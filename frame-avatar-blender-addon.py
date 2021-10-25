@@ -1,7 +1,7 @@
 bl_info = {
 	"name": "Homeomorphic avatar creator",
 	"description": "Homeomorphic avatar creation tools",
-	"author": "Martin Petersson",
+	"author": "Martin Petersson, Eric Eisaman",
 	"version": (0, 0, 1),
 	"blender": (2, 92, 2),
 	"location": "View3D",
