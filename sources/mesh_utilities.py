@@ -76,8 +76,11 @@ class uv_transformation_calculator:
 			target_vector = (T2 - T1).normalized()
 			dot = reference_vector.dot(target_vector)
 
-			if 1.0 < dot <= (1.0 + TRESHOLD):	#Check for slight overflow (a lot of overflow would create a math domain error)
+			if 1.0 < dot <= (1.0 + TRESHOLD):	#Check for slight overflow (a lot of overflow will still create a math domain error)
 				dot = 1.0
+
+			elif -(1.0 + TRESHOLD) <= dot < -1.0:	#Check for slight underflow (a lot of underflow will still create a math domain error)
+				dot = -1.0
 
 			rotation = acos(dot)
 
