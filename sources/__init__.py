@@ -654,7 +654,8 @@ class EXPORTGLTF_OT_my_op(bpy.types.Operator):
 		if avatar_string != "":
 			avatar_obj = bpy.data.objects[avatar_string] # should be referencing the object directly instead of by name!
 			mesh_data = avatar_obj.data
-			avatar_shapekeys = bpy.data.meshes[mesh_data.name].shape_keys.key_blocks
+			#Note - We are skipping the first key here and since base object is the first one this should not be a problem
+			avatar_shapekeys = bpy.data.meshes[mesh_data.name].shape_keys.key_blocks[1:]
 
 		# CHANGE LAYER VISIBILITY AND SELECT MORPHSET OBJECT
 		for obj in context.scene.objects:
@@ -669,8 +670,8 @@ class EXPORTGLTF_OT_my_op(bpy.types.Operator):
 
 		""" CREATE METADATA """
 
-		shapekey_name_dict = {}
-
+		uv_transform_extra_data = list()		#This is used for the actual gtlf export
+		uv_transform_map = dict()				#This is used temporarily so that we can fetch the corresponding UV transform
 
 		#Acquite UV map from original avatar and prepare uv transformation calculator
 		uvtc = uv_transformation_calculator(get_uv_map_from_mesh(avatar_obj))
@@ -678,33 +679,20 @@ class EXPORTGLTF_OT_my_op(bpy.types.Operator):
 		for name, item in bpy.data.collections[packing_set].all_objects.items():
 
 			#Acquire the UV map from the mesh and calculate transform from reference map
-			print(f'Calculating UV for: {name}')
-			uv_transformation_parameters = uvtc.calculate_transform(get_uv_map_from_mesh(item))
-
 			stripped_shapekey_name = name.lstrip(f"{avatar_string}_")
-
-			current_morph = {'UVTransform': uv_transformation_parameters}
-			shapekey_name_dict[stripped_shapekey_name] = current_morph
-
-			print("current_morph: ", current_morph)	#Note - this was self.morphs but this means printing beginning over and over so printing one at a time
-
-		self.morphs = asdict(MorphSet(Morphs=shapekey_name_dict))
-		#morphsets_dict = {f"MorphSets_{avatar_string}": morphs}
-
+			uv_transform_map[stripped_shapekey_name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
 
 		# loop shapekeys here for '__'
 		for shape in avatar_shapekeys:
-			if '__' in str(shape.name):
-				if '__None' in str(shape.name):
-					uv_transforms = asdict(transform(scale='None', rotation='None', translation='None'))
-				else:
-					i = str(shape.name).index('__')
-					n = str(shape.name)[i+2:]
-					uv_transforms = self.morphs["Morphs"][n]["UVTransform"]
+			shape_name = str(shape.name)
 
-				self.morphs['Morphs'][shape.name] = {'UVTransform': uv_transforms} # replace with matrix transform
+			#Strip __None if present
+			if shape_name.endswith('__None'):
+				shape_name = shape_name[:-6]
 
-		morphsets_dict = {f"MorphSets_{avatar_string}": self.morphs}
+			uv_transform_extra_data.append((shape.name, dict(UVTransform = uv_transform_map.get(shape_name))))
+
+		morphsets_dict = {f"MorphSets_{avatar_string}": uv_transform_extra_data}
 		export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
 		print_to_editor(export_json, 'extras_dump')
 
