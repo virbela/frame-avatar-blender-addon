@@ -389,7 +389,7 @@ class BAKETARGET_OT_my_op(bpy.types.Operator):
 			for shape in avatar_shapekeys:
 				#if shape.name != "Basis":
 
-				if str(shape.name).find('__') != -1:
+				if '__' in str(shape.name):
 					continue
 				else:
 					copy_obj = avatar_obj.copy()
@@ -679,7 +679,7 @@ class EXPORTGLTF_OT_my_op(bpy.types.Operator):
 		for name, item in bpy.data.collections[packing_set].all_objects.items():
 
 			#Acquire the UV map from the mesh and calculate transform from reference map
-			stripped_shapekey_name = name.lstrip(f"{avatar_string}_")
+			stripped_shapekey_name = name[len(f"{avatar_string}_"):]	#This assumes the name begins with the pattern, if the collection is modified it would cause weird names, maybe even an empty name in worst case
 			uv_transform_map[stripped_shapekey_name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
 
 		# loop shapekeys here for '__'
