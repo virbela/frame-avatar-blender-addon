@@ -449,6 +449,7 @@ class PACK_OT_my_op(bpy.types.Operator):
 	def execute(self, context):
 		time_start = time.time()
 		packer_checkbox = bpy.context.scene.homomorphictools.packer_bool
+		relative_checkbox = bpy.context.scene.homomorphictools.relative_bool
 		packing_set = bpy.context.scene.homomorphictools.single_mesh
 		avatar_string = bpy.context.scene.homomorphictools.avatar_string
 		uvset_string = bpy.context.scene.homomorphictools.uvset_string
@@ -502,6 +503,9 @@ class PACK_OT_my_op(bpy.types.Operator):
 
 		#check if overlapping first and run this, alternatively pack using the standard packer and use a small margin like 0.001:
 		#print(bpy.ops.uvpackmaster2.uv_overlap_check())
+
+		if relative_checkbox:
+			bpy.ops.uv.average_islands_scale()
 
 		bpy.ops.uvpackmaster2.split_overlapping_islands()
 
@@ -605,7 +609,7 @@ class BATCHBAKE_OT_my_op(bpy.types.Operator):
 			node_bg.location = (111, 260)
 
 			node_tex = exportmaterial.node_tree.nodes.new('ShaderNodeTexImage')
-			node_tex.image = bpy.data.images['Avatar_atlas']
+			node_tex.image = bpy.data.images[f"{avatar_string}_atlas"]
 
 			node_tex.location = (-185, 260)
 
