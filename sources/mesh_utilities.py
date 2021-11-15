@@ -59,7 +59,6 @@ class uv_transformation_calculator:
 
 
 	def calculate_transform(self, target_uv_map):
-
 		try:
 			#Get reference and target endpoints as vectors
 			R1, R2 = self.reference_uv_map[self.ep1], self.reference_uv_map[self.ep2]
@@ -71,7 +70,7 @@ class uv_transformation_calculator:
 			#Calculate scale
 			scale = distance / self.reference_distance
 
-			#Calculate rotation
+			#Calculate rotation - TODO: use the signed_angle feature of blenders Vector functions
 			reference_vector = (R2 - R1).normalized()
 			target_vector = (T2 - T1).normalized()
 			dot = reference_vector.dot(target_vector)
@@ -92,10 +91,8 @@ class uv_transformation_calculator:
 			#We scale the comparisons to make sure the error is scale invariant
 			if pos_rot_result * scale < TRESHOLD:
 				pass
-				#print(f'rotation: +{rotation}')
 			elif neg_rot_result * scale < TRESHOLD:
-				pass
-				#print(f'rotation: -{rotation}')
+				rotation = -rotation
 			else:
 				raise Exception(f'Could not determine rotation (got {rotation} for vectors {reference_vector} and {target_vector}, distances: {pos_rot_result * scale}, {neg_rot_result * scale} (treshold: {TRESHOLD}))')
 
@@ -104,6 +101,9 @@ class uv_transformation_calculator:
 
 			#Calculate translation
 			translation = T1 - rotate_vector(R1, rotation) * scale
+
+			#Just for making sure
+			#print(R1, R2, T1, T2, '→', rotate_vector(R1, rotation) * scale + translation, rotate_vector(R2, rotation) * scale + translation)
 
 			return [translation.x, translation.y, rotation, scale]
 		except ValueError as source_error:
