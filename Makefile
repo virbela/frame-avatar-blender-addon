@@ -8,7 +8,10 @@ distribution/$(distribution_name).zip: $(wildcard sources/*.py)
 	zip -r $(distribution_name).zip $(module_name) -x $(module_name)/__pycache__/\* && \
 	rm -f $(module_name)
 
+test:
+	PYTHONPATH=sources python3 tests/vector_math.py
+
 clean:
 	rm -f distribution/*
 
-.PHONY: clean
+.PHONY: clean test
