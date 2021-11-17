@@ -684,6 +684,7 @@ class EXPORTGLTF_OT_my_op(bpy.types.Operator):
 
 			#Acquire the UV map from the mesh and calculate transform from reference map
 			stripped_shapekey_name = name[len(f"{avatar_string}_"):]	#This assumes the name begins with the pattern, if the collection is modified it would cause weird names, maybe even an empty name in worst case
+			print(f'Getting transform for: {name}')
 			uv_transform_map[stripped_shapekey_name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
 
 		# loop shapekeys here for '__'
