@@ -1,7 +1,7 @@
 from math import acos, pi, cos, sin, sqrt, tau
 
 ZERO_TRESHOLD = 1e-12
-ROTATION_TRESHOLD = 1e-9
+ROTATION_TRESHOLD = 1e-7
 
 def quantize_value(value, step):
 	return round(value / step) * step
