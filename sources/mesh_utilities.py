@@ -20,7 +20,9 @@ def get_uv_map_from_mesh(obj, uv_layer=ACTIVE_LAYER):
 	uv_map = dict()
 	for face in mesh.faces:
 		for loop in face.loops:
-			uv_map[loop.vert.index] = convert_vectors(loop[uv_layer_index].uv)	#Note - copy Vector here since the vector reference will be invalid outside of this context
+			uv_point = convert_vectors(loop[uv_layer_index].uv)	#Note - copy Vector here since the vector reference will be invalid outside of this context
+			uv_point.y = 1.0 - uv_point.y
+			uv_map[loop.vert.index] = uv_point
 
 	return uv_map
 
