@@ -57,7 +57,7 @@ class basis_object:
 """ Add feature baking objects in isolation """
 
 def batch_bake(named_obj):
-	img_size = bpy.context.scene.homomorphictools.imgsize_string
+	img_size = bpy.context.scene.homomorphictools.imgsize_int
 	avatar_string = bpy.context.scene.homomorphictools.avatar_string
 	color_checkbox = bpy.context.scene.homomorphictools.color_bool
 	#direct_checkbox = bpy.context.scene.homomorphictools.direct_bool
@@ -182,9 +182,9 @@ class HomomorphicProperties(bpy.types.PropertyGroup):
 	single_mesh : bpy.props.StringProperty(name="Singular collection", description="Single mesh collection")
 	packer_bool : bpy.props.BoolProperty(name="UVPackmaster/default packer", description="Use UVPackmaster to pack UVs, uncheck to use default packer", default=True, get=None, set=None)
 
-	imgsize_string : bpy.props.IntProperty(name="Image size", default=2048) # default 4k
+	imgsize_int : bpy.props.IntProperty(name="Bake image size", default=4096) # default 4k
 	path_string : bpy.props.StringProperty(name="Filepath")
-	relative_bool : bpy.props.BoolProperty(name="Average island scale", description="Average UV island scale", default=False, get=None, set=None)
+	relative_bool : bpy.props.BoolProperty(name="Average island scale", description="Average UV island scale", default=True, get=None, set=None)
 	persistent_bool : bpy.props.BoolProperty(name="Clear image", description="Persistent bakes per pass", default=False)
 	color_bool : bpy.props.BoolProperty(name="Color pass", description="Albedo", default=True, get=None, set=None)
 	direct_bool : bpy.props.BoolProperty(name="Direct pass", description="Direct lighting", default=True, get=None, set=None)
@@ -263,6 +263,9 @@ class PACK_PT_main_panel(bpy.types.Panel):
 		scene = context.scene
 
 		homomorphictools = scene.homomorphictools
+
+		layout.prop(homomorphictools, "imgsize_int")
+
 		layout.prop(homomorphictools, "uvset_string")
 		layout.prop(homomorphictools, "relative_bool")
 		layout.prop(homomorphictools, "packer_bool")
@@ -280,7 +283,6 @@ class BATCHBAKE_PT_main_panel(bpy.types.Panel):
 		scene = context.scene
 		homomorphictools = scene.homomorphictools
 
-		layout.prop(homomorphictools, "imgsize_string")
 		#layout.prop(homomorphictools, "path_string")
 		layout.prop(homomorphictools, "color_bool")
 		#layout.prop(homomorphictools, "direct_bool")
@@ -376,11 +378,11 @@ class BAKETARGET_OT_my_op(bpy.types.Operator):
 			for node in bakematerial.node_tree.nodes:
 				node.select = False
 
-
-		if bpy.data.collections.get(collection_name) == None:
+		single_mesh_collection = bpy.data.collections.get(collection_name)
+		if single_mesh_collection is None:
 			single_mesh_collection = bpy.data.collections.new(collection_name) # create collection if not existing
-			bpy.context.scene.collection.children.link(single_mesh_collection)
 
+			bpy.context.scene.collection.children.link(single_mesh_collection)
 			bpy.context.scene.homomorphictools.single_mesh = collection_name # add collection name to property group for later use
 
 		if avatar_string != "":
@@ -427,11 +429,14 @@ class BAKETARGET_OT_my_op(bpy.types.Operator):
 
 		for i in bpy.data.collections[collection_name].objects:
 			#obj_name_keyshape = i.name
-			bpy.context.view_layer.objects.active = bpy.data.objects[i.name]
-			for current_shape in shapekeys_list:
-				#try:
-				if i.name != f"{avatar_string}_{current_shape}":
-					bpy.context.active_object.shape_key_remove(bpy.data.meshes[i.name].shape_keys.key_blocks[current_shape])
+
+			if current_object := bpy.data.objects.get(i.name):
+				bpy.context.view_layer.objects.active = current_object
+
+				for current_shape in shapekeys_list:
+
+					if i.name != f"{avatar_string}_{current_shape}":
+						bpy.context.active_object.shape_key_remove(bpy.data.meshes[i.name].shape_keys.key_blocks[current_shape])
 			# remove last key or delete since it changes the shading?
 			#bpy.context.active_object.shape_key_clear()
 
@@ -448,6 +453,7 @@ class PACK_OT_my_op(bpy.types.Operator):
 
 	def execute(self, context):
 		time_start = time.time()
+		img_size = bpy.context.scene.homomorphictools.imgsize_int
 		packer_checkbox = bpy.context.scene.homomorphictools.packer_bool
 		relative_checkbox = bpy.context.scene.homomorphictools.relative_bool
 		packing_set = bpy.context.scene.homomorphictools.single_mesh
@@ -507,13 +513,22 @@ class PACK_OT_my_op(bpy.types.Operator):
 		if relative_checkbox:
 			bpy.ops.uv.average_islands_scale()
 
-		bpy.ops.uvpackmaster2.split_overlapping_islands()
+		if packer_checkbox:
+			bpy.ops.uvpackmaster2.split_overlapping_islands()
+
+		# Calculate UV margin
+		uv_margin_extra_pixels = 50
+		bake_margin_pixels = bpy.context.scene.render.bake.margin
+		uv_margin_pixels = bake_margin_pixels + uv_margin_extra_pixels
+		uv_margin = uv_margin_pixels / img_size
 
 		# Pack UV islands
-		if packer_checkbox == True:
+		if packer_checkbox:
+			bpy.context.scene.uvp2_props.margin = uv_margin
+			#bpy.context.scene.uvp2_props.precision = 2000# max(2048, img_size)
 			bpy.ops.uvpackmaster2.uv_pack() # pack uvs
-		elif packer_checkbox == False:
-			bpy.ops.uv.pack_islands()
+		else:
+			bpy.ops.uv.pack_islands(margin=uv_margin)
 
 		# Deselect everything
 		for element in collection_objs.all_objects:
@@ -523,6 +538,10 @@ class PACK_OT_my_op(bpy.types.Operator):
 
 		print("Executed in: %.4f sec" % (time.time() - time_start))
 		return {'FINISHED'}
+
+def hide_everything_from_render():
+	for obj in bpy.data.objects:
+		obj.hide_render = True
 
 
 class BATCHBAKE_OT_my_op(bpy.types.Operator):
@@ -556,9 +575,7 @@ class BATCHBAKE_OT_my_op(bpy.types.Operator):
 			bpy.context.scene.render.bake.use_clear = False
 
 
-		for obj in bpy.data.collections[collection_name].objects:
-			obj.hide_render = True
-			print("obj.hide_render")
+		hide_everything_from_render()
 
 		bpy.context.view_layer.objects.active = None
 
@@ -571,22 +588,26 @@ class BATCHBAKE_OT_my_op(bpy.types.Operator):
 
 			print("bake_object.name: ", bake_object.name)
 			print("currently selected objects:", bpy.context.view_layer.objects.active)
-			bpy.data.objects[bake_object.name].select_set(True)
+			#bpy.data.objects[bake_object.name].select_set(True)
+			bake_object.select_set(True)
 
-			object_uvset = bpy.data.objects[bake_object.name].data.uv_layers[uvset_string]
+			#object_uvset = bpy.data.objects[bake_object.name].data.uv_layers[uvset_string]
+			object_uvset = bake_object.data.uv_layers[uvset_string]
 			object_uvset.active = True
-			bpy.data.objects[bake_object.name].hide_render = False
+			#bpy.data.objects[bake_object.name].hide_render = False
+			bake_object.hide_render = False
 
 			object_uvset.active_render = True
-
 
 
 			batch_bake(bake_object.name)
 
 
-			bpy.data.objects[bake_object.name].hide_render = True
+			# bpy.data.objects[bake_object.name].hide_render = True
+			# bpy.data.objects[bake_object.name].select_set(False)
 
-			bpy.data.objects[bake_object.name].select_set(False)
+			bake_object.name.hide_render = True
+			bake_object.name.select_set(False)
 
 		for obj in bpy.data.collections[collection_name].objects:
 			obj.hide_render = False
