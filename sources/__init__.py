@@ -2,12 +2,12 @@
 try:
     import bpy
 except ImportError:
-    pass
-from modules.create_bake_targets import CreateBakeTargets
+    print("This script must be run with Blender.")
+from modules.create_bake_targets import create_bake_targets
 
 """ Create UI """
 # Create Bake Targets
-CreateBakeTargets()
+create_bake_targets()
 # Pack UVs
 # Paint
 # Export

@@ -1,9 +1,9 @@
 
 
-def GetByNameSubstring(str, lst):
+def get_by_name_substring(str, lst):
     return lst
 
-def GetByNameWithWithoutSubstring(withList, withoutList, objectList):
+def get_by_name_with_without_substring(withList, withoutList, objectList):
     print(withList)
     print(withoutList)
     return objectList
@@ -14,7 +14,7 @@ def GetByNameWithWithoutSubstring(withList, withoutList, objectList):
 # str "L_Eye__TakesColor__Variants_08"
 # substr "__Variants_"
 # returns 8
-def IntAfterSubstring(str, substr):
+def int_after_substring(str, substr):
     i = str.index(substr)
     l = len(substr)
     return int(str[i+l:i+l+2])

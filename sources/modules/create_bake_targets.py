@@ -1,50 +1,51 @@
-from modules.utils.string_utils import GetByNameSubstring , GetByNameWithWithoutSubstring , IntAfterSubstring
+from modules.utils.string_utils import get_by_name_substring , get_by_name_with_without_substring , int_after_substring
 try:
     import bpy
 except ImportError:
     bpy = None
-    import modules.mocks.object_mock as object_mock
-    mesh = object_mock.Mesh()
 
-def GetMorphObject():
+import modules.mocks.object_mock as object_mock
+mesh = object_mock.Mesh()
+
+def get_morph_objects():
     # Using bpy.data.objects[]
     return []
 
-def GetUnshaded(morphs):
+def get_unshaded(morphs):
     # use GetByNameSubstring("__None", morphs)
     return morphs
 
-def GetGrayscale(morphs):
+def get_grayscale(morphs):
     # use GetByNameWithWithoutSubstring([], ["__None","__TakesColor"], morphs)
     return morphs
 
-def GetRGB(morphs):
+def get_rgb(morphs):
     # use GetByNameSubstring("__TakesColor", morphs)
     return [mesh]
 
-def CreateVariant(object):
+def create_variant(object):
     pass
 
-def AddVariants(layer):
+def add_variants(layer):
     print("Add Variants")
     # Add variants to the layer
     for i in range(0, len(layer)):
         if "__Variants_" in layer[i].name:
-            n = IntAfterSubstring(layer[i].name, "__Variants_")
+            n = int_after_substring(layer[i].name, "__Variants_")
             print("Variants: " + str(n))
         continue
     print("End Add Variants")
 
-def CreateBakeTargets():
+def create_bake_targets():
     print("Create Bake Targets")
     # morphs are meshes based on input object with shape keys
-    morphs = GetMorphObject()
+    morphs = get_morph_objects()
     # A list of meshes that are not shaded
-    unshaded_group = GetUnshaded(morphs)
+    unshaded_group = get_unshaded(morphs)
     # A list of meshes that are shaded but with no color
-    grayscale_group = GetGrayscale(morphs)
+    grayscale_group = get_grayscale(morphs)
     # A list of meshes that are shaded and with color
-    rgb_group = GetRGB(morphs)
+    rgb_group = get_rgb(morphs)
     rgb_layer = rgb_group
-    AddVariants(rgb_layer)
+    add_variants(rgb_layer)
     print("End Create Bake Targets")
