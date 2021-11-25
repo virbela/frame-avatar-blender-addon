@@ -67,25 +67,42 @@ def partition_grayscale_group(grayscale_group : list) -> None:
 def create_ao_texture(object) -> None:
     print("Create AO Texture")
     # Create a 1k texture for the AO of the object
-    for object in grayscale_group:
-        bpy.data.images.new(object.name, 1024, 1024)
-        
+    ao_tex = bpy.data.images.new(object.name, 1024, 1024) 
+    state.add_ao_texture({
+        "type" : "ao",
+        "name" : ao_tex.name,
+        "owner_name" : object.name
+    }) 
     print("End Create AO Texture")
 
 def create_paint_texture(object, is_color: bool) -> None:
     print("Create Paint Texture")
     # Create a 1k texture for the paint of the object
+    paint_tex = bpy.data.images.new(object.name, 1024, 1024) 
+    state.add_paint_texture({
+        "type" : "paint",
+        "is_color" : is_color,
+        "name" : paint_tex.name,
+        "owner_name" : object.name
+    }) 
     print("End Create Paint Texture")
 
 def create_textures() -> None:
     print("Create Textures")
     # Create textures for the r_layer, g_layer, b_layer
-    #   - use create_ao_texture(object)
-
-    #   - use create_paint_texture(object, False)
+    for object in state.get_r_layer():
+        create_ao_texture(object)
+        create_paint_texture(object, False)
+    for object in state.get_g_layer():
+        create_ao_texture(object)
+        create_paint_texture(object, False)
+    for object in state.get_b_layer():
+        create_ao_texture(object)
+        create_paint_texture(object, False)
     # Create textures for the rgb_layer
-    #   - use create_ao_texture(object)
-    #   - use create_paint_texture(object, True)
+    for object in state.get_rgb_layer():
+        create_ao_texture(object)
+        create_paint_texture(object, True)
     print("End Create Textures")
 
 def create_ao_material(object) -> None:
@@ -113,7 +130,6 @@ def create_bake_targets()-> None:
     state.extend_rgb_layer(get_variants(state.get_rgb_layer()))
     partition_grayscale_group(grayscale_group)
     create_textures()
-    
     # Discard AO material and iteratively create a new unique paint material for every shape key mesh, assign the baked AO textures to a materail setup. assign paint texture .  
     create_ao_material()
     print("End Create Bake Targets")

@@ -1,3 +1,8 @@
+try:
+    import bpy
+except ImportError:
+    import modules.mocks.bpy_mock as bpy
+
 rgb_layer = []
 r_layer = []
 g_layer = []
@@ -5,6 +10,36 @@ b_layer = []
 
 ui = {}
 
+ao_textures = {}
+paint_textures = {}
+
+def add_ao_texture(name : str, value : dict) -> None:
+    """
+    Add an AO texture to the dictionary.
+    value is a dictionary with the following keys:
+    {
+        "type": "ao",
+        "name" : "",
+        "owner_name" : ""
+    }
+    """
+    global ao_textures
+    ao_textures[name] = value
+
+def add_paint_texture(name : str, value : dict) -> None:
+    """
+    Add a paint texture to the dictionary.
+    value is a dictionary with the following keys:
+    {
+        "type": "paint",
+        "is_color" : bool,
+        "name" : "",
+        "owner_name" : ""
+    }
+    """
+    global paint_textures
+    paint_textures[name] = value
+    
 def set_ui(data: dict) -> None:
     """
     Set the UI value.
