@@ -1,11 +1,9 @@
+import modules.state as state
 from modules.utils.string_utils import get_by_name_substring , get_by_name_with_without_substring , int_after_substring
 try:
     import bpy
 except ImportError:
-    bpy = None
-
-import modules.mocks.object_mock as object_mock
-mesh = object_mock.Mesh()
+    import modules.mocks.bpy_mock as bpy
 
 def get_morph_objects() -> list:
     # Using bpy.data.objects[]
@@ -21,20 +19,22 @@ def get_grayscale(morphs : list) -> list:
 
 def get_rgb(morphs : list) -> list:
     # use GetByNameSubstring("__TakesColor", morphs)
-    return [mesh]
+    return bpy.data.objects
 
 def create_variant(object):
     pass
 
-def add_variants(layer : list) -> None:
-    print("Add Variants")
+def get_variants(layer : list) -> list:
+    print("Get Variants")
+    variants = []
     # Add variants to the layer
     for i in range(0, len(layer)):
         if "__Variants_" in layer[i].name:
             n = int_after_substring(layer[i].name, "__Variants_")
             print("Variants: " + str(n))
         continue
-    print("End Add Variants")
+    return variants
+    print("End Get Variants")
 
 def create_bake_targets()-> None:
     print("Create Bake Targets")
@@ -45,7 +45,6 @@ def create_bake_targets()-> None:
     # A list of meshes that are shaded but with no color
     grayscale_group = get_grayscale(morphs)
     # A list of meshes that are shaded and with color
-    rgb_group = get_rgb(morphs)
-    rgb_layer = rgb_group
-    add_variants(rgb_layer)
+    state.set_rgb_layer(get_rgb(morphs))
+    state.extend_rgb_layer(get_variants(state.get_rgb_layer()))
     print("End Create Bake Targets")

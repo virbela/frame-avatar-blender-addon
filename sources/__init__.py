@@ -2,14 +2,17 @@
 try:
     import bpy
 except ImportError:
-    print("This script must be run with Blender.")
-from modules.create_bake_targets import create_bake_targets
+    import modules.mocks.bpy_mock as bpy
 
-""" Create UI """
-# Create Bake Targets
-create_bake_targets()
-# Pack UVs
-# Paint
-# Export
+from modules.create_ui import create_ui
 
-""" Operators """
+def main():
+    """ Create UI """
+    create_ui()
+    """ Operators """
+
+if __name__ == "__main__":
+    main()
+
+
+
