@@ -68,6 +68,10 @@ def create_bake_targets()-> None:
     print("Create Bake Targets")
     # morphs are meshes based on input object with shape keys
     morphs = get_morph_objects()
+    # Iterate over the shape keys using get_shape_keys() 
+	# Filter out the Nones, create layers
+	# Filter out the variants, using string helper function after the string create_variant()
+	# for every mesh represented in the layers create two 1k textures, one diffuse and one AO, from the shape keys
     # A list of meshes that are not shaded
     unshaded_group = get_unshaded(morphs)
     # A list of meshes that are shaded but with no color
