@@ -7,26 +7,26 @@ except ImportError:
 import modules.mocks.object_mock as object_mock
 mesh = object_mock.Mesh()
 
-def get_morph_objects():
+def get_morph_objects() -> list:
     # Using bpy.data.objects[]
     return []
 
-def get_unshaded(morphs):
+def get_unshaded(morphs : list) -> list:
     # use GetByNameSubstring("__None", morphs)
     return morphs
 
-def get_grayscale(morphs):
+def get_grayscale(morphs : list) -> list:
     # use GetByNameWithWithoutSubstring([], ["__None","__TakesColor"], morphs)
     return morphs
 
-def get_rgb(morphs):
+def get_rgb(morphs : list) -> list:
     # use GetByNameSubstring("__TakesColor", morphs)
     return [mesh]
 
 def create_variant(object):
     pass
 
-def add_variants(layer):
+def add_variants(layer : list) -> None:
     print("Add Variants")
     # Add variants to the layer
     for i in range(0, len(layer)):
@@ -36,7 +36,7 @@ def add_variants(layer):
         continue
     print("End Add Variants")
 
-def create_bake_targets():
+def create_bake_targets()-> None:
     print("Create Bake Targets")
     # morphs are meshes based on input object with shape keys
     morphs = get_morph_objects()
