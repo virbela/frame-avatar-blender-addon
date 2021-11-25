@@ -1,4 +1,5 @@
 import modules.state as state
+import modules.data_classes as dc
 from modules.utils.string_utils import get_by_name_substring , get_by_name_with_without_substring , int_after_substring
 try:
     import bpy
@@ -68,23 +69,18 @@ def create_ao_texture(object) -> None:
     print("Create AO Texture")
     # Create a 1k texture for the AO of the object
     ao_tex = bpy.data.images.new(object.name, 1024, 1024) 
-    state.add_ao_texture({
-        "type" : "ao",
-        "name" : ao_tex.name,
-        "owner_name" : object.name
-    }) 
+    state.add_ao_texture(
+        dc.AOTexture(ao_tex.name, object.name)
+    ) 
     print("End Create AO Texture")
 
 def create_paint_texture(object, is_color: bool) -> None:
     print("Create Paint Texture")
     # Create a 1k texture for the paint of the object
     paint_tex = bpy.data.images.new(object.name, 1024, 1024) 
-    state.add_paint_texture({
-        "type" : "paint",
-        "is_color" : is_color,
-        "name" : paint_tex.name,
-        "owner_name" : object.name
-    }) 
+    state.add_paint_texture(
+        dc.PaintTexture(paint_tex.name, object.name, is_color)
+    ) 
     print("End Create Paint Texture")
 
 def create_textures() -> None:
