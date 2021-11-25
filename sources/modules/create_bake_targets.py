@@ -64,6 +64,26 @@ def partition_grayscale_group(grayscale_group : list) -> None:
     state.set_g_layer(g_layer)
     state.set_b_layer(b_layer)
 
+def create_ao_texture(object) -> None:
+    print("Create AO Texture")
+    # Create a 1k texture for the AO of the object
+    print("End Create AO Texture")
+
+def create_paint_texture(object, is_color: bool) -> None:
+    print("Create Paint Texture")
+    # Create a 1k texture for the paint of the object
+    print("End Create Paint Texture")
+
+def create_textures() -> None:
+    print("Create Textures")
+    # Create textures for the r_layer, g_layer, b_layer
+    #   - use create_ao_texture(object)
+    #   - use create_paint_texture(object, False)
+    # Create textures for the rgb_layer
+    #   - use create_ao_texture(object)
+    #   - use create_paint_texture(object, True)
+    print("End Create Textures")
+
 def create_bake_targets()-> None:
     print("Create Bake Targets")
     # morphs are meshes based on input object with shape keys
@@ -80,4 +100,5 @@ def create_bake_targets()-> None:
     state.set_rgb_layer(get_rgb(morphs))
     state.extend_rgb_layer(get_variants(state.get_rgb_layer()))
     partition_grayscale_group(grayscale_group)
+    create_textures()
     print("End Create Bake Targets")
