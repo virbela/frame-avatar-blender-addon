@@ -79,4 +79,5 @@ def create_bake_targets()-> None:
     # A list of meshes that are shaded and with color
     state.set_rgb_layer(get_rgb(morphs))
     state.extend_rgb_layer(get_variants(state.get_rgb_layer()))
+    partition_grayscale_group(grayscale_group)
     print("End Create Bake Targets")
