@@ -1,0 +1,76 @@
+This document is Mikaels notes outlining the work that is to be done to the branch feature-rfs-001
+
+	Pending features in order of presentation (based on meeting with Eric 2021-11-23)
+
+		* Automated baking of eye color data.
+
+			This will be accomplished by having diffuse textures for the eyes. (se FF2)
+
+		* Baking AO only morphs to monochrome channels (see FF1)
+
+		* Adding color channel to UV-transform metadata (FF4)
+
+		* Update frame to handle the new exports (See rfs-001 feature of frame).
+
+		* Make hand painting accessible for artists (FF5)
+			(this is similar to using the eye textures but here we are painting inside of blender)
+
+		* Implement full production ready atlas with eyes and painted morphs
+			This will require all sub features to work together.
+
+
+	Features categorized by function
+
+		FF1		Allocating UV islands to grayscale or color target.
+		FF2		Allowing allocating multiple targets (eyes have multiple colors, we may want different faces or different textures on clothes).
+		FF3		Configuring the target textures based on final atlas size and percentage of Y space.
+
+					(See channel_packing.svg for details).
+
+		FF4		Post processing step of export and texture stitching
+
+		FF5		GUI features to make sure the workflow is guided enough for artists without deep technical skills to be able to use it.
+				This includes having things partitioned either in order of operation (wizard mode) or to put the more advanced and seldom to change settings
+				in a specific panel.
+
+				Sub features here include to switch to texture painting context, hide or show objects and so forth.
+
+		FF6		Some morphs should be baked together, we could call this bake groups.
+
+
+	Improvements to addon
+
+		When creating bake targets we should not need need to remove the entire collection.
+		Only changed items should be updated.
+		We need to define here though what information we overwrite and what information we do not overwrite.
+
+		Textures should be named in a way where we can reconnect them to shape keys if they are removed from the target collection.
+
+
+	Technical details
+
+		For custom data storage classes in a blender context it makes the most sense to use derivates of bpy.types.PropertyGroup to make sure blender properly saves our state
+
+	Extra thoughts
+
+		Multiple atlas targets
+			In the future we may want more tha one target atlas, especially if we are baking multiple passes with different resolutions.
+			Since this is outside of the scope of this task there is no need to implement all this but I do think it is a good idea
+			to at least have things prepared for it. That things is properly split up by concerns.
+
+			If we have a class that represents a target atlas we don't need to do much changes to add more of these.
+			But the initial implementation is hard coding the instanciation of the one target and we use it as a singleton for now.
+
+
+	Useful references
+		Properties
+			https://docs.blender.org/api/current/bpy.props.html
+
+		Image editing
+			https://docs.blender.org/api/blender_python_api_2_71_release/bpy.types.Image.html
+			https://blender.stackexchange.com/questions/13422/crop-image-with-python-script/13516#13516
+			https://blender.stackexchange.com/questions/3673/why-is-accessing-image-data-so-slow/3678#3678
+
+
+	Scattered Notes
+		Blender has Numpy built in but since we are not really doing any mathematical image operations it may not be all that helpful
