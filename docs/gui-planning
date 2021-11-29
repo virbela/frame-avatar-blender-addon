@@ -1,0 +1,7 @@
+
+
+Bake groups:
+
+	We could have a list with defined groups that also includes the (Bake individual) group as a group you can't delete.
+	Then we have a different list with all the targets and one can assign them to various groups, similar to how the vertex grouping box works.
+
