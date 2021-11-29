@@ -5,6 +5,7 @@ except ImportError:
 
 import modules.data_classes as dc
 
+# Pieces of State
 rgb_layer = []
 r_layer = []
 g_layer = []
@@ -15,6 +16,7 @@ ui = {}
 ao_textures = {}
 paint_textures = {}
 
+# Accessors and Mutators
 def add_ao_texture(ao_tex : dc.AOTexture) -> None:
     """
     Add an AO texture to the dictionary.
