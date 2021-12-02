@@ -37,6 +37,7 @@ This document is Mikaels notes outlining the work that is to be done to the bran
 
 		FF6		Some morphs should be baked together, we could call this bake groups.
 
+		FF7		Button for operations to fix improper normals in the mesh
 
 	Improvements to addon
 
@@ -61,6 +62,8 @@ This document is Mikaels notes outlining the work that is to be done to the bran
 			If we have a class that represents a target atlas we don't need to do much changes to add more of these.
 			But the initial implementation is hard coding the instanciation of the one target and we use it as a singleton for now.
 
+		Option for automatic normal correction at the appropriate stage (see FF7)
+
 
 	Useful references
 		Properties
@@ -71,6 +74,59 @@ This document is Mikaels notes outlining the work that is to be done to the bran
 			https://blender.stackexchange.com/questions/13422/crop-image-with-python-script/13516#13516
 			https://blender.stackexchange.com/questions/3673/why-is-accessing-image-data-so-slow/3678#3678
 
+		Blender path handling
+			https://blender.stackexchange.com/questions/180092/how-to-read-the-contents-of-a-text-file
+
+		Arrange nodes
+			https://blender.stackexchange.com/questions/41461/automatic-node-distribution-and-alignment
+
+		Blender class naming convention
+			https://blender.stackexchange.com/a/124747
+
+		Blender handling of when manipulating collectionproperties
+			https://docs.blender.org/api/current/info_gotcha.html?highlight=collectionproperty#help-my-script-crashes-blender
+
+
 
 	Scattered Notes
 		Blender has Numpy built in but since we are not really doing any mathematical image operations it may not be all that helpful
+
+
+	Current plan
+
+
+		DONE		Texture stitching
+		SKIP		Mock data for export
+		PEND		Frame implementation
+		DONE		Partitioning of equal sums
+		PEND		GUI implementation - data access
+
+
+
+	Branches
+
+		teams rooms		 	ssf-00x
+							ssf-00y
+
+
+
+	Notes
+
+		bpy.data.scenes["Scene"].uvp2_props.tex_ratio
+
+
+		morph target data
+			uv mode
+				target channel
+					diffuse color layer					__TakesColor					https://github.com/virbela/frame-avatar-blender-addon/blob/feature-ssf-000/sources/modules/create_bake_targets.py#L21
+					gray scale layer													https://github.com/virbela/frame-avatar-blender-addon/blob/feature-ssf-000/sources/modules/create_bake_targets.py#L17
+				fixed (static)
+				only corner pixel						__None							https://github.com/virbela/frame-avatar-blender-addon/blob/feature-ssf-000/sources/modules/create_bake_targets.py#L13
+
+			variant count								__Variants_{count}				https://github.com/virbela/frame-avatar-blender-addon/blob/feature-ssf-000/sources/modules/create_bake_targets.py#L43
+				example: eyes for instance
+
+			priority
+
+
+
