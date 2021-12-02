@@ -67,7 +67,7 @@ class test_suite:
 		#Maybe later we should have different verbosity levels but for now this is always output
 		#and verbosity affects each individual test - specifically tracebacks and such
 		print()
-		print(f'TESTS FAILED: Concluded {count} tests of which {failed} failed')
+		print(f'TESTS COMPLETE: Concluded {count} tests of which {failed} failed')
 		print()
 
 		if failed:
@@ -105,3 +105,12 @@ class test_context:
 			self.suite.log_error(self, et, ev, tb)
 
 		return True	#Don't raise exception
+
+
+class mock_object:
+	def __init__(self, *positional, **named):
+		self.positional = positional
+		self.named = named
+
+	def __repr__(self):
+		return f'<{self.__class__.__module__}.{self.__class__.__qualname__}(mock_object)>'
