@@ -1,6 +1,6 @@
 import bpy
-from . import utilities
-from .properties import *
+from .. import utilities
+from ..properties import *
 
 @utilities.register_class
 class FRAME_UL_bake_targets(bpy.types.UIList):
@@ -38,5 +38,6 @@ class FRAME_UL_bake_target_mirrors(bpy.types.UIList):
 		else:
 			row.label(text=item.primary or '???', icon='UNLINKED')
 			row.label(text=item.secondary or '???')
+
 
 

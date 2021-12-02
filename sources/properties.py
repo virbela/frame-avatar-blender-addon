@@ -16,11 +16,11 @@ UV_ISLAND_MODES = enum_descriptor(
 	#(identifier, 			name, 				description,
 	#	icon, 				number),
 
-	('UV_IM_COLOR',			'Color',			'This UV island will end up on the color segment of the atlas',
-		'COLOR',			0),
-
 	('UV_IM_MONOCHROME',	'Monochrome',		'This UV island will be channel packed to a gray scale segment of the atlas',
-		'IMAGE_ZDEPTH',		1),
+		'IMAGE_ZDEPTH',		0),
+
+	('UV_IM_COLOR',			'Color',			'This UV island will end up on the color segment of the atlas',
+		'COLOR',			1),
 
 	('UV_IM_NIL',			'Nil UV island',	'This UV island will have zero area (unshaded)',
 		'DOT',				2),
@@ -110,6 +110,7 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
 	bake_target_mirror_collection: bpy.props.CollectionProperty(type = BakeTargetMirrorEntry)
 	selected_bake_target_mirror: bpy.props.IntProperty(name = "Selected mirror entry", default = -1)
 
+	source_object: 		bpy.props.StringProperty(name="Object name")
 
 
 

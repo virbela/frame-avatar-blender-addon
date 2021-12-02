@@ -6,117 +6,9 @@ import time
 from . import utilities
 from .utilities import hide_everything_from_render, get_named_image
 from .baking import batch_bake
+from .ui.baking import *
+from .ui.panels import *
 
-
-@utilities.register_class
-class FRAME_OT_set_bake_mirror_primary(bpy.types.Operator):
-	bl_label = "Set primary"
-	bl_description = 'Set primary bake target of selected mirror entry'
-	bl_idname = 'frame.set_bake_mirror_primary'
-
-	#TODO - fix
-	def execute(self, context):
-
-		HT = context.scene.homeomorphictools
-		et = HT.bake_target_collection[HT.selected_bake_target]
-		tm = HT.bake_target_mirror_collection[HT.selected_bake_target_mirror]
-		tm.primary = et.identifier
-
-		return {'FINISHED'}
-
-
-@utilities.register_class
-class FRAME_OT_set_bake_mirror_secondary(bpy.types.Operator):
-	bl_label = "Set secondary"
-	bl_description = 'Set secondary bake target of selected mirror entry'
-	bl_idname = 'frame.set_bake_mirror_secondary'
-
-	#TODO - fix
-	def execute(self, context):
-
-		HT = context.scene.homeomorphictools
-		et = HT.bake_target_collection[HT.selected_bake_target]
-		tm = HT.bake_target_mirror_collection[HT.selected_bake_target_mirror]
-		tm.secondary = et.identifier
-
-		return {'FINISHED'}
-
-
-@utilities.register_class
-class FRAME_OT_add_bake_target_mirror(bpy.types.Operator):
-	bl_label = "+"
-	bl_description = 'Create new mirror entry'
-	bl_idname = 'frame.add_bake_target_mirror'
-
-	def execute(self, context):
-
-		HT = context.scene.homeomorphictools
-		new = HT.bake_target_mirror_collection.add()
-
-
-		last_id = len(HT.bake_target_mirror_collection) - 1
-		HT.selected_bake_target_mirror = last_id
-
-		return {'FINISHED'}
-
-
-@utilities.register_class
-class FRAME_OT_remove_bake_target_mirror(bpy.types.Operator):
-	bl_label = "-"
-	bl_description = 'Remove mirror entry'
-	bl_idname = 'frame.remove_bake_target_mirror'
-
-	def execute(self, context):
-
-		HT = context.scene.homeomorphictools
-		HT.bake_target_mirror_collection.remove(HT.selected_bake_target_mirror)
-
-		last_id = len(HT.bake_target_mirror_collection) - 1
-		if last_id == -1:
-			HT.selected_bake_target_mirror = -1
-		else:
-			HT.selected_bake_target_mirror = min(HT.selected_bake_target_mirror, last_id)
-
-		return {'FINISHED'}
-
-
-
-
-@utilities.register_class
-class FRAME_OT_add_bake_target(bpy.types.Operator):
-	bl_label = "+"
-	bl_description = 'Create new bake target'
-	bl_idname = 'frame.add_bake_target'
-
-	def execute(self, context):
-
-		HT = context.scene.homeomorphictools
-		new = HT.bake_target_collection.add()
-
-		last_id = len(HT.bake_target_collection) - 1
-		HT.selected_bake_target = last_id
-
-		return {'FINISHED'}
-
-
-@utilities.register_class
-class FRAME_OT_remove_bake_target(bpy.types.Operator):
-	bl_label = "-"
-	bl_description = 'Remove selected bake target'
-	bl_idname = 'frame.remove_bake_target'
-
-	def execute(self, context):
-
-		HT = context.scene.homeomorphictools
-		HT.bake_target_collection.remove(HT.selected_bake_target)
-
-		last_id = len(HT.bake_target_collection) - 1
-		if last_id == -1:
-			HT.selected_bake_target = -1
-		else:
-			HT.selected_bake_target = min(HT.selected_bake_target, last_id)
-
-		return {'FINISHED'}
 
 
 @utilities.register_class
@@ -609,4 +501,5 @@ class BATCHBAKE_OT_test_operator(bpy.types.Operator):
 		# just_for_testing['lut'] = target_map
 
 		return {'FINISHED'}
+
 

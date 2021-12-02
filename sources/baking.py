@@ -2,6 +2,45 @@ import bpy
 from .utilities import deselect_all_nodes, get_named_image
 from .exceptions import *
 
+
+def create_bake_targets_from_shapekeys(tool_properties, shape_keys):
+
+	def create_mirror(primary, secondary):
+		new = tool_properties.bake_target_mirror_collection.add()
+		new.primary = primary
+		new.secondary = secondary
+		return new
+
+	def create_target(name, mode='UV_IM_MONOCHROME'):
+		new = tool_properties.bake_target_collection.add()
+		new.object_name = tool_properties.source_object
+		new.shape_key_name = name
+		return new
+
+	for sk in shape_keys:
+		key = sk.name
+		#TODO
+		#Here we should run our rules for the naming scheme
+
+		if key.endswith('_L'):
+			base = key[:-2]
+			L, R = f'{base}_L', f'{base}_R'
+			create_target(L)
+			create_target(R)
+			create_mirror(L, R)
+
+		elif key.endswith('_R'):
+			pass
+
+		elif key.endswith('__None'):
+			base = key[:-6]
+			create_target(base, 'UV_IM_NIL')
+
+		else:
+			create_target(key)
+
+
+
 def create_bake_material(name):
 	'''
 		Creates material for baking
