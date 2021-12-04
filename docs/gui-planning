@@ -1,7 +1,32 @@
 
 
-Bake groups:
+Addon panels for category 'Avatar' in space 'VIEW_3D'
 
-	We could have a list with defined groups that also includes the (Bake individual) group as a group you can't delete.
-	Then we have a different list with all the targets and one can assign them to various groups, similar to how the vertex grouping box works.
+	Bake targets (ui.panels.FRAME_PT_batch_bake_targets)
 
+		Bake target list
+			Type:			FRAME_UL_bake_targets
+			Item type:		properties.BakeTarget
+			Description:	List of bake targets from HT.bake_target_collection where HT.selected_bake_target is the selected item
+
+		If there is a selected bake target (et):
+			MAYBE-TODO: Rename et to make more sense
+
+			Search box for object in scene.objects → et.object_name
+
+			If there is such object et.object_name:
+				Search box for shape_keys in the object et.object_name → et.shape_key_name
+
+			Scalar for UV area weight (importance factor) → et.uv_area_weight
+			Cardinal for number of variants this bake has → et.variant_count
+			Option for UV island mode (see documentation on properties.BakeTarget) → et.uv_mode
+
+
+		Bake target mirror entry list (see documentation (TODO: write) for details regarding how UV island mirroring works)
+			Type:			FRAME_UL_bake_target_mirrors
+			Item type:		properties.BakeTargetMirrorEntry
+			Description:	List of bake targets that should be handled as mirrored targets
+
+
+		Operator to create bake targets from shape key names
+			Calls:			baking.create_bake_targets_from_shapekeys

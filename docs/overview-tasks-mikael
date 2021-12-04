@@ -130,3 +130,25 @@ This document is Mikaels notes outlining the work that is to be done to the bran
 
 
 
+
+
+	About class registration
+		https://wiki.blender.org/wiki/Reference/Release_Notes/2.80/Python_API/Addons#Class_Registration
+
+		Note: subclasses of [Header, Menu, Operator, Panel, UIList] remain accessible from bpy.types
+			This means we want to prefix everything with FRAME_ to not risk namespace collisions
+
+		In many cases bl_idname can be omitted and it will be based on class name.
+		In some cases though, this does not apply and a specific bl_idname is needed.
+
+			TODO: Refer to places in the code where this happens
+
+
+
+	Pending notes
+
+
+		Bake groups:
+
+			We could have a list with defined groups that also includes the (Bake individual) group as a group you can't delete.
+			Then we have a different list with all the targets and one can assign them to various groups, similar to how the vertex grouping box works.

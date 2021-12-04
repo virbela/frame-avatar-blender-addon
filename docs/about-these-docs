@@ -1,0 +1,16 @@
+Important note on Documentation Maintenance:
+	This documentation may become out of sync with the code base and until such time a tool is selected to prevent this it will be important that once in a while someone just reads through the docs
+	and makes sure all identifiers, structures and hierarchies are still correct. Failure to do so will render the documentation effort useless in the long run.
+
+About these docs
+	Most of these docs are intended for the developers of this addon rather than the artists who will be using the addon and these docs should not be bundled with the addon release.
+	Please familiarize yourself with the main index to know where things are and if there are any particular considerations (this could be anything from what to document or naming conventions)
+
+Main index
+	glossary			- Contains actions and acronyms.
+							(Actions are words that indicate that we should do something, such as pending tasks)
+
+	gui-planning		- Explanation of graphical user interface for the addon
+
+	decisions			- Technical decisions made or pending.
+							This is a good place to write motivations so that if we ever question a decision down the line we can see why it was made which may save us lots of time if reconsideration is warranted.
