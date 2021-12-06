@@ -12,9 +12,11 @@ bl_info = {
 #dependencies: UVPackmaster 2.5.8
 
 from .properties import *
-from .panels import *
+from .ui import *
 from .operators import *
+from .preferences import *
 from . import utilities
+from . import logging
 import bpy
 
 # Addon registration
@@ -23,6 +25,7 @@ def register():
 		bpy.utils.register_class(cls)
 
 	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
+
 
 def unregister():
 	del bpy.types.Scene.homeomorphictools

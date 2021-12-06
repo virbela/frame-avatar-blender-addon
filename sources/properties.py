@@ -1,12 +1,6 @@
 import bpy
 from . import utilities
-import enum
-from .helpers import enum_descriptor
-
-class missing_action(enum.Enum):
-	FAIL = object()
-	RETURN_NONE = object()
-
+from .helpers import enum_descriptor, base_property_group
 
 UV_ISLAND_MODES = enum_descriptor(
 
@@ -16,7 +10,10 @@ UV_ISLAND_MODES = enum_descriptor(
 	#(identifier, 			name, 				description,
 	#	icon, 				number),
 
-	('UV_IM_MONOCHROME',	'Monochrome',		'This UV island will be channel packed to a gray scale segment of the atlas',
+	#NOTE - Suspecting the number is not needed, also since we use our own object to represent these values we could have the long column last and get a more
+	#compact and nice table.
+
+	('UV_IM_MONOCHROME',	'Grayscale',		'This UV island will be channel packed to a grayscale segment of the atlas',
 		'IMAGE_ZDEPTH',		0),
 
 	('UV_IM_COLOR',			'Color',			'This UV island will end up on the color segment of the atlas',
@@ -32,7 +29,7 @@ UV_ISLAND_MODES = enum_descriptor(
 
 
 @utilities.register_class
-class BakeTarget(bpy.types.PropertyGroup):
+class BakeTarget(base_property_group):
 
 	object_name: 		bpy.props.StringProperty(name="Object name")
 	shape_key_name: 	bpy.props.StringProperty(name="Shape key")
@@ -72,36 +69,16 @@ class BakeTarget(bpy.types.PropertyGroup):
 			else:
 				return self.object_name
 
-@utilities.register_class
-class BakeTargetMirrorEntry(bpy.types.PropertyGroup):
 
+
+@utilities.register_class
+class BakeTargetMirrorEntry(base_property_group):
 	primary: 		bpy.props.StringProperty(name='Primary bake target')
 	secondary:		bpy.props.StringProperty(name='Secondary bake target')
 
 
-
 @utilities.register_class
-class HomeomorphicProperties(bpy.types.PropertyGroup):
-	#shapekeys_bool : bpy.props.BoolProperty(name="Shape key data", description="Inherit shape key name from object", default=True, get=None, set=None)
-	#meshdata_bool : bpy.props.BoolProperty(name="Mesh data", description="Inherit mesh data-block name from object", default=True, get=None, set=None)
-	avatar_string : bpy.props.StringProperty(name="MorphSets")#, update=list_shapekeys) <- function for populating UIList with shapekeys and other parameters
-	uvset_string : bpy.props.StringProperty(name="UV set")
-	single_mesh : bpy.props.StringProperty(name="Singular collection", description="Single mesh collection")
-	packer_bool : bpy.props.BoolProperty(name="UVPackmaster/default packer", description="Use UVPackmaster to pack UVs, uncheck to use default packer", default=True, get=None, set=None)
-
-	imgsize_int : bpy.props.IntProperty(name="Bake image size", default=4096) # default 4k
-	path_string : bpy.props.StringProperty(name="Filepath")
-	relative_bool : bpy.props.BoolProperty(name="Average island scale", description="Average UV island scale", default=True, get=None, set=None)
-	persistent_bool : bpy.props.BoolProperty(name="Clear image", description="Persistent bakes per pass", default=False)
-	#color_bool : bpy.props.BoolProperty(name="Color pass", description="Albedo", default=True, get=None, set=None)
-	direct_bool : bpy.props.BoolProperty(name="Direct pass", description="Direct lighting", default=True, get=None, set=None)
-	indirect_bool : bpy.props.BoolProperty(name="Indirect pass", description="Indirect lighting", default=True, get=None, set=None)
-	ao_bool : bpy.props.BoolProperty(name="Ambient Occlusion pass", description="Ambient lighting", default=True, get=None, set=None)
-	#direct_color_bool : bpy.props.BoolProperty(name="Color pass", description="Albedo", default=True, get=None, set=None)
-	#indirect_color_bool : bpy.props.BoolProperty(name="Color pass", description="Albedo", default=True, get=None, set=None)
-
-
-
+class HomeomorphicProperties(base_property_group):
 
 	#Note that we use -1 to indicate that nothing is selected for integer selections
 	bake_target_collection: bpy.props.CollectionProperty(type = BakeTarget)
@@ -112,51 +89,3 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
 
 	source_object: 		bpy.props.StringProperty(name="Object name")
 
-
-
-	def get_properties_by_names(self, names, if_missing=missing_action.FAIL):
-		'Takes list of names separated by space and yields the values of those members.'
-
-		if if_missing is missing_action.FAIL:
-			return (getattr(self, member) for member in names.split())
-		elif if_missing is missing_action.RETURN_NONE:
-			return (getattr(self, member, None) for member in names.split())
-		else:
-			raise ValueError(f'if_missing has unknown value')
-
-
-
-# class ShapekeyTable(bpy.types.PropertyGroup): #ShapekeyProperties
-# 	shapekey_name : bpy.props.StringProperty(name="Shape key", default="Shape key")
-# 	uv_scale : bpy.props.FloatProperty(default=1.0)
-# 	shapekey_index : bpy.props.IntProperty(default=0)
-
-
-# class MESHNAME_PT_main_panel(bpy.types.Panel):
-# 	bl_label = "Organize data"
-# 	bl_idname = "MESHNAME_PT_main_panel"
-# 	bl_space_type = 'VIEW_3D'
-# 	bl_region_type = 'UI'
-# 	bl_category = "Avatar"
-
-# 	def draw(self, context):
-# 		layout = self.layout
-# 		scene = context.scene
-# 		homeomorphictools = scene.homeomorphictools
-# 		row = layout.row()
-# 		#layout.label(text="")
-# 		row.prop(homeomorphictools, "meshdata_bool")
-# 		row.prop(homeomorphictools, "shapekeys_bool")
-# 		layout.operator("meshnamed.mainoperator")
-
-# class MY_UL_List(bpy.types.UIList):
-# 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-# 		# We could write some code to decide which icon to use here...
-# 		custom_icon = 'SHAPEKEY_DATA'
-# 		# Make sure your code supports all 3 layout types
-# 		if self.layout_type in {'DEFAULT', 'COMPACT'}:
-# 			layout.label(text=item.name, icon = custom_icon)
-
-# 		elif self.layout_type in {'GRID'}:
-# 			layout.alignment = 'CENTER'
-# 			layout.label(text="", icon = custom_icon)

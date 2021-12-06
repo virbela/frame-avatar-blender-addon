@@ -2,6 +2,18 @@ import bpy
 from .. import utilities
 from ..properties import *
 
+@utilities.register_class
+class FRAME_PT_workflow(bpy.types.Panel):
+	bl_label = "Workflow"
+	bl_space_type = 'VIEW_3D'
+	bl_region_type = 'UI'
+	bl_category = "Avatar"
+
+	def draw(self, context):
+		scene = context.scene
+		HT = context.scene.homeomorphictools
+
+		self.layout.operator('frame.update_baking_scene')
 
 
 @utilities.register_class

@@ -20,7 +20,13 @@ addon_test:
 
 test: vector_test addon_test
 
+list-actions:
+	$(QUIET_MODE) grep -Prn '#(:?TODO|MAYBE-TODO|NOTE|HACK|DECISION|BUG)' sources/ --include='*.py' --color=always -A2	#Show two lines after match
+
+
 clean:
 	rm -f distribution/*
 
-.PHONY: clean vector_test addon_test
+
+.PHONY: clean vector_test addon_test list-actions
+.IGNORE: list-actions

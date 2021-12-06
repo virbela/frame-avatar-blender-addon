@@ -2,13 +2,52 @@ import bpy
 from .utilities import deselect_all_nodes, get_named_image
 from .exceptions import *
 
+def update_bake_scene(context):
+
+	work_scene = context.scene
+
+	#BUG - must check if baking objects exists
+
+	#TODO - add name to preferences
+	baking_scene = bpy.data.scenes.get('Baking') or bpy.data.scenes.new('Baking')
+
+	#DECISION - should we clear the scene?
+	for scene_obj in baking_scene.collection.objects:
+		baking_scene.collection.objects.unlink(scene_obj)
+
+	for bake_target in work_scene.homeomorphictools.bake_target_collection:
+
+		name = bake_target.object_name
+		shape_key = bake_target.shape_key_name
+
+		#Fetch object to copy
+		obj = work_scene.objects.get(name)
+		new_object = obj.copy()
+		new_object.data = obj.data.copy()	#Copy data as well
+
+
+		#Remove all shape keys except the selected one
+		if shape_key:
+			new_object.name = f'baking_{name}_{shape_key}'
+			for skey in new_object.data.shape_keys.key_blocks:
+				if skey.name != shape_key:
+					new_object.shape_key_remove(skey)
+		else:
+			new_object.name = f'baking_{name}'
+
+		#Put object in baking scene
+		baking_scene.collection.objects.link(new_object)
+
 
 def create_bake_targets_from_shapekeys(tool_properties, shape_keys):
 
+	#BUG - User may create multiple bake targets
+
 	def create_mirror(primary, secondary):
 		new = tool_properties.bake_target_mirror_collection.add()
-		new.primary = primary
-		new.secondary = secondary
+		source = tool_properties.source_object
+		new.primary = f'{source}.{primary}'
+		new.secondary = f'{source}.{secondary}'
 		return new
 
 	def create_target(name, mode='UV_IM_MONOCHROME'):
@@ -19,8 +58,7 @@ def create_bake_targets_from_shapekeys(tool_properties, shape_keys):
 
 	for sk in shape_keys:
 		key = sk.name
-		#TODO
-		#Here we should run our rules for the naming scheme
+		#TODO - Here we should run our rules for the naming scheme
 
 		if key.endswith('_L'):
 			base = key[:-2]

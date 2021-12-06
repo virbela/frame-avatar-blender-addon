@@ -2,6 +2,14 @@ from local_testing import mock_object as _mock_object
 
 #Note that a lot of mocking happens as singletons even though those objects should not be singletons.
 
+def iter_annotations(type):
+	annotations = dict()
+	for base in reversed(type.mro()):
+		if item_anno := getattr(base, '__annotations__', None):
+			annotations.update(item_anno)
+
+	yield from annotations.items()
+
 class _mock_stats:
 	registered_classes = list()
 	unregistered_classes = list()
@@ -117,6 +125,22 @@ class _mock_image_collection(_mock_collection):
 		self._items[name] = new
 		return new
 
+class _mock_text_collection(_mock_collection):
+	_item_type = 'Text'
+
+	def new(self, name):
+		new = types.Text(name)
+		self._items[name] = new
+		return new
+
+
+class _mock_addon_collection(_mock_collection):
+	_item_type = 'AddonPreferences'
+
+class _mock_preferences_collection(_mock_collection):
+	_item_type = 'PropertyGroup'
+
+	log_target = 'frame.log'
 
 class _mock_material_collection(_mock_collection):
 	_item_type = 'Material'
@@ -133,9 +157,12 @@ class data:
 	meshes = _mock_mesh_collection()
 	materials = _mock_material_collection()
 	collections = _mock_collection_collection()
+	texts = _mock_text_collection()
 
 class context:
 	active_object = None
+	class preferences:
+		addons = _mock_addon_collection()
 
 	class view_layer:
 		objects = _mock_layer_object_collection()
@@ -159,9 +186,15 @@ class ops:
 class types:
 	class PropertyGroup(_mock_object):
 		def __init_subclass__(cls):
-			for key, value in cls.__annotations__.items():
+			for key, value in iter_annotations(cls):
 				setattr(cls, key, _mock.property_instance(key, value))
 
+	class AddonPreferences(PropertyGroup):
+		preferences = _mock_preferences_collection()
+
+	class Text(_mock_object):
+		def write(self, text):
+			pass
 
 	class Mesh(_mock_object):
 		materials = _mock_material_collection()

@@ -1,6 +1,13 @@
 Actions
 	TODO			Something we should do
 	MAYBE-TODO		Something that we should consider doing
+	NOTE			Something we should be aware of and potentially act upon
+	HACK			A hack we should fix
+	DECISION		We need to make a decision here
+	BUG				High priority todo
+
+	You can view all actions in this project using the command:
+		make list-actions
 
 Glossary
 	HT 			HomeomorphicTools instance in context.scene.homeomorphictools
