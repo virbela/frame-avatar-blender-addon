@@ -24,7 +24,7 @@ class _mock:
 			instance.__dict__[self.name] = self.property_type._filter(value)
 
 		def __get__(self, instance, owner):
-			if isinstance is None:
+			if instance is None:
 				return self
 			else:
 

@@ -22,7 +22,7 @@ Addon panels for category 'Avatar' in space 'VIEW_3D'
 			Option for UV island mode (see documentation on properties.BakeTarget) → et.uv_mode
 
 
-		Bake target mirror entry list (see documentation (TODO: write) for details regarding how UV island mirroring works)
+		Bake target mirror entry list (see documentation (#TODO: write) for details regarding how UV island mirroring works)
 			Type:			FRAME_UL_bake_target_mirrors
 			Item type:		properties.BakeTargetMirrorEntry
 			Description:	List of bake targets that should be handled as mirrored targets

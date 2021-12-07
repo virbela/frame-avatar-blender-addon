@@ -20,13 +20,19 @@ addon_test:
 
 test: vector_test addon_test
 
+#list-actions finds searches for "#WORD" where WORD is any upper case word, followed by an optional colon and then any non character
 list-actions:
-	$(QUIET_MODE) grep -Prn '#(:?TODO|MAYBE-TODO|NOTE|HACK|DECISION|BUG)' sources/ --include='*.py' --color=always -A2	#Show two lines after match
+	$(QUIET_MODE) grep -Prn '#[A-Z]+:?\W' sources/ --include='*.py' --color=always -A2	#Show two lines after match
+	$(QUIET_MODE) grep -Prn '#[A-Z]+:?\W' docs/ --exclude='*.svg' --color=always -A2	#Show two lines after match
 
+#list-actions finds searches for "#WORD" where WORD is any upper case word, followed by an optional colon and then any non character
+list-actions-short:
+	$(QUIET_MODE) grep -Prn '#[A-Z]+:?\W' sources/ --include='*.py' --color=always 	#Show two lines after match
+	$(QUIET_MODE) grep -Prn '#[A-Z]+:?\W' docs/ --exclude='*.svg' --color=always	#Show two lines after match
 
 clean:
 	rm -f distribution/*
 
 
-.PHONY: clean vector_test addon_test list-actions
-.IGNORE: list-actions
+.PHONY: clean vector_test addon_test list-actions list-actions-short
+.IGNORE: list-actions list-actions-short

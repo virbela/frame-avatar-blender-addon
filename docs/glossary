@@ -5,6 +5,8 @@ Actions
 	HACK			A hack we should fix
 	DECISION		We need to make a decision here
 	BUG				High priority todo
+	TEST			Temporary test item that we should remove
+	DEBUG			Temporary debug item that we should remove
 
 	You can view all actions in this project using the command:
 		make list-actions

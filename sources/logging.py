@@ -78,6 +78,8 @@ class log_instance:
 
 	def process_message(self, context, message):
 
+		#TODO - messages that are repeating in close temporal proximity should be grouped to prevent spamming
+
 		preferences = context.preferences.addons[__package__].preferences
 		#Get or create text target based on addon preference `log_target´
 		text = bpy.data.texts.get(preferences.log_target) or bpy.data.texts.new(preferences.log_target)
@@ -87,6 +89,8 @@ class log_instance:
 		t = time.strftime('%X', message.timestamp)
 		text.write(f'{t} {message.log_level.name}: {message.message}\n')
 
+		#TODO - make sure things scroll down
+
 		self.history.append(message)
 
 		if len(self.history) > self.MAX_HISTORY:
@@ -94,5 +98,5 @@ class log_instance:
 
 
 
-log = log_instance()
+log_writer = log_instance()
 

@@ -28,8 +28,21 @@ UV_ISLAND_MODES = enum_descriptor(
 
 
 
+
+
+
+
 @utilities.register_class
 class BakeTarget(base_property_group):
+
+	#BUG these targets aren't properly named so we can't sort them, they all seem to be empty string
+
+
+	# def _get_name(arg):
+	# 	print('GET', arg)
+	# 	return '123'
+
+	name: 				bpy.props.StringProperty(name="Bake target name")
 
 	object_name: 		bpy.props.StringProperty(name="Object name")
 	shape_key_name: 	bpy.props.StringProperty(name="Shape key")
@@ -38,7 +51,7 @@ class BakeTarget(base_property_group):
 
 	variant_count:		bpy.props.IntProperty(name="Variant count", default=1)
 
-	uv_mode:			bpy.props.EnumProperty(items=UV_ISLAND_MODES, name="UV island mode", default=0)
+	uv_mode:			bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
 
 
 	@property
@@ -50,6 +63,7 @@ class BakeTarget(base_property_group):
 				return self.object_name
 		else:
 			return '(No object selected)'
+
 
 	@property
 	def short_description(self):
@@ -80,6 +94,8 @@ class BakeTargetMirrorEntry(base_property_group):
 @utilities.register_class
 class HomeomorphicProperties(base_property_group):
 
+	### Bake targets ###
+
 	#Note that we use -1 to indicate that nothing is selected for integer selections
 	bake_target_collection: bpy.props.CollectionProperty(type = BakeTarget)
 	selected_bake_target: bpy.props.IntProperty(name = "Selected bake target", default = -1)
@@ -89,3 +105,8 @@ class HomeomorphicProperties(base_property_group):
 
 	source_object: 		bpy.props.StringProperty(name="Object name")
 
+	### Atlas,textures, paint assist ###
+	atlas_size: 		bpy.props.IntProperty(name="Atlas size", default = 4096)
+	color_percentage:	bpy.props.FloatProperty(name="Atlas color region percentage", default = 25.0)
+
+	painting_size:		bpy.props.IntProperty(name="Hand paint texture size", default = 1024)

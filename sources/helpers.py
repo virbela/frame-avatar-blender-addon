@@ -1,6 +1,8 @@
 import bpy
 import enum
 from dataclasses import dataclass
+from .logging import log_writer
+from .constants import *
 
 class missing_action(enum.Enum):
 	FAIL = object()
@@ -18,6 +20,7 @@ class enum_entry:
 class enum_descriptor:
 	def __init__(self, *entries):
 		self.members = {ee.identifier:ee for ee in (enum_entry(*e) for e in entries)}
+		self.by_value = {ee.number: ee for ee in self.members.values()}
 
 	def __iter__(self):
 		for member in self.members.values():
@@ -34,4 +37,13 @@ class base_property_group(bpy.types.PropertyGroup):
 			return (getattr(self, member, None) for member in names.split())
 		else:
 			raise ValueError(f'if_missing has unknown value')
+
+
+def get_work_scene(context):
+	if scene := bpy.data.scenes.get(WORK_SCENE):
+		return scene
+	else:
+		with log_writer(context) as log:
+			log.error(f'Work scene `{WORK_SCENE}´ could not be found.')
+
 

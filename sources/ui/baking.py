@@ -18,7 +18,7 @@ class FRAME_OT_create_bake_targets_from_shapekeys(bpy.types.Operator):
 
 		if source := bpy.data.objects.get(HT.source_object):
 			shape_keys = source.data.shape_keys.key_blocks
-			create_bake_targets_from_shapekeys(HT, shape_keys)
+			create_bake_targets_from_shapekeys(context, HT, shape_keys)
 
 		else:
 			raise BakeException.NoObjectChosen(HT.source_object)

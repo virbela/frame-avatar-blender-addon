@@ -6,11 +6,11 @@ with test_suite('Addon tests', verbose=True) as (positive, negative):
 		import sources as addon
 
 	with positive('Basic logging'):
-		from sources import logging
+		from sources.logging import log_writer
 		import bpy
 
 		#Testing with bpy.context mock
-		with logging.log(bpy.context) as log:
+		with log_writer(bpy.context) as log:
 			log.debug('Debug message')
 			log.info('Info message')
 			log.warning('Warning message')

@@ -2,12 +2,15 @@ import bpy
 from .. import utilities
 from ..properties import *
 
+#NOTE - we are currently using item.name for bake targets to identify them but we can't change that name right now
+#		we should add a way to change the name
+
 @utilities.register_class
 class FRAME_UL_bake_targets(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-		layout.label(text=item.description, icon=UV_ISLAND_MODES.members[item.uv_mode].icon)
+		layout.label(text=item.name, icon=UV_ISLAND_MODES.members[item.uv_mode].icon)
 
-		#Note - there are multipl layout types as shown in this example
+		#NOTE - there are multipl layout types as shown in this example
 			# # Make sure your code supports all 3 layout types
 			# if self.layout_type in {'DEFAULT', 'COMPACT'}:
 			# 	layout.label(text=item.name, icon = 'SOMEICON')
@@ -28,9 +31,6 @@ class FRAME_UL_bake_target_mirrors(bpy.types.UIList):
 			if entry.identifier == item.primary:
 				primary = entry
 
-		#primary = item.primary
-
-		#print(list(HT.bake_target_collection))
 
 		if primary:
 			row.label(text=item.primary or '???', icon=UV_ISLAND_MODES.members[primary.uv_mode].icon)
@@ -38,6 +38,5 @@ class FRAME_UL_bake_target_mirrors(bpy.types.UIList):
 		else:
 			row.label(text=item.primary or '???', icon='UNLINKED')
 			row.label(text=item.secondary or '???')
-
 
 

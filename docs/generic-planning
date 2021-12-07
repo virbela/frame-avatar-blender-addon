@@ -1,0 +1,40 @@
+#TODO - move to decision log
+Currently we create a new scene for baking where the intention was to separate out baking to make it easier to differentiate from the remaining of the blend file.
+The drawback here is that the properties in HomeomorphicProperties are defined on a per scene basis so when we select the bake scene all the bake target disappear.
+
+	More information:
+		https://devtalk.blender.org/t/adding-a-datablock-to-store-properties-per-file-proposal/12741
+		https://blender.stackexchange.com/questions/153000/blender-dev-global-location-to-store-project-properties
+
+	Current workaround:
+
+		We fetch properties from the scene named Scene always.
+
+
+
+Eric via email 2021-12-04
+    1) Complete bake target channels implementation starting with adding the variants.
+    2) Implement and test Paint Assist within the FABA.
+
+    a) Clicking paint button :
+
+    i) the selected morph will be focussed upon in 3d viewport on the right in paint mode.
+    ii) the paint color should be set to blue if the Color option is selected.
+    iii) the paint color should be set to gray if the Greyscale option is selected.
+    iv) materials will be applied to bake target meshes enabling the AO to be visible while painting.
+    v) the 1k paint texture should be shown on the left.
+    vi) show text log on the bottom revealing standard out feedback to artist.
+
+    b) If another morph is selected while in paint mode:
+
+    i) save the 1k paint texture the of the previous morph being painted.
+    ii) do the same things shown above.
+
+    3) Use the FABA start to finish. Paint the eyes as projected from view. https://drive.google.com/drive/folders/1To1TqYmnm3_Hc3WubbNneVOWB1WNvyIH
+    4) On export, implement the compositing to the final 4k atlas including all the greyscale layers and color layer.
+    Implement Frame application GES and SSF chunking adjustments to accommodate for the new layered atlas approach.
+    5) Push changes to FABA and Frame branches.  Use #frame-deployment channel /loadbranch hook to deploy your Frame branch to our test server.
+    6) Post an update in our shared discusion with a link to the test server : port running your branch.
+
+
+
