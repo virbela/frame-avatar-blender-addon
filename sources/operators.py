@@ -1,9 +1,21 @@
 import bpy
 from . import utilities
-from .baking import update_bake_scene, bake_all_bake_targets, bake_selected_bake_targets, pack_uv_islands
+from .baking import update_bake_scene, bake_all_bake_targets, bake_selected_bake_targets, pack_uv_islands, auto_assign_atlas
 from .helpers import get_work_scene
 
 #TODO - add documentation for when hovering above an operator in blender
+
+
+
+@utilities.register_class
+class FRAME_OT_auto_assign_atlas(bpy.types.Operator):
+	bl_label = "Auto assign atlas/UV"
+	bl_idname = "frame.auto_assign_atlas"
+
+	def execute(self, context):
+		auto_assign_atlas(context)
+		return {'FINISHED'}
+
 
 @utilities.register_class
 class FRAME_OT_update_baking_scene(bpy.types.Operator):

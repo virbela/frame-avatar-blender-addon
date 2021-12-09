@@ -27,8 +27,8 @@ list-actions:
 
 #list-actions finds searches for "#WORD" where WORD is any upper case word, followed by an optional colon and then any non character
 list-actions-short:
-	$(QUIET_MODE) grep -Prn '#[A-Z]+:?\W' sources/ --include='*.py' --color=always 	#Show two lines after match
-	$(QUIET_MODE) grep -Prn '#[A-Z]+:?\W' docs/ --exclude='*.svg' --color=always	#Show two lines after match
+	$(QUIET_MODE) grep -Prn '#[A-Z]+:?\W' sources/ --include='*.py' --color=always
+	$(QUIET_MODE) grep -Prn '#[A-Z]+:?\W' docs/ --exclude='*.svg' --color=always
 
 clean:
 	rm -f distribution/*

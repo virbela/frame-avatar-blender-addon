@@ -3,6 +3,23 @@ from .. import utilities
 from ..properties import *
 from ..helpers import get_work_scene
 
+import textwrap
+
+def textlines(txt):
+	return textwrap.dedent(txt).strip('\r\n\t ').split('\n')
+
+class explanations:
+	auto_assign_atlas = textlines('''
+		In order to perform channel packing we need to
+		assign each bake target an atlas and an UV map.
+		The operation below will automatically distribute
+		bake target UV islands for applicable targets.
+		Note that you may override this by unchecking the
+		"Assign atlas automaticall" checkbox in the
+		"Bake targets" panel if there is a technical
+		reason to do so.
+	''')
+
 @utilities.register_class
 class FRAME_PT_workflow(bpy.types.Panel):
 	bl_label = "Workflow"
@@ -13,6 +30,13 @@ class FRAME_PT_workflow(bpy.types.Panel):
 	def draw(self, context):
 		if scene := get_work_scene(context):
 			HT = scene.homeomorphictools
+
+			#TODO - this should point to our documentation for the workflow. This could point to a document that requires the artist to be logged in to that web service (like google docs as an example).
+			#We may not want links that anyone can access since the workflow should be considered proprietary
+			op = self.layout.operator('wm.url_open', text='Help')
+			op.url = 'http://example.org/'
+
+			self.layout.operator('frame.auto_assign_atlas')
 
 			self.layout.operator('frame.pack_uv_islands')
 			self.layout.operator('frame.update_baking_scene')
@@ -74,7 +98,7 @@ class FRAME_PT_batch_bake_targets(bpy.types.Panel):
 			bake_target_actions.operator('frame.add_bake_target')
 			bake_target_actions.operator('frame.remove_bake_target')
 
-
+			#TODO - divy up this into a few functions to make it less messy
 			if HT.selected_bake_target != -1:
 				et = HT.bake_target_collection[HT.selected_bake_target]
 				self.layout.prop_search(et, "object_name", scene, "objects")
@@ -85,8 +109,34 @@ class FRAME_PT_batch_bake_targets(bpy.types.Panel):
 
 
 				self.layout.prop(et, 'uv_area_weight')
-				self.layout.prop(et, 'variant_count')
+
+				variants = self.layout.box()
+				variants.prop(et, 'multi_variants')
+
+				if et.multi_variants:
+					variants.template_list('FRAME_UL_bake_variants', '', et, 'variant_collection', et, 'selected_variant')
+
+					variant_actions = variants.row(align=True)
+					variant_actions.operator('frame.add_bake_target_variant')
+					variant_actions.operator('frame.remove_bake_target_variant')
+
+					if et.selected_variant != -1:
+						var = et.variant_collection[et.selected_variant]
+						variants.prop_search(var, 'image', bpy.data, 'images')
+
+
 				self.layout.prop(et, 'uv_mode')
+
+				self.layout.prop(et, 'auto_atlas')
+				if et.auto_atlas:
+					self.layout.label(text=f"Atlas: {et.atlas or '(not assigned)'}")
+					self.layout.label(text=f"UV set: {et.uv_set or '(not assigned)'}")
+				else:
+					self.layout.prop_search(et, 'atlas', bpy.data, 'images')
+					if obj:
+						self.layout.prop_search(et, 'uv_set', obj.data, 'uv_layers')
+					else:
+						self.layout.label(text=f"UV set: (No object)'")
 
 
 			mirrors = self.layout.box()

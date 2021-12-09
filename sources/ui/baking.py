@@ -3,6 +3,9 @@ from .. import utilities
 from ..exceptions import BakeException
 from ..baking import create_bake_targets_from_shapekeys
 
+#TODO - We need to refactor this, make sure we use the correct scene everywhere
+#TODO - We should have an abstract way for dealing with lists of things since we have 3 lists so far (bake targets, bake mirrors, bake variants). There might be more.
+
 
 @utilities.register_class
 class FRAME_OT_create_bake_targets_from_shapekeys(bpy.types.Operator):
@@ -132,5 +135,54 @@ class FRAME_OT_remove_bake_target(bpy.types.Operator):
 			HT.selected_bake_target = -1
 		else:
 			HT.selected_bake_target = min(HT.selected_bake_target, last_id)
+
+		return {'FINISHED'}
+
+
+
+@utilities.register_class
+class FRAME_OT_add_bake_target_variant(bpy.types.Operator):
+	bl_label = "+"
+	bl_description = 'Add variant'
+	bl_idname = 'frame.add_bake_target_variant'
+
+	def execute(self, context):
+		#TODO - implement
+		HT = context.scene.homeomorphictools
+
+		if HT.selected_bake_target != -1:
+			et = HT.bake_target_collection[HT.selected_bake_target]
+
+			new = et.variant_collection.add()
+
+			last_id = len(et.variant_collection) - 1
+			et.selected_variant = last_id
+
+		else:
+			print('ERROR')
+
+
+
+
+		return {'FINISHED'}
+
+
+@utilities.register_class
+class FRAME_OT_remove_bake_target_variant(bpy.types.Operator):
+	bl_label = "-"
+	bl_description = 'Remove mirror entry'
+	bl_idname = 'frame.remove_bake_target_variant'
+
+	def execute(self, context):
+
+		#TODO implement
+		# HT = context.scene.homeomorphictools
+		# HT.bake_target_mirror_collection.remove(HT.selected_bake_target_mirror)
+
+		# last_id = len(HT.bake_target_mirror_collection) - 1
+		# if last_id == -1:
+		# 	HT.selected_bake_target_mirror = -1
+		# else:
+		# 	HT.selected_bake_target_mirror = min(HT.selected_bake_target_mirror, last_id)
 
 		return {'FINISHED'}

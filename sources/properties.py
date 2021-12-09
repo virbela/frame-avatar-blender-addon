@@ -30,6 +30,10 @@ UV_ISLAND_MODES = enum_descriptor(
 
 
 
+@utilities.register_class
+class BakeVariant(base_property_group):
+	name: 					bpy.props.StringProperty(name="Variant name", default='Untitled variant')
+	image:					bpy.props.StringProperty(name="Image texture")
 
 
 @utilities.register_class
@@ -42,38 +46,28 @@ class BakeTarget(base_property_group):
 	# 	print('GET', arg)
 	# 	return '123'
 
-	name: 				bpy.props.StringProperty(name="Bake target name")
+	name: 					bpy.props.StringProperty(name="Bake target name")
 
-	object_name: 		bpy.props.StringProperty(name="Object name")
-	shape_key_name: 	bpy.props.StringProperty(name="Shape key")
+	object_name: 			bpy.props.StringProperty(name="Object name")
+	shape_key_name: 		bpy.props.StringProperty(name="Shape key")
 
-	uv_area_weight: 	bpy.props.FloatProperty(name="UV island area weight", default=1.0)
-
-	variant_count:		bpy.props.IntProperty(name="Variant count", default=1)
-
-	uv_mode:			bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
+	uv_area_weight: 		bpy.props.FloatProperty(name="UV island area weight", default=1.0)
 
 
-	@property
-	def description(self):
-		if self.object_name:
-			if self.shape_key_name:
-				return f'{self.object_name}.{self.shape_key_name}'
-			else:
-				return self.object_name
-		else:
-			return '(No object selected)'
+	uv_mode:				bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
+
+	auto_atlas:				bpy.props.BoolProperty(name="Assign atlas automatically", default=True)
+	atlas:					bpy.props.StringProperty(name="Atlas name")
+	# ↑ This is used for storing the automatic choice as well as the manual
+	uv_set:					bpy.props.StringProperty(name="UV set", default='UVMap')
 
 
-	@property
-	def short_description(self):
-		if self.object_name:
-			if self.shape_key_name:
-				return f'{self.object_name}.{self.shape_key_name}'
-			else:
-				return self.object_name
-		else:
-			return '???'
+	#Variants
+	multi_variants:			bpy.props.BoolProperty(name="Multiple variants", default=False)
+	variant_collection:		bpy.props.CollectionProperty(type = BakeVariant)
+	selected_variant:		bpy.props.IntProperty(name = "Selected bake variant", default = -1)
+
+
 
 	@property
 	def identifier(self):
@@ -97,16 +91,16 @@ class HomeomorphicProperties(base_property_group):
 	### Bake targets ###
 
 	#Note that we use -1 to indicate that nothing is selected for integer selections
-	bake_target_collection: bpy.props.CollectionProperty(type = BakeTarget)
-	selected_bake_target: bpy.props.IntProperty(name = "Selected bake target", default = -1)
+	bake_target_collection: 			bpy.props.CollectionProperty(type = BakeTarget)
+	selected_bake_target: 				bpy.props.IntProperty(name = "Selected bake target", default = -1)
 
-	bake_target_mirror_collection: bpy.props.CollectionProperty(type = BakeTargetMirrorEntry)
-	selected_bake_target_mirror: bpy.props.IntProperty(name = "Selected mirror entry", default = -1)
+	bake_target_mirror_collection: 		bpy.props.CollectionProperty(type = BakeTargetMirrorEntry)
+	selected_bake_target_mirror: 		bpy.props.IntProperty(name = "Selected mirror entry", default = -1)
 
-	source_object: 		bpy.props.StringProperty(name="Object name")
+	source_object: 						bpy.props.StringProperty(name="Object name")
 
 	### Atlas,textures, paint assist ###
-	atlas_size: 		bpy.props.IntProperty(name="Atlas size", default = 4096)
-	color_percentage:	bpy.props.FloatProperty(name="Atlas color region percentage", default = 25.0)
+	atlas_size: 						bpy.props.IntProperty(name="Atlas size", default = 4096)
+	color_percentage:					bpy.props.FloatProperty(name="Atlas color region percentage", default = 25.0)
 
-	painting_size:		bpy.props.IntProperty(name="Hand paint texture size", default = 1024)
+	painting_size:						bpy.props.IntProperty(name="Hand paint texture size", default = 1024)

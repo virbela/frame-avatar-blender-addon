@@ -1,3 +1,8 @@
+#TODO
+    git rid of context.scene.homeomorphictools
+
+
+
 #TODO - move to decision log
 Currently we create a new scene for baking where the intention was to separate out baking to make it easier to differentiate from the remaining of the blend file.
 The drawback here is that the properties in HomeomorphicProperties are defined on a per scene basis so when we select the bake scene all the bake target disappear.
@@ -38,3 +43,8 @@ Eric via email 2021-12-04
 
 
 
+
+References:
+
+    Text wrapping in panels
+        https://blender.stackexchange.com/questions/74052/wrap-text-within-a-panel

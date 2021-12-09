@@ -5,7 +5,12 @@ from .logging import log_writer
 from .helpers import get_work_scene
 from .constants import *
 
+def auto_assign_atlas(context):
+	#TODO implement - This is the current pending thing to implement since this is the first goal that needs to be functioning
+	pass
+
 def pack_uv_islands(context):
+	#TODO implement
 	pass
 
 def get_bake_group(bake_target):
@@ -16,6 +21,14 @@ def bake_all_bake_targets(context):
 	#TODO - implement!
 	pass
 
+
+def get_bake_atlas(bake_target):
+	#TODO - here we should get the correct atlas for baking
+	pass
+
+def get_uv_set(bake_target):
+	#TODO - return correct UV set
+	pass
 
 def perform_baking(context, baking_scene, bake_group):
 
@@ -31,6 +44,9 @@ def perform_baking(context, baking_scene, bake_group):
 			raise BakeException.NoActiveMaterial(bake_object)
 
 		active_mat.use_nodes = True
+
+		atlas = get_bake_atlas(bake_target)
+		uv_set = get_uv_set(bake_target)
 
 		#TODO - check if we should really do this here
 		create_intermediate_bake_texture_nodes(active_mat, atlas, uv_set)
@@ -270,7 +286,7 @@ def prepare_batch_bake():
 	if not baking_scene:
 		raise BakeException.NoSuchScene(BAKE_SCENE)
 
-	bake_scene.cycles.bake_type = 'DIFFUSE'
-	bake_scene.render.bake.use_pass_direct = False
-	bake_scene.render.bake.use_pass_indirect = False
-	bake_scene.render.bake.use_pass_color = True
+	baking_scene.cycles.bake_type = 'DIFFUSE'
+	baking_scene.render.bake.use_pass_direct = False
+	baking_scene.render.bake.use_pass_indirect = False
+	baking_scene.render.bake.use_pass_color = True
