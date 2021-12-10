@@ -5,33 +5,7 @@ from .logging import log_writer
 from .helpers import get_work_scene
 from .constants import *
 
-def auto_assign_atlas(context):
-	#TODO implement - This is the current pending thing to implement since this is the first goal that needs to be functioning
-	pass
-
-def pack_uv_islands(context):
-	#TODO implement
-	pass
-
-def get_bake_group(bake_target):
-	#TODO implement
-	return [bake_target]
-
-def bake_all_bake_targets(context):
-	#TODO - implement!
-	pass
-
-
-def get_bake_atlas(bake_target):
-	#TODO - here we should get the correct atlas for baking
-	pass
-
-def get_uv_set(bake_target):
-	#TODO - return correct UV set
-	pass
-
 def perform_baking(context, baking_scene, bake_group):
-
 
 	#TODO - We only need to setup the bake material once per bake but we need to assign the material to each bake object in the group - we should make sure this is what happens
 	#TODO - We should probably just assign the bake material instead of complaining if bake object does not have an active material
@@ -139,60 +113,61 @@ def update_bake_scene(context):
 			log.info(f'Created baking scene `{BAKE_SCENE}´ with {len(baking_scene.collection.objects)} objects.')
 
 
-def create_bake_targets_from_shapekeys(context, tool_properties, shape_keys):
+#DEPRECHATED
+# def create_bake_targets_from_shapekeys(context, tool_properties, shape_keys):
 
-	with log_writer(context) as log:
-		#BUG - User may create multiple bake targets
+# 	with log_writer(context) as log:
+# 		#BUG - User may create multiple bake targets
 
-		def create_mirror(primary, secondary):
-			new = tool_properties.bake_target_mirror_collection.add()
-			source = tool_properties.source_object
-			new.primary = f'{source}.{primary}'
-			new.secondary = f'{source}.{secondary}'
-			return new
-
-
-		#TODO - Here we should run our rules for the naming scheme
-
-		#Create all targets
-		targets = dict()
-		for sk in shape_keys:
-			key = sk.name
-			targets[key] = dict(
-				name = f'bake_{tool_properties.source_object}_{key}',
-				object_name = tool_properties.source_object,
-				shape_key_name = key,
-				uv_mode = 'UV_IM_MONOCHROME',
-			)
+# 		def create_mirror(primary, secondary):
+# 			new = tool_properties.bake_target_mirror_collection.add()
+# 			source = tool_properties.source_object
+# 			new.primary = f'{source}.{primary}'
+# 			new.secondary = f'{source}.{secondary}'
+# 			return new
 
 
+# 		#TODO - Here we should run our rules for the naming scheme
 
-		#Configure targets and mirrors
-		for key in targets:
-			if key.endswith('_L'):
-				base = key[:-2]
-				Lk = f'{base}_L'
-				Rk = f'{base}_R'
-				R = targets.get(Rk)
-
-				if R:
-					create_mirror(Lk, Rk)
-				else:
-					log.error(f"Could not create mirror for {key} since there was no such object `{Rk}´")
-
-			elif key.endswith('_R'):
-				pass
-
-			elif key.endswith('__None'):
-				targets[key]['uv_mode'] = 'UV_IM_NIL'
+# 		#Create all targets
+# 		targets = dict()
+# 		for sk in shape_keys:
+# 			key = sk.name
+# 			targets[key] = dict(
+# 				name = f'bake_{tool_properties.source_object}_{key}',
+# 				object_name = tool_properties.source_object,
+# 				shape_key_name = key,
+# 				uv_mode = 'UV_IM_MONOCHROME',
+# 			)
 
 
-		#NOTE - there is a bug where we can only set uv_mode (or any other enum) once from the same context.
-		#		To avoid this bug we first create dicts that represents the new bake targets and then we instanciate them below
-		for target in targets.values():
-			new = tool_properties.bake_target_collection.add()
-			for key, value in target.items():
-				setattr(new, key, value)
+
+# 		#Configure targets and mirrors
+# 		for key in targets:
+# 			if key.endswith('_L'):
+# 				base = key[:-2]
+# 				Lk = f'{base}_L'
+# 				Rk = f'{base}_R'
+# 				R = targets.get(Rk)
+
+# 				if R:
+# 					create_mirror(Lk, Rk)
+# 				else:
+# 					log.error(f"Could not create mirror for {key} since there was no such object `{Rk}´")
+
+# 			elif key.endswith('_R'):
+# 				pass
+
+# 			elif key.endswith('__None'):
+# 				targets[key]['uv_mode'] = 'UV_IM_NIL'
+
+
+# 		#NOTE - there is a bug where we can only set uv_mode (or any other enum) once from the same context.
+# 		#		To avoid this bug we first create dicts that represents the new bake targets and then we instanciate them below
+# 		for target in targets.values():
+# 			new = tool_properties.bake_target_collection.add()
+# 			for key, value in target.items():
+# 				setattr(new, key, value)
 
 
 def create_bake_material(name):

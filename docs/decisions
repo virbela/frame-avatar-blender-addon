@@ -1,0 +1,35 @@
+Brief
+	This document is intended to be a place where decisions are logged and explained.
+
+Rationale
+	Without logging the reasons for certain decisions that were made to perhaps fix a bug or work around an issue develoers are bound to repeat old mistakes.
+	This is costly of time and effort and to document such decisions is a good way to prevent it.
+
+
+
+Articles
+
+	Baking - overview of process
+
+		Currently we create a new scene for baking where the intention was to separate out baking to make it easier to differentiate from the remaining of the blend file.
+		The drawback here is that the properties in HomeomorphicProperties are defined on a per scene basis so when we select the bake scene all the bake target disappear.
+
+		More information:
+			https://devtalk.blender.org/t/adding-a-datablock-to-store-properties-per-file-proposal/12741
+			https://blender.stackexchange.com/questions/153000/blender-dev-global-location-to-store-project-properties
+
+		Current workaround:
+
+			We fetch properties from the work scene¹ always.
+
+		Notes
+			¹	The work scene is defined by name and is currently defined in the module 'constants' as the variable 'WORK_SCENE'.
+
+
+
+
+	Logging system
+
+		Currently we use a context manager to keep track of the context but after using that, it didn't really make things easier.
+		We will instead have a single instance where we pass the blender context as the first argument.
+		The reason we want the context in the first place is to be able to access the addon preferences.

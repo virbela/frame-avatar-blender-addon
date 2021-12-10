@@ -1,0 +1,28 @@
+
+Python modules are currently organized like this
+
+	sources/
+		├── __init__.py
+		├── constants.py
+		├── exceptions.py
+		├── helpers.py
+		├── baking.py
+		├── local_math.py
+		├── logging.py
+		├── mesh_utilities.py
+		├── operators.py
+		├── preferences.py
+		├── properties.py
+		├── structures.py
+		├── ui
+		│   ├── __init__.py
+		│   ├── elements.py
+		│   ├── baking.py
+		│   └── panels.py
+		└── utilities.py
+
+	#TODO - concretenize the structure and explain it
+
+	#TODO - Currently we have a bunch of operators in 'ui/baking' which is wrong
+			All operators should be in one place since they will all derive from the frame_operator type currently
+			defined in 'helpers' (and it probably should not be there either, maybe we should have something for all bases we use)

@@ -3,19 +3,6 @@
 
 
 
-#TODO - move to decision log
-Currently we create a new scene for baking where the intention was to separate out baking to make it easier to differentiate from the remaining of the blend file.
-The drawback here is that the properties in HomeomorphicProperties are defined on a per scene basis so when we select the bake scene all the bake target disappear.
-
-	More information:
-		https://devtalk.blender.org/t/adding-a-datablock-to-store-properties-per-file-proposal/12741
-		https://blender.stackexchange.com/questions/153000/blender-dev-global-location-to-store-project-properties
-
-	Current workaround:
-
-		We fetch properties from the scene named Scene always.
-
-
 
 Eric via email 2021-12-04
     1) Complete bake target channels implementation starting with adding the variants.
@@ -48,3 +35,7 @@ References:
 
     Text wrapping in panels
         https://blender.stackexchange.com/questions/74052/wrap-text-within-a-panel
+
+
+TODO:
+    manual UV island negates need for checkbox

@@ -1,7 +1,6 @@
 import bpy, enum
 from .constants import COLORS
 
-pending_classes = list()
 
 def print_to_editor(string, outputname):
 	text_input = str(string)
@@ -19,9 +18,9 @@ def hide_everything_from_render():
 		obj.hide_render = True
 
 
-def register_class(cls):
-	pending_classes.append(cls)
-	return cls
+# def register_class(cls):
+# 	pending_classes.append(cls)
+# 	return cls
 
 def deselect_all_nodes(node_list):
 	for node in node_list:

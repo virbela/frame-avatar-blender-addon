@@ -5,6 +5,21 @@ with test_suite('Addon tests', verbose=True) as (positive, negative):
 	with positive('Basic import of addon'):
 		import sources as addon
 
+	with positive('Coverage of operations'):
+		import sources as addon
+		from sources.helpers import pending_classes, IMPLEMENTATION_PENDING
+		from sources.operators.base import frame_operator
+		failed = list()
+		for cls in pending_classes:
+			if issubclass(cls, frame_operator):
+				if cls.frame_operator is IMPLEMENTATION_PENDING:
+					failed.append(cls.__name__)
+
+		if failed:
+			raise Exception(f'The following operators lacks implementation: {", ".join(failed)}')
+
+
+
 	with positive('Basic logging'):
 		from sources.logging import log_writer
 		import bpy

@@ -1,27 +1,20 @@
 import bpy
 from .. import utilities
 from ..properties import *
-from ..helpers import get_work_scene
+from ..helpers import get_work_scene, pending_classes
 
 import textwrap
 
 def textlines(txt):
 	return textwrap.dedent(txt).strip('\r\n\t ').split('\n')
 
-class explanations:
-	auto_assign_atlas = textlines('''
-		In order to perform channel packing we need to
-		assign each bake target an atlas and an UV map.
-		The operation below will automatically distribute
-		bake target UV islands for applicable targets.
-		Note that you may override this by unchecking the
-		"Assign atlas automaticall" checkbox in the
-		"Bake targets" panel if there is a technical
-		reason to do so.
-	''')
+class frame_panel(bpy.types.Panel):
+	#contribution note 6B
+	def __init_subclass__(cls):
+		pending_classes.append(cls)
 
-@utilities.register_class
-class FRAME_PT_workflow(bpy.types.Panel):
+
+class FRAME_PT_workflow(frame_panel):
 	bl_label = "Workflow"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
@@ -47,8 +40,8 @@ class FRAME_PT_workflow(bpy.types.Panel):
 			helpers.operator('frame.bake_selected')
 
 
-@utilities.register_class
-class FRAME_PT_painting(bpy.types.Panel):
+
+class FRAME_PT_painting(frame_panel):
 	bl_label = "Texture painting"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
@@ -61,8 +54,7 @@ class FRAME_PT_painting(bpy.types.Panel):
 			self.layout.prop(HT, 'painting_size')
 
 
-@utilities.register_class
-class FRAME_PT_uv_packing(bpy.types.Panel):
+class FRAME_PT_uv_packing(frame_panel):
 	bl_label = "Texture atlas"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
@@ -80,8 +72,7 @@ class FRAME_PT_uv_packing(bpy.types.Panel):
 
 
 
-@utilities.register_class
-class FRAME_PT_batch_bake_targets(bpy.types.Panel):
+class FRAME_PT_batch_bake_targets(frame_panel):
 	bl_label = "Bake targets"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
@@ -127,16 +118,16 @@ class FRAME_PT_batch_bake_targets(bpy.types.Panel):
 
 				self.layout.prop(et, 'uv_mode')
 
-				self.layout.prop(et, 'auto_atlas')
-				if et.auto_atlas:
-					self.layout.label(text=f"Atlas: {et.atlas or '(not assigned)'}")
-					self.layout.label(text=f"UV set: {et.uv_set or '(not assigned)'}")
-				else:
+				if et.uv_mode == 'UV_IM_FROZEN':
 					self.layout.prop_search(et, 'atlas', bpy.data, 'images')
 					if obj:
 						self.layout.prop_search(et, 'uv_set', obj.data, 'uv_layers')
 					else:
 						self.layout.label(text=f"UV set: (No object)'")
+				else:
+					self.layout.label(text=f"Atlas: {et.atlas or '(not assigned)'}")
+					self.layout.label(text=f"UV set: {et.uv_set or '(not assigned)'}")
+
 
 
 			mirrors = self.layout.box()

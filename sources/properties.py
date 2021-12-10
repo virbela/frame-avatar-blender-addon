@@ -1,6 +1,11 @@
 import bpy
 from . import utilities
-from .helpers import enum_descriptor, base_property_group
+from .helpers import enum_descriptor, frame_property_group
+
+#Important notes
+#	Regarding descriptions of properties, please see contribution note 1
+
+#TODO - Add descriptions for all properties
 
 UV_ISLAND_MODES = enum_descriptor(
 
@@ -29,26 +34,20 @@ UV_ISLAND_MODES = enum_descriptor(
 
 
 
-
-@utilities.register_class
-class BakeVariant(base_property_group):
+class BakeVariant(frame_property_group):
 	name: 					bpy.props.StringProperty(name="Variant name", default='Untitled variant')
 	image:					bpy.props.StringProperty(name="Image texture")
 
 
-@utilities.register_class
-class BakeTarget(base_property_group):
+class BakeTarget(frame_property_group):
 
-	#BUG these targets aren't properly named so we can't sort them, they all seem to be empty string
+	name: 					bpy.props.StringProperty(name = "Bake target name", default='Untitled bake target')
 
-
-	# def _get_name(arg):
-	# 	print('GET', arg)
-	# 	return '123'
-
-	name: 					bpy.props.StringProperty(name="Bake target name")
-
-	object_name: 			bpy.props.StringProperty(name="Object name")
+	object_name: 			bpy.props.StringProperty(
+		name = 					"Object name",
+		description = 			"The object that is used for this bake target.\n"
+								"Once selected it is possible to select a specific shape key",
+	)
 	shape_key_name: 		bpy.props.StringProperty(name="Shape key")
 
 	uv_area_weight: 		bpy.props.FloatProperty(name="UV island area weight", default=1.0)
@@ -56,9 +55,8 @@ class BakeTarget(base_property_group):
 
 	uv_mode:				bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
 
-	auto_atlas:				bpy.props.BoolProperty(name="Assign atlas automatically", default=True)
 	atlas:					bpy.props.StringProperty(name="Atlas name")
-	# ↑ This is used for storing the automatic choice as well as the manual
+	# ↑ This is used for storing the automatic choice as well as the manual (frozen) one
 	uv_set:					bpy.props.StringProperty(name="UV set", default='UVMap')
 
 
@@ -69,7 +67,7 @@ class BakeTarget(base_property_group):
 
 
 
-	@property
+	@property	#contribution note 8
 	def identifier(self):
 		if self.object_name:
 			if self.shape_key_name:
@@ -78,15 +76,20 @@ class BakeTarget(base_property_group):
 				return self.object_name
 
 
+	#TODO implement
+	def get_mirror_type(self, ht):
+		for mirror in ht.bake_target_mirror_collection:
+			print(mirror.primary)
 
-@utilities.register_class
-class BakeTargetMirrorEntry(base_property_group):
+
+
+class BakeTargetMirrorEntry(frame_property_group):
+	#Here I wanted to use PointerProperty but they don't really act as the name implies. See contribution note 7 for more details.
 	primary: 		bpy.props.StringProperty(name='Primary bake target')
-	secondary:		bpy.props.StringProperty(name='Secondary bake target')
+	secondary: 		bpy.props.StringProperty(name='Secondary bake target')
 
 
-@utilities.register_class
-class HomeomorphicProperties(base_property_group):
+class HomeomorphicProperties(frame_property_group):
 
 	### Bake targets ###
 
@@ -104,3 +107,12 @@ class HomeomorphicProperties(base_property_group):
 	color_percentage:					bpy.props.FloatProperty(name="Atlas color region percentage", default = 25.0)
 
 	painting_size:						bpy.props.IntProperty(name="Hand paint texture size", default = 1024)
+
+	def get_selected_bake_target(self):
+		if self.selected_bake_target != -1:
+			return self.bake_target_collection[self.selected_bake_target]
+
+	def get_selected_mirror(self):
+		if self.selected_bake_target_mirror != -1:
+			return self.bake_target_mirror_collection[self.selected_bake_target_mirror]
+

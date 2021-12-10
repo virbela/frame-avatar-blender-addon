@@ -1,3 +1,6 @@
+class InternalError(BaseException):
+	pass
+
 class BakeException:
 	class base(BaseException):
 		pass
