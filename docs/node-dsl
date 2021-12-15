@@ -1,0 +1,69 @@
+#TODO - these docs (and many others) would benefit from a markup since we could then easier render code excerpts
+
+When defining node graphs we use a node definition DSL explained in this document
+
+The "script" is essentially just a python function body with a few special patterns.
+
+	Signature definition
+
+		The signature definition is implemented using an annotation named "arguments".
+		It contains a standard python function signature.
+		The final signature will be prefixed by the reserved argument "_tree" that will hold a reference to the node tree.
+
+		Example
+		-------
+
+			arguments: atlas, uv_map='UVMap'
+
+
+		This must be in the top level of the script body
+
+
+	Node definition
+
+		Node definitions are done in one of two ways:
+
+			type	local_name		storage_name
+			type	storage_name
+
+		If local_name is omitted it will use the storage_name.
+
+		Example
+		-------
+
+			ShaderNodeAmbientOcclusion		ao				baking_ao
+
+		This does not have to be in the top level of the script body which allows for conditional definitions such as
+
+		Example
+		-------
+			if diffuse_input:
+				ShaderNodeTexImage      	diffuse_image
+
+
+	Node links (graph building)
+
+		This is the most powerful aspect of this feature since it makes programatic graph building much easier
+		The syntax is
+
+			source_node.source_slot --> destination_node.destination_slot
+
+		Since slot names can have spaces, a hyphen will be translated to space, example:
+
+			"Base Color" should be expressed as "Base-Color" (see example below)
+
+		Example
+		-------
+
+			baking_ao.Color --> baking_ao_p.Base-Color
+
+
+
+Note that you can extract some information useful for the graph building and placement of nodes by using the Avatar/Developer tools in the node editor on a selection.
+The output will be put in the log window
+
+
+
+When running "load_node_setup_function" you get a python function back and its source code is attached to return_value.__source__
+
+#TODO - include a full example of a node script and its output

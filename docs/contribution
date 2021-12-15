@@ -101,3 +101,5 @@ Specific articles
 
 		We identify the bake target by the object and the shape key. This allows us to rename the bake targets user interface name without disconnecting targets.
 		#POTENTIAL-PROBLEM - If we want to have multiple bake targets from the same shape key this will not work, one need to use the variants-feature for that instead.
+
+	9	NodeTree only exists after use_nodes = True

@@ -11,4 +11,5 @@ class MIRROR_TYPE(enum.Enum):
 
 WORK_SCENE = 'Scene'
 BAKE_SCENE = 'Baking'
+PARTITIONING_OBJECT = '_uv_partitioning_object_'
 BAKE_MATERIAL = 'BakeMaterial'

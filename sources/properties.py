@@ -1,6 +1,6 @@
 import bpy
-from . import utilities
-from .helpers import enum_descriptor, frame_property_group
+from .helpers import enum_descriptor, frame_property_group, get_named_entry, require_named_entry, get_bake_scene
+from .constants import MIRROR_TYPE
 
 #Important notes
 #	Regarding descriptions of properties, please see contribution note 1
@@ -66,6 +66,27 @@ class BakeTarget(frame_property_group):
 	selected_variant:		bpy.props.IntProperty(name = "Selected bake variant", default = -1)
 
 
+	def get_object(self):
+		return get_named_entry(bpy.data.objects, self.object_name)
+
+	def require_object(self):
+		return require_named_entry(bpy.data.objects, self.object_name)
+
+	def get_bake_scene_object(self, context):
+		bake_scene = get_bake_scene(context)
+		return get_named_entry(bake_scene.objects, self.get_bake_scene_name())
+
+	def require_bake_scene_object(self, context):
+		bake_scene = get_bake_scene(context)
+		return require_named_entry(bake_scene.objects, self.get_bake_scene_name())
+
+	def get_atlas(self):
+		return get_named_entry(bpy.data.images, self.atlas)
+
+	def require_atlas(self):
+		return require_named_entry(bpy.data.images, self.atlas)
+
+
 
 	@property	#contribution note 8
 	def identifier(self):
@@ -76,12 +97,28 @@ class BakeTarget(frame_property_group):
 				return self.object_name
 
 
-	#TODO implement
 	def get_mirror_type(self, ht):
+		find_id = self.identifier
 		for mirror in ht.bake_target_mirror_collection:
-			print(mirror.primary)
+			if find_id == mirror.primary:
+				return mirror, MIRROR_TYPE.PRIMARY
+			elif find_id == mirror.secondary:
+				return mirror, MIRROR_TYPE.SECONDARY
+
+		return None, None
 
 
+	#TBD should we use the name here or the identifier?
+	def get_bake_scene_name(self):
+		return self.identifier
+
+	def iter_bake_scene_variant_names(self):
+		prefix = self.get_bake_scene_name()
+		if self.multi_variants:
+			for variant in self.variant_collection:
+				yield f'{prefix}.{variant.name}'
+		else:
+			yield prefix
 
 class BakeTargetMirrorEntry(frame_property_group):
 	#Here I wanted to use PointerProperty but they don't really act as the name implies. See contribution note 7 for more details.
@@ -112,7 +149,31 @@ class HomeomorphicProperties(frame_property_group):
 		if self.selected_bake_target != -1:
 			return self.bake_target_collection[self.selected_bake_target]
 
+	def require_selected_bake_target(self):
+		if candidate := self.get_selected_bake_target():
+			return candidate
+		else:
+			raise Exception()	#TODO - proper exception
+
 	def get_selected_mirror(self):
 		if self.selected_bake_target_mirror != -1:
 			return self.bake_target_mirror_collection[self.selected_bake_target_mirror]
 
+	def require_selected_mirror(self):
+		if candidate := self.get_selected_mirror():
+			return candidate
+		else:
+			raise Exception()	#TODO - proper exception
+
+
+	def get_bake_target_by_identifier(self, identifier):
+		for bt in self.bake_target_collection:
+			if bt.identifier == identifier:
+				return bt
+
+	def require_bake_target_by_identifier(self, identifier):
+		if candidate := self.get_bake_target_by_identifier(identifier):
+			return candidate
+		else:
+			#TODO - proper exception
+			raise Exception()

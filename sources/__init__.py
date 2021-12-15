@@ -20,13 +20,16 @@ from . import logging
 
 from .helpers import pending_classes
 
+from . import materials
+
+
 # Addon registration
 def register():
+	global original_inspect_getsourcelines
 	for cls in pending_classes:
 		bpy.utils.register_class(cls)
 
 	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
-
 
 def unregister():
 	del bpy.types.Scene.homeomorphictools

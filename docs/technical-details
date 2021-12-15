@@ -1,0 +1,26 @@
+
+Note: Technical detail note may sometimes be called tech-note
+
+1	Setting up baking
+
+	For baking we have two options
+		render.bake.use_clear
+			Will clear target atlas before baking - this should probably never be set
+
+		render.bake.margin
+			Margin when baking in texels - this needs to be set according to our wishes
+
+	Other options
+		cycles.bake_type = 'DIFFUSE'
+		render.bake.use_pass_direct = False
+		render.bake.use_pass_indirect = False
+		render.bake.use_pass_color = True
+
+
+2	UV operations
+
+	This is an excerpt from blender/source/blender/editors/uvedit/uvedit_unwrap_ops.c
+
+		Object **objects = BKE_view_layer_array_from_objects_in_edit_mode_unique_data_with_uvs
+
+	This means we probably need to make sure we are in the proper context rather than attempting context override

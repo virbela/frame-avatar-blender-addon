@@ -1,7 +1,8 @@
 import bpy
-from .. import utilities
 from ..properties import *
 from ..helpers import get_work_scene, pending_classes
+from .. import operators
+
 
 import textwrap
 
@@ -12,6 +13,18 @@ class frame_panel(bpy.types.Panel):
 	#contribution note 6B
 	def __init_subclass__(cls):
 		pending_classes.append(cls)
+
+
+#TODO - this should be guarded by a devmode boolean
+class FRAME_PT_node_dev_tools(frame_panel):
+	bl_label = "Development Tools"
+	bl_space_type = 'NODE_EDITOR'
+	bl_region_type = 'UI'
+	bl_category = "Avatar"
+
+	def draw(self, context):
+		self.layout.operator('frame.create_node_script')
+
 
 
 class FRAME_PT_workflow(frame_panel):
@@ -38,6 +51,10 @@ class FRAME_PT_workflow(frame_panel):
 			helpers = self.layout.box()
 			helpers.label(text='Extra utilities')
 			helpers.operator('frame.bake_selected')
+
+			#TODO - remove this
+			helpers.operator('frame.place_holder_for_experiments')
+
 
 
 

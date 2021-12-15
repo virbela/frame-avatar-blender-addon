@@ -1,5 +1,4 @@
 import bpy
-from . import utilities
 from .helpers import pending_classes, register_class
 
 @register_class	#contribution note 6A

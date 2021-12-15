@@ -1,5 +1,4 @@
 import bpy
-from .. import utilities
 from ..properties import *
 from ..helpers import pending_classes, get_homeomorphic_tool_state
 
@@ -30,23 +29,30 @@ class FRAME_UL_bake_targets(frame_ui_list):
 class FRAME_UL_bake_target_mirrors(frame_ui_list):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 
-		if HT := get_homeomorphic_tool_state(context):	#contribution note 2
+		if ht := get_homeomorphic_tool_state(context):	#contribution note 2
 			row = layout.row()
 
-			primary = HT.bake_target_collection.get(item.primary)
-			secondary = HT.bake_target_collection.get(item.secondary)
+			def na(txt):
+				'This is a helper function that will say (Not assigned) if the string is empty but otherwise indicate the contents but also convey it is a broken link'
 
-			print(primary)
+				if txt:
+					return f'`{txt}´ N/A'
+				else:
+					return '(Not Available)'
+
+
+			primary = ht.get_bake_target_by_identifier(item.primary)
+			secondary = ht.get_bake_target_by_identifier(item.secondary)
 
 			if primary and secondary:
 				row.label(text=primary.name, icon=UV_ISLAND_MODES.members[primary.uv_mode].icon)
 				row.label(text=secondary.name)
 			elif primary:
 				row.label(text=primary.name, icon='UNLINKED')
-				row.label(text='(Not assigned')
+				row.label(text=na(item.secondary))
 			elif secondary:
-				row.label(text='(Not assigned', icon='UNLINKED')
+				row.label(text=na(item.primary), icon='UNLINKED')
 				row.label(text=secondary.name)
 			else:
-				row.label(text='(Not assigned)', icon='UNLINKED')
-				row.label(text='(Not assigned)')
+				row.label(text=na(item.primary), icon='UNLINKED')
+				row.label(text=na(item.secondary))

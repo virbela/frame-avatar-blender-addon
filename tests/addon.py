@@ -21,16 +21,15 @@ with test_suite('Addon tests', verbose=True) as (positive, negative):
 
 
 	with positive('Basic logging'):
-		from sources.logging import log_writer
+		from sources.logging import log_writer as log
 		import bpy
 
-		#Testing with bpy.context mock
-		with log_writer(bpy.context) as log:
-			log.debug('Debug message')
-			log.info('Info message')
-			log.warning('Warning message')
-			log.error('Error message')
-			log.fatal('Fatal message')
+
+		log.debug('Debug message')
+		log.info('Info message')
+		log.warning('Warning message')
+		log.error('Error message')
+		log.fatal('Fatal message')
 
 
 	with positive('Register addon'):
@@ -104,4 +103,3 @@ with test_suite('Addon tests', verbose=True) as (positive, negative):
 
 
 
-	#print(addon)

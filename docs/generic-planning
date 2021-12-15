@@ -1,8 +1,3 @@
-#TODO
-    git rid of context.scene.homeomorphictools
-
-
-
 
 Eric via email 2021-12-04
     1) Complete bake target channels implementation starting with adding the variants.
@@ -31,11 +26,20 @@ Eric via email 2021-12-04
 
 
 
+
+#TODO
+    We should make sure no dots are in names since we use dots as separators for ROOT_OBJECT.SHAPE_KEY.VARIANT or ROOT_OBJECT.VARIANT if no shape keys are there
+
+
 References:
 
     Text wrapping in panels
         https://blender.stackexchange.com/questions/74052/wrap-text-within-a-panel
 
 
-TODO:
-    manual UV island negates need for checkbox
+    All nodes
+        https://github.com/blender/blender/blob/master/release/scripts/startup/nodeitems_builtins.py#L372-L489
+
+    Areas
+        https://github.com/blender/blender/blob/594f47ecd2d5367ca936cf6fc6ec8168c2b360d0/source/blender/makesrna/intern/rna_userdef.c#L3813-L3834
+

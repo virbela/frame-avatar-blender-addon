@@ -1,8 +1,24 @@
-class InternalError(BaseException):
+class InternalError(Exception):
 	pass
 
+#DECISION - should we go away from pythons camel case exception naming scheme to make it easier to read? If everything is prefixed by the module name it shouldn't be a surprise to anyone.
+
+class FrameException:
+	class FailedToCreateNamedEntry(Exception):
+		def __init__(self, collection, name):
+			super().__init__(f'Failed to create a named entry named `{name}´ in collection {collection}.')
+
+	class NamedEntryNotFound(Exception):
+		def __init__(self, collection, name):
+			super().__init__(f'No entry named `{name}´ was found in collection {collection}.')
+
+	class NoNameGivenForCollectionLookup(Exception):
+		def __init__(self, collection):
+			super().__init__(f'No name was given for look up in collection {collection}.')
+
+
 class BakeException:
-	class base(BaseException):
+	class base(Exception):
 		pass
 
 	class NoActiveMaterial(base):

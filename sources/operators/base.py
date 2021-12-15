@@ -2,6 +2,7 @@ import bpy
 
 from ..helpers import get_homeomorphic_tool_state, pending_classes
 from ..exceptions import BakeException, InternalError
+from ..logging import log_writer as log
 
 class frame_operator(bpy.types.Operator):
 	frame_operator = None
@@ -17,11 +18,12 @@ class frame_operator(bpy.types.Operator):
 					self.frame_operator(context, HT)
 
 				except BakeException.base as e:	#contribution note 4
-					#TODO - log this error properly
-					print('FAIL', e)
+					log.exception(f'Exception when calling operator for {self}: {e}')
 					return {'CANCELLED'}
 
-				#TODO - we should also catch the generic exception, log it (including traceback) and then re-raise it for blender to deal with it
+				except Exception as e:
+					log.exception(f'Exception when calling operator for {self}: {e}')
+					raise #We also raise this to let blender know things went wrong
 
 				return {'FINISHED'}
 			else:

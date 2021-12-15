@@ -1,5 +1,6 @@
 import bmesh
 from .local_math import convert_vectors, ROTATION_TRESHOLD
+from .logging import log_writer as log
 
 #Note that we could import local_math from . and override the ROTATION_TRESHOLD if needed
 
@@ -9,8 +10,7 @@ ACTIVE_LAYER = type('ACTIVE_LAYER', (), {})
 def get_uv_map_from_mesh(obj, uv_layer=ACTIVE_LAYER):
 	'If uv_layer is ACTIVE_LAYER, the active UV layer will be used, otherwise, uv_layer is considered to be the index of the wanted UV layer.'
 
-	mesh = bmesh.new()
-	mesh.from_mesh(obj.data)
+	mesh = bmesh.from_edit_mesh(obj.data)
 
 	if uv_layer is ACTIVE_LAYER:
 		uv_layer_index = mesh.loops.layers.uv.active
@@ -30,9 +30,9 @@ def get_uv_map_from_mesh(obj, uv_layer=ACTIVE_LAYER):
 
 class uv_transformation_calculator:
 	def __init__(self, reference_uv_map):
+
 		#Find two furthest points in UV map
 		max_len = None
-
 		for ref_index1, ref1 in reference_uv_map.items():
 			for ref_index2, ref2 in reference_uv_map.items():
 				l = abs(ref1 - ref2)
@@ -77,7 +77,7 @@ class uv_transformation_calculator:
 			e1 = ((R1.rotate(rotation) * scale + translation) - T1).error()
 			e2 = ((R2.rotate(rotation) * scale + translation) - T2).error()
 
-			print(f'Translation: {translation} Rotation: {rotation} Errors: {e1, e2}')
+			log.info(f'Translation: {translation} Rotation: {rotation} Errors: {e1, e2}')
 
 			if e1 > ROTATION_TRESHOLD or e2 > ROTATION_TRESHOLD:
 				raise ValueError('Failed to properly calculate transform')
