@@ -122,22 +122,30 @@ class FRAME_OT_experiments(frame_operator):
 
 		atlas = bt.require_atlas()
 		uv_map = bt.uv_set
-		make_baterial = create_named_entry(bpy.data.materials, 'testmat', recreate=True)
-		make_baterial.use_nodes = True	#contribution note 9
 
-		#TODO - this is just for testing!!
-		paint_image = bpy.data.images['eye_texture.png']
 
-		materials.setup_bake_material2(make_baterial.node_tree, atlas, uv_map, paint_image)
 
 		bake_scene = get_bake_scene(context)
 		context.window.scene = bake_scene
 		view_layer = bake_scene.view_layers[0]	#TODO - should make sure there is only one
 
-		for variant in bt.iter_bake_scene_variant_names():
-			target = require_named_entry(bake_scene.objects, variant)
+		#TODO - maybe have iter that gives names and variants - or just variants since they have names
+		for variant_name, variant in bt.iter_bake_scene_variants():
+			target = require_named_entry(bake_scene.objects, variant_name)
 
-			target.active_material = make_baterial
+			#TODO - we should not recreate the material since we may not be able to take advantage of shader caches and such
+			bake_baterial = create_named_entry(bpy.data.materials, 'testmat', recreate=True)
+			bake_baterial.use_nodes = True	#contribution note 9
+
+
+			#TODO - this is just for testing!!
+			#TODO - make sure we even have a variant since not all targets have those
+			paint_image = bpy.data.images[variant.image]	#TODO - make sure this image exists
+			paint_uv = 'Diffuse'
+			materials.setup_bake_material2(bake_baterial.node_tree, atlas, uv_map, paint_image, paint_uv)
+
+
+			target.active_material = bake_baterial
 			view_layer.objects.active = target
 			set_selection(view_layer.objects, target)
 			set_active(view_layer.objects, target)

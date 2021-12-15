@@ -112,6 +112,15 @@ class BakeTarget(frame_property_group):
 	def get_bake_scene_name(self):
 		return self.identifier
 
+	def iter_bake_scene_variants(self):
+		prefix = self.get_bake_scene_name()
+		if self.multi_variants:
+			for variant in self.variant_collection:
+				yield f'{prefix}.{variant.name}', variant
+		else:
+			yield prefix, None
+
+
 	def iter_bake_scene_variant_names(self):
 		prefix = self.get_bake_scene_name()
 		if self.multi_variants:

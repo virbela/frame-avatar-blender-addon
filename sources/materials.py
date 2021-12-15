@@ -43,70 +43,54 @@ setup_bake_material = load_node_setup_function('setup_bake_material', '''
 
 
 
-# TODO ADD NEW UV!
-# 	#Node definitions
-# 	ShaderNodeUVMap	baking_uv
-# 	ShaderNodeUVMap	baking_uv.001
-# 	ShaderNodeTexImage	diffuse_image
-# 	ShaderNodeAmbientOcclusion	baking_ao
-# 	ShaderNodeBsdfPrincipled	baking_ao_p
-# 	ShaderNodeOutputMaterial	baking_out
-# 	ShaderNodeTexImage	baking_image
-
-# 	#Node locations
-# 	baking_uv.location = (-1130, 171)
-# 	baking_uv.001.location = (-1121, -177)
-# 	diffuse_image.location = (-869, -31)
-# 	baking_ao.location = (-450, 40)
-# 	baking_ao_p.location = (-200, 40)
-# 	baking_out.location = (95, 37)
-# 	baking_image.location = (-873, 301)
-
-# 	#Node links
-# 	baking_uv.UV --> baking_image.Vector
-# 	baking_ao.Color --> baking_ao_p.Base-Color
-# 	baking_ao_p.BSDF --> baking_out.Surface
-# 	diffuse_image.Color --> baking_ao.Color
-# 	baking_uv.001.UV --> diffuse_image.Vector
 
 
 
 setup_bake_material2 = load_node_setup_function('setup_bake_material', '''
 
-	arguments: atlas, uv_map='UVMap', diffuse_input=None
+	arguments: atlas, uv_map='UVMap', diffuse_image=None, diffuse_uv_map='Diffuse'
 
 	#Node definitions
-	ShaderNodeTexImage      		baking_image
-	ShaderNodeUVMap 				baking_uv
-	ShaderNodeOutputMaterial        baking_out
-	ShaderNodeBsdfPrincipled        baking_ao_p
-	ShaderNodeAmbientOcclusion      baking_ao
-	if diffuse_input:
-		ShaderNodeTexImage      	diffuse_image
+	ShaderNodeUVMap				uvm_target
+	ShaderNodeAmbientOcclusion	ao
+	ShaderNodeBsdfPrincipled	nbp_ao
+	ShaderNodeOutputMaterial	out
+	ShaderNodeTexImage			tex_target
 
 	#Node locations
-	baking_image.location = 		(-873, 301)
-	baking_uv.location = 			(-1326, -34)
-	baking_out.location = 			(95, 37)
-	baking_ao_p.location = 			(-200, 40)
-	baking_ao.location = 			(-450, 40)
-	if diffuse_input:
-		diffuse_image.location = 	(-869, -31)
-
-	#Other settings
-	baking_image.image = atlas
-	baking_uv.uv_map = uv_map
-	if diffuse_input:
-		diffuse_image.image = diffuse_input
+	uvm_target.location = 		(-1130, 171)
+	ao.location = 				(-450, 40)
+	nbp_ao.location = 			(-200, 40)
+	out.location = 				(95, 37)
+	tex_target.location = 		(-873, 301)
 
 	#Node links
-	baking_uv.UV --> baking_image.Vector
-	baking_ao.Color --> baking_ao_p.Base-Color
-	baking_ao_p.BSDF --> baking_out.Surface
-	baking_uv.UV --> diffuse_image.Vector
+	uvm_target.UV 		--> 	tex_target.Vector
+	ao.Color 			--> 	nbp_ao.Base-Color
+	nbp_ao.BSDF 		--> 	out.Surface
 
-	if diffuse_input:
-		diffuse_image.Color --> baking_ao.Color
+	#Settings
+	tex_target.image = atlas
+	uvm_target.uv_map = uv_map
+
+
+	#For diffuse source
+	if diffuse_image:
+
+		ShaderNodeUVMap				uvm_diffuse
+		ShaderNodeTexImage			tex_diffuse
+
+		uvm_diffuse.location = 		(-1121, -177)
+		tex_diffuse.location = 		(-869, -31)
+
+		uvm_diffuse.UV 		--> 	tex_diffuse.Vector
+		tex_diffuse.Color 	--> 	ao.Color
+
+		tex_diffuse.image = diffuse_image
+		uvm_diffuse.uv_map = diffuse_uv_map
+
+	set_active(tex_target)
+
 
 ''')
 
