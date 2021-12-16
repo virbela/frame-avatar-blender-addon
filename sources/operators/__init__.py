@@ -89,10 +89,44 @@ class FRAME_OT_remove_bake_target_variant(frame_operator):
 	frame_operator = 	operations.bake_variants.remove
 
 
+#DEPRECHATED ↓↓↓
+
+import random, string
+def gen_random_hash(length):
+	return ''.join(random.choice(string.hexdigits) for i in range(length))
+
+def get_unique_name(collection, prefix, max_prefix_length, random_hash_length=8, max_tries=1024):
+	for v in range(max_tries):
+		candidate = f'{prefix[:max_prefix_length]}-{gen_random_hash(random_hash_length)}'
+		if candidate not in collection:
+			return candidate
+
+	raise Exception('severe fail')	#TODO - proper exception
+
+#DEPRECHATED ↑↑↑
+
+
+def get_nice_name(collection, prefix, max_prefix_length, random_hash_length=8, max_tries=1000):
+
+	for v in range(max_tries):
+		tail = f'-{v:03}' if v else ''
+		candidate = f'{prefix[:max_prefix_length]}{tail}'
+		if candidate not in collection:
+			return candidate
+
+	raise Exception('severe fail')	#TODO - proper exception
+
 
 #TODO - remove this one for distribution
 #NOTICE - we currently don't have a reasonable way of quickly including or excluding aspects since python doesn't have a preprocessor. We can solve this somehow later though but currently manual intervention is required
 #	One solution would be to use a variable in a module but the minor drawback is that the code would still be there, even though it would not be run (this is probably a good solution)
+
+
+#BUG - we have to make sure we have the correct UV layer active for rendering - there is a distinction
+#		both the selected and render-active plays role in the UV Maps list box - need to figure out how this works and how it relates
+#		to the active node in the node editor - perhaps that was a red herring
+#BUG - when we pack UVs we also scale the wrong UV layer - we need to limit this to the right layer
+
 class FRAME_OT_experiments(frame_operator):
 	bl_label = 			"Placeholder for experiments"
 	bl_idname = 		"frame.place_holder_for_experiments"
@@ -129,21 +163,51 @@ class FRAME_OT_experiments(frame_operator):
 		context.window.scene = bake_scene
 		view_layer = bake_scene.view_layers[0]	#TODO - should make sure there is only one
 
-		#TODO - maybe have iter that gives names and variants - or just variants since they have names
+		#NOTE - one way to create the materials in a reasonable fascion is to name them according to the settings that can be different
+		#		currently a material is defined by 4 properties - target atlas, target uv, [diffuse atlas, diffuse uv] - where [] denotes optional
+		#	    One really useful property of creating all the materials other than potential caching benefits within blender is to be able
+		#		to troubleshoot baking by inspecting materials.
+
+		# The final solution should prepare all materials before executing batch baking
+		# but in this test we will do it here
+
+
+		# Setup materials here
+		#TODO - we should handle the case of not using variants
+		#NOTE - Here we create the materials
+		variant_material_cache = dict()	#NOTE - this cache should not reside here of course but we use it in this test - it should be in a module but should not be a saved state.
 		for variant_name, variant in bt.iter_bake_scene_variants():
 			target = require_named_entry(bake_scene.objects, variant_name)
 
-			#TODO - we should not recreate the material since we may not be able to take advantage of shader caches and such
-			bake_baterial = create_named_entry(bpy.data.materials, 'testmat', recreate=True)
-			bake_baterial.use_nodes = True	#contribution note 9
+			if variant.image:
+				paint_image = bpy.data.images[variant.image]	#TODO - make sure this image exists
+				paint_uv = 'Diffuse'
+				#TBD - could this yield way too long names? Should we use a "{shortname}-{shorthash}" naming scheme?
+
+				#NOTE - we are hitting the 63 char limit here! - we will use hash variant
+				# 		pattern here was f'bake.{variant_name}.{atlas.name}.{uv_map}.{paint_image.name}.{paint_uv}'
+
+				material_name = get_nice_name(variant_material_cache, f'bake-{bt.shortname}-{variant.name}', 32)
+
+				#NOTE - we were not going to recreate materials but in this test we are doing the materials setup which SHOULD recreate them in case something was changed
+				bake_baterial = create_named_entry(bpy.data.materials, material_name, recreate=True)
+				bake_baterial.use_nodes = True	#contribution note 9
+
+				#TODO - this is just for testing!!
+				#TODO - make sure we even have a variant since not all targets have those
+				materials.setup_bake_material2(bake_baterial.node_tree, atlas, uv_map, paint_image, paint_uv)
+			else:
+				raise Exception('not implemented')	#TODO - implement
+
+			#store what material we are using
+			variant_material_cache[variant_name] = material_name
 
 
-			#TODO - this is just for testing!!
-			#TODO - make sure we even have a variant since not all targets have those
-			paint_image = bpy.data.images[variant.image]	#TODO - make sure this image exists
-			paint_uv = 'Diffuse'
-			materials.setup_bake_material2(bake_baterial.node_tree, atlas, uv_map, paint_image, paint_uv)
+		# Do baking here
+		for variant_name, variant in bt.iter_bake_scene_variants():
+			target = require_named_entry(bake_scene.objects, variant_name)
 
+			bake_baterial = bpy.data.materials[variant_material_cache[variant_name]]
 
 			target.active_material = bake_baterial
 			view_layer.objects.active = target

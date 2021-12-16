@@ -37,9 +37,7 @@ class re_transpiler:
 
 	@classmethod
 	def transpile(cls, context, source, position=0):
-
 		result = ''
-		last_position = position
 
 		while cls.transpilation_rules:
 

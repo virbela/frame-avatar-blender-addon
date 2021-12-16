@@ -97,6 +97,16 @@ class BakeTarget(frame_property_group):
 				return self.object_name
 
 
+	@property
+	def shortname(self):
+		if self.object_name:
+			if self.shape_key_name:
+				return self.shape_key_name
+			else:
+				return self.object_name
+		return 'untitled'
+
+
 	def get_mirror_type(self, ht):
 		find_id = self.identifier
 		for mirror in ht.bake_target_mirror_collection:
@@ -112,13 +122,12 @@ class BakeTarget(frame_property_group):
 	def get_bake_scene_name(self):
 		return self.identifier
 
+	# this doesn't yield anything if there are no variants
 	def iter_bake_scene_variants(self):
 		prefix = self.get_bake_scene_name()
 		if self.multi_variants:
 			for variant in self.variant_collection:
 				yield f'{prefix}.{variant.name}', variant
-		else:
-			yield prefix, None
 
 
 	def iter_bake_scene_variant_names(self):
