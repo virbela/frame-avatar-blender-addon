@@ -138,13 +138,14 @@ def load_node_setup_function(name, raw_code):
 	'This version creates materials from scratch'
 
 	pre = textwrap.dedent('''
-		from .helpers import set_selection as _set_selection, set_active as _set_active
+		from . import helpers as _helpers
+		from types import MethodType as _method_type
 
-		def set_selection(*node_list):
-			_set_selection(_tree.nodes, *node_list)
-
-		def set_active(node):
-			_set_active(_tree.nodes, node)
+		# Bind helper methods to the node tree
+		set_selection = _method_type(_helpers.set_selection, _tree.nodes)
+		clear_selection = _method_type(_helpers.clear_selection, _tree.nodes)
+		set_active = _method_type(_helpers.set_active, _tree.nodes)
+		clear_active = _method_type(_helpers.clear_active, _tree.nodes)
 
 		#DECISION - should this be mandatory?
 		_tree.nodes.clear()

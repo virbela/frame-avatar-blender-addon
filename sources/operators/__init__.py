@@ -70,6 +70,15 @@ class FRAME_OT_add_bake_target(frame_operator):
 	bl_idname = 		'frame.add_bake_target'
 	frame_operator = 	operations.bake_targets.add
 
+class FRAME_OT_show_selected_bt(frame_operator):
+	bl_label =			"Edit selected"
+	bl_description = 	(
+							'Edit selected bake target.\n'
+							'Activates shape key is needed'
+						)
+	bl_idname = 		'frame.show_selected_bt'
+	frame_operator = 	operations.bake_targets.edit_selected
+
 class FRAME_OT_remove_bake_target(frame_operator):
 	bl_label = 			"-"
 	bl_description = 	'Remove selected bake target'
@@ -89,44 +98,35 @@ class FRAME_OT_remove_bake_target_variant(frame_operator):
 	frame_operator = 	operations.bake_variants.remove
 
 
-#DEPRECHATED ↓↓↓
+class FRAME_OT_switch_to_bake_material(frame_operator):
+	bl_label =			"Bake material"
+	bl_description = 	'Switch all bake objects to use the bake material'
+	bl_idname = 		'frame.switch_to_bake_material'
+	frame_operator = 	operations.switch_to_bake_material
 
-import random, string
-def gen_random_hash(length):
-	return ''.join(random.choice(string.hexdigits) for i in range(length))
+class FRAME_OT_switch_to_preview_material(frame_operator):
+	bl_label =			"Preview material"
+	bl_description = 	'Switch all bake objects to use the preview material'
+	bl_idname = 		'frame.switch_to_preview_material'
+	frame_operator = 	operations.switch_to_preview_material
 
-def get_unique_name(collection, prefix, max_prefix_length, random_hash_length=8, max_tries=1024):
-	for v in range(max_tries):
-		candidate = f'{prefix[:max_prefix_length]}-{gen_random_hash(random_hash_length)}'
-		if candidate not in collection:
-			return candidate
-
-	raise Exception('severe fail')	#TODO - proper exception
-
-#DEPRECHATED ↑↑↑
-
-
-def get_nice_name(collection, prefix, max_prefix_length, random_hash_length=8, max_tries=1000):
-
-	for v in range(max_tries):
-		tail = f'-{v:03}' if v else ''
-		candidate = f'{prefix[:max_prefix_length]}{tail}'
-		if candidate not in collection:
-			return candidate
-
-	raise Exception('severe fail')	#TODO - proper exception
+class FRAME_OT_synchronize_mirrors(frame_operator):
+	bl_label =			"Synchronize mirrors"
+	bl_description = 	'Copy settings from all primary targets to secondary targets in the mirror list'
+	bl_idname = 		'frame.synchronize_mirrors'
+	frame_operator = 	operations.synchronize_mirrors
 
 
-#TODO - remove this one for distribution
+
+
+from ..materials import get_material_variants
+
+
+
 #NOTICE - we currently don't have a reasonable way of quickly including or excluding aspects since python doesn't have a preprocessor. We can solve this somehow later though but currently manual intervention is required
 #	One solution would be to use a variable in a module but the minor drawback is that the code would still be there, even though it would not be run (this is probably a good solution)
 
-
-#BUG - we have to make sure we have the correct UV layer active for rendering - there is a distinction
-#		both the selected and render-active plays role in the UV Maps list box - need to figure out how this works and how it relates
-#		to the active node in the node editor - perhaps that was a red herring
-#BUG - when we pack UVs we also scale the wrong UV layer - we need to limit this to the right layer
-
+#TODO - remove this one for distribution
 class FRAME_OT_experiments(frame_operator):
 	bl_label = 			"Placeholder for experiments"
 	bl_idname = 		"frame.place_holder_for_experiments"
@@ -138,7 +138,7 @@ class FRAME_OT_experiments(frame_operator):
 			return
 
 		from .. import materials
-		from ..helpers import create_named_entry, set_selection, set_active, get_bake_scene, require_named_entry
+		from ..helpers import create_named_entry, set_selection, set_active, get_bake_scene, require_named_entry, set_scene
 		import bpy
 		from ..constants import MIRROR_TYPE
 
@@ -155,12 +155,14 @@ class FRAME_OT_experiments(frame_operator):
 			log.debug(f'{bt.name} is not a mirror, so we should bake it')
 
 		atlas = bt.require_atlas()
-		uv_map = bt.uv_set
+		uv_map = bt.uv_map
 
 
 
 		bake_scene = get_bake_scene(context)
-		context.window.scene = bake_scene
+		# switch to bake scene
+		set_scene(context, bake_scene)
+
 		view_layer = bake_scene.view_layers[0]	#TODO - should make sure there is only one
 
 		#NOTE - one way to create the materials in a reasonable fascion is to name them according to the settings that can be different
@@ -171,52 +173,28 @@ class FRAME_OT_experiments(frame_operator):
 		# The final solution should prepare all materials before executing batch baking
 		# but in this test we will do it here
 
-
-		# Setup materials here
-		#TODO - we should handle the case of not using variants
-		#NOTE - Here we create the materials
-		variant_material_cache = dict()	#NOTE - this cache should not reside here of course but we use it in this test - it should be in a module but should not be a saved state.
-		for variant_name, variant in bt.iter_bake_scene_variants():
-			target = require_named_entry(bake_scene.objects, variant_name)
-
-			if variant.image:
-				paint_image = bpy.data.images[variant.image]	#TODO - make sure this image exists
-				paint_uv = 'Diffuse'
-				#TBD - could this yield way too long names? Should we use a "{shortname}-{shorthash}" naming scheme?
-
-				#NOTE - we are hitting the 63 char limit here! - we will use hash variant
-				# 		pattern here was f'bake.{variant_name}.{atlas.name}.{uv_map}.{paint_image.name}.{paint_uv}'
-
-				material_name = get_nice_name(variant_material_cache, f'bake-{bt.shortname}-{variant.name}', 32)
-
-				#NOTE - we were not going to recreate materials but in this test we are doing the materials setup which SHOULD recreate them in case something was changed
-				bake_baterial = create_named_entry(bpy.data.materials, material_name, recreate=True)
-				bake_baterial.use_nodes = True	#contribution note 9
-
-				#TODO - this is just for testing!!
-				#TODO - make sure we even have a variant since not all targets have those
-				materials.setup_bake_material2(bake_baterial.node_tree, atlas, uv_map, paint_image, paint_uv)
-			else:
-				raise Exception('not implemented')	#TODO - implement
-
-			#store what material we are using
-			variant_material_cache[variant_name] = material_name
-
+		#NOTE - we were not going to recreate materials but in this test we are doing the materials setup which SHOULD recreate them in case something was changed
+		variant_materials = get_material_variants(bt, bake_scene, atlas, uv_map, recreate=True)
 
 		# Do baking here
 		for variant_name, variant in bt.iter_bake_scene_variants():
 			target = require_named_entry(bake_scene.objects, variant_name)
+			materials = variant_materials[variant_name]
+			bake_material = bpy.data.materials[materials.bake]
+			preview_material = bpy.data.materials[materials.preview]
 
-			bake_baterial = bpy.data.materials[variant_material_cache[variant_name]]
-
-			target.active_material = bake_baterial
-			view_layer.objects.active = target
+			# select bake material as active material
+			target.active_material = bake_material
+			# set active view layer object and selection
+			#TODO - check how to do this for a bake group
 			set_selection(view_layer.objects, target)
 			set_active(view_layer.objects, target)
-			overrides = dict(
-				scene = bake_scene
-			)
-			bpy.ops.object.bake(overrides, type='DIFFUSE', save_mode='EXTERNAL')
+
+			# perform baking
+			bpy.ops.object.bake(type='DIFFUSE', save_mode='EXTERNAL')
+
+			# switch material to preview material
+			target.active_material = preview_material
 
 
 #TODO - this should be guarded by a devmode boolean

@@ -1,41 +1,11 @@
-from ..helpers import IMPLEMENTATION_PENDING, get_bake_scene, get_work_scene, a_get, a_set, set_scene, set_selection, set_active
+from ..helpers import IMPLEMENTATION_PENDING, get_bake_scene, get_work_scene, a_get, a_set, set_scene, set_selection, set_active, clear_selection, require_named_entry
 from ..logging import log_writer as log
+from ..structures import intermediate, iter_dc
+from ..materials import get_material_variants
+from ..constants import MIRROR_TYPE
 from .. import constants
 import bpy, bmesh
 import textwrap
-
-
-from dataclasses import dataclass, asdict as dc_to_dict
-
-def iter_dc(d):
-	return dc_to_dict(d).items()
-
-class intermediate:
-	# it would be nice to specify these members more fully but the problem is that we can't both define a tree structure AND refer to things in the tree in
-	# a satisfying way. Since we are not using typing now anyway we will let it be like this. It wouldn't hurt to add comments though that explains the proper type
-
-	class pending:
-		@dataclass
-		class bake_target:
-			name: 				str
-			object_name: 		str
-			shape_key_name: 	str
-			uv_mode: 			str
-			bake_target:		object		= None
-
-	class packing:
-		@dataclass
-		class bake_target:
-			bake_target:		object	#properties.BakeTarget
-			bake_object:		object	#the object in the bake scene
-			area:				float		= 0.0
-			variant_name:		str			= None
-
-	@dataclass
-	class mirror:
-		primary: 				object	#intermediate.pending.bake_target
-		secondary: 				object	#intermediate.pending.bake_target
-
 
 
 #TODO - implement proper version of commented-out code blocks in this module
@@ -133,15 +103,22 @@ def pack_uv_islands(operator, context, ht):
 
 	# First we get a list of all the islands
 	uv_object_list = list()
+	#todo note 1
 	for bake_target in ht.bake_target_collection:
-		if bake_target.multi_variants:
-			for variant_name in bake_target.iter_bake_scene_variant_names():
-				print(variant_name)
-				uv_object_list.append(intermediate.packing.bake_target(bake_target, bake_scene.objects.get(variant_name), variant_name=variant_name))
+		mirror, mt = bake_target.get_mirror_type(ht)
+		if mt is MIRROR_TYPE.SECONDARY:
+			continue
+
+		elif bake_target.multi_variants:
+			for variant_name, variant in bake_target.iter_bake_scene_variants():
+				if bake_object := bake_scene.objects.get(variant_name):
+					uv_object_list.append(intermediate.packing.bake_target(bake_target, bake_object, variant_name=variant_name))
+				else:
+					log.warning(f'No bake object found for {bake_target}')
 
 		else:
 			if bake_object := bake_target.get_bake_scene_object(context):
-				uv_object_list.append(intermediate.packing.bake_target(bake_target, bake_object))
+				uv_object_list.append(intermediate.packing.bake_target(bake_target, bake_object, variant_name=None))
 
 	# In order to work with the UVs we need to create a selection and enter edit mode, see: tech-note 2
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
@@ -161,12 +138,17 @@ def pack_uv_islands(operator, context, ht):
 	# unselect partitioning face
 	set_face_selection(partitioning_object, False)
 
+	# makes sure we have the correct UV layer active - see tech-note 3
+	for uv in uv_object_list:
+		print(uv)
+		uv.bake_object.data.uv_layers.active = uv.bake_object.data.uv_layers.get(uv.bake_target.uv_map)
+
 	bpy.ops.uv.average_islands_scale()	#TODO - conditional
 
 	# Now the islands have been rescaled and we will calculate their areas and store it in our intermediate structure
 	for uv in uv_object_list:
 
-		uv_map = uv.bake_object.data.uv_layers.get(uv.bake_target.uv_set)
+		uv_map = uv.bake_object.data.uv_layers.get(uv.bake_target.uv_map)
 
 		mesh = bmesh.from_edit_mesh(uv.bake_object.data)
 		uv.area = sum(face.calc_area() for face in mesh.faces)
@@ -227,10 +209,7 @@ def pack_uv_islands(operator, context, ht):
 	# This probably means we need to make sure our atlas is not used in places it is not supposed to be
 	create_monochromatic_blocker()
 	bake_scene.uvp2_props.pack_to_others = True
-
-
 	bpy.ops.object.mode_set(mode='OBJECT')
-
 
 	set_selection(view_layer.objects, partitioning_object, *(u.bake_object for u in color_targets))
 	# set first to active since we need an arbritary active object
@@ -242,7 +221,7 @@ def pack_uv_islands(operator, context, ht):
 
 	#Select correct UV map for targets
 	for target in color_targets:
-		set_uv_map(target.bake_object, 'UVMap')
+		set_uv_map(target.bake_object, target.bake_target.uv_map)
 
 	# deselect the blocker
 	set_uv_selection(partitioning_object, False)
@@ -252,13 +231,42 @@ def pack_uv_islands(operator, context, ht):
 
 	# TODO - assign proper atlas and uv-map
 	# EXPERIMENT
-	for target in color_targets:
-		target.bake_target.atlas = 'tinytest'
+	# for target in color_targets:
+	# 	target.bake_target.atlas = 'tinytest'
+
+
+
 
 	# TODO - handle monochrome targets
-	#create_color_blocker()
+	create_color_blocker()
+	bake_scene.uvp2_props.pack_to_others = True
+	bpy.ops.object.mode_set(mode='OBJECT')
 
 
+	set_selection(view_layer.objects, partitioning_object, *(u.bake_object for u in monochrome_targets))
+	# set first to active since we need an arbritary active object
+	set_active(view_layer.objects, monochrome_targets[0].bake_object)
+
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_all(action='SELECT')	#Select faces in model editor
+	bpy.ops.uv.select_all(action='SELECT')		#Select UVs in UV editor
+
+	#Select correct UV map for targets
+	for target in color_targets:
+		set_uv_map(target.bake_object, target.bake_target.uv_map)
+
+
+	# deselect the blocker
+	set_uv_selection(partitioning_object, False)
+
+	# Perform packing
+	bpy.ops.uvpackmaster2.uv_pack()
+
+
+
+
+	bpy.ops.object.mode_set(mode='OBJECT')
+	clear_selection(view_layer.objects)
 
 
 
@@ -269,7 +277,6 @@ def copy_object(source_obj, name):
 	return new_object
 
 def update_bake_scene(operator, context, ht):
-
 	work_scene, bake_scene = get_work_scene(context), get_bake_scene(context)
 
 	#DECISION - should we clear the bake scene each update?
@@ -277,14 +284,10 @@ def update_bake_scene(operator, context, ht):
 	for obj in bake_scene.collection.objects:
 		bpy.data.meshes.remove(obj.data, do_unlink=True)
 
+	#todo note 1
 	for bake_target in ht.bake_target_collection:
-
 		mirror, mt = bake_target.get_mirror_type(ht)
-		if mt is constants.MIRROR_TYPE.PRIMARY:
-			pass
-		elif mt is constants.MIRROR_TYPE.SECONDARY:
-			continue
-		else:
+		if mt is constants.MIRROR_TYPE.SECONDARY:
 			continue
 
 		source_obj = bake_target.require_object()
@@ -317,8 +320,7 @@ def update_bake_scene(operator, context, ht):
 
 
 def create_bake_targets_from_shapekeys(operator, context, ht):
-	#BUG - User may create multiple bake targets
-	#CLARIFY - how?
+	#BUG - User may create multiple bake targets by calling this over and over
 
 	if source := bpy.data.objects.get(ht.source_object):
 		shape_keys = source.data.shape_keys.key_blocks
@@ -337,7 +339,7 @@ def create_bake_targets_from_shapekeys(operator, context, ht):
 		for sk in shape_keys:
 			key = sk.name
 			targets[key] = intermediate.pending.bake_target(
-				name = f'bake_{ht.source_object}_{key}',
+				name = f'{ht.source_object}_{key}',
 				object_name = ht.source_object,
 				shape_key_name = key,
 				uv_mode = 'UV_IM_MONOCHROME',
@@ -407,6 +409,25 @@ class bake_targets:
 	def remove(operator, context, ht):
 		generic_list.remove(ht.bake_target_collection, a_get(ht, 'selected_bake_target'), a_set(ht, 'selected_bake_target'))
 
+	def edit_selected(operator, context, ht):
+		bake_target = ht.get_selected_bake_target()
+		if not bake_target:
+			return
+
+		bto = bake_target.get_object()
+		if not bto:
+			return
+
+		work_scene = get_work_scene(context)
+		set_scene(context, work_scene)
+		view_layer = context.view_layer
+		set_selection(view_layer.objects, bto)
+		if bake_target.shape_key_name:
+			bto.active_shape_key_index = bto.data.shape_keys.key_blocks.find(bake_target.shape_key_name) #tech-note 4
+
+		bpy.ops.object.mode_set(mode='EDIT')
+
+
 class bake_variants:
 
 	def add(operator, context, ht):
@@ -417,6 +438,60 @@ class bake_variants:
 		if bake_target := ht.get_selected_bake_target():
 			generic_list.remove(bake_target.variant_collection, a_get(bake_target, 'selected_variant'), a_set(bake_target, 'selected_variant'))
 
+
+def generic_switch_to_material(context, ht, material_type):
+	bake_scene = get_bake_scene(context)
+	#todo note 1
+	for bt in ht.bake_target_collection:
+		mirror, mt = bt.get_mirror_type(ht)
+		if mt is MIRROR_TYPE.SECONDARY:
+			continue
+
+		atlas = bt.get_atlas()
+		uv_map = bt.uv_map
+
+		if atlas and uv_map:
+			variant_materials = get_material_variants(bt, bake_scene, atlas, uv_map)
+
+			for variant_name, variant in bt.iter_bake_scene_variants():
+				target = require_named_entry(bake_scene.objects, variant_name)
+				materials = variant_materials[variant_name]
+				# set active material
+				target.active_material = bpy.data.materials[getattr(materials, material_type)]
+		else:
+			log.warning(f'{bt.identifier} lacks atlas or uv_map')
+
+
+def transfer_variant(source, dest):
+	dest.name = source.name
+	dest.image = source.image
+	dest.uv_map = source.uv_map
+
+def copy_collection(source, dest, transfer):
+	while len(dest):
+		dest.remove(0)
+
+	for item in source:
+		transfer(item, dest.add())
+
+def synchronize_mirrors(operator, context, ht):
+	for mirror in ht.bake_target_mirror_collection:
+		primary = ht.get_bake_target_by_identifier(mirror.primary)
+		secondary = ht.get_bake_target_by_identifier(mirror.secondary)
+		if primary and secondary:
+			secondary.uv_area_weight = primary.uv_area_weight
+			secondary.uv_mode = primary.uv_mode
+			secondary.atlas = primary.atlas
+			secondary.uv_map = primary.uv_map
+			secondary.multi_variants = primary.multi_variants
+			copy_collection(primary.variant_collection, secondary.variant_collection, transfer_variant)
+			secondary.selected_variant = primary.selected_variant
+
+def switch_to_bake_material(operator, context, ht):
+	generic_switch_to_material(context, ht, 'bake')
+
+def switch_to_preview_material(operator, context, ht):
+	generic_switch_to_material(context, ht, 'preview')
 
 class devtools:
 	def get_node_links(operator, context, ht):

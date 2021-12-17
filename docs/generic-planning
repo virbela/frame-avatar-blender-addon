@@ -27,10 +27,6 @@ Eric via email 2021-12-04
 
 
 
-#TODO
-    We should make sure no dots are in names since we use dots as separators for ROOT_OBJECT.SHAPE_KEY.VARIANT or ROOT_OBJECT.VARIANT if no shape keys are there
-
-
 References:
 
     Text wrapping in panels

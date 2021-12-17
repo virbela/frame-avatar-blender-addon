@@ -24,3 +24,11 @@ Note: Technical detail note may sometimes be called tech-note
 		Object **objects = BKE_view_layer_array_from_objects_in_edit_mode_unique_data_with_uvs
 
 	This means we probably need to make sure we are in the proper context rather than attempting context override
+
+3	UV Layer
+
+	When we are performing packing or other operations on the UV layer it is important that the correct layer is active.
+
+4	Index from name
+
+	 bpy_prop_collection defines a find method for getting the numerical ID

@@ -1,0 +1,34 @@
+These todo notes have numbers that are referenced in the source code as "todo note N".
+The purpose of this is to allow for more elaborate descriptions that are needed in multiple places.
+
+Non numbered items
+
+    * We should make sure no dots are in names since we use dots as separators for ROOT_OBJECT.SHAPE_KEY.VARIANT or ROOT_OBJECT.VARIANT if no shape keys are there
+
+    * We should have convenience functions for manipulating collections based on name
+
+        set_active(bto.data.shape_keys.key_blocks, bto.data.shape_keys.key_blocks[bake_target.shape_key_name])
+          ↓
+        set_active_name(bto.data.shape_keys.key_blocks, bake_target.shape_key_name)
+
+    * maybe have buttons for selecting all UV islands of color or gray
+
+   	* make sure we select proper UV maps when baking
+
+   		Now this is set up when packing but it is easy to change it by mistake by clicking in the UV layer list of the object.
+
+
+Numbered items
+
+1	Iterate through valid bake targets
+
+	If a bake target is mirrored and also is the secondary part of a mirror we should skip it in this iteration.
+	This happens in multiple places and a generalized form should be made instead.
+
+	Example of current typical implementation
+	-----------------------------------------
+
+		for bt in ht.bake_target_collection:
+			mirror, mt = bt.get_mirror_type(ht)
+			if mt is MIRROR_TYPE.SECONDARY:
+				continue

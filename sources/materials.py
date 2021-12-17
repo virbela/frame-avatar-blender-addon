@@ -1,54 +1,57 @@
+import bpy
 from .node_utils import load_node_setup_function
+from .helpers import create_named_entry, require_named_entry, get_nice_name
+from .operators import operations
+from .structures import intermediate
+
+def get_material_variants(bt, bake_scene, atlas, uv_map, recreate=False):
+
+	# Setup materials here
+	#TODO - we should handle the case of not using variants
+	#NOTE - Here we create the materials
+	#TODO - this is just for testing!!
+	#TODO - make sure we even have a variant since not all targets have those
+	result = dict()	#NOTE - this cache should not reside here of course but we use it in this test - it should be in a module but should not be a saved state.
+	for variant_name, variant in bt.iter_bake_scene_variants():
+		target = require_named_entry(bake_scene.objects, variant_name)
+
+		if variant.image:
+			paint_image = bpy.data.images[variant.image]	#TODO - make sure this image exists
+			paint_uv = variant.uv_map
+
+			# we are hitting the 63 char limit here and therefore we use get_nice_name
+			bake_material_name = get_nice_name(result, f'bake-{bt.shortname}-{variant.name}', 32)
+			preview_material_name = get_nice_name(result, f'preview-{bt.shortname}-{variant.name}', 32)
+
+			bake_material = create_named_entry(bpy.data.materials, bake_material_name, recreate=recreate, ignore_existing=True)
+			bake_material.use_nodes = True	#contribution note 9
+			setup_bake_material(bake_material.node_tree, atlas, uv_map, paint_image, paint_uv)
+
+			preview_material = create_named_entry(bpy.data.materials, preview_material_name, recreate=recreate, ignore_existing=True)
+			preview_material.use_nodes = True	#contribution note 9
+			setup_bake_preview_material(preview_material.node_tree, atlas, uv_map)
+
+
+		else:
+			raise Exception('not implemented')	#TODO - implement
+
+		#store what material we are using
+		result[variant_name] = intermediate.pending.materials(
+			bake = bake_material_name,
+			preview = preview_material_name,
+		)
+
+	return result
 
 
 
 #TO-DOC		How this works is not yet documented, it is an experimental feature meant to make it much easier to define materials programatically for use in automation
 # Brief documentation has been create in docs/node-dsl
 
+
 setup_bake_material = load_node_setup_function('setup_bake_material', '''
 
-	#This function signature as ammended to the (_tree) signature that this function will get
-	arguments: atlas, uv_map='UVMap'
-
-	#Define nodes
-	ShaderNodeTexImage 				img				baking_image
-	ShaderNodeUVMap					uv				baking_uv
-
-	ShaderNodeBsdfPrincipled		ao_p			baking_ao_p
-	ShaderNodeAmbientOcclusion		ao				baking_ao
-	ShaderNodeOutputMaterial		out				baking_out
-
-
-	#Setup node locations (just to prevent them from forming a heap)
-	ao.location = (-450, 40)
-	ao_p.location = (-200, 40)
-	out.location = (100, 40)
-	img.location = (0, 700)
-	uv.location = (-200, 500)
-
-	#Setup node settings
-	img.image = atlas
-	uv.uv_map = uv_map
-
-	#Make connections
-	uv.UV --> img.Vector
-	ao.Color --> ao_p.Base-Color
-	ao_p.BSDF --> out.Surface
-
-	#Set img node to be the active one
-	set_selection(img)	#TBD Do we need selection or only active?
-	set_active(img)
-
-''')
-
-
-
-
-
-
-setup_bake_material2 = load_node_setup_function('setup_bake_material', '''
-
-	arguments: atlas, uv_map='UVMap', diffuse_image=None, diffuse_uv_map='Diffuse'
+	arguments: atlas, uv_map='UVMap', diffuse_image=None, diffuse_uv_map=None
 
 	#Node definitions
 	ShaderNodeUVMap				uvm_target
@@ -75,7 +78,7 @@ setup_bake_material2 = load_node_setup_function('setup_bake_material', '''
 
 
 	#For diffuse source
-	if diffuse_image:
+	if diffuse_image and diffuse_uv_map:
 
 		ShaderNodeUVMap				uvm_diffuse
 		ShaderNodeTexImage			tex_diffuse
@@ -89,11 +92,39 @@ setup_bake_material2 = load_node_setup_function('setup_bake_material', '''
 		tex_diffuse.image = diffuse_image
 		uvm_diffuse.uv_map = diffuse_uv_map
 
+	clear_selection()
 	set_active(tex_target)
 
 
 ''')
 
+
+setup_bake_preview_material = load_node_setup_function('setup_bake_preview_material', '''
+
+	arguments: atlas, uv_map='UVMap'
+
+	#Node definitions
+	ShaderNodeUVMap				uvm_target
+	ShaderNodeOutputMaterial	out
+	ShaderNodeTexImage			tex_target
+
+	#Node locations
+	uvm_target.location = 		(-1130, 171)
+	out.location = 				(95, 37)
+	tex_target.location = 		(-873, 301)
+
+	#Node links
+	uvm_target.UV 		--> 	tex_target.Vector
+	tex_target.Color	--> 	out.Surface
+
+	#Settings
+	tex_target.image = atlas
+	uvm_target.uv_map = uv_map
+
+	clear_selection()
+	clear_active()
+
+''')
 
 
 

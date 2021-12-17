@@ -51,9 +51,19 @@ class FRAME_PT_workflow(frame_panel):
 			helpers = self.layout.box()
 			helpers.label(text='Extra utilities')
 			helpers.operator('frame.bake_selected')
+			helpers.operator('frame.synchronize_mirrors')
 
-			#TODO - remove this
-			helpers.operator('frame.place_holder_for_experiments')
+
+			materials = self.layout.box()
+			materials.label(text='Materials')
+			materials.operator('frame.switch_to_bake_material')
+			materials.operator('frame.switch_to_preview_material')
+
+
+			#TODO - remove or make conditional
+			debug = self.layout.box()
+			debug.label(text='Debug tools')
+			debug.operator('frame.place_holder_for_experiments')
 
 
 
@@ -105,6 +115,8 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 			bake_target_actions = self.layout.row(align=True)
 			bake_target_actions.operator('frame.add_bake_target')
 			bake_target_actions.operator('frame.remove_bake_target')
+			bake_target_actions.operator('frame.show_selected_bt')
+
 
 			#TODO - divy up this into a few functions to make it less messy
 			if HT.selected_bake_target != -1:
@@ -131,6 +143,7 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 					if et.selected_variant != -1:
 						var = et.variant_collection[et.selected_variant]
 						variants.prop_search(var, 'image', bpy.data, 'images')
+						variants.prop_search(var, 'uv_map', obj.data, 'uv_layers')
 
 
 				self.layout.prop(et, 'uv_mode')
@@ -138,15 +151,15 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 				if et.uv_mode == 'UV_IM_FROZEN':
 					self.layout.prop_search(et, 'atlas', bpy.data, 'images')
 					if obj:
-						self.layout.prop_search(et, 'uv_set', obj.data, 'uv_layers')
+						self.layout.prop_search(et, 'uv_map', obj.data, 'uv_layers')
 					else:
 						self.layout.label(text=f"UV set: (No object)'")
 				else:
 					self.layout.label(text=f"Atlas: {et.atlas or '(not assigned)'}")
-					self.layout.label(text=f"UV set: {et.uv_set or '(not assigned)'}")
+					self.layout.label(text=f"UV set: {et.uv_map or '(not assigned)'}")
 
 
-
+			#TODO - add button for synchronizing primary → secondary (where? here or utils?)
 			mirrors = self.layout.box()
 			mirrors.label(text='Mirrored bake targets')
 			mirrors.template_list('FRAME_UL_bake_target_mirrors', '', HT,  'bake_target_mirror_collection', HT, 'selected_bake_target_mirror')

@@ -89,12 +89,15 @@ def require_named_entry(collection, name):
 	else:
 		raise FrameException.NamedEntryNotFound(collection, name)
 
-def create_named_entry(collection, name, allow_rename=False, recreate=False):
+#TODO - we should use an enum mode instead of a bunch of booleans which is confusing
+def create_named_entry(collection, name, allow_rename=False, recreate=False, ignore_existing=False):
 
 	if name in collection:
 		if recreate:
 			collection.remove(collection.get(name))
 			return collection.new(name)
+		elif ignore_existing:
+			return collection.get(name)
 		elif allow_rename:
 			return collection.new(name)
 		else:
@@ -118,9 +121,15 @@ def set_selection(collection, *selected):
 		else:
 			item.select = item in new_selection
 
+# this is just to make code more readable
+def clear_selection(collection):
+	set_selection(collection)
+
 def set_active(collection, item):
 	collection.active = item
 
+def clear_active(collection):
+	collection.active = None
 
 #NOTE - was going to use https://docs.python.org/3/library/operator.html#operator.attrgetter but there is no attrsetter so we'll just define both for consistency
 class attribute_reference:
@@ -135,3 +144,14 @@ class a_get(attribute_reference):
 class a_set(attribute_reference):
 	def __call__(self, value):
 		return setattr(self.target, self.attribute, value)
+
+def get_nice_name(collection, prefix, max_prefix_length, random_hash_length=8, max_tries=1000):
+
+	for v in range(max_tries):
+		tail = f'-{v:03}' if v else ''
+		candidate = f'{prefix[:max_prefix_length]}{tail}'
+		if candidate not in collection:
+			return candidate
+
+	raise Exception('severe fail')	#TODO - proper exception
+

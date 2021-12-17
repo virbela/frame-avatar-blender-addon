@@ -37,6 +37,7 @@ UV_ISLAND_MODES = enum_descriptor(
 class BakeVariant(frame_property_group):
 	name: 					bpy.props.StringProperty(name="Variant name", default='Untitled variant')
 	image:					bpy.props.StringProperty(name="Image texture")
+	uv_map:					bpy.props.StringProperty(name="UV Map")
 
 
 class BakeTarget(frame_property_group):
@@ -57,7 +58,7 @@ class BakeTarget(frame_property_group):
 
 	atlas:					bpy.props.StringProperty(name="Atlas name")
 	# ↑ This is used for storing the automatic choice as well as the manual (frozen) one
-	uv_set:					bpy.props.StringProperty(name="UV set", default='UVMap')
+	uv_map:					bpy.props.StringProperty(name="UV map", default='UVMap')
 
 
 	#Variants
