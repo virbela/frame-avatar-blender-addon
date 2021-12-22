@@ -1,0 +1,94 @@
+Description of workflow
+
+	Define bake targets
+
+		Each bake target can have multiple variants with individual image textures and UV maps.
+		If a bake target with only one variant needs painting, that variant still needs to be defined.
+
+		Bake targets that are mirrorable can also be defined and in that case, only the primary target
+		will be baked and the secondary target will have its UV coordinates mirrored (we may need to select U or V axis here).
+
+		Here we can also define bake groups which are targets that should be baked together.
+
+	Create work meshes (for all bake targets or the specific selected one)
+
+		Bake targets are used to define work meshes in the Baking scene.
+		Here the artist can define their own seams and their own UV unwrap to ensure high fidelity.
+		If the target already exists, only the vertex coordinates are synchronized so that
+		seams and such are kept. A check is done that topology is matching.
+		The artist must not change the topology, if they do, we will log an error upon validating.
+
+		The artist can also adjust normals here which is important for the ambient occlusion.
+
+
+	Create work materials
+
+		Material for baking / painting
+		Material for preview
+
+		Materials can be synchronized from the bake targets if they need to be updated.
+
+
+	Perform baking
+
+		Data validation is first run to ensure everything is ok.
+		If things are ok we start baking all the targets.
+
+
+
+Workflow panel
+
+	Bake targets
+		Validate targets			frame.validate_targets
+
+	Texture atlas
+		Auto assign atlas			frame.auto_assign_atlas
+		Pack UV islands				frame.pack_uv_islands
+
+	Work meshes
+		Update selected				frame.update_selected_workmesh
+		Update all					frame.update_all_workmeshes
+
+	Work materials
+		Update selected				frame.update_selected_material
+		Update all					frame.update_all_materials
+		Switch to baking			frame.switch_to_bake_material
+		Switch to preview			frame.switch_to_preview_material
+
+	Baking
+		Bake selected				frame.bake_selected
+		Bake all					frame.bake_all
+
+
+
+
+↓↓ older notes ↓↓
+
+Initially there is a source scene.
+In this scene we have some objects, some of them may have shapekeys.
+Some shapekeys may be named in a specific way to indicate certain settings in the bake target list.
+
+The bake target list is the main repository that decides what we should bake and how it should be exported in the glb.
+
+
+An artist will define the bake targets based on technical requirements.
+Once those bake targets have been defined we can create representations of them in a new scene.
+At this point we will also create materials for baking and previewing.
+
+These materials can be updated if we decide to add a handpainted texture to something.
+But this will just be a helper that creates a default texture for the artist.
+They could create the texture themselves and link it when setting up the bake target, such as when we
+use the already drawn eyes for instance.
+
+If a bake target is a mirror, then only the primary target is created.
+Here we have a potential problem in case we say that something should not be a mirror anymore, then we need to create the other part of it.
+We could also have not had a mirror and then opted to have a mirror.
+To properly address this we need to know the current state and the wanted state. Here is a potential problem also in that
+we could lose information such as carefully done UV-unwraps or similar.
+
+
+
+In this new scene we are free to manipulate the UVs of those bake targets, such as marking seams, doing unwraps, projections etc.
+
+
+We also need the tools to help with the normals.

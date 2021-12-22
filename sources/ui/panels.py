@@ -37,33 +37,64 @@ class FRAME_PT_workflow(frame_panel):
 		if scene := get_work_scene(context):
 			HT = scene.homeomorphictools
 
+			introduction = self.layout.box()
+			introduction.label(text='Introduction')
 			#TODO - this should point to our documentation for the workflow. This could point to a document that requires the artist to be logged in to that web service (like google docs as an example).
 			#We may not want links that anyone can access since the workflow should be considered proprietary
-			op = self.layout.operator('wm.url_open', text='Help')
-			op.url = 'http://example.org/'
-
-			self.layout.operator('frame.auto_assign_atlas')
-
-			self.layout.operator('frame.pack_uv_islands')
-			self.layout.operator('frame.update_baking_scene')
-			self.layout.operator('frame.bake_all')
-
-			helpers = self.layout.box()
-			helpers.label(text='Extra utilities')
-			helpers.operator('frame.bake_selected')
-			helpers.operator('frame.synchronize_mirrors')
+			get_help = introduction.operator('wm.url_open', text='Help')
+			get_help.url = 'http://example.org/'
+			introduction.operator('frame.setup_bake_scene')
 
 
-			materials = self.layout.box()
-			materials.label(text='Materials')
-			materials.operator('frame.switch_to_bake_material')
-			materials.operator('frame.switch_to_preview_material')
+			atlas_setup = self.layout.box()
+			atlas_setup.label(text='Texture atlas')
+			atlas_setup.operator('frame.auto_assign_atlas')
+			atlas_setup.operator('frame.pack_uv_islands')
+
+			bake_targets = self.layout.box()
+			bake_targets.label(text='Bake targets')
+			bake_targets.operator('frame.validate_targets')
+
+			work_meshes = self.layout.box()
+			work_meshes.label(text='Work meshes')
+			work_meshes.operator('frame.update_selected_workmesh')
+			work_meshes.operator('frame.update_all_workmeshes')
+
+			work_materials = self.layout.box()
+			work_materials.label(text='Work materials')
+			work_materials.operator('frame.update_selected_material')
+			work_materials.operator('frame.update_all_materials')
+			work_materials.operator('frame.switch_to_bake_material')
+			work_materials.operator('frame.switch_to_preview_material')
+
+			baking = self.layout.box()
+			baking.label(text='Baking')
+			baking.operator('frame.bake_selected')
+			baking.operator('frame.bake_all')
+
+			#TODO - clean this up!
+
+			# self.layout.operator('frame.auto_assign_atlas')
+			# self.layout.operator('frame.pack_uv_islands')
+			# self.layout.operator('frame.update_baking_scene')
+			# self.layout.operator('frame.bake_all')
+
+			# helpers = self.layout.box()
+			# helpers.label(text='Extra utilities')
+			# helpers.operator('frame.bake_selected')
+			# helpers.operator('frame.synchronize_mirrors')
 
 
-			#TODO - remove or make conditional
-			debug = self.layout.box()
-			debug.label(text='Debug tools')
-			debug.operator('frame.place_holder_for_experiments')
+			# materials = self.layout.box()
+			# materials.label(text='Materials')
+			# materials.operator('frame.switch_to_bake_material')
+			# materials.operator('frame.switch_to_preview_material')
+
+
+			# #TODO - remove or make conditional
+			# debug = self.layout.box()
+			# debug.label(text='Debug tools')
+			# debug.operator('frame.place_holder_for_experiments')
 
 
 
@@ -151,12 +182,15 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 				if et.uv_mode == 'UV_IM_FROZEN':
 					self.layout.prop_search(et, 'atlas', bpy.data, 'images')
 					if obj:
-						self.layout.prop_search(et, 'uv_map', obj.data, 'uv_layers')
+						#self.layout.prop_search(et, 'uv_map', obj.data, 'uv_layers')
+						self.layout.prop(et, 'uv_target_channel')
 					else:
-						self.layout.label(text=f"UV set: (No object)'")
+						self.layout.label(text=f"UV set: (No object)")
 				else:
 					self.layout.label(text=f"Atlas: {et.atlas or '(not assigned)'}")
-					self.layout.label(text=f"UV set: {et.uv_map or '(not assigned)'}")
+					#self.layout.label(text=f"UV set: {et.uv_map or '(not assigned)'}")
+					self.layout.label(text=f"UV target: {et.uv_target_channel}")
+
 
 
 			#TODO - add button for synchronizing primary → secondary (where? here or utils?)

@@ -2,6 +2,42 @@ from .base import frame_operator
 from ..logging import log_writer as log
 from . import operations
 
+class FRAME_OT_setup_bake_scene(frame_operator):
+	bl_label = 			"First time setup"
+	bl_idname = 		"frame.setup_bake_scene"
+	bl_description = 	"Create bake scene and "
+	frame_operator = 	operations.setup_bake_scene
+
+
+class FRAME_OT_validate_targets(frame_operator):
+	bl_label = 			"Validate bake targets"
+	bl_idname = 		"frame.validate_targets"
+	#TODO - bl_description
+	frame_operator = 	operations.validate_targets
+
+class FRAME_OT_update_selected_workmesh(frame_operator):
+	bl_label = 			"Update selected work mesh"
+	bl_idname = 		"frame.update_selected_workmesh"
+	#TODO - bl_description
+	frame_operator = 	operations.update_selected_workmesh
+
+class FRAME_OT_update_all_workmeshes(frame_operator):
+	bl_label = 			"Update all work meshes"
+	bl_idname = 		"frame.update_all_workmeshes"
+	#TODO - bl_description
+	frame_operator = 	operations.update_all_workmeshes
+
+class FRAME_OT_update_selected_material(frame_operator):
+	bl_label = 			"Update selected material"
+	bl_idname = 		"frame.update_selected_material"
+	#TODO - bl_description
+	frame_operator = 	operations.update_selected_material
+
+class FRAME_OT_update_all_materials(frame_operator):
+	bl_label = 			"Update all materials"
+	bl_idname = 		"frame.update_all_materials"
+	#TODO - bl_description
+	frame_operator = 	operations.update_all_materials
 
 class FRAME_OT_auto_assign_atlas(frame_operator):
 	bl_label = 			"Auto assign atlas/UV"
@@ -9,6 +45,7 @@ class FRAME_OT_auto_assign_atlas(frame_operator):
 	bl_description = 	"Go through the bake targets and assign atlas texture and UV layer for all non frozen bake targets."
 	frame_operator = 	operations.auto_assign_atlas
 
+#TBD - should we have this one?
 class FRAME_OT_update_baking_scene(frame_operator):
 	bl_label = 			"Update baking scene"
 	bl_idname = 		"frame.update_baking_scene"
@@ -97,15 +134,14 @@ class FRAME_OT_remove_bake_target_variant(frame_operator):
 	bl_idname = 		'frame.remove_bake_target_variant'
 	frame_operator = 	operations.bake_variants.remove
 
-
 class FRAME_OT_switch_to_bake_material(frame_operator):
-	bl_label =			"Bake material"
+	bl_label =			"Show bake/paint material"
 	bl_description = 	'Switch all bake objects to use the bake material'
 	bl_idname = 		'frame.switch_to_bake_material'
 	frame_operator = 	operations.switch_to_bake_material
 
 class FRAME_OT_switch_to_preview_material(frame_operator):
-	bl_label =			"Preview material"
+	bl_label =			"Show preview material"
 	bl_description = 	'Switch all bake objects to use the preview material'
 	bl_idname = 		'frame.switch_to_preview_material'
 	frame_operator = 	operations.switch_to_preview_material

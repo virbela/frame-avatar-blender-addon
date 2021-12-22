@@ -8,6 +8,13 @@ import bpy, bmesh
 import textwrap
 
 
+#TODO - fix this!
+validate_targets = IMPLEMENTATION_PENDING
+update_selected_workmesh = IMPLEMENTATION_PENDING
+update_all_workmeshes = IMPLEMENTATION_PENDING
+update_selected_material = IMPLEMENTATION_PENDING
+update_all_materials = IMPLEMENTATION_PENDING
+setup_bake_scene = IMPLEMENTATION_PENDING
 #TODO - implement proper version of commented-out code blocks in this module
 #MINOR-TODO - We could still improve list handling but for the moment it is good enough to strike a balance between maintainability and development
 

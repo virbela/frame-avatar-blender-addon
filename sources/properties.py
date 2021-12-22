@@ -9,8 +9,6 @@ from .constants import MIRROR_TYPE
 
 UV_ISLAND_MODES = enum_descriptor(
 
-	#Icons: https://blenderartists.org/uploads/default/original/4X/7/a/6/7a6b22e5e0fa4d2108dddc58c84c8b3d5e36e0ee.png
-
 	#Tuple layout - see https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
 	#(identifier, 			name, 				description,
 	#	icon, 				number),
@@ -31,6 +29,31 @@ UV_ISLAND_MODES = enum_descriptor(
 		'FREEZE',			3),
 )
 
+
+UV_TARGET_CHANNEL = enum_descriptor(
+
+	#Tuple layout - see https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
+	#(identifier, 			name, 				description,
+	#	icon, 				number),
+
+	#NOTE - Suspecting the number is not needed, also since we use our own object to represent these values we could have the long column last and get a more
+	#compact and nice table.
+
+	('UV_TARGET_NIL',		'Unassigned',			'UV island has not yet been assigned an atlas channel',
+		'DOT',				0),
+
+	('UV_TARGET_COLOR',		'Color channel',		'UV island will be placed in the color channel',
+		'COLOR',			1),
+
+	('UV_TARGET_R',			'Red channel',			'UV island will be placed in the red channel',
+		'EVENT_R',			2),
+
+	('UV_TARGET_G',			'Green channel',		'UV island will be placed in the green channel',
+		'EVENT_G',			3),
+
+	('UV_TARGET_B',			'Blue channel',			'UV island will be placed in the blue channel',
+		'EVENT_B',			4),
+)
 
 
 
@@ -53,12 +76,14 @@ class BakeTarget(frame_property_group):
 
 	uv_area_weight: 		bpy.props.FloatProperty(name="UV island area weight", default=1.0)
 
-
 	uv_mode:				bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
 
 	atlas:					bpy.props.StringProperty(name="Atlas name")
 	# ↑ This is used for storing the automatic choice as well as the manual (frozen) one
-	uv_map:					bpy.props.StringProperty(name="UV map", default='UVMap')
+
+	#TBD - use this?
+	#uv_map:					bpy.props.StringProperty(name="UV map", default='UVMap')
+	uv_target_channel:		bpy.props.EnumProperty(items=tuple(UV_TARGET_CHANNEL), name="UV target channel", default=0)
 
 
 	#Variants
