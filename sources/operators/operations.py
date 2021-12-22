@@ -301,7 +301,9 @@ def update_bake_scene(operator, context, ht):
 
 			elif variant in bpy.data.objects:
 				#Object is not in bake scene but it does exist, this is a serious issue
-				raise Exception('FAIL') #TODO - proper exception
+				raise Exception(f'Object {variant} already existing') #TODO - proper exception
+				#NOTE - this can happen if there is orphaned objects, like if the scene is deleted but not the objects
+				#TBD - how should we deal with this situation? Delete conflicting objects? warn user? Instruct user how to resolve situation?
 
 			else:
 				#Object is not in bake scene, let's put it there

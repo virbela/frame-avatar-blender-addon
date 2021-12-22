@@ -30,9 +30,17 @@ list-actions-short:
 	$(QUIET_MODE) grep -Prn '#[A-Z-]+:?\W' sources/ --include='*.py' --color=always
 	$(QUIET_MODE) grep -Prn '#[A-Z-]+:?\W' docs/ --exclude='*.svg' --color=always
 
+#Note that this is unlikely to work on windows but at some point we could look into fixing that
+#There is both problems with how we deal with paths and that windows have a different way of making symlinks that require special ntfs tools (could be wrong on this, was a while)
+install-development-version:
+	$(QUIET_MODE) rm -f .addon_path
+	$(QUIET_MODE) blender --background --python scripts/get_addon_path.py -- .addon_path
+	$(QUIET_MODE) mkdir -p "$(shell cat .addon_path)"
+	$(QUIET_MODE) ln -fs "$(shell pwd)/sources" "$(shell cat .addon_path)/$(module_name)"
+
 clean:
 	rm -f distribution/*
 
 
-.PHONY: clean vector_test addon_test list-actions list-actions-short
+.PHONY: clean vector_test addon_test list-actions list-actions-short install-development-version
 .IGNORE: list-actions list-actions-short

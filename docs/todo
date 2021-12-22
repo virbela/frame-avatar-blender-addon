@@ -17,6 +17,8 @@ Non numbered items
 
    		Now this is set up when packing but it is easy to change it by mistake by clicking in the UV layer list of the object.
 
+   	* have a look at https://docs.blender.org/api/current/bpy.app.handlers.html
+
 
 Numbered items
 
@@ -32,3 +34,4 @@ Numbered items
 			mirror, mt = bt.get_mirror_type(ht)
 			if mt is MIRROR_TYPE.SECONDARY:
 				continue
+

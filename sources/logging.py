@@ -59,8 +59,9 @@ class log_instance(log_base):
 		#TODO - here it would be nice to make sure that the text object is visible in the text pane but have not figured out how to do that yet
 
 		t = time.strftime('%X', message.timestamp)
-		text.write(f'{t} {message.log_level.name}: {message.message}\n')
-
+		line = f'{t} {message.log_level.name}: {message.message}'
+		text.write(f'{line}\n')
+		print(line)	#TODO - make this optional
 		#TODO - make sure things scroll down
 
 		self.history.append(message)
