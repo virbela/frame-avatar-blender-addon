@@ -1,6 +1,7 @@
 import bpy
 from .helpers import enum_descriptor, frame_property_group, get_named_entry, require_named_entry, get_bake_scene
 from .constants import MIRROR_TYPE
+from .exceptions import InternalError
 
 #Important notes
 #	Regarding descriptions of properties, please see contribution note 1
@@ -27,6 +28,60 @@ UV_ISLAND_MODES = enum_descriptor(
 
 	('UV_IM_FROZEN',		'Frozen',			'This UV island will not be modified by the packer',
 		'FREEZE',			3),
+)
+
+
+UV_MIRROR_AXIS = enum_descriptor(
+
+	#Tuple layout - see https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
+	#(identifier, 			name, 				description,
+	#	icon, 				number),
+
+	#NOTE - Suspecting the number is not needed, also since we use our own object to represent these values we could have the long column last and get a more
+	#compact and nice table.
+
+	('UV_MA_U',				'U',				'U (X) Axis',
+		'EVENT_U',			0),
+
+	('UV_MA_V',				'V',				'V (Y) Axis',
+		'EVENT_V',			1),
+
+)
+
+
+# GEOMETRY_MIRROR_AXIS = enum_descriptor(		#MAYBE-LATER
+
+# 	#Tuple layout - see https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
+# 	#(identifier, 			name, 				description,
+# 	#	icon, 				number),
+
+# 	#NOTE - Suspecting the number is not needed, also since we use our own object to represent these values we could have the long column last and get a more
+# 	#compact and nice table.
+
+# 	('GEOM_MA_X',			'X',				'X Axis',
+# 		'EVENT_X',			0),
+
+# 	('GEOM_MA_Y',			'Y',				'Y Axis',
+# 		'EVENT_Y',			1),
+
+# 	('GEOM_MA_Z',			'Z',				'Z Axis',
+# 		'EVENT_Z',			2),
+# )
+
+UV_BAKE_MODE = enum_descriptor(
+
+	#Tuple layout - see https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
+	#(identifier, 			name, 				description,
+	#	icon, 				number),
+
+	#NOTE - Suspecting the number is not needed, also since we use our own object to represent these values we could have the long column last and get a more
+	#compact and nice table.
+
+	('UV_BM_REGULAR',		'Regular',			'This is a regular, non mirrored, bake target',
+		'OBJECT_DATA',		0),
+
+	('UV_BM_MIRRORED',		'Mirrored',			'This bake target will be mirrored upon another target along the U axis',
+		'MOD_MIRROR',		1),
 )
 
 
@@ -72,9 +127,17 @@ class BakeTarget(frame_property_group):
 		description = 			"The object that is used for this bake target.\n"
 								"Once selected it is possible to select a specific shape key",
 	)
+
 	shape_key_name: 		bpy.props.StringProperty(name="Shape key")
 
 	uv_area_weight: 		bpy.props.FloatProperty(name="UV island area weight", default=1.0)
+
+	bake_mode:				bpy.props.EnumProperty(items=tuple(UV_BAKE_MODE), name="UV bake mode", default=0)
+
+	uv_mirror_axis:			bpy.props.EnumProperty(items=tuple(UV_MIRROR_AXIS), name="UV mirror axis", default=0)
+
+
+	#geom_mirror_axis:		bpy.props.EnumProperty(items=tuple(GEOMETRY_MIRROR_AXIS), name="Geometry mirror axis", default=0)		#MAYBE-LATER
 
 	uv_mode:				bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
 

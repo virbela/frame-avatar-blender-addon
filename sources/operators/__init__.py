@@ -2,10 +2,30 @@ from .base import frame_operator
 from ..logging import log_writer as log
 from . import operations
 
+
+class FRAME_OT_new_workmesh_from_selected(frame_operator):
+	bl_label = 			"New from selected"
+	bl_idname = 		"frame.new_workmesh_from_selected"
+	#TODO - bl_description
+	frame_operator = 	operations.new_workmesh_from_selected
+
+class FRAME_OT_update_selected_workmesh_all_shapekeys(frame_operator):
+	bl_label = 			"Update selected"
+	bl_idname = 		"frame.update_selected_workmesh_all_shapekeys"
+	#TODO - bl_description
+	frame_operator = 	operations.update_selected_workmesh_all_shapekeys
+
+class FRAME_OT_update_selected_workmesh_active_shapekey(frame_operator):
+	bl_label = 			"Update active shapekey"
+	bl_idname = 		"frame.update_selected_workmesh_active_shapekey"
+	#TODO - bl_description
+	frame_operator = 	operations.update_selected_workmesh_active_shapekey
+
+
 class FRAME_OT_setup_bake_scene(frame_operator):
 	bl_label = 			"First time setup"
 	bl_idname = 		"frame.setup_bake_scene"
-	bl_description = 	"Create bake scene and "
+	bl_description = 	"Create bake scene"
 	frame_operator = 	operations.setup_bake_scene
 
 
@@ -177,6 +197,7 @@ class FRAME_OT_experiments(frame_operator):
 		from ..helpers import create_named_entry, set_selection, set_active, get_bake_scene, require_named_entry, set_scene
 		import bpy
 		from ..constants import MIRROR_TYPE
+
 
 
 		mirror, mt = bt.get_mirror_type(ht)

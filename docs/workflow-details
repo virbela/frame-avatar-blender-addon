@@ -1,3 +1,89 @@
+
+Note
+	The # tag IMPLEMENTATION-DETAIL is meant to mark out features that need to be implemented.
+	When those features are implemented, remove this tag.
+
+
+Description of workflow
+
+	* Select one or more objects in the source scene
+
+	* Use the "create work meshes from source object" function
+		#IMPLEMENTATION-DETAIL
+
+		This will create one mesh for each shape key in the object if it has shape keys.
+		If the object uses any of the naming scheme we will create bake targets connected to these objects
+		with the settings derived from the naming scheme.
+
+		Background:
+
+			First the plan was to create bake targets that refer to an object with a specific shape key.
+			Later it was realized that this had a problem in that UV-maps and other mesh specific data gets shared
+			between all shape keys. The reason we use shapekeys in the first place is so that we can use the same
+			topology for all the exported meshes for efficient drawing in the Frame application.
+
+			#IMPLEMENTATION-DETAIL
+			We can still have this requirement in that we keep a reference to the source object in the bake target.
+			But we also have the workmesh which will be where we can define specific UV maps that suits specific objects.
+
+			#IMPLEMENTATION-DETAIL
+			We will check that the topology matches as part of the data validation prodcedure
+
+	* Go through bake targets
+
+		Remove ones that are not relevant (remember to remove their meshes as well)
+		#IMPLEMENTATION-DETAIL
+		We could have a button for this
+
+		Create UV-maps and textures (including hand painting textures)
+		We will have buttons to help with this 		#IMPLEMENTATION-DETAIL
+
+		Define bake mirrors
+
+		Define bake groups		#IMPLEMENTATION-DETAIL
+
+	* Create work materials
+
+		This is materials for baking/painting and for previewing the atlas
+		Note that we must make shaders for channel unpacking here #IMPLEMENTATION-DETAIL
+
+
+
+Workflow panel
+
+	Work meshes
+		New from selected			frame.new_workmesh_from_selected
+		Update selected				frame.update_selected_workmesh_all_shapekeys
+		Update active shapekey		frame.update_selected_workmesh_active_shapekey
+
+	Bake targets
+		Validate targets			frame.validate_targets
+
+	Texture atlas
+		Auto assign atlas			frame.auto_assign_atlas
+		Pack UV islands				frame.pack_uv_islands
+
+	Work materials
+		Update selected				frame.update_selected_material
+		Update all					frame.update_all_materials
+		Switch to baking			frame.switch_to_bake_material
+		Switch to preview			frame.switch_to_preview_material
+
+	Baking
+		Bake selected				frame.bake_selected
+		Bake all					frame.bake_all
+
+
+
+
+
+
+
+↓↓↓ DEPRECHATED ↓↓↓↓
+
+
+
+
 Description of workflow
 
 	Define bake targets

@@ -45,20 +45,21 @@ class FRAME_PT_workflow(frame_panel):
 			get_help.url = 'http://example.org/'
 			introduction.operator('frame.setup_bake_scene')
 
+			work_meshes = self.layout.box()
+			work_meshes.label(text='Work meshes')
+			work_meshes.operator('frame.new_workmesh_from_selected')
+			work_meshes.operator('frame.update_selected_workmesh_all_shapekeys')
+			work_meshes.operator('frame.update_selected_workmesh_active_shapekey')
+
+			bake_targets = self.layout.box()
+			bake_targets.label(text='Bake targets')
+			bake_targets.operator('frame.validate_targets')
 
 			atlas_setup = self.layout.box()
 			atlas_setup.label(text='Texture atlas')
 			atlas_setup.operator('frame.auto_assign_atlas')
 			atlas_setup.operator('frame.pack_uv_islands')
 
-			bake_targets = self.layout.box()
-			bake_targets.label(text='Bake targets')
-			bake_targets.operator('frame.validate_targets')
-
-			work_meshes = self.layout.box()
-			work_meshes.label(text='Work meshes')
-			work_meshes.operator('frame.update_selected_workmesh')
-			work_meshes.operator('frame.update_all_workmeshes')
 
 			work_materials = self.layout.box()
 			work_materials.label(text='Work materials')
@@ -91,10 +92,10 @@ class FRAME_PT_workflow(frame_panel):
 			# materials.operator('frame.switch_to_preview_material')
 
 
-			# #TODO - remove or make conditional
-			# debug = self.layout.box()
-			# debug.label(text='Debug tools')
-			# debug.operator('frame.place_holder_for_experiments')
+			#TODO - remove or make conditional
+			debug = self.layout.box()
+			debug.label(text='Debug tools')
+			debug.operator('frame.place_holder_for_experiments')
 
 
 
@@ -154,9 +155,10 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 				et = HT.bake_target_collection[HT.selected_bake_target]
 				self.layout.prop_search(et, "object_name", scene, "objects")
 
-				if obj := bpy.data.objects.get(et.object_name):
-					if shape_keys := obj.data.shape_keys:
-						self.layout.prop_search(et, "shape_key_name", obj.data.shape_keys, "key_blocks")
+				#DEPRECHATED
+				# if obj := bpy.data.objects.get(et.object_name):
+				# 	if shape_keys := obj.data.shape_keys:
+				# 		self.layout.prop_search(et, "shape_key_name", obj.data.shape_keys, "key_blocks")
 
 
 				self.layout.prop(et, 'uv_area_weight')
@@ -176,6 +178,16 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 						variants.prop_search(var, 'image', bpy.data, 'images')
 						variants.prop_search(var, 'uv_map', obj.data, 'uv_layers')
 
+				self.layout.prop(et, 'bake_mode')
+
+				if et.bake_mode == 'UV_BM_REGULAR':
+					pass
+				elif et.bake_mode == 'UV_BM_MIRRORED':
+					self.layout.prop(et, 'uv_mirror_axis')
+
+					#self.layout.prop(et, 'geom_mirror_axis')		#MAYBE-LATER
+				else:
+					raise InternalError(f'et.bake_mode set to unsupported value {et.bake_mode}')
 
 				self.layout.prop(et, 'uv_mode')
 
@@ -187,29 +199,33 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 					else:
 						self.layout.label(text=f"UV set: (No object)")
 				else:
-					self.layout.label(text=f"Atlas: {et.atlas or '(not assigned)'}")
+					if atlas := bpy.data.images.get(et.atlas):
+						self.layout.label(text=f"Atlas: {atlas.name}", icon_value=atlas.preview.icon_id)
+					else:
+						self.layout.label(text=f"Atlas: (not assigned)", icon='UNLINKED')
 					#self.layout.label(text=f"UV set: {et.uv_map or '(not assigned)'}")
-					self.layout.label(text=f"UV target: {et.uv_target_channel}")
+					self.layout.label(text=f"UV target: {UV_TARGET_CHANNEL.members[et.uv_target_channel].name}", icon=UV_TARGET_CHANNEL.members[et.uv_target_channel].icon)
+
 
 
 
 			#TODO - add button for synchronizing primary → secondary (where? here or utils?)
-			mirrors = self.layout.box()
-			mirrors.label(text='Mirrored bake targets')
-			mirrors.template_list('FRAME_UL_bake_target_mirrors', '', HT,  'bake_target_mirror_collection', HT, 'selected_bake_target_mirror')
+			# mirrors = self.layout.box()
+			# mirrors.label(text='Mirrored bake targets')
+			# mirrors.template_list('FRAME_UL_bake_target_mirrors', '', HT,  'bake_target_mirror_collection', HT, 'selected_bake_target_mirror')
 
-			bake_target_actions = mirrors.row(align=True)
-			bake_target_actions.operator('frame.add_bake_target_mirror')
-			bake_target_actions.operator('frame.remove_bake_target_mirror')
+			# bake_target_actions = mirrors.row(align=True)
+			# bake_target_actions.operator('frame.add_bake_target_mirror')
+			# bake_target_actions.operator('frame.remove_bake_target_mirror')
 
-			if HT.selected_bake_target_mirror != -1:
-				tm = HT.bake_target_mirror_collection[HT.selected_bake_target_mirror]
-				row = mirrors.row()
-				row.operator('frame.set_bake_mirror_primary')
-				row.operator('frame.set_bake_mirror_secondary')
+			# if HT.selected_bake_target_mirror != -1:
+			# 	tm = HT.bake_target_mirror_collection[HT.selected_bake_target_mirror]
+			# 	row = mirrors.row()
+			# 	row.operator('frame.set_bake_mirror_primary')
+			# 	row.operator('frame.set_bake_mirror_secondary')
 
 
-			advanced = self.layout.box()
-			advanced.label(text='Create from shapekeys')
-			advanced.prop_search(HT, 'source_object', scene, 'objects')
-			advanced.operator('frame.create_bake_targets_from_shapekeys')
+			# advanced = self.layout.box()
+			# advanced.label(text='Create from shapekeys')
+			# advanced.prop_search(HT, 'source_object', scene, 'objects')
+			# advanced.operator('frame.create_bake_targets_from_shapekeys')

@@ -14,7 +14,92 @@ update_selected_workmesh = IMPLEMENTATION_PENDING
 update_all_workmeshes = IMPLEMENTATION_PENDING
 update_selected_material = IMPLEMENTATION_PENDING
 update_all_materials = IMPLEMENTATION_PENDING
-setup_bake_scene = IMPLEMENTATION_PENDING
+
+update_selected_workmesh_all_shapekeys = IMPLEMENTATION_PENDING
+update_selected_workmesh_active_shapekey = IMPLEMENTATION_PENDING
+
+
+def create_mirror(ht, primary, secondary):
+	new = ht.bake_target_mirror_collection.add()
+	new.primary = primary
+	new.secondary = secondary
+	return new
+
+
+def create_workmesh_from_key_blocks(ht, source_object, key_blocks):
+	#TODO - Here we should run our rules for the naming scheme
+
+	#Create all intermediate targets
+	targets = dict()
+	mirror_list = list()
+	for sk in key_blocks:
+		key = sk.name
+		targets[key] = intermediate.pending.bake_target(
+			name = f'{ht.source_object}_{key}',
+			object_name = ht.source_object,
+			shape_key_name = key,
+			uv_mode = 'UV_IM_MONOCHROME',
+		)
+
+
+	#Configure targets and mirrors
+	for key, target in targets.items():
+		if key.endswith('_L'):
+			base = key[:-2]
+			Rk = f'{base}_R'
+			R = targets.get(Rk)
+
+			if R:
+				mirror_list.append(intermediate.mirror(target, R))
+
+			else:
+				log.error(f"Could not create mirror for {key} since there was no such object `{Rk}´")
+
+		elif key.endswith('_R'):
+			pass
+
+		elif key.endswith('__None'):
+			target.uv_mode = 'UV_IM_NIL'
+
+
+	#Create corresponding work meshes
+	for key, target in targets.items():
+		print(key, target)
+
+
+
+	# #NOTE - there is a bug where we can only set uv_mode (or any other enum) once from the same context.
+	# #		To avoid this bug we first create dicts that represents the new bake targets and then we instanciate them below
+	# for target in targets.values():
+	# 	new = ht.bake_target_collection.add()
+	# 	for key, value in iter_dc(target):
+	# 		setattr(new, key, value)
+
+	# 	target.bake_target = new
+
+	# #Create mirrors
+	# for mirror in mirror_list:
+	# 	create_mirror(mirror.primary.bake_target.identifier, mirror.secondary.bake_target.identifier)
+
+
+
+def new_workmesh_from_selected(operator, context, ht):
+
+	for source_object in context.selected_objects:
+		if shape_keys := source_object.data.shape_keys:
+			create_workmesh_from_key_blocks(ht, source_object, shape_keys.key_blocks)
+
+		else:
+			#IMPLEMENT
+			print(source_object)
+
+
+
+
+
+def setup_bake_scene(operator, context, ht):
+	get_bake_scene(context)
+
 #TODO - implement proper version of commented-out code blocks in this module
 #MINOR-TODO - We could still improve list handling but for the moment it is good enough to strike a balance between maintainability and development
 
@@ -327,7 +412,7 @@ def update_bake_scene(operator, context, ht):
 
 
 
-
+#DEPRECHATED
 def create_bake_targets_from_shapekeys(operator, context, ht):
 	#BUG - User may create multiple bake targets by calling this over and over
 
