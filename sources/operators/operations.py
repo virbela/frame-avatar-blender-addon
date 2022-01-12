@@ -26,8 +26,9 @@ def create_mirror(ht, primary, secondary):
 	return new
 
 
-def create_workmesh_from_key_blocks(ht, source_object, key_blocks):
+def create_workmesh_from_key_blocks(ht, source_object, key_blocks, bake_scene):
 	#TODO - Here we should run our rules for the naming scheme
+	#One of these would be numbers after to indicate grouping
 
 	#Create all intermediate targets
 	targets = dict()
@@ -35,8 +36,8 @@ def create_workmesh_from_key_blocks(ht, source_object, key_blocks):
 	for sk in key_blocks:
 		key = sk.name
 		targets[key] = intermediate.pending.bake_target(
-			name = f'{ht.source_object}_{key}',
-			object_name = ht.source_object,
+			name = f'{source_object.name}_{key}',
+			object_name = source_object.name,
 			shape_key_name = key,
 			uv_mode = 'UV_IM_MONOCHROME',
 		)
@@ -64,8 +65,35 @@ def create_workmesh_from_key_blocks(ht, source_object, key_blocks):
 
 	#Create corresponding work meshes
 	for key, target in targets.items():
-		print(key, target)
 
+		copy_obj = source_object.copy()
+		copy_obj.name = target.name
+		copy_obj.data = source_object.data.copy()
+		copy_obj.data.name = target.name
+
+		#TBD - what should we do when an object already exists? Remove existing?
+		if target.name != copy_obj.name:
+			log.warning(f'Name was changed to {copy_obj.name}')
+			target.name = copy_obj.name
+
+		#Remove all shapekeys except the one this object represents
+		for key in copy_obj.data.shape_keys.key_blocks:
+			if key.name != target.shape_key_name:
+				copy_obj.shape_key_remove(key)
+
+		#Remove remaining
+		for key in copy_obj.data.shape_keys.key_blocks:
+			copy_obj.shape_key_remove(key)
+
+		#TBD - should we set up a material here for copy_obj?
+		#TBD - should we put things in collections based on their source object? Such as all Avatar-objects in one collection
+		bake_scene.collection.objects.link(copy_obj)
+
+
+
+		print(target)
+
+		#TODO - store this target in the addon list
 
 
 	# #NOTE - there is a bug where we can only set uv_mode (or any other enum) once from the same context.
@@ -85,9 +113,11 @@ def create_workmesh_from_key_blocks(ht, source_object, key_blocks):
 
 def new_workmesh_from_selected(operator, context, ht):
 
+	#TODO - make sure we are in the right scene or inform the user
+
 	for source_object in context.selected_objects:
 		if shape_keys := source_object.data.shape_keys:
-			create_workmesh_from_key_blocks(ht, source_object, shape_keys.key_blocks)
+			create_workmesh_from_key_blocks(ht, source_object, shape_keys.key_blocks, get_bake_scene(context))
 
 		else:
 			#IMPLEMENT
@@ -111,6 +141,7 @@ class generic_list:
 		new = collection.add()
 		last_id = len(collection) - 1
 		set_selected(last_id)
+		return new
 
 	@staticmethod
 	def remove(collection, get_selected, set_selected):
@@ -520,6 +551,27 @@ class bake_targets:
 			bto.active_shape_key_index = bto.data.shape_keys.key_blocks.find(bake_target.shape_key_name) #tech-note 4
 
 		bpy.ops.object.mode_set(mode='EDIT')
+
+class bake_groups:
+
+	def add(operator, context, ht):
+		generic_list.add(ht.bake_group_collection, a_get(ht, 'selected_bake_group'), a_set(ht, 'selected_bake_group'))
+
+	def remove(operator, context, ht):
+		generic_list.remove(ht.bake_group_collection, a_get(ht, 'selected_bake_group'), a_set(ht, 'selected_bake_group'))
+
+
+	class members:
+		def add(operator, context, ht):
+			if bake_group := ht.get_selected_bake_group():
+				if bake_target := ht.get_selected_bake_target():
+					print(bake_target)
+					new = generic_list.add(bake_group.members, a_get(bake_group, 'selected_member'), a_set(bake_group, 'selected_member'))
+					new.target = bake_target.identifier or ''
+
+		def remove(operator, context, ht):
+			print('SHOULD REMOVE')
+			#generic_list.remove(ht.bake_group_collection, a_get(ht, 'selected_bake_group'), a_set(ht, 'selected_bake_group'))
 
 
 class bake_variants:

@@ -35,8 +35,8 @@ list-actions-short:
 install-development-version:
 	$(QUIET_MODE) rm -f .addon_path
 	$(QUIET_MODE) blender --background --python scripts/get_addon_path.py -- .addon_path
-	$(QUIET_MODE) mkdir -p "$(shell cat .addon_path)"
-	$(QUIET_MODE) ln -fs "$(shell pwd)/sources" "$(shell cat .addon_path)/$(module_name)"
+	$(QUIET_MODE) mkdir -p `cat .addon_path`
+	$(QUIET_MODE) ln -fs "$(shell pwd)/sources" "`cat .addon_path`/$(module_name)"
 
 clean:
 	rm -f distribution/*

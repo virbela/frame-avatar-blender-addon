@@ -26,6 +26,19 @@ class FRAME_UL_bake_targets(frame_ui_list):
 		layout.prop(item, 'name', icon=UV_ISLAND_MODES.members[item.uv_mode].icon, text='', emboss=False, translate=False)
 
 
+class FRAME_UL_bake_groups(frame_ui_list):
+	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+		layout.prop(item, 'name', icon='UNLINKED', text='', emboss=False, translate=False)
+
+class FRAME_UL_bake_group_members(frame_ui_list):
+	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+		if ht := get_homeomorphic_tool_state(context):	#contibution note 2
+			if target := ht.get_bake_target_by_identifier(item.target):
+				layout.prop(target, 'name', icon=UV_ISLAND_MODES.members[primary.uv_mode].icon, text='', emboss=False, translate=False)
+			else:
+				layout.label(icon='UNLINKED', text=item.target)
+
+
 class FRAME_UL_bake_target_mirrors(frame_ui_list):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 

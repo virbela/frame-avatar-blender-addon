@@ -1,5 +1,43 @@
 
 
+
+Graphical layout
+
+	Tab: Workflow
+
+		Group: Introduction
+
+			Operator: Help
+			Operator: First time setup
+
+		Group: Work meshes
+			Operator: New from selected
+			Operator: Update selected
+			Operator: Update active shapekey
+
+		Group: Bake targets
+			Operator: Validate bake targets
+
+		Group: Texture atlas
+			Operator: Auto assign atlas/UV
+			Operator: Pack UV islands
+
+		Group: Work materials
+			Operator: Update selected material
+			Operator: Update all materials
+			Operator: Show bake/paint material
+			Operator: Show preview material
+
+		Group: Baking
+			Operator: Bake selected bake target
+			Operator: Bake all bake targets
+
+		Group: Debug tools
+			Operator: Placeholder for experiments
+
+
+
+#TO-DOC ↓ Read through this, update/remove as fit - these are older notes
 Addon panels for category 'Avatar' in space 'VIEW_3D'
 
 	Bake targets (ui.panels.FRAME_PT_batch_bake_targets)

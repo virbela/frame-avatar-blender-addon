@@ -35,3 +35,58 @@ Numbered items
 			if mt is MIRROR_TYPE.SECONDARY:
 				continue
 
+2 Implement operators
+
+  Note: Groups are prefixed with # in the table below
+
+  Table: Operator implementation status
+    Operator                                Status
+    --------                                -----
+    # Introduction
+    Help                                    Pending
+    First time setup                        Pending
+
+    # Work meshes
+    New from selected                       Started - will create meshes, does not check for duplicates, updates pending data, does not store pending data
+    Update selected                         Pending
+    Update active shapekey                  Pending
+
+    # Bake targets
+    Validate bake targets                   Pending
+
+    # Texture atlas
+    Auto assign atlas/UV                    Pending
+    Pack UV islands                         Pending
+
+    # Work materials
+    Update selected material                Pending
+    Update all materials                    Pending
+    Show bake/paint material                Pending
+    Show preview material                   Pending
+
+    # Baking
+    Bake selected bake target               Pending
+    Bake all bake targets                   Pending
+
+    # Debug tools
+    Placeholder for experiments             Pending
+
+3 Verify coverage
+
+    Module: operations
+
+4 Fix problem with list references
+
+    Initially I wanted to use bpy.PointerProperty but this is not a mutable pointer so this was not useful.
+    Each bake target contains a list of variants which is fine because we are in a pure tree data structure here.
+    The problem arises when we need to go from tree to graph, such as when we have bake groups that need to reference a bunch of bake targets.
+    To solve this the best bet is probably to create unique IDs for each bake target and reference by that ID.
+    The drawback here is that we need to go through all bake targets each time.
+
+    See Contribution note 8 for information on how this was solved for the bake targets
+
+    Also note the functions get_bake_target_by_identifier and require_bake_target_by_identifier in properties.py
+
+    Currently we create the identifier based on the object and shape key, this is not ideal. We don't want a mutable identifier!
+
+    Further reading: https://devtalk.blender.org/t/universal-unique-id-per-object/363/4

@@ -227,10 +227,19 @@ class BakeTarget(frame_property_group):
 		else:
 			yield prefix
 
+
+class BakeTargetReference(frame_property_group):
+	target:					bpy.props.StringProperty(name='Bake target identifier')
+
+class BakeGroup(frame_property_group):
+	name: 					bpy.props.StringProperty(name="Group name", default='Untitled group')
+	members:				bpy.props.CollectionProperty(type = BakeTargetReference)
+	selected_member:		bpy.props.IntProperty(name = "Selected bake target", default = -1)
+
 class BakeTargetMirrorEntry(frame_property_group):
 	#Here I wanted to use PointerProperty but they don't really act as the name implies. See contribution note 7 for more details.
-	primary: 		bpy.props.StringProperty(name='Primary bake target')
-	secondary: 		bpy.props.StringProperty(name='Secondary bake target')
+	primary: 		bpy.props.StringProperty(name='Primary bake target identifier')
+	secondary: 		bpy.props.StringProperty(name='Secondary bake target identifier')
 
 
 class HomeomorphicProperties(frame_property_group):
@@ -244,6 +253,9 @@ class HomeomorphicProperties(frame_property_group):
 	bake_target_mirror_collection: 		bpy.props.CollectionProperty(type = BakeTargetMirrorEntry)
 	selected_bake_target_mirror: 		bpy.props.IntProperty(name = "Selected mirror entry", default = -1)
 
+	bake_group_collection: 				bpy.props.CollectionProperty(type = BakeGroup)
+	selected_bake_group: 				bpy.props.IntProperty(name = "Selected bake group", default = -1)
+
 	source_object: 						bpy.props.StringProperty(name="Object name")
 
 	### Atlas,textures, paint assist ###
@@ -255,6 +267,10 @@ class HomeomorphicProperties(frame_property_group):
 	def get_selected_bake_target(self):
 		if self.selected_bake_target != -1:
 			return self.bake_target_collection[self.selected_bake_target]
+
+	def get_selected_bake_group(self):
+		if self.selected_bake_group != -1:
+			return self.bake_group_collection[self.selected_bake_group]
 
 	def require_selected_bake_target(self):
 		if candidate := self.get_selected_bake_target():

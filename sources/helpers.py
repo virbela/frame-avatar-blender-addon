@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from .logging import log_writer as log
 from .constants import *
 from .exceptions import *
+import threading, uuid
 
 pending_classes = list()
 
@@ -53,6 +54,7 @@ class frame_property_group(bpy.types.PropertyGroup):
 			raise ValueError(f'if_missing has unknown value')
 
 
+#DEPRECHATED - should be require_work_scene
 # The context here is only for logging purposes
 def get_work_scene(context):
 	if scene := bpy.data.scenes.get(WORK_SCENE):
@@ -60,6 +62,8 @@ def get_work_scene(context):
 	else:
 		log.error(f'Work scene `{WORK_SCENE}´ could not be found.')
 
+
+#DEPRECHATED - should be require_bake_scene and comments should be updated
 # The context here is only for logging purposes and is not currently used here but
 # we want to keep the API consistent in case we later do want some logging here
 def get_bake_scene(context):
@@ -154,4 +158,46 @@ def get_nice_name(collection, prefix, max_prefix_length, random_hash_length=8, m
 			return candidate
 
 	raise Exception('severe fail')	#TODO - proper exception
+
+
+def is_reference_valid(target):
+	try:
+		target.name
+		return True
+	except ReferenceError:
+		return False
+
+
+class UUID_manager:
+	def __init__(self, key):
+		self.key = key
+		self.uuid_map = dict()
+		self.lock = threading.Lock()
+
+	def validate(self):
+		to_discard = [key for key, value in self.uuid_map.items() if not is_reference_valid(value)]
+		for key in to_discard:
+			del self.uuid_map[key]
+
+		for key, value in self.uuid_map.items():
+			if self.uuid_map.get(key) is not value:
+				log.warning('UUID connection was broken')
+
+	def register(self, obj, auto_fix=True):
+		with self.lock:
+			if existing_uuid := obj.get(self.key, ''):
+				if self.uuid_map.get(existing_uuid) is not obj:
+					if auto_fix:
+						self.uuid_map[existing_uuid] = obj
+						log.debug('Updated incorrect UUID')
+					else:
+						raise Exception('UUID does not match')
+				return existing_uuid
+			else:
+				while True:
+					candidate = str(uuid.uuid4())
+					if candidate not in self.uuid_map:
+						self.uuid_map[candidate] = obj
+						obj[self.key] = candidate
+						return candidate
 

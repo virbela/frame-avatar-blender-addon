@@ -1,6 +1,6 @@
 import bpy
 from ..properties import *
-from ..helpers import get_work_scene, pending_classes
+from ..helpers import get_work_scene, get_bake_scene, pending_classes
 from .. import operators
 
 
@@ -131,6 +131,7 @@ class FRAME_PT_uv_packing(frame_panel):
 
 
 
+
 class FRAME_PT_batch_bake_targets(frame_panel):
 	bl_label = "Bake targets"
 	bl_space_type = 'VIEW_3D'
@@ -141,6 +142,7 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 
 		if scene := get_work_scene(context):
 			HT = scene.homeomorphictools
+			bake_scene = get_bake_scene(context)
 
 			self.layout.template_list('FRAME_UL_bake_targets', '', HT,  'bake_target_collection', HT, 'selected_bake_target')
 
@@ -153,7 +155,7 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 			#TODO - divy up this into a few functions to make it less messy
 			if HT.selected_bake_target != -1:
 				et = HT.bake_target_collection[HT.selected_bake_target]
-				self.layout.prop_search(et, "object_name", scene, "objects")
+				self.layout.prop_search(et, "object_name", bake_scene, "objects")
 
 				#DEPRECHATED
 				# if obj := bpy.data.objects.get(et.object_name):
@@ -229,3 +231,28 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 			# advanced.label(text='Create from shapekeys')
 			# advanced.prop_search(HT, 'source_object', scene, 'objects')
 			# advanced.operator('frame.create_bake_targets_from_shapekeys')
+
+class FRAME_PT_bake_groups(frame_panel):
+	bl_label = "Bake groups"
+	bl_space_type = 'VIEW_3D'
+	bl_region_type = 'UI'
+	bl_category = "Avatar"
+
+	def draw(self, context):
+
+		if scene := get_work_scene(context):
+			HT = scene.homeomorphictools
+			bake_scene = get_bake_scene(context)
+
+			self.layout.template_list('FRAME_UL_bake_groups', '', HT, 'bake_group_collection', HT, 'selected_bake_group')
+			bake_group_actions = self.layout.row(align=True)
+			bake_group_actions.operator('frame.add_bake_group')
+			bake_group_actions.operator('frame.remove_bake_group')
+
+			if selected_group := HT.get_selected_bake_group():
+				group = self.layout.box()
+				group.label(text='Bake group members')
+				group.template_list('FRAME_UL_bake_group_members', '', selected_group, 'members', selected_group, 'selected_member')
+				group_actions = group.row(align=True)
+				group_actions.operator('frame.add_bake_group_member')
+				group_actions.operator('frame.remove_bake_group_member')

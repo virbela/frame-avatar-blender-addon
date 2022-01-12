@@ -30,6 +30,7 @@ def register():
 		bpy.utils.register_class(cls)
 
 	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
+	#TODO		bpy.app.handlers.save_pre.append(...)    #and load_post
 
 def unregister():
 	del bpy.types.Scene.homeomorphictools

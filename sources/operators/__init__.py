@@ -121,6 +121,31 @@ class FRAME_OT_remove_bake_target_mirror(frame_operator):
 	bl_idname = 		'frame.remove_bake_target_mirror'
 	frame_operator = 	operations.bake_mirrors.remove
 
+class FRAME_OT_add_bake_group(frame_operator):
+	bl_label = 			"+"
+	bl_description = 	'Create new bake group'
+	bl_idname = 		'frame.add_bake_group'
+	frame_operator = 	operations.bake_groups.add
+
+class FRAME_OT_remove_bake_group(frame_operator):
+	bl_label =			"-"
+	bl_description = 	'Remove selected bake group'
+	bl_idname = 		'frame.remove_bake_group'
+	frame_operator = 	operations.bake_groups.remove
+
+class FRAME_OT_add_bake_group_member(frame_operator):
+	bl_label = 			"+"
+	bl_description = 	'Add selected bake target to bake group'
+	bl_idname = 		'frame.add_bake_group_member'
+	frame_operator = 	operations.bake_groups.members.add
+
+class FRAME_OT_remove_bake_group_member(frame_operator):
+	bl_label =			"-"
+	bl_description = 	'Remove selected member from bake group'
+	bl_idname = 		'frame.remove_bake_group_member'
+	frame_operator = 	operations.bake_groups.members.remove
+
+
 class FRAME_OT_add_bake_target(frame_operator):
 	bl_label =			"+"
 	bl_description = 	'Create new bake target'
@@ -188,6 +213,12 @@ class FRAME_OT_experiments(frame_operator):
 	bl_idname = 		"frame.place_holder_for_experiments"
 	bl_description =	"This is for internal development purposes and should not be seen in distribution"
 	def frame_operator(operator, context, ht):
+
+		import bpy
+		print(bpy.context.active_object)
+		return
+
+
 		bt = ht.get_selected_bake_target()
 
 		if not bt:
