@@ -35,7 +35,7 @@ Numbered items
 			if mt is MIRROR_TYPE.SECONDARY:
 				continue
 
-2 Implement operators
+2   Implement operators
 
   Note: Groups are prefixed with # in the table below
 
@@ -71,11 +71,11 @@ Numbered items
     # Debug tools
     Placeholder for experiments             Pending
 
-3 Verify coverage
+3   Verify coverage
 
     Module: operations
 
-4 Fix problem with list references
+4   Fix problem with list references
 
     Initially I wanted to use bpy.PointerProperty but this is not a mutable pointer so this was not useful.
     Each bake target contains a list of variants which is fine because we are in a pure tree data structure here.
@@ -90,3 +90,56 @@ Numbered items
     Currently we create the identifier based on the object and shape key, this is not ideal. We don't want a mutable identifier!
 
     Further reading: https://devtalk.blender.org/t/universal-unique-id-per-object/363/4
+
+5   UI
+
+    Table: Property/UI implementation status (seen as a logical tree from homeomorphic tools (HomeomorphicProperties))
+        Note: Selected item index will not be incorporated in this table and will be implied from any collection type
+
+        Property                                        Status                  Purpose/Comment
+        --------                                        -------                 ---------------
+        bake_target_collection                          Implemented             Collection of all bake targets
+            identifier                                  Deprechated             See todo 4
+            name                                        Implemented             Name of bake target
+            object_name                                 Deprechated             Deprechated due to Todo-4, use object_reference for index
+            object_reference                            Partially implemented
+            shape_key_name                              Implemented             Original name of shape key
+            uv_area_weight                              Implemented but ...     Importance of UV island - Not implemented in logic
+            bake_mode                                   Implemented but ...     Bake mode - Not implemented in logic
+                Regular                                 Pending
+                Mirror                                  Pending
+            uv_mirror_axis                              Implemented but ...     Ability to select UV axis for mirrored bake mode. Not implemented in logic
+                U                                       Pending
+                V                                       Pending
+            uv_mode                                     Implemented
+                Grayscale                               Pending
+                Color                                   Pending
+                Nil UV island                           Pending
+                Frozen                                  Pending
+            atlas                                       Implemented but ...     Name of atlas. (see todo 4)
+            uv_target_channel                           Implemented but ...     Not implemented in logic yet.
+                Unassigned                              Pending
+                Color channel                           Pending
+                Red channel                             Pending
+                Green channel                           Pending
+                Blue channel                            Pending
+            multi_variants                              Implemented
+            variant_collection                          Implemented but ...     Not implemented in logic yet.
+                name                                    Pending
+                image                                   Pending
+                uv_map                                  Pending
+
+        bake_target_mirror_collection                   Deprechated             Mirrors will be defined using additional bake targets that have a reference to original
+            primary                                     Pending                 Should use index instead to be consistent with other references of bake targets
+            secondary                                   Pending                 Should use index instead to be consistent with other references of bake targets
+
+        bake_group_collection
+            name
+            members
+
+        source_object
+        atlas_size
+        color_percentage
+        painting_size
+
+6   Using PointerProperty where possible (contribution note 10) and list views where not, fix the todo-4 problem.

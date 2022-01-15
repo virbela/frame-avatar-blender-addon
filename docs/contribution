@@ -99,7 +99,13 @@ Specific articles
 
 	8	Bake target identifier
 
-		We identify the bake target by the object and the shape key. This allows us to rename the bake targets user interface name without disconnecting targets.
-		#POTENTIAL-PROBLEM - If we want to have multiple bake targets from the same shape key this will not work, one need to use the variants-feature for that instead.
+		A	We identify the bake target by the object and the shape key. This allows us to rename the bake targets user interface name without disconnecting targets.
+			#POTENTIAL-PROBLEM - If we want to have multiple bake targets from the same shape key this will not work, one need to use the variants-feature for that instead.
+
+		B	Updated version where we use the index as a string but we should not do this later (see todo 4)
 
 	9	NodeTree only exists after use_nodes = True
+
+	10	Using PointerType properties
+
+		It works like the name implies when we are pointing to already registered data types. This means we can't use it to point to instance of where it is used as a property.

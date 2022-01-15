@@ -2,6 +2,7 @@ import bpy
 from ..properties import *
 from ..helpers import get_work_scene, get_bake_scene, pending_classes
 from .. import operators
+import functools
 
 
 import textwrap
@@ -130,6 +131,22 @@ class FRAME_PT_uv_packing(frame_panel):
 
 
 
+class template_expandable_section:
+	_EXPANDED_ICON = 'TRIA_DOWN'
+	_COLLAPSED_ICON = 'TRIA_RIGHT'
+
+	def __init__(self, layout, data, title, expanded_property):
+		self._layout = layout.box()
+		self._state = getattr(data, expanded_property)
+		self._layout.prop(data, expanded_property, text=title, icon=self._EXPANDED_ICON if self._state else self._COLLAPSED_ICON)
+
+	def __getattr__(self, key):
+		if self._state:
+			return functools.partial(getattr(self._layout, key))
+		else:
+			return lambda *a, **n: None	#This is a dummy function so when this template is hidden nothing is displayed
+
+
 
 
 class FRAME_PT_batch_bake_targets(frame_panel):
@@ -152,10 +169,71 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 			bake_target_actions.operator('frame.show_selected_bt')
 
 
+			#TODO - document the reasoning behind all this
 			#TODO - divy up this into a few functions to make it less messy
 			if HT.selected_bake_target != -1:
 				et = HT.bake_target_collection[HT.selected_bake_target]
-				self.layout.prop_search(et, "object_name", bake_scene, "objects")
+
+				self.layout.prop(et, 'bake_mode')
+
+				self.layout.prop_search(et, "object_reference", bake_scene, "objects")
+				if et.bake_mode == 'UV_BM_REGULAR':
+
+					self.layout.prop(et, 'uv_area_weight')
+
+					variants = self.layout.box()
+					variants.prop(et, 'multi_variants')
+
+					if et.multi_variants:
+						variants.template_list('FRAME_UL_bake_variants', '', et, 'variant_collection', et, 'selected_variant')
+
+						variant_actions = variants.row(align=True)
+						variant_actions.operator('frame.add_bake_target_variant')
+						variant_actions.operator('frame.remove_bake_target_variant')
+
+						if et.selected_variant != -1:
+							var = et.variant_collection[et.selected_variant]
+							variants.prop_search(var, 'image', bpy.data, 'images')
+							if et.object_reference:
+								variants.prop_search(var, 'uv_map', et.object_reference.data, 'uv_layers')
+							else:
+								variants.label(text='Select object to choose UV map')
+
+
+					self.layout.prop(et, 'uv_mode')
+
+					if et.uv_mode == 'UV_IM_FROZEN':
+						self.layout.prop_search(et, 'atlas', bpy.data, 'images')
+						if et.object_reference:
+							#self.layout.prop_search(et, 'uv_map', obj.data, 'uv_layers')
+							self.layout.prop(et, 'uv_target_channel')
+						else:
+							self.layout.label(text=f"UV set: (No object)")
+					else:
+						if atlas := bpy.data.images.get(et.atlas):
+							self.layout.label(text=f"Atlas: {atlas.name}", icon_value=atlas.preview.icon_id)
+						else:
+							self.layout.label(text=f"Atlas: (not assigned)", icon='UNLINKED')
+						#self.layout.label(text=f"UV set: {et.uv_map or '(not assigned)'}")
+						self.layout.label(text=f"UV target: {UV_TARGET_CHANNEL.members[et.uv_target_channel].name}", icon=UV_TARGET_CHANNEL.members[et.uv_target_channel].icon)
+
+
+
+				elif et.bake_mode == 'UV_BM_MIRRORED':
+					#self.layout.prop_search(et, 'mirror_source', HT, 'bake_target_collection')
+					#self.layout.prop(et, 'mirror_source')
+
+					#TODO - make this expandable
+					uv_mirror_options = template_expandable_section(self.layout, et, 'UV mirror options', 'uv_mirror_options_expanded')
+					uv_mirror_options.prop(et, 'uv_mirror_axis')
+					uv_mirror_options.label(text='Source of mirror')
+					uv_mirror_options.template_list('FRAME_UL_bake_targets', '', HT,  'bake_target_collection', et, 'mirror_source')
+
+
+					#self.layout.prop(et, 'geom_mirror_axis')		#MAYBE-LATER
+				else:
+					raise InternalError(f'et.bake_mode set to unsupported value {et.bake_mode}')
+
 
 				#DEPRECHATED
 				# if obj := bpy.data.objects.get(et.object_name):
@@ -163,50 +241,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 				# 		self.layout.prop_search(et, "shape_key_name", obj.data.shape_keys, "key_blocks")
 
 
-				self.layout.prop(et, 'uv_area_weight')
-
-				variants = self.layout.box()
-				variants.prop(et, 'multi_variants')
-
-				if et.multi_variants:
-					variants.template_list('FRAME_UL_bake_variants', '', et, 'variant_collection', et, 'selected_variant')
-
-					variant_actions = variants.row(align=True)
-					variant_actions.operator('frame.add_bake_target_variant')
-					variant_actions.operator('frame.remove_bake_target_variant')
-
-					if et.selected_variant != -1:
-						var = et.variant_collection[et.selected_variant]
-						variants.prop_search(var, 'image', bpy.data, 'images')
-						variants.prop_search(var, 'uv_map', obj.data, 'uv_layers')
-
-				self.layout.prop(et, 'bake_mode')
-
-				if et.bake_mode == 'UV_BM_REGULAR':
-					pass
-				elif et.bake_mode == 'UV_BM_MIRRORED':
-					self.layout.prop(et, 'uv_mirror_axis')
-
-					#self.layout.prop(et, 'geom_mirror_axis')		#MAYBE-LATER
-				else:
-					raise InternalError(f'et.bake_mode set to unsupported value {et.bake_mode}')
-
-				self.layout.prop(et, 'uv_mode')
-
-				if et.uv_mode == 'UV_IM_FROZEN':
-					self.layout.prop_search(et, 'atlas', bpy.data, 'images')
-					if obj:
-						#self.layout.prop_search(et, 'uv_map', obj.data, 'uv_layers')
-						self.layout.prop(et, 'uv_target_channel')
-					else:
-						self.layout.label(text=f"UV set: (No object)")
-				else:
-					if atlas := bpy.data.images.get(et.atlas):
-						self.layout.label(text=f"Atlas: {atlas.name}", icon_value=atlas.preview.icon_id)
-					else:
-						self.layout.label(text=f"Atlas: (not assigned)", icon='UNLINKED')
-					#self.layout.label(text=f"UV set: {et.uv_map or '(not assigned)'}")
-					self.layout.label(text=f"UV target: {UV_TARGET_CHANNEL.members[et.uv_target_channel].name}", icon=UV_TARGET_CHANNEL.members[et.uv_target_channel].icon)
 
 
 
@@ -256,3 +290,10 @@ class FRAME_PT_bake_groups(frame_panel):
 				group_actions = group.row(align=True)
 				group_actions.operator('frame.add_bake_group_member')
 				group_actions.operator('frame.remove_bake_group_member')
+
+				#NOTE - Currently we don't allow to change the target afterwards, instead we have to remove and select a differet target and add it.
+				# This might be slightly confusing for the user though since it is fairly far between the bake targets and bake groups so we may want to improve this later
+
+				# if selected_group.selected_member != -1:
+				# 	selected_member = selected_group.members[selected_group.selected_member]
+				# 	self.layout.prop_search(selected_member, 'target', HT, 'bake_target_collection')

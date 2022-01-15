@@ -15,3 +15,8 @@ Glossary
 	HT 			HomeomorphicTools instance in context.scene.homeomorphictools
 
 	tech-note	Specific note in the tehcnical-details document
+
+Implementation states
+
+	Implemented					Item is implemented
+	Implemented but ...			Item is implemented but something relating to it still needs work

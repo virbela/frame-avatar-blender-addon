@@ -25,9 +25,22 @@ from . import materials
 
 # Addon registration
 def register():
-	global original_inspect_getsourcelines
+	# global original_inspect_getsourcelines
+	#NOTE why was that? ↑
+
 	for cls in pending_classes:
 		bpy.utils.register_class(cls)
+
+
+	#CLEAN tests under here
+	#print(dir(BakeTarget.bl_rna))
+	#print(BakeTarget.bl_rna.properties['mirror_source'])
+	#BakeTarget.bl_rna.properties['mirror_source'] = bpy.props.PointerProperty(name='Bake target used for mirror', type=BakeTarget.bl_rna.rna_type)
+	#print(BakeTarget.bl_rna.properties['mirror_source'])
+	#print(bpy.types.PointerProperty(BakeTarget.bl_rna))
+
+
+	#BakeTarget.bl_rna.properties['mirror_source'] =  bpy.props.PointerProperty(name='bake ref', type=BakeTarget)()  # bpy.types.PointerProperty(BakeTarget.bl_rna)
 
 	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
 	#TODO		bpy.app.handlers.save_pre.append(...)    #and load_post

@@ -234,13 +234,14 @@ def pack_uv_islands(operator, context, ht):
 
 		elif bake_target.multi_variants:
 			for variant_name, variant in bake_target.iter_bake_scene_variants():
-				if bake_object := bake_scene.objects.get(variant_name):
+
+				if bake_object := bake_scene.objects.get(variant_name):	#TODO - we need to define a set of variant meshes
 					uv_object_list.append(intermediate.packing.bake_target(bake_target, bake_object, variant_name=variant_name))
 				else:
 					log.warning(f'No bake object found for {bake_target}')
 
 		else:
-			if bake_object := bake_target.get_bake_scene_object(context):
+			if bake_object := bake_target.object_reference:
 				uv_object_list.append(intermediate.packing.bake_target(bake_target, bake_object, variant_name=None))
 
 	# In order to work with the UVs we need to create a selection and enter edit mode, see: tech-note 2
@@ -504,7 +505,7 @@ def create_bake_targets_from_shapekeys(operator, context, ht):
 
 		#Create mirrors
 		for mirror in mirror_list:
-			create_mirror(mirror.primary.bake_target.identifier, mirror.secondary.bake_target.identifier)
+			create_mirror(ht.get_bake_target_index(mirror.primary.bake_target), ht.get_bake_target_index(mirror.secondary.bake_target))
 
 
 
@@ -512,12 +513,12 @@ class bake_mirrors:
 	def set_primary(operator, context, ht):
 		if mirror := ht.get_selected_mirror():
 			if bake_target := ht.get_selected_bake_target():
-				mirror.primary = bake_target.identifier
+				mirror.primary = ht.get_bake_target_index(bake_target)
 
 	def set_secondary(operator, context, ht):
 		if mirror := ht.get_selected_mirror():
 			if bake_target := ht.get_selected_bake_target():
-				mirror.secondary = bake_target.identifier
+				mirror.secondary = ht.get_bake_target_index(bake_target)
 
 	def add(operator, context, ht):
 		generic_list.add(ht.bake_target_mirror_collection, a_get(ht, 'selected_bake_target_mirror'), a_set(ht, 'selected_bake_target_mirror'))
@@ -565,13 +566,12 @@ class bake_groups:
 		def add(operator, context, ht):
 			if bake_group := ht.get_selected_bake_group():
 				if bake_target := ht.get_selected_bake_target():
-					print(bake_target)
 					new = generic_list.add(bake_group.members, a_get(bake_group, 'selected_member'), a_set(bake_group, 'selected_member'))
-					new.target = bake_target.identifier or ''
+					new.target = ht.get_bake_target_index(bake_target)
 
 		def remove(operator, context, ht):
-			print('SHOULD REMOVE')
-			#generic_list.remove(ht.bake_group_collection, a_get(ht, 'selected_bake_group'), a_set(ht, 'selected_bake_group'))
+			if bake_group := ht.get_selected_bake_group():
+				generic_list.remove(bake_group.members, a_get(bake_group, 'selected_member'), a_set(bake_group, 'selected_member'))
 
 
 class bake_variants:
@@ -622,8 +622,8 @@ def copy_collection(source, dest, transfer):
 
 def synchronize_mirrors(operator, context, ht):
 	for mirror in ht.bake_target_mirror_collection:
-		primary = ht.get_bake_target_by_identifier(mirror.primary)
-		secondary = ht.get_bake_target_by_identifier(mirror.secondary)
+		primary = ht.bake_target_collection[mirror.primary]
+		secondary = ht.bake_target_collection[mirror.secondary]
 		if primary and secondary:
 			secondary.uv_area_weight = primary.uv_area_weight
 			secondary.uv_mode = primary.uv_mode

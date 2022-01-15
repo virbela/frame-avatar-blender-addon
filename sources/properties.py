@@ -1,5 +1,5 @@
 import bpy
-from .helpers import enum_descriptor, frame_property_group, get_named_entry, require_named_entry, get_bake_scene
+from .helpers import enum_descriptor, frame_property_group, get_named_entry, require_named_entry, get_bake_scene, register_class
 from .constants import MIRROR_TYPE
 from .exceptions import InternalError
 
@@ -118,6 +118,8 @@ class BakeVariant(frame_property_group):
 	uv_map:					bpy.props.StringProperty(name="UV Map")
 
 
+
+
 class BakeTarget(frame_property_group):
 
 	name: 					bpy.props.StringProperty(name = "Bake target name", default='Untitled bake target')
@@ -128,31 +130,36 @@ class BakeTarget(frame_property_group):
 								"Once selected it is possible to select a specific shape key",
 	)
 
-	shape_key_name: 		bpy.props.StringProperty(name="Shape key")
+	#TEST
+	object_reference:				bpy.props.PointerProperty(name='reference obj', type=bpy.types.Object)
 
-	uv_area_weight: 		bpy.props.FloatProperty(name="UV island area weight", default=1.0)
+	shape_key_name: 				bpy.props.StringProperty(name="Shape key")
 
-	bake_mode:				bpy.props.EnumProperty(items=tuple(UV_BAKE_MODE), name="UV bake mode", default=0)
+	uv_area_weight: 				bpy.props.FloatProperty(name="UV island area weight", default=1.0)
 
-	uv_mirror_axis:			bpy.props.EnumProperty(items=tuple(UV_MIRROR_AXIS), name="UV mirror axis", default=0)
+	bake_mode:						bpy.props.EnumProperty(items=tuple(UV_BAKE_MODE), name="UV bake mode", default=0)
 
+	uv_mirror_axis:					bpy.props.EnumProperty(items=tuple(UV_MIRROR_AXIS), name="UV mirror axis", default=0)
 
-	#geom_mirror_axis:		bpy.props.EnumProperty(items=tuple(GEOMETRY_MIRROR_AXIS), name="Geometry mirror axis", default=0)		#MAYBE-LATER
+	mirror_source:					bpy.props.IntProperty(name='Bake target used for mirror')
+	uv_mirror_options_expanded:		bpy.props.BoolProperty(name="UV mirror options expanded", default=True)
 
-	uv_mode:				bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
+	#geom_mirror_axis:				bpy.props.EnumProperty(items=tuple(GEOMETRY_MIRROR_AXIS), name="Geometry mirror axis", default=0)		#MAYBE-LATER
 
-	atlas:					bpy.props.StringProperty(name="Atlas name")
+	uv_mode:						bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
+
+	atlas:							bpy.props.StringProperty(name="Atlas name")
 	# ↑ This is used for storing the automatic choice as well as the manual (frozen) one
 
 	#TBD - use this?
-	#uv_map:					bpy.props.StringProperty(name="UV map", default='UVMap')
-	uv_target_channel:		bpy.props.EnumProperty(items=tuple(UV_TARGET_CHANNEL), name="UV target channel", default=0)
+	#uv_map:						bpy.props.StringProperty(name="UV map", default='UVMap')
+	uv_target_channel:				bpy.props.EnumProperty(items=tuple(UV_TARGET_CHANNEL), name="UV target channel", default=0)
 
 
 	#Variants
-	multi_variants:			bpy.props.BoolProperty(name="Multiple variants", default=False)
-	variant_collection:		bpy.props.CollectionProperty(type = BakeVariant)
-	selected_variant:		bpy.props.IntProperty(name = "Selected bake variant", default = -1)
+	multi_variants:					bpy.props.BoolProperty(name="Multiple variants", default=False)
+	variant_collection:				bpy.props.CollectionProperty(type = BakeVariant)
+	selected_variant:				bpy.props.IntProperty(name = "Selected bake variant", default = -1)
 
 
 	def get_object(self):
@@ -161,13 +168,13 @@ class BakeTarget(frame_property_group):
 	def require_object(self):
 		return require_named_entry(bpy.data.objects, self.object_name)
 
-	def get_bake_scene_object(self, context):
-		bake_scene = get_bake_scene(context)
-		return get_named_entry(bake_scene.objects, self.get_bake_scene_name())
+	#def get_bake_scene_object(self, context):
+		#bake_scene = get_bake_scene(context)
+		#return get_named_entry(bake_scene.objects, self.get_bake_scene_name())
 
-	def require_bake_scene_object(self, context):
-		bake_scene = get_bake_scene(context)
-		return require_named_entry(bake_scene.objects, self.get_bake_scene_name())
+	#def require_bake_scene_object(self, context):
+	#	bake_scene = get_bake_scene(context)
+	#	return require_named_entry(bake_scene.objects, self.get_bake_scene_name())
 
 	def get_atlas(self):
 		return get_named_entry(bpy.data.images, self.atlas)
@@ -177,13 +184,16 @@ class BakeTarget(frame_property_group):
 
 
 
-	@property	#contribution note 8
-	def identifier(self):
-		if self.object_name:
-			if self.shape_key_name:
-				return f'{self.object_name}.{self.shape_key_name}'
-			else:
-				return self.object_name
+	# @property	#contribution note 8B
+	# def identifier(self):
+	# 	return str(ht.get_bake_target_index(self))
+
+
+		# if self.object_name:
+		# 	if self.shape_key_name:
+		# 		return f'{self.object_name}.{self.shape_key_name}'
+		# 	else:
+		# 		return self.object_name
 
 
 	@property
@@ -197,7 +207,7 @@ class BakeTarget(frame_property_group):
 
 
 	def get_mirror_type(self, ht):
-		find_id = self.identifier
+		find_id = ht.get_bake_target_index(self)
 		for mirror in ht.bake_target_mirror_collection:
 			if find_id == mirror.primary:
 				return mirror, MIRROR_TYPE.PRIMARY
@@ -208,19 +218,19 @@ class BakeTarget(frame_property_group):
 
 
 	#TBD should we use the name here or the identifier?
-	def get_bake_scene_name(self):
-		return self.identifier
+	# def get_bake_scene_name(self):
+	# 	return self.identifier
 
 	# this doesn't yield anything if there are no variants
 	def iter_bake_scene_variants(self):
-		prefix = self.get_bake_scene_name()
+		prefix = self.name # self.get_bake_scene_name()
 		if self.multi_variants:
 			for variant in self.variant_collection:
 				yield f'{prefix}.{variant.name}', variant
 
 
 	def iter_bake_scene_variant_names(self):
-		prefix = self.get_bake_scene_name()
+		prefix = self.name # self.get_bake_scene_name()
 		if self.multi_variants:
 			for variant in self.variant_collection:
 				yield f'{prefix}.{variant.name}'
@@ -228,8 +238,13 @@ class BakeTarget(frame_property_group):
 			yield prefix
 
 
+#TEST
+#BakeTarget.__annotations__['mirror_source'] = bpy.props.PointerProperty(name='Bake target used for mirror', type=BakeTarget)
+# class BakeTargetReference(frame_property_group):
+# 	target:					bpy.props.PointerProperty(name='bake target', type=BakeTarget)
+
 class BakeTargetReference(frame_property_group):
-	target:					bpy.props.StringProperty(name='Bake target identifier')
+	target:					bpy.props.IntProperty(name='Bake target identifier', default=-1)
 
 class BakeGroup(frame_property_group):
 	name: 					bpy.props.StringProperty(name="Group name", default='Untitled group')
@@ -238,8 +253,8 @@ class BakeGroup(frame_property_group):
 
 class BakeTargetMirrorEntry(frame_property_group):
 	#Here I wanted to use PointerProperty but they don't really act as the name implies. See contribution note 7 for more details.
-	primary: 		bpy.props.StringProperty(name='Primary bake target identifier')
-	secondary: 		bpy.props.StringProperty(name='Secondary bake target identifier')
+	primary: 				bpy.props.IntProperty(name='Primary bake target identifier', default=-1)
+	secondary: 				bpy.props.IntProperty(name='Secondary bake target identifier', default=-1)
 
 
 class HomeomorphicProperties(frame_property_group):
@@ -288,6 +303,12 @@ class HomeomorphicProperties(frame_property_group):
 		else:
 			raise Exception()	#TODO - proper exception
 
+	def get_bake_target_index(self, target):
+		for index, bt in enumerate(self.bake_target_collection):
+			if bt == target:	# note: We can't use identity comparison due to internal deferring in blender
+				return index
+
+		return -1
 
 	def get_bake_target_by_identifier(self, identifier):
 		for bt in self.bake_target_collection:

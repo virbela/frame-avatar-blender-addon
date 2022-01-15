@@ -1,0 +1,40 @@
+log
+
+	Since the bake targets should now reference items in the bake scene some changes have to be done to the panel
+	We haven't made anything for the bake groups which is an important step in the workflow so addressing that
+
+	Hit a snag, see Todo-4
+
+		Notes about this situation
+
+			If we have a reference to an object in blender and that object is removed that object will raise a referenceerror when deferring it.
+			We can make a function to test for this, is_reference_valid in helpers.py
+
+
+			Save hooks
+			https://blender.stackexchange.com/questions/781/can-i-perform-an-action-when-a-file-is-saved-or-loaded
+
+		Dropping this for now, we will use names indices for now for referencing things and fix this later.
+
+
+	I still have trouble referencing things, now I want to reference the bake target used as base for a mirror.
+		I am currently investigating if I could somehow use prop_search but get a custom property back, like the index of an item (or later UUID).
+
+		https://github.com/martijnberger/blender/blob/c359343f8dae6689c955dc1fa700cb26f6cd2e95/source/blender/makesrna/intern/rna_access.c#L622
+		https://github.com/martijnberger/blender/blob/c359343f8dae6689c955dc1fa700cb26f6cd2e95/source/blender/makesrna/intern/rna_access.c#L4242-L4247
+		https://github.com/martijnberger/blender/blob/c359343f8dae6689c955dc1fa700cb26f6cd2e95/source/blender/makesrna/intern/rna_access.c#L4116
+
+
+	I figured out how we can point to objects in the correct way like so: https://blender.stackexchange.com/a/99965
+
+		This will take at least one head ache out, next step is to figure out how to point to our own bake target (with the mirror function).
+
+
+
+	Since mirrors should use the same UV map, we need to synchronize work meshes. We need a button for doing this. We will call it synchronize mirrors.
+	It could have a warning about what changes will be made.
+		It should create or recreate a specific UV map on the mirrored workmesh
+
+
+	Going to skip mirrors for now in order to make sure the entirety of the workflow works
+
