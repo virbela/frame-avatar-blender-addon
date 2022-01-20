@@ -114,9 +114,10 @@ UV_TARGET_CHANNEL = enum_descriptor(
 
 class BakeVariant(frame_property_group):
 	name: 					bpy.props.StringProperty(name="Variant name", default='Untitled variant')
-	image:					bpy.props.StringProperty(name="Image texture")
+	image:					bpy.props.PointerProperty(name="Image texture", type=bpy.types.Image)
 	uv_map:					bpy.props.StringProperty(name="UV Map")
 
+	workmesh:				bpy.props.PointerProperty(name='Work mesh', type=bpy.types.Object)
 
 
 
@@ -130,9 +131,8 @@ class BakeTarget(frame_property_group):
 								"Once selected it is possible to select a specific shape key",
 	)
 
-	#TEST
-	object_reference:				bpy.props.PointerProperty(name='reference obj', type=bpy.types.Object)
-
+	# source info
+	source_object:					bpy.props.PointerProperty(name='Source object', type=bpy.types.Object)
 	shape_key_name: 				bpy.props.StringProperty(name="Shape key")
 
 	uv_area_weight: 				bpy.props.FloatProperty(name="UV island area weight", default=1.0)
@@ -148,11 +148,12 @@ class BakeTarget(frame_property_group):
 
 	uv_mode:						bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
 
-	atlas:							bpy.props.StringProperty(name="Atlas name")
+	#atlas:							bpy.props.StringProperty(name="Atlas name")
+	atlas:							bpy.props.PointerProperty(name="Atlas image", type=bpy.types.Image)
 	# ↑ This is used for storing the automatic choice as well as the manual (frozen) one
 
 	#TBD - use this?
-	#uv_map:						bpy.props.StringProperty(name="UV map", default='UVMap')
+	uv_map:							bpy.props.StringProperty(name="UV map", default='UVMap')
 	uv_target_channel:				bpy.props.EnumProperty(items=tuple(UV_TARGET_CHANNEL), name="UV target channel", default=0)
 
 
@@ -160,6 +161,7 @@ class BakeTarget(frame_property_group):
 	multi_variants:					bpy.props.BoolProperty(name="Multiple variants", default=False)
 	variant_collection:				bpy.props.CollectionProperty(type = BakeVariant)
 	selected_variant:				bpy.props.IntProperty(name = "Selected bake variant", default = -1)
+
 
 
 	def get_object(self):

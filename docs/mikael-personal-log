@@ -38,3 +38,9 @@ log
 
 	Going to skip mirrors for now in order to make sure the entirety of the workflow works
 
+
+	inspiration: https://blender.stackexchange.com/questions/19121/how-to-create-collapsible-panel
+
+
+	I am noticing that blender will know the index of things in lists because of output such as bake_target=bpy.data.scenes['Scene'].homeomorphictools.bake_target_collection[0])
+	This could come in handy in solving the index/reference issue

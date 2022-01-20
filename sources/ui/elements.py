@@ -15,8 +15,8 @@ class FRAME_UL_bake_variants(frame_ui_list):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 		#layout.label(text=item.name, icon='FILE_BLANK')
 
-		if img := bpy.data.images.get(item.image):
-			layout.prop(item, 'name', icon_value=img.preview.icon_id, text='', emboss=False, translate=False)
+		if item.image:
+			layout.prop(item, 'name', icon_value=item.image.preview.icon_id, text='', emboss=False, translate=False)
 		else:
 			layout.prop(item, 'name', icon='UNLINKED', text='', emboss=False, translate=False)
 
@@ -39,10 +39,13 @@ class FRAME_UL_bake_groups(frame_ui_list):
 class FRAME_UL_bake_group_members(frame_ui_list):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 		if ht := get_homeomorphic_tool_state(context):	#contibution note 2
-			if target := ht.bake_target_collection[item.target]:	#TODO - we should use a UUID system to do this correctly
-				layout.prop(target, 'name', icon=UV_ISLAND_MODES.members[target.uv_mode].icon, text='', emboss=False, translate=False)
+			if item.target < len(ht.bake_target_collection):
+				if target := ht.bake_target_collection[item.target]:	#TODO - we should use a UUID system to do this correctly
+					layout.prop(target, 'name', icon=UV_ISLAND_MODES.members[target.uv_mode].icon, text='', emboss=False, translate=False)
+				else:
+					layout.label(icon='UNLINKED', text=item.target)
 			else:
-				layout.label(icon='UNLINKED', text=item.target)
+				layout.label(icon='UNLINKED', text='No target')
 
 
 class FRAME_UL_bake_target_mirrors(frame_ui_list):

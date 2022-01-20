@@ -3,11 +3,35 @@ from ..logging import log_writer as log
 from . import operations
 
 
-class FRAME_OT_new_workmesh_from_selected(frame_operator):
-	bl_label = 			"New from selected"
-	bl_idname = 		"frame.new_workmesh_from_selected"
+# class FRAME_OT_new_workmesh_from_selected(frame_operator):
+# 	bl_label = 			"New from selected"
+# 	bl_idname = 		"frame.new_workmesh_from_selected"
+# 	#TODO - bl_description
+# 	frame_operator = 	operations.new_workmesh_from_selected
+
+
+
+
+
+class FRAME_OT_create_workmeshes_for_all_targets(frame_operator):
+	bl_label = 			"New work meshes from all bake targets"
+	bl_idname = 		"frame.create_workmeshes_for_all_targets"
 	#TODO - bl_description
-	frame_operator = 	operations.new_workmesh_from_selected
+	frame_operator = 	operations.create_workmeshes_for_all_targets
+
+class FRAME_OT_create_workmeshes_for_selected_target(frame_operator):
+	bl_label = 			"New work meshes from selected bake targets"
+	bl_idname = 		"frame.create_workmeshes_for_selected_target"
+	#TODO - bl_description
+	frame_operator = 	operations.create_workmeshes_for_selected_target
+
+
+class FRAME_OT_create_targets_from_selection(frame_operator):
+	bl_label = 			"New bake targets from selected objects"
+	bl_idname = 		"frame.create_targets_from_selection"
+	#TODO - bl_description
+	frame_operator = 	operations.create_targets_from_selection
+
 
 class FRAME_OT_update_selected_workmesh_all_shapekeys(frame_operator):
 	bl_label = 			"Update selected"
@@ -293,3 +317,24 @@ class FRAME_OT_node_get_links(frame_operator):
 
 	frame_operator = operations.devtools.get_node_links
 
+#TODO - this should be guarded by a devmode boolean
+class FRAME_OT_clear_bake_scene(frame_operator):
+	bl_label = 			"Remove everything from bake scene"
+	bl_idname = 		"frame.clear_bake_scene"
+	bl_description =	"This is for internal development purposes and should not be seen in distribution"
+	def frame_operator(operator, context, ht):
+		from ..helpers import get_bake_scene
+		import bpy
+		scene = get_bake_scene(context)
+		for item in scene.objects:
+			bpy.data.meshes.remove(item.data, do_unlink=True)
+
+#TODO - this should be guarded by a devmode boolean
+class FRAME_OT_clear_bake_targets(frame_operator):
+	bl_label = 			"Remove all bake targets"
+	bl_idname = 		"frame.clear_bake_targets"
+	bl_description =	"This is for internal development purposes and should not be seen in distribution"
+	def frame_operator(operator, context, ht):
+		ht.selected_bake_target = -1
+		while len(ht.bake_target_collection):
+			ht.bake_target_collection.remove(0)

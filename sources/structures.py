@@ -2,10 +2,14 @@
 #These must not be saved in any blender specific context and must be discarded after use
 #For structures that SHOULD be saved in blender specific contexts are defined in the properties.py module.
 
-from dataclasses import dataclass, asdict as dc_to_dict
+from dataclasses import dataclass#, asdict as dc_to_dict
 
 def iter_dc(d):
-	return dc_to_dict(d).items()
+	# return dc_to_dict(d).items()
+	# note: dataclasses.asdict performs a deep copy which will be problematic when referencing blender objects so we will iter it ourselves
+
+	return ((key, getattr(d, key)) for key in d.__dataclass_fields__)
+
 
 class intermediate:
 	# it would be nice to specify these members more fully but the problem is that we can't both define a tree structure AND refer to things in the tree in
@@ -16,6 +20,7 @@ class intermediate:
 		class bake_target:
 			name: 				str
 			object_name: 		str
+			source_object:		object
 			shape_key_name: 	str
 			uv_mode: 			str
 			bake_target:		object		= None

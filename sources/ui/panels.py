@@ -46,15 +46,20 @@ class FRAME_PT_workflow(frame_panel):
 			get_help.url = 'http://example.org/'
 			introduction.operator('frame.setup_bake_scene')
 
-			work_meshes = self.layout.box()
-			work_meshes.label(text='Work meshes')
-			work_meshes.operator('frame.new_workmesh_from_selected')
-			work_meshes.operator('frame.update_selected_workmesh_all_shapekeys')
-			work_meshes.operator('frame.update_selected_workmesh_active_shapekey')
 
 			bake_targets = self.layout.box()
 			bake_targets.label(text='Bake targets')
+			bake_targets.operator('frame.create_targets_from_selection')
 			bake_targets.operator('frame.validate_targets')
+
+
+			work_meshes = self.layout.box()
+			work_meshes.label(text='Work meshes')
+			work_meshes.operator('frame.create_workmeshes_for_all_targets')
+			work_meshes.operator('frame.create_workmeshes_for_selected_target')
+			work_meshes.operator('frame.update_selected_workmesh_all_shapekeys')
+			work_meshes.operator('frame.update_selected_workmesh_active_shapekey')
+
 
 			atlas_setup = self.layout.box()
 			atlas_setup.label(text='Texture atlas')
@@ -97,6 +102,8 @@ class FRAME_PT_workflow(frame_panel):
 			debug = self.layout.box()
 			debug.label(text='Debug tools')
 			debug.operator('frame.place_holder_for_experiments')
+			debug.operator('frame.clear_bake_scene')
+			debug.operator('frame.clear_bake_targets')
 
 
 
@@ -166,7 +173,7 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 			bake_target_actions = self.layout.row(align=True)
 			bake_target_actions.operator('frame.add_bake_target')
 			bake_target_actions.operator('frame.remove_bake_target')
-			bake_target_actions.operator('frame.show_selected_bt')
+			#bake_target_actions.operator('frame.show_selected_bt')	#LATER
 
 
 			#TODO - document the reasoning behind all this
@@ -174,9 +181,16 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 			if HT.selected_bake_target != -1:
 				et = HT.bake_target_collection[HT.selected_bake_target]
 
+				self.layout.prop_search(et, "source_object", scene, "objects")
+
+				if obj := et.source_object:
+					if shape_keys := obj.data.shape_keys:
+						self.layout.prop_search(et, "shape_key_name", obj.data.shape_keys, "key_blocks")
+
+
+
 				self.layout.prop(et, 'bake_mode')
 
-				self.layout.prop_search(et, "object_reference", bake_scene, "objects")
 				if et.bake_mode == 'UV_BM_REGULAR':
 
 					self.layout.prop(et, 'uv_area_weight')
@@ -193,27 +207,48 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 
 						if et.selected_variant != -1:
 							var = et.variant_collection[et.selected_variant]
-							variants.prop_search(var, 'image', bpy.data, 'images')
-							if et.object_reference:
-								variants.prop_search(var, 'uv_map', et.object_reference.data, 'uv_layers')
+							variants.prop(var, 'image')
+
+							variants.prop_search(var, 'workmesh', bake_scene, 'objects')
+							if var.workmesh:
+								variants.prop_search(var, 'uv_map', var.workmesh.data, 'uv_layers')
 							else:
-								variants.label(text='Select object to choose UV map')
+								variants.label(text='Select work mesh to choose UV map')
+
+
+					else:	# draw the first entry only
+						if len(et.variant_collection) == 0:
+							variants.label(text='Please revalidate bake target')
+						else:
+							var = et.variant_collection[0]
+							variants.prop_search(var, 'image', bpy.data, 'images')
+
+							variants.prop_search(var, 'workmesh', bake_scene, 'objects')
+							if var.workmesh:
+								variants.prop_search(var, 'uv_map', var.workmesh.data, 'uv_layers')
+							else:
+								variants.label(text='Select work mesh to choose UV map')
+
 
 
 					self.layout.prop(et, 'uv_mode')
 
 					if et.uv_mode == 'UV_IM_FROZEN':
-						self.layout.prop_search(et, 'atlas', bpy.data, 'images')
-						if et.object_reference:
-							#self.layout.prop_search(et, 'uv_map', obj.data, 'uv_layers')
-							self.layout.prop(et, 'uv_target_channel')
-						else:
-							self.layout.label(text=f"UV set: (No object)")
+						self.layout.prop(et, 'atlas')
+						#TODO - decide what to do here
+						# if et.workmesh:
+						# 	#self.layout.prop_search(et, 'uv_map', obj.data, 'uv_layers')
+						# 	self.layout.prop(et, 'uv_target_channel')
+						# else:
+						# 	self.layout.label(text=f"UV set: (No object)")
 					else:
-						if atlas := bpy.data.images.get(et.atlas):
-							self.layout.label(text=f"Atlas: {atlas.name}", icon_value=atlas.preview.icon_id)
-						else:
+
+						if et.atlas is None:
 							self.layout.label(text=f"Atlas: (not assigned)", icon='UNLINKED')
+						else:
+							self.layout.label(text=f"Atlas: {et.atlas.name}", icon_value=et.atlas.preview.icon_id)
+
+
 						#self.layout.label(text=f"UV set: {et.uv_map or '(not assigned)'}")
 						self.layout.label(text=f"UV target: {UV_TARGET_CHANNEL.members[et.uv_target_channel].name}", icon=UV_TARGET_CHANNEL.members[et.uv_target_channel].icon)
 
@@ -223,11 +258,12 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 					#self.layout.prop_search(et, 'mirror_source', HT, 'bake_target_collection')
 					#self.layout.prop(et, 'mirror_source')
 
-					#TODO - make this expandable
-					uv_mirror_options = template_expandable_section(self.layout, et, 'UV mirror options', 'uv_mirror_options_expanded')
-					uv_mirror_options.prop(et, 'uv_mirror_axis')
-					uv_mirror_options.label(text='Source of mirror')
-					uv_mirror_options.template_list('FRAME_UL_bake_targets', '', HT,  'bake_target_collection', et, 'mirror_source')
+					pass	#TODO
+					#BUG - when showing the FRAME_UL_bake_targets list in two places we get trouble with shared state
+					# uv_mirror_options = template_expandable_section(self.layout, et, 'UV mirror options', 'uv_mirror_options_expanded')
+					# uv_mirror_options.prop(et, 'uv_mirror_axis')
+					# uv_mirror_options.label(text='Source of mirror')
+					# uv_mirror_options.template_list('FRAME_UL_bake_targets', '', HT,  'bake_target_collection', et, 'mirror_source')
 
 
 					#self.layout.prop(et, 'geom_mirror_axis')		#MAYBE-LATER
@@ -235,10 +271,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 					raise InternalError(f'et.bake_mode set to unsupported value {et.bake_mode}')
 
 
-				#DEPRECHATED
-				# if obj := bpy.data.objects.get(et.object_name):
-				# 	if shape_keys := obj.data.shape_keys:
-				# 		self.layout.prop_search(et, "shape_key_name", obj.data.shape_keys, "key_blocks")
 
 
 

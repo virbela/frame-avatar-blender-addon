@@ -1,22 +1,28 @@
-from ..helpers import IMPLEMENTATION_PENDING, get_bake_scene, get_work_scene, a_get, a_set, set_scene, set_selection, set_active, clear_selection, require_named_entry
+from ..helpers import IMPLEMENTATION_PENDING, get_bake_scene, get_work_scene, a_get, a_set, set_scene, set_selection, set_active, clear_selection, require_named_entry, get_nice_name
 from ..logging import log_writer as log
 from ..structures import intermediate, iter_dc
-from ..materials import get_material_variants
+from ..materials import get_material_variants, setup_bake_material
 from ..constants import MIRROR_TYPE
+from ..bake_targets import validate_all
 from .. import constants
 import bpy, bmesh
 import textwrap
 
 
 #TODO - fix this!
-validate_targets = IMPLEMENTATION_PENDING
 update_selected_workmesh = IMPLEMENTATION_PENDING
 update_all_workmeshes = IMPLEMENTATION_PENDING
-update_selected_material = IMPLEMENTATION_PENDING
 update_all_materials = IMPLEMENTATION_PENDING
 
 update_selected_workmesh_all_shapekeys = IMPLEMENTATION_PENDING
 update_selected_workmesh_active_shapekey = IMPLEMENTATION_PENDING
+
+create_workmeshes_for_all_targets = IMPLEMENTATION_PENDING
+create_workmeshes_for_selected_target = IMPLEMENTATION_PENDING
+
+
+def validate_targets(operator, context, ht):
+	validate_all(ht)
 
 
 def create_mirror(ht, primary, secondary):
@@ -26,6 +32,152 @@ def create_mirror(ht, primary, secondary):
 	return new
 
 
+
+def create_targets_from_selection(operator, context, ht):
+
+	for source_object in context.selected_objects:
+		if shape_keys := source_object.data.shape_keys:
+			create_baketarget_from_key_blocks(ht, source_object, shape_keys.key_blocks, get_bake_scene(context))
+
+		else:
+			create_baketarget_from_key_blocks(ht, source_object, None, get_bake_scene(context))
+
+
+def update_selected_material(operator, context, ht):
+
+	if bake_target := ht.get_selected_bake_target():
+		if variant := bake_target.variant_collection[bake_target.selected_variant]:
+			update_workmesh_materials(context, ht, bake_target, variant)
+
+# def create_workmeshes_for_all_targets(operator, context, ht):
+# 	pass
+
+def create_workmeshes_for_selected_target(operator, context, ht):
+
+	#TODO - when conditions fail we should add log entries
+	if bake_target := ht.get_selected_bake_target():
+		bake_scene = get_bake_scene(context)
+
+		for variant in bake_target.variant_collection:
+
+			pending_name = f'{bake_target.name}_{variant.name}'
+
+			if source_object := bake_target.source_object:
+				pending_object = source_object.copy()
+				pending_object.name = pending_name
+				pending_object.data = source_object.data.copy()
+				pending_object.data.name = pending_name
+
+				# Create UV maps
+				bake_uv = pending_object.data.uv_layers.new(name='Baking')	#TODO - not hardcode
+				local_uv = pending_object.data.uv_layers.new(name='Local')	#TODO - not hardcode
+				set_uv_map(pending_object, local_uv.name)
+				#TBD - what should we do when an object already exists? Remove existing?
+				# if bake_target.name != pending_object.name:
+				# 	log.warning(f'Name was changed to {pending_object.name}')
+
+				# check if this target uses a shape key
+				if shape_key := pending_object.data.shape_keys.key_blocks.get(bake_target.shape_key_name):
+					#Remove all shapekeys except the one this object represents
+					for key in pending_object.data.shape_keys.key_blocks:
+						if key.name != bake_target.shape_key_name:
+							pending_object.shape_key_remove(key)
+
+					#Remove remaining
+					for key in pending_object.data.shape_keys.key_blocks:
+						pending_object.shape_key_remove(key)
+
+			bake_scene.collection.objects.link(pending_object)
+
+			variant.workmesh = pending_object
+			variant.uv_map = local_uv.name
+			bake_target.uv_map = bake_uv.name		#TODO - should the target be in each variant perhaps?
+
+			update_workmesh_materials(context, ht, bake_target, variant)
+
+def update_workmesh_materials(context, ht,  bake_target, variant):
+	#TODO - create all materials
+
+	#TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
+	if not variant.image:
+		variant.workmesh.active_material = None
+		print('no img')
+		return
+
+	if not variant.uv_map:
+		variant.workmesh.active_material = None
+		print('no uv')
+		return
+
+	bake_material_name =f'bake-{bake_target.shortname}-{variant.name}'
+	bake_material = bpy.data.materials.new(bake_material_name)
+	bake_material.use_nodes = True	#contribution note 9
+	setup_bake_material(bake_material.node_tree, bake_target.atlas, bake_target.uv_map, variant.image, variant.uv_map)
+	variant.workmesh.active_material = bake_material
+
+
+
+
+def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene):
+	#Create all intermediate targets
+	targets = dict()
+	mirror_list = list()
+
+	if key_blocks is None:
+		targets[None] = intermediate.pending.bake_target(
+			name = source_object.name,
+			object_name = source_object.name,
+			source_object = source_object,
+			bake_target = source_object,
+			shape_key_name = None,
+			uv_mode = 'UV_IM_MONOCHROME',
+		)
+
+	else:
+		for sk in key_blocks:
+			key = sk.name
+			targets[key] = intermediate.pending.bake_target(
+				name = f'{source_object.name}_{key}',
+				object_name = source_object.name,
+				source_object = source_object,
+				bake_target = source_object,
+				shape_key_name = key,
+				uv_mode = 'UV_IM_MONOCHROME',
+			)
+
+
+
+	#Configure targets and mirrors
+	for key, target in targets.items():
+		if key.endswith('_L'):
+			base = key[:-2]
+			Rk = f'{base}_R'
+			R = targets.get(Rk)
+
+			if R:
+				mirror_list.append(intermediate.mirror(target, R))
+
+			else:
+				log.error(f"Could not create mirror for {key} since there was no such object `{Rk}´")
+
+		elif key.endswith('_R'):
+			pass
+
+		elif key.endswith('__None'):
+			target.uv_mode = 'UV_IM_NIL'
+
+
+	#Create bake targets
+	for target in targets.values():
+		new = ht.bake_target_collection.add()
+		new.variant_collection.add()	# add default variant
+		for key, value in iter_dc(target):
+			setattr(new, key, value)
+
+		target.bake_target = new
+
+
+#DEPRECHATED
 def create_workmesh_from_key_blocks(ht, source_object, key_blocks, bake_scene):
 	#TODO - Here we should run our rules for the naming scheme
 	#One of these would be numbers after to indicate grouping
@@ -33,14 +185,26 @@ def create_workmesh_from_key_blocks(ht, source_object, key_blocks, bake_scene):
 	#Create all intermediate targets
 	targets = dict()
 	mirror_list = list()
-	for sk in key_blocks:
-		key = sk.name
-		targets[key] = intermediate.pending.bake_target(
-			name = f'{source_object.name}_{key}',
+
+	if key_blocks is None:
+		targets[None] = intermediate.pending.bake_target(
+			name = source_object.name,
 			object_name = source_object.name,
-			shape_key_name = key,
+			bake_target = source_object,
+			shape_key_name = None,
 			uv_mode = 'UV_IM_MONOCHROME',
 		)
+
+	else:
+		for sk in key_blocks:
+			key = sk.name
+			targets[key] = intermediate.pending.bake_target(
+				name = f'{source_object.name}_{key}',
+				object_name = source_object.name,
+				bake_target = source_object,
+				shape_key_name = key,
+				uv_mode = 'UV_IM_MONOCHROME',
+			)
 
 
 	#Configure targets and mirrors
@@ -76,20 +240,25 @@ def create_workmesh_from_key_blocks(ht, source_object, key_blocks, bake_scene):
 			log.warning(f'Name was changed to {copy_obj.name}')
 			target.name = copy_obj.name
 
-		#Remove all shapekeys except the one this object represents
-		for key in copy_obj.data.shape_keys.key_blocks:
-			if key.name != target.shape_key_name:
-				copy_obj.shape_key_remove(key)
+		# check if this target uses a shape key
+		if key is not None:
+			#Remove all shapekeys except the one this object represents
+			for key in copy_obj.data.shape_keys.key_blocks:
+				if key.name != target.shape_key_name:
+					copy_obj.shape_key_remove(key)
 
-		#Remove remaining
-		for key in copy_obj.data.shape_keys.key_blocks:
-			copy_obj.shape_key_remove(key)
+			#Remove remaining
+			for key in copy_obj.data.shape_keys.key_blocks:
+				copy_obj.shape_key_remove(key)
 
 		#TBD - should we set up a material here for copy_obj?
 		#TBD - should we put things in collections based on their source object? Such as all Avatar-objects in one collection
-		bake_scene.collection.objects.link(copy_obj)
+		if target.bake_target.multi_variants:
+			for index, variant in enumerate(target.bake_target.variant_collection):
+				print('VAR', index, variant)
 
-
+		else:
+			bake_scene.collection.objects.link(copy_obj)
 
 		print(target)
 
@@ -120,8 +289,7 @@ def new_workmesh_from_selected(operator, context, ht):
 			create_workmesh_from_key_blocks(ht, source_object, shape_keys.key_blocks, get_bake_scene(context))
 
 		else:
-			#IMPLEMENT
-			print(source_object)
+			create_workmesh_from_key_blocks(ht, source_object, None, get_bake_scene(context))
 
 
 
@@ -153,11 +321,44 @@ class generic_list:
 			set_selected(min(get_selected(), last_id))
 
 
+
 def auto_assign_atlas(operator, context, ht):
-	'Goes through all bake targets and assigns them to the correct atlas and UV set based on the uv_mode'
+	'Goes through all bake targets and assigns them to the correct intermediate atlas and UV set based on the uv_mode'
+
+
+	#TODO - here we need to put things in bins like how the UV packing does below but before we can do this we should look at the variants
 
 	for bake_target in ht.bake_target_collection:
-		log.debug(f'BAKE	{bake_target.name}	{bake_target.get_mirror_type(ht)}')
+		if bake_target.bake_mode == 'UV_BM_REGULAR':
+
+			if bake_target.uv_mode == 'UV_IM_MONOCHROME':
+				pass	#TODO - implement
+			elif bake_target.uv_mode == 'UV_IM_COLOR':
+				pass	#TODO - implement
+			elif bake_target.uv_mode == 'UV_IM_NIL':
+				pass	#TODO - implement
+			elif bake_target.uv_mode == 'UV_IM_FROZEN':
+				pass	#TODO - implement
+			else:
+				raise Exception()	#TODO internal error
+
+			# check uv target channel
+			if bake_target.uv_target_channel == 'UV_TARGET_NIL':
+				pass	#TODO - implement
+			elif bake_target.uv_target_channel == 'UV_TARGET_COLOR':
+				pass	#TODO - implement
+			elif bake_target.uv_target_channel == 'UV_TARGET_R':
+				pass	#TODO - implement
+			elif bake_target.uv_target_channel == 'UV_TARGET_G':
+				pass	#TODO - implement
+			elif bake_target.uv_target_channel == 'UV_TARGET_B':
+				pass	#TODO - implement
+			else:
+				raise Exception()	#TODO internal error
+
+
+
+
 
 def get_partitioning_object(scene):
 	'Gets the partitioning object used in UV packing. If no such object exists, we create it. This will be using the current context so take care when calling this!'

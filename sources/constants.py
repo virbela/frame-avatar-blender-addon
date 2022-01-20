@@ -7,6 +7,7 @@ class MIRROR_TYPE(enum.Enum):
 	PRIMARY = object()
 	SECONDARY = object()
 
+IGNORED = type('IGNORED', (), {})
 
 
 WORK_SCENE = 'Scene'
