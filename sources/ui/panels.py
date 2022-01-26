@@ -248,9 +248,17 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 						else:
 							self.layout.label(text=f"Atlas: {et.atlas.name}", icon_value=et.atlas.preview.icon_id)
 
-
 						#self.layout.label(text=f"UV set: {et.uv_map or '(not assigned)'}")
 						self.layout.label(text=f"UV target: {UV_TARGET_CHANNEL.members[et.uv_target_channel].name}", icon=UV_TARGET_CHANNEL.members[et.uv_target_channel].icon)
+
+						#TODO - this should perhaps not be visible?
+						if et.intermediate_atlas is None:
+							self.layout.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
+						else:
+							if preview := et.intermediate_atlas.preview:
+								self.layout.label(text=f"Intermediate atlas: {et.intermediate_atlas.name}", icon_value=preview.icon_id)
+							else:
+								self.layout.label(text=f"Intermediate atlas: {et.intermediate_atlas.name}", icon='FILE_IMAGE')
 
 
 

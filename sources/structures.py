@@ -31,13 +31,24 @@ class intermediate:
 			preview:			str
 
 
+
+
 	class packing:
 		@dataclass
 		class bake_target:
-			bake_target:		object	#properties.BakeTarget
-			bake_object:		object	#the object in the bake scene
+			bake_target:		object
+			variant:			object
 			area:				float		= 0.0
 			variant_name:		str			= None
+			bin:				object		= None
+
+		@dataclass
+		class atlas_bin:
+			name:				str
+			allocated:			float		= 0.0
+			atlas:				object		= None
+
+
 
 	@dataclass
 	class mirror:

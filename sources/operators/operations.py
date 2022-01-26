@@ -1,4 +1,4 @@
-from ..helpers import IMPLEMENTATION_PENDING, get_bake_scene, get_work_scene, a_get, a_set, set_scene, set_selection, set_active, clear_selection, require_named_entry, get_nice_name
+from ..helpers import IMPLEMENTATION_PENDING, get_bake_scene, get_work_scene, a_get, a_set, set_scene, set_selection, set_active, clear_selection, require_named_entry, get_nice_name, create_named_entry
 from ..logging import log_writer as log
 from ..structures import intermediate, iter_dc
 from ..materials import get_material_variants, setup_bake_material
@@ -17,8 +17,6 @@ update_all_materials = IMPLEMENTATION_PENDING
 update_selected_workmesh_all_shapekeys = IMPLEMENTATION_PENDING
 update_selected_workmesh_active_shapekey = IMPLEMENTATION_PENDING
 
-create_workmeshes_for_all_targets = IMPLEMENTATION_PENDING
-create_workmeshes_for_selected_target = IMPLEMENTATION_PENDING
 
 
 def validate_targets(operator, context, ht):
@@ -49,61 +47,63 @@ def update_selected_material(operator, context, ht):
 		if variant := bake_target.variant_collection[bake_target.selected_variant]:
 			update_workmesh_materials(context, ht, bake_target, variant)
 
-# def create_workmeshes_for_all_targets(operator, context, ht):
-# 	pass
+def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
+	#TODO - when conditions fail we should add log entries
+	for variant in bake_target.variant_collection:
+
+		pending_name = f'{bake_target.name}_{variant.name}'
+
+		if source_object := bake_target.source_object:
+			pending_object = source_object.copy()
+			pending_object.name = pending_name
+			pending_object.data = source_object.data.copy()
+			pending_object.data.name = pending_name
+
+			# Create UV map for painting
+			bake_uv = pending_object.data.uv_layers[0]	# Assume first UV map is the bake one
+			local_uv = pending_object.data.uv_layers.new(name='Painting')	#TODO - not hardcode
+			set_uv_map(pending_object, local_uv.name)
+
+			#TBD - what should we do when an object already exists? Remove existing?
+			# if bake_target.name != pending_object.name:
+			# 	log.warning(f'Name was changed to {pending_object.name}')
+
+			# check if this target uses a shape key
+			if shape_key := pending_object.data.shape_keys.key_blocks.get(bake_target.shape_key_name):
+				#Remove all shapekeys except the one this object represents
+				for key in pending_object.data.shape_keys.key_blocks:
+					if key.name != bake_target.shape_key_name:
+						pending_object.shape_key_remove(key)
+
+				#Remove remaining
+				for key in pending_object.data.shape_keys.key_blocks:
+					pending_object.shape_key_remove(key)
+
+		bake_scene.collection.objects.link(pending_object)
+
+		variant.workmesh = pending_object
+		variant.uv_map = local_uv.name
+		bake_target.uv_map = bake_uv.name		#TODO - should the target be in each variant perhaps?
+
+		update_workmesh_materials(context, ht, bake_target, variant)
+
+def create_workmeshes_for_all_targets(operator, context, ht):
+	bake_scene = get_bake_scene(context)
+	for bake_target in ht.bake_target_collection:
+		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
 def create_workmeshes_for_selected_target(operator, context, ht):
 
-	#TODO - when conditions fail we should add log entries
+	#TODO - handle no selected target
 	if bake_target := ht.get_selected_bake_target():
 		bake_scene = get_bake_scene(context)
+		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
-		for variant in bake_target.variant_collection:
-
-			pending_name = f'{bake_target.name}_{variant.name}'
-
-			if source_object := bake_target.source_object:
-				pending_object = source_object.copy()
-				pending_object.name = pending_name
-				pending_object.data = source_object.data.copy()
-				pending_object.data.name = pending_name
-
-				# Create UV maps
-				bake_uv = pending_object.data.uv_layers.new(name='Baking')	#TODO - not hardcode
-				local_uv = pending_object.data.uv_layers.new(name='Local')	#TODO - not hardcode
-				set_uv_map(pending_object, local_uv.name)
-				#TBD - what should we do when an object already exists? Remove existing?
-				# if bake_target.name != pending_object.name:
-				# 	log.warning(f'Name was changed to {pending_object.name}')
-
-				# check if this target uses a shape key
-				if shape_key := pending_object.data.shape_keys.key_blocks.get(bake_target.shape_key_name):
-					#Remove all shapekeys except the one this object represents
-					for key in pending_object.data.shape_keys.key_blocks:
-						if key.name != bake_target.shape_key_name:
-							pending_object.shape_key_remove(key)
-
-					#Remove remaining
-					for key in pending_object.data.shape_keys.key_blocks:
-						pending_object.shape_key_remove(key)
-
-			bake_scene.collection.objects.link(pending_object)
-
-			variant.workmesh = pending_object
-			variant.uv_map = local_uv.name
-			bake_target.uv_map = bake_uv.name		#TODO - should the target be in each variant perhaps?
-
-			update_workmesh_materials(context, ht, bake_target, variant)
 
 def update_workmesh_materials(context, ht,  bake_target, variant):
 	#TODO - create all materials
 
 	#TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
-	if not variant.image:
-		variant.workmesh.active_material = None
-		print('no img')
-		return
-
 	if not variant.uv_map:
 		variant.workmesh.active_material = None
 		print('no uv')
@@ -326,35 +326,113 @@ def auto_assign_atlas(operator, context, ht):
 	'Goes through all bake targets and assigns them to the correct intermediate atlas and UV set based on the uv_mode'
 
 
-	#TODO - here we need to put things in bins like how the UV packing does below but before we can do this we should look at the variants
+	#TODO - currently we will just hardcode the intermediate atlases but later we need to check which to use and create them if needed
+	a_width = 4096
+	a_height = 4096
 
+	atlas_color = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_color', 	a_width, a_height, recreate=False, ignore_existing=True)
+	atlas_red = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_red', 		a_width, a_height, recreate=False, ignore_existing=True)
+	atlas_green = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_green', 	a_width, a_height, recreate=False, ignore_existing=True)
+	atlas_blue = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_blue', 	a_width, a_height, recreate=False, ignore_existing=True)
+
+
+	#TODO - here we need to put things in bins like how the UV packing does below but before we can do this we should look at the variants
+	#TBD - should we do it all from beginning? for now yes - maybe later we can have selection
+
+	#TO-DOC - document what happens here properly
+
+	uv_object_list = list()
+	#todo note 1
 	for bake_target in ht.bake_target_collection:
+		#mirror, mt = bake_target.get_mirror_type(ht)
+
 		if bake_target.bake_mode == 'UV_BM_REGULAR':
 
-			if bake_target.uv_mode == 'UV_IM_MONOCHROME':
-				pass	#TODO - implement
-			elif bake_target.uv_mode == 'UV_IM_COLOR':
-				pass	#TODO - implement
-			elif bake_target.uv_mode == 'UV_IM_NIL':
-				pass	#TODO - implement
-			elif bake_target.uv_mode == 'UV_IM_FROZEN':
-				pass	#TODO - implement
-			else:
-				raise Exception()	#TODO internal error
+			for variant_name, variant in bake_target.iter_variants():
 
-			# check uv target channel
-			if bake_target.uv_target_channel == 'UV_TARGET_NIL':
-				pass	#TODO - implement
-			elif bake_target.uv_target_channel == 'UV_TARGET_COLOR':
-				pass	#TODO - implement
-			elif bake_target.uv_target_channel == 'UV_TARGET_R':
-				pass	#TODO - implement
-			elif bake_target.uv_target_channel == 'UV_TARGET_G':
-				pass	#TODO - implement
-			elif bake_target.uv_target_channel == 'UV_TARGET_B':
-				pass	#TODO - implement
-			else:
-				raise Exception()	#TODO internal error
+				mesh = bmesh.new()
+				mesh.from_mesh(variant.workmesh.data)
+				uv_area = sum(face.calc_area() * bake_target.uv_area_weight for face in mesh.faces)
+				mesh.free()
+
+				uv_object_list.append(intermediate.packing.bake_target(bake_target, variant, uv_area, variant_name))
+
+
+
+
+	monochrome_targets = list()
+	color_targets = list()
+	nil_targets = list()
+	frozen_targets = list()
+	for uv in uv_object_list:
+		if uv.bake_target.uv_mode == 'UV_IM_MONOCHROME':
+			monochrome_targets.append(uv)
+		elif uv.bake_target.uv_mode == 'UV_IM_COLOR':
+			color_targets.append(uv)
+		elif uv.bake_target.uv_mode == 'UV_IM_NIL':
+			nil_targets.append(uv)
+		elif uv.bake_target.uv_mode == 'UV_IM_FROZEN':
+			frozen_targets.append(uv)
+		else:
+			raise Exception(uv.bake_target.uv_mode)	#TODO proper exception
+
+	log.debug(f'UV bins - monochrome: {len(monochrome_targets)}, color: {len(color_targets)}, nil: {len(nil_targets)}, frozen: {len(frozen_targets)}')
+
+
+	#NOTE - we support multiple color bins but it is not used yet
+	color_bins = [
+		intermediate.packing.atlas_bin('color', atlas=atlas_color),
+	]
+
+	mono_bins = [
+		intermediate.packing.atlas_bin('red', atlas=atlas_red),
+		intermediate.packing.atlas_bin('green', atlas=atlas_green),
+		intermediate.packing.atlas_bin('blue', atlas=atlas_blue),
+	]
+
+
+	all_targets = [
+		(monochrome_targets, mono_bins),
+		(color_targets, color_bins),
+	]
+
+	for target_list, bin_list in all_targets:
+		for uv_island in sorted(target_list, reverse=True, key=lambda island: island.area):
+			uv_island.bin = target_bin = min(bin_list, key=lambda bin: bin.allocated)
+			uv_island.bake_target.intermediate_atlas = target_bin.atlas
+			target_bin.allocated += uv_island.area
+
+
+
+
+
+	# for bake_target in ht.bake_target_collection:
+	# 	if bake_target.bake_mode == 'UV_BM_REGULAR':
+
+	# 		if bake_target.uv_mode == 'UV_IM_MONOCHROME':
+	# 			pass	#TODO - implement
+	# 		elif bake_target.uv_mode == 'UV_IM_COLOR':
+	# 			pass	#TODO - implement
+	# 		elif bake_target.uv_mode == 'UV_IM_NIL':
+	# 			pass	#TODO - implement
+	# 		elif bake_target.uv_mode == 'UV_IM_FROZEN':
+	# 			pass	#TODO - implement
+	# 		else:
+	# 			raise Exception()	#TODO internal error
+
+			# # check uv target channel
+			# if bake_target.uv_target_channel == 'UV_TARGET_NIL':
+			# 	pass	#TODO - implement
+			# elif bake_target.uv_target_channel == 'UV_TARGET_COLOR':
+			# 	pass	#TODO - implement
+			# elif bake_target.uv_target_channel == 'UV_TARGET_R':
+			# 	pass	#TODO - implement
+			# elif bake_target.uv_target_channel == 'UV_TARGET_G':
+			# 	pass	#TODO - implement
+			# elif bake_target.uv_target_channel == 'UV_TARGET_B':
+			# 	pass	#TODO - implement
+			# else:
+			# 	raise Exception()	#TODO internal error
 
 
 
@@ -414,6 +492,13 @@ bake_all_bake_targets = IMPLEMENTATION_PENDING
 bake_selected_bake_targets = IMPLEMENTATION_PENDING
 
 def pack_uv_islands(operator, context, ht):
+
+	for bake_target in ht.bake_target_collection:
+		print(bake_target.name, bake_target.intermediate_atlas)
+
+
+#DEPRECATED
+def old_pack_uv_islands(operator, context, ht):
 
 	#TO-DOC these operations should be more clearly documented!
 

@@ -154,7 +154,10 @@ class BakeTarget(frame_property_group):
 
 	#TBD - use this?
 	uv_map:							bpy.props.StringProperty(name="UV map", default='UVMap')
+	#NOTE - we are not caring about target channel right now - we instead use intermediate_atlas
 	uv_target_channel:				bpy.props.EnumProperty(items=tuple(UV_TARGET_CHANNEL), name="UV target channel", default=0)
+
+	intermediate_atlas:				bpy.props.PointerProperty(name='Intermediate atlas', type=bpy.types.Image)
 
 
 	#Variants
@@ -223,12 +226,22 @@ class BakeTarget(frame_property_group):
 	# def get_bake_scene_name(self):
 	# 	return self.identifier
 
+	#NOTE we should probably deprecate this in favor of iter_variants
 	# this doesn't yield anything if there are no variants
 	def iter_bake_scene_variants(self):
 		prefix = self.name # self.get_bake_scene_name()
 		if self.multi_variants:
 			for variant in self.variant_collection:
 				yield f'{prefix}.{variant.name}', variant
+
+
+	def iter_variants(self):
+		prefix = self.name # self.get_bake_scene_name()
+		for variant in self.variant_collection:
+			if self.multi_variants:
+				yield f'{prefix}.{variant.name}', variant
+			else:
+				yield f'{prefix}', variant
 
 
 	def iter_bake_scene_variant_names(self):

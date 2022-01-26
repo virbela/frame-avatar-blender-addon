@@ -94,21 +94,22 @@ def require_named_entry(collection, name):
 		raise FrameException.NamedEntryNotFound(collection, name)
 
 #TODO - we should use an enum mode instead of a bunch of booleans which is confusing
-def create_named_entry(collection, name, allow_rename=False, recreate=False, ignore_existing=False):
+#TODO - ignore_existing is not very well named
+def create_named_entry(collection, name, *positional, allow_rename=False, recreate=False, ignore_existing=False):
 
 	if name in collection:
 		if recreate:
 			collection.remove(collection.get(name))
-			return collection.new(name)
+			return collection.new(name, *positional)
 		elif ignore_existing:
 			return collection.get(name)
 		elif allow_rename:
-			return collection.new(name)
+			return collection.new(name, *positional)
 		else:
 			raise FrameException.FailedToCreateNamedEntry(collection, name)
 
 	else:
-		return collection.new(name)
+		return collection.new(name, *positional)
 
 
 
