@@ -152,8 +152,8 @@ class BakeTarget(frame_property_group):
 	atlas:							bpy.props.PointerProperty(name="Atlas image", type=bpy.types.Image)
 	# ↑ This is used for storing the automatic choice as well as the manual (frozen) one
 
-	#TBD - use this?
-	uv_map:							bpy.props.StringProperty(name="UV map", default='UVMap')
+	#TBD - use this? - yes we need UV map for when rescaling from source
+	source_uv_map:					bpy.props.StringProperty(name="UV map", default='UVMap')
 	#NOTE - we are not caring about target channel right now - we instead use intermediate_atlas
 	uv_target_channel:				bpy.props.EnumProperty(items=tuple(UV_TARGET_CHANNEL), name="UV target channel", default=0)
 

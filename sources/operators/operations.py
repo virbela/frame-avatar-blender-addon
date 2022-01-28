@@ -497,9 +497,53 @@ def assign_uv_coords(obj, assign_coords):
 bake_all_bake_targets = IMPLEMENTATION_PENDING
 bake_selected_bake_targets = IMPLEMENTATION_PENDING
 
+
+class guarded_operator:
+	def __init__(self, operator):
+		self.operator = operator
+
+	def __repr__(self):
+		return f'<{self.__class__.__name__} of {self.operator}>'
+
+	def __call__(self, *pos, **named):
+		if self.operator.poll():
+			return self.operator(*pos, **named)
+
+
+disable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.disable_target_box)
+enable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.enable_target_box)
+
+
+def copy_and_transform_uv(source_object, source_layer, target_object, target_layer, scale_factor=1.0):
+
+	#TODO - investigate if we can get uv layer index without actually changing it and getting mesh.loops.layers.uv.active
+	bpy.ops.object.mode_set(mode='OBJECT')
+
+	#TODO - would be great if we made a context manager for these commands so that we could reset all changes when exiting the context (this applies to a lot of things outside this function too)
+	set_uv_map(source_object, source_layer)
+	set_uv_map(target_object, target_layer)
+
+	source_mesh = bmesh.new()
+	source_mesh.from_mesh(source_object.data)
+	source_uv_layer_index = source_mesh.loops.layers.uv.active
+
+	target_mesh = bmesh.new()
+	target_mesh.from_mesh(target_object.data)
+	target_uv_layer_index = target_mesh.loops.layers.uv.active
+
+	#TODO - use a strict zip here so we can detect error and also handle any such errors using the .free() methods in the finalization handler
+	for source_face, target_face in zip(source_mesh.faces, target_mesh.faces):
+		for source_loop, target_loop in zip(source_face.loops, target_face.loops):
+			source_uv = source_loop[source_uv_layer_index].uv
+			target_loop[target_uv_layer_index].uv = source_uv * scale_factor
+
+	target_mesh.to_mesh(target_object.data)
+	source_mesh.free()
+	target_mesh.free()
+
+#DEPRECATED
 def rescale_uv(object, uv_layer, factor):
 	bpy.ops.object.mode_set(mode='OBJECT')
-	#uv_layer = uv_object_list[0].variant.workmesh.data.uv_layers['UVMap']
 	set_uv_map(object, uv_layer)
 
 	mesh = bmesh.new()
@@ -516,23 +560,16 @@ def rescale_uv(object, uv_layer, factor):
 
 
 def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_map, box=None):
-	#TODO - we must generalize this function so we can do this for each of the intermediate atlases
-
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 	set_scene(context, bake_scene)
 
-
-	#TODO - currently we don't know if we already rescaled UVs so the operation will become problematic when running it multiple times
-	#		we could fix this either by having an original UV map in the work mesh or accessing the original UV map from the source object
-
 	uv_object_list = [u for u in all_uv_object_list if u.bake_target.intermediate_atlas == atlas]
 
-
 	for uv_island in uv_object_list:
-		rescale_uv(uv_island.variant.workmesh, uv_map, uv_island.area *uv_island.bake_target.uv_area_weight)
+		scale_factor = uv_island.area * uv_island.bake_target.uv_area_weight
+		copy_and_transform_uv(uv_island.bake_target.source_object, uv_island.bake_target.source_uv_map, uv_island.variant.workmesh, uv_map, scale_factor)
 
-
-	#FIX skipping partitioning object temporarily
+	#TO-FIX skipping partitioning object temporarily
 	set_selection(view_layer.objects, *(u.variant.workmesh for u in uv_object_list))
 	# set first to active since we need an arbritary active object
 	set_active(view_layer.objects, uv_object_list[0].variant.workmesh)
@@ -543,12 +580,11 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 	bpy.ops.uv.select_all(action='SELECT')		#Select UVs in UV editor
 
 
-	#NOTE - we should make sure the normalize box is not set so this is not automatically run when packing since we also want to factor in our own weights
-	#bpy.ops.uv.average_islands_scale()
-
-
 	bpy.ops.uvpackmaster2.split_overlapping_islands()
 	bake_scene.uvp2_props.rot_step = 45
+
+	# note - we use guarded operators for setting the state of the packing box since setting it to the same state it already is will fail
+	disable_packing_box()
 
 	if box:
 		(	bake_scene.uvp2_props.target_box_p1_x,
@@ -556,10 +592,10 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 			bake_scene.uvp2_props.target_box_p2_x,
 			bake_scene.uvp2_props.target_box_p2_y ) = box
 
-		bpy.ops.uvpackmaster2.enable_target_box()
+		enable_packing_box()
 
 	bpy.ops.uvpackmaster2.uv_pack()
-	bpy.ops.uvpackmaster2.disable_target_box()
+	disable_packing_box()
 
 	clear_selection(view_layer.objects)
 	bpy.ops.object.mode_set(mode='OBJECT')
@@ -575,64 +611,9 @@ def pack_uv_islands(operator, context, ht):
 	color_box = (0.0, 0.0, 1.0, ht.color_percentage / 100.0)
 
 	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_red'], 'UVMap', mono_box)
-	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_green'], 'UVMap', mono_box)
-	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_blue'], 'UVMap', mono_box)
-	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_color'], 'UVMap', color_box)
-
-	# #TODO - we must generalize this function so we can do this for each of the intermediate atlases
-
-	# bake_scene = get_bake_scene(context)
-	# view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
-	# set_scene(context, bake_scene)
-
-	# #TODO - currently we don't know if we already rescaled UVs so the operation will become problematic when running it multiple times
-	# #		we could fix this either by having an original UV map in the work mesh or accessing the original UV map from the source object
-
-	# #test purpose
-	# current_atlas = bpy.data.images['atlas_intermediate_red']
-
-	# all_uv_object_list = get_intermediate_uv_object_list(ht)
-
-	# uv_object_list = [u for u in all_uv_object_list if u.bake_target.intermediate_atlas == current_atlas]
-
-
-	# for uv_island in uv_object_list:
-	# 	rescale_uv(uv_island.variant.workmesh, 'UVMap', uv_island.area *uv_island.bake_target.uv_area_weight)
-
-
-	# #FIX skipping partitioning object temporarily
-	# set_selection(view_layer.objects, *(u.variant.workmesh for u in uv_object_list))
-	# # set first to active since we need an arbritary active object
-	# set_active(view_layer.objects, uv_object_list[0].variant.workmesh)
-
-
-
-	# # enter edit mode and select all faces and UVs
-	# bpy.ops.object.mode_set(mode='EDIT')
-	# bpy.ops.mesh.select_all(action='SELECT')	#Select faces in model editor
-	# bpy.ops.uv.select_all(action='SELECT')		#Select UVs in UV editor
-
-
-	# #NOTE - we should make sure the normalize box is not set so this is not automatically run when packing since we also want to factor in our own weights
-	# #bpy.ops.uv.average_islands_scale()
-
-
-	# bpy.ops.uvpackmaster2.split_overlapping_islands()
-	# bake_scene.uvp2_props.rot_step = 45
-
-	# bake_scene.uvp2_props.target_box_p1_x = 0.0
-	# bake_scene.uvp2_props.target_box_p1_y = 1.0 - ht.color_percentage / 100.0
-	# bake_scene.uvp2_props.target_box_p2_x = 1.0
-	# bake_scene.uvp2_props.target_box_p2_y = 0.0
-
-	# bpy.ops.uvpackmaster2.enable_target_box()
-	# bpy.ops.uvpackmaster2.uv_pack()
-
-
-	# # bpy.ops.object.mode_set(mode='OBJECT')
-	# # clear_selection(view_layer.objects)
-
-
+	#pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_green'], 'UVMap', mono_box)
+	#pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_blue'], 'UVMap', mono_box)
+	#pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_color'], 'UVMap', color_box)
 
 
 
