@@ -74,10 +74,19 @@ class FRAME_PT_workflow(frame_panel):
 			work_materials.operator('frame.switch_to_bake_material')
 			work_materials.operator('frame.switch_to_preview_material')
 
+			work_materials.separator()
+			work_materials.operator('frame.select_by_atlas')
+			work_materials.prop(HT, 'select_by_atlas_image')
+
 			baking = self.layout.box()
 			baking.label(text='Baking')
 			baking.operator('frame.bake_selected')
 			baking.operator('frame.bake_all')
+
+			helper_tools = self.layout.box()
+			helper_tools.label(text='Helpers')
+			helper_tools.operator('frame.select_objects_by_uv')
+			helper_tools.operator('frame.reset_uv_transforms')
 
 			#TODO - clean this up!
 
@@ -154,6 +163,23 @@ class template_expandable_section:
 			return lambda *a, **n: None	#This is a dummy function so when this template is hidden nothing is displayed
 
 
+def draw_variant(layout, variant, bake_scene):
+	layout.prop(variant, 'image')
+
+	layout.prop_search(variant, 'workmesh', bake_scene, 'objects')
+	if variant.workmesh:
+		layout.prop_search(variant, 'uv_map', variant.workmesh.data, 'uv_layers')
+	else:
+		layout.label(text='Select work mesh to choose UV map')
+
+	#TODO - this should perhaps not be visible?
+	if variant.intermediate_atlas is None:
+		layout.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
+	else:
+		if preview := variant.intermediate_atlas.preview:
+			layout.label(text=f"Intermediate atlas: {variant.intermediate_atlas.name}", icon_value=preview.icon_id)
+		else:
+			layout.label(text=f"Intermediate atlas: {variant.intermediate_atlas.name}", icon='FILE_IMAGE')
 
 
 class FRAME_PT_batch_bake_targets(frame_panel):
@@ -207,13 +233,8 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 
 						if et.selected_variant != -1:
 							var = et.variant_collection[et.selected_variant]
-							variants.prop(var, 'image')
+							draw_variant(variants, var, bake_scene)
 
-							variants.prop_search(var, 'workmesh', bake_scene, 'objects')
-							if var.workmesh:
-								variants.prop_search(var, 'uv_map', var.workmesh.data, 'uv_layers')
-							else:
-								variants.label(text='Select work mesh to choose UV map')
 
 
 					else:	# draw the first entry only
@@ -221,17 +242,12 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 							variants.label(text='Please revalidate bake target')
 						else:
 							var = et.variant_collection[0]
-							variants.prop_search(var, 'image', bpy.data, 'images')
-
-							variants.prop_search(var, 'workmesh', bake_scene, 'objects')
-							if var.workmesh:
-								variants.prop_search(var, 'uv_map', var.workmesh.data, 'uv_layers')
-							else:
-								variants.label(text='Select work mesh to choose UV map')
-
+							draw_variant(variants, var, bake_scene)
 
 
 					self.layout.prop(et, 'uv_mode')
+
+					#TODO - should we use uv_target_channel ?
 
 					if et.uv_mode == 'UV_IM_FROZEN':
 						self.layout.prop(et, 'atlas')
@@ -249,16 +265,7 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 							self.layout.label(text=f"Atlas: {et.atlas.name}", icon_value=et.atlas.preview.icon_id)
 
 						#self.layout.label(text=f"UV set: {et.uv_map or '(not assigned)'}")
-						self.layout.label(text=f"UV target: {UV_TARGET_CHANNEL.members[et.uv_target_channel].name}", icon=UV_TARGET_CHANNEL.members[et.uv_target_channel].icon)
-
-						#TODO - this should perhaps not be visible?
-						if et.intermediate_atlas is None:
-							self.layout.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
-						else:
-							if preview := et.intermediate_atlas.preview:
-								self.layout.label(text=f"Intermediate atlas: {et.intermediate_atlas.name}", icon_value=preview.icon_id)
-							else:
-								self.layout.label(text=f"Intermediate atlas: {et.intermediate_atlas.name}", icon='FILE_IMAGE')
+						#self.layout.label(text=f"UV target: {UV_TARGET_CHANNEL.members[et.uv_target_channel].name}", icon=UV_TARGET_CHANNEL.members[et.uv_target_channel].icon)
 
 
 

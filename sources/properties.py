@@ -119,6 +119,9 @@ class BakeVariant(frame_property_group):
 
 	workmesh:				bpy.props.PointerProperty(name='Work mesh', type=bpy.types.Object)
 
+	#NOTE - we are not caring about target channel right now - we instead use intermediate_atlas
+	uv_target_channel:				bpy.props.EnumProperty(items=tuple(UV_TARGET_CHANNEL), name="UV target channel", default=0)
+	intermediate_atlas:				bpy.props.PointerProperty(name='Intermediate atlas', type=bpy.types.Image)
 
 
 class BakeTarget(frame_property_group):
@@ -154,10 +157,6 @@ class BakeTarget(frame_property_group):
 
 	#TBD - use this? - yes we need UV map for when rescaling from source
 	source_uv_map:					bpy.props.StringProperty(name="UV map", default='UVMap')
-	#NOTE - we are not caring about target channel right now - we instead use intermediate_atlas
-	uv_target_channel:				bpy.props.EnumProperty(items=tuple(UV_TARGET_CHANNEL), name="UV target channel", default=0)
-
-	intermediate_atlas:				bpy.props.PointerProperty(name='Intermediate atlas', type=bpy.types.Image)
 
 
 	#Variants
@@ -293,6 +292,9 @@ class HomeomorphicProperties(frame_property_group):
 	color_percentage:					bpy.props.FloatProperty(name="Atlas color region percentage", default = 25.0)
 
 	painting_size:						bpy.props.IntProperty(name="Hand paint texture size", default = 1024)
+
+
+	select_by_atlas_image:				bpy.props.PointerProperty(name='Match atlas', type=bpy.types.Image)
 
 	def get_selected_bake_target(self):
 		if self.selected_bake_target != -1:

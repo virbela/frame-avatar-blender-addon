@@ -18,6 +18,23 @@ update_selected_workmesh_all_shapekeys = IMPLEMENTATION_PENDING
 update_selected_workmesh_active_shapekey = IMPLEMENTATION_PENDING
 
 
+def select_by_atlas(operator, context, ht):
+
+	selection = list()
+	for bake_target in ht.bake_target_collection:
+		for variant_name, variant in bake_target.iter_variants():
+			if variant.intermediate_atlas == ht.select_by_atlas_image:
+				selection.append(variant.workmesh)
+
+
+	bake_scene = get_bake_scene(context)
+	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+	set_scene(context, bake_scene)
+
+	set_selection(view_layer.objects, *selection)
+
+
+
 
 def validate_targets(operator, context, ht):
 	validate_all(ht)
@@ -32,13 +49,13 @@ def create_mirror(ht, primary, secondary):
 
 
 def create_targets_from_selection(operator, context, ht):
-
+	bake_scene = get_bake_scene(context)
 	for source_object in context.selected_objects:
 		if shape_keys := source_object.data.shape_keys:
-			create_baketarget_from_key_blocks(ht, source_object, shape_keys.key_blocks, get_bake_scene(context))
+			create_baketarget_from_key_blocks(ht, source_object, shape_keys.key_blocks, bake_scene)
 
 		else:
-			create_baketarget_from_key_blocks(ht, source_object, None, get_bake_scene(context))
+			create_baketarget_from_key_blocks(ht, source_object, None, bake_scene)
 
 
 def update_selected_material(operator, context, ht):
@@ -346,6 +363,7 @@ def get_intermediate_uv_object_list(ht):
 def auto_assign_atlas(operator, context, ht):
 	'Goes through all bake targets and assigns them to the correct intermediate atlas and UV set based on the uv_mode'
 
+	#TODO - currently we don't take into account that variants may end up on different bins which is fine but we need to store the intermediate target with the variant and not the bake target
 
 	#TODO - currently we will just hardcode the intermediate atlases but later we need to check which to use and create them if needed
 	a_width = 4096
@@ -405,7 +423,7 @@ def auto_assign_atlas(operator, context, ht):
 	for target_list, bin_list in all_targets:
 		for uv_island in sorted(target_list, reverse=True, key=lambda island: island.area):
 			uv_island.bin = target_bin = min(bin_list, key=lambda bin: bin.allocated)
-			uv_island.bake_target.intermediate_atlas = target_bin.atlas
+			uv_island.variant.intermediate_atlas = target_bin.atlas
 			target_bin.allocated += uv_island.area
 
 
@@ -471,6 +489,7 @@ def set_uv_selection(obj, state):
 		for loop in face.loops:
 			uv = loop[uv_layer_index]
 			uv.select = state
+	mesh.free()
 
 
 def set_uv_map(obj, uv_map):
@@ -559,11 +578,17 @@ def rescale_uv(object, uv_layer, factor):
 	mesh.free()
 
 
+def reset_uv_transformations(bake_targets):
+	for bake_target in bake_targets:
+		for variant_name, variant in bake_target.iter_variants():
+			copy_and_transform_uv(bake_target.source_object, bake_target.source_uv_map, variant.workmesh, variant.uv_map)
+
+
 def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_map, box=None):
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 	set_scene(context, bake_scene)
 
-	uv_object_list = [u for u in all_uv_object_list if u.bake_target.intermediate_atlas == atlas]
+	uv_object_list = [u for u in all_uv_object_list if u.variant.intermediate_atlas == atlas]
 
 	for uv_island in uv_object_list:
 		scale_factor = uv_island.area * uv_island.bake_target.uv_area_weight
@@ -1044,6 +1069,9 @@ def switch_to_bake_material(operator, context, ht):
 
 def switch_to_preview_material(operator, context, ht):
 	generic_switch_to_material(context, ht, 'preview')
+
+
+
 
 class devtools:
 	def get_node_links(operator, context, ht):

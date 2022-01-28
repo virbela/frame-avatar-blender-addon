@@ -1,7 +1,8 @@
 from .base import frame_operator
 from ..logging import log_writer as log
 from . import operations
-
+#NOTE - these are only here because of some stuff put directly in here instead of in the proper place (operations)
+from ..helpers import get_bake_scene, set_selection
 
 # class FRAME_OT_new_workmesh_from_selected(frame_operator):
 # 	bl_label = 			"New from selected"
@@ -12,6 +13,11 @@ from . import operations
 
 
 
+class FRAME_OT_select_by_atlas(frame_operator):
+	bl_label = 			"Select work meshes based on atlas"
+	bl_idname = 		"frame.select_by_atlas"
+	#TODO - bl_description
+	frame_operator = 	operations.select_by_atlas
 
 class FRAME_OT_create_workmeshes_for_all_targets(frame_operator):
 	bl_label = 			"New work meshes from all bake targets"
@@ -338,3 +344,55 @@ class FRAME_OT_clear_bake_targets(frame_operator):
 		ht.selected_bake_target = -1
 		while len(ht.bake_target_collection):
 			ht.bake_target_collection.remove(0)
+
+
+
+#TODO - this should be moved to operations
+class FRAME_OT_select_objects_by_uv(frame_operator):
+	bl_label = 			"Select objects based on UV selection"
+	bl_idname = 		"frame.select_objects_by_uv"
+	#TODO bl_description
+	def frame_operator(operator, context, ht):
+
+		import bmesh
+
+		bake_scene = get_bake_scene(context)
+		to_select = list()
+		for obj in bake_scene.objects:
+			mesh = bmesh.from_edit_mesh(obj.data)
+			uv_layer_index = mesh.loops.layers.uv.active
+
+			def check_candidate_object():
+				for face in mesh.faces:
+					for loop in face.loops:
+						uv = loop[uv_layer_index]
+						if uv.select:
+							return True
+				return False
+
+			if check_candidate_object():
+				to_select.append(obj)
+
+			mesh.free()
+
+		view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+		set_selection(view_layer.objects, *to_select)
+
+#TODO - this should be moved to operations
+class FRAME_OT_reset_uv_transforms(frame_operator):
+	bl_label = 			"Reset UV transforms"
+	bl_idname = 		"frame.reset_uv_transforms"
+	bl_description =	"Resets UV transform to reflect the source object"
+	def frame_operator(operator, context, ht):
+
+		bake_scene = get_bake_scene(context)
+
+		view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+
+		to_reset = list()
+		for bake_target in ht.bake_target_collection:
+			for variant_name, variant in bake_target.iter_variants():
+				if variant.workmesh.select_get(view_layer=view_layer):
+					to_reset.append(bake_target)
+
+		operations.reset_uv_transformations(to_reset)
