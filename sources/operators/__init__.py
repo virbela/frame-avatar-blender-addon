@@ -305,8 +305,7 @@ class FRAME_OT_experiments(frame_operator):
 			target.active_material = bake_material
 			# set active view layer object and selection
 			#TODO - check how to do this for a bake group
-			set_selection(view_layer.objects, target)
-			set_active(view_layer.objects, target)
+			set_selection(view_layer.objects, target, synchronize_active=True, make_sure_active=True)
 
 			# perform baking
 			bpy.ops.object.bake(type='DIFFUSE', save_mode='EXTERNAL')
@@ -359,7 +358,8 @@ class FRAME_OT_select_objects_by_uv(frame_operator):
 		bake_scene = get_bake_scene(context)
 		to_select = list()
 		for obj in bake_scene.objects:
-			mesh = bmesh.from_edit_mesh(obj.data)
+			mesh = bmesh.new()
+			mesh.from_mesh(obj.data)
 			uv_layer_index = mesh.loops.layers.uv.active
 
 			def check_candidate_object():
@@ -376,7 +376,7 @@ class FRAME_OT_select_objects_by_uv(frame_operator):
 			mesh.free()
 
 		view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
-		set_selection(view_layer.objects, *to_select)
+		set_selection(view_layer.objects, *to_select, synchronize_active=True, make_sure_active=True)
 
 #TODO - this should be moved to operations
 class FRAME_OT_reset_uv_transforms(frame_operator):

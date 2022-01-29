@@ -116,15 +116,24 @@ def create_named_entry(collection, name, *positional, allow_rename=False, recrea
 def set_scene(context, scene):
 	context.window.scene = scene
 
-def set_selection(collection, *selected):
+def set_selection(collection, *selected, synchronize_active=False, make_sure_active=False):
 	'Replaces current selection'
 	new_selection = set(selected)
+
 	for item in collection:
 		#NOTE There are two APIs to select things, we will favor the setter since that seems the be most recent
 		if setter := getattr(item, 'select_set', None):
 			setter(item in new_selection)
 		else:
 			item.select = item in new_selection
+
+	# if there is an active element in this collection and it is not selected, we deactivate it if synchronize_active is set
+	if synchronize_active and collection.active not in new_selection:
+		collection.active = None
+
+	# select first if make_sure_active is set and there is no active object
+	if make_sure_active and collection.active is None and selected:
+		collection.active = selected[0]
 
 # this is just to make code more readable
 def clear_selection(collection):

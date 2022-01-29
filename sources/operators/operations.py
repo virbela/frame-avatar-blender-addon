@@ -30,9 +30,7 @@ def select_by_atlas(operator, context, ht):
 	bake_scene = get_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 	set_scene(context, bake_scene)
-
-	set_selection(view_layer.objects, *selection)
-
+	set_selection(view_layer.objects, *selection, synchronize_active=True, make_sure_active=True)
 
 
 
@@ -482,8 +480,10 @@ def get_partitioning_object(scene):
 	new.hide_render = True
 	return new
 
+#TODO - check if we need to_mesh or not for selections - this function will not be tested until we have the nil island reservation part in order
 def set_uv_selection(obj, state):
-	mesh = bmesh.from_edit_mesh(obj.data)
+	mesh = bmesh.new()
+	mesh.from_mesh(obj.data)
 	uv_layer_index = mesh.loops.layers.uv.active
 	for face in mesh.faces:
 		for loop in face.loops:
@@ -491,26 +491,31 @@ def set_uv_selection(obj, state):
 			uv.select = state
 	mesh.free()
 
-
 def set_uv_map(obj, uv_map):
 	obj.data.uv_layers[uv_map].active = True
 
 
-
+#TODO - check if we need to_mesh or not for selections - this function will not be tested until we have the nil island reservation part in order
 def set_face_selection(obj, state):
-	#It is important to destroy the bmesh object after adjusting selection but since it is local it will automatically be destroyed at return
-	mesh = bmesh.from_edit_mesh(obj.data)
+	mesh = bmesh.new()
+	mesh.from_mesh(obj.data)
 	for face in mesh.faces:
 		face.select = state
 
+	mesh.free()
+
+
 def assign_uv_coords(obj, assign_coords):
 	icoords = iter(assign_coords)
-	mesh = bmesh.from_edit_mesh(obj.data)
+	mesh = bmesh.new()
+	mesh.from_mesh(obj.data)
 	uv_layer_index = mesh.loops.layers.uv.active
 	for face in mesh.faces:
 		for loop, c in zip(face.loops, icoords):
 			loop[uv_layer_index].uv = c
 
+	mesh.to_mesh(obj.data)
+	mesh.free()
 
 
 bake_all_bake_targets = IMPLEMENTATION_PENDING
@@ -619,6 +624,9 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 
 		enable_packing_box()
 
+
+	bake_scene.uvp2_props.pixel_margin = 5	#TODO - not hardcode! We could just not set this and set it in UVP UI but I think it is better this is a setting in FABA so that we don't forget about it
+
 	bpy.ops.uvpackmaster2.uv_pack()
 	disable_packing_box()
 
@@ -636,9 +644,9 @@ def pack_uv_islands(operator, context, ht):
 	color_box = (0.0, 0.0, 1.0, ht.color_percentage / 100.0)
 
 	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_red'], 'UVMap', mono_box)
-	#pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_green'], 'UVMap', mono_box)
-	#pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_blue'], 'UVMap', mono_box)
-	#pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_color'], 'UVMap', color_box)
+	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_green'], 'UVMap', mono_box)
+	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_blue'], 'UVMap', mono_box)
+	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_color'], 'UVMap', color_box)
 
 
 
@@ -966,6 +974,7 @@ class bake_targets:
 	def remove(operator, context, ht):
 		generic_list.remove(ht.bake_target_collection, a_get(ht, 'selected_bake_target'), a_set(ht, 'selected_bake_target'))
 
+	#TDB use?
 	def edit_selected(operator, context, ht):
 		bake_target = ht.get_selected_bake_target()
 		if not bake_target:
