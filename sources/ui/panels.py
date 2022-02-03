@@ -86,7 +86,10 @@ class FRAME_PT_workflow(frame_panel):
 			helper_tools = self.layout.box()
 			helper_tools.label(text='Helpers')
 			helper_tools.operator('frame.select_objects_by_uv')
+			helper_tools.operator('frame.synchronize_visibility_to_render')
+			helper_tools.operator('frame.make_everything_visible')
 			helper_tools.operator('frame.reset_uv_transforms')
+			helper_tools.operator('frame.recalculate_normals')
 
 			#TODO - clean this up!
 

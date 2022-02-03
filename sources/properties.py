@@ -234,6 +234,7 @@ class BakeTarget(frame_property_group):
 				yield f'{prefix}.{variant.name}', variant
 
 
+	#TODO - use a helper function for creating names
 	def iter_variants(self):
 		prefix = self.name # self.get_bake_scene_name()
 		for variant in self.variant_collection:

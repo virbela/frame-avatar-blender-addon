@@ -1,8 +1,8 @@
 from .base import frame_operator
 from ..logging import log_writer as log
-from . import operations
-#NOTE - these are only here because of some stuff put directly in here instead of in the proper place (operations)
-from ..helpers import get_bake_scene, set_selection
+from . import operations, experiments
+
+
 
 # class FRAME_OT_new_workmesh_from_selected(frame_operator):
 # 	bl_label = 			"New from selected"
@@ -230,10 +230,6 @@ class FRAME_OT_synchronize_mirrors(frame_operator):
 
 
 
-from ..materials import get_material_variants
-
-
-
 #NOTICE - we currently don't have a reasonable way of quickly including or excluding aspects since python doesn't have a preprocessor. We can solve this somehow later though but currently manual intervention is required
 #	One solution would be to use a variable in a module but the minor drawback is that the code would still be there, even though it would not be run (this is probably a good solution)
 
@@ -242,157 +238,55 @@ class FRAME_OT_experiments(frame_operator):
 	bl_label = 			"Placeholder for experiments"
 	bl_idname = 		"frame.place_holder_for_experiments"
 	bl_description =	"This is for internal development purposes and should not be seen in distribution"
-	def frame_operator(operator, context, ht):
-
-		import bpy
-		print(bpy.context.active_object)
-		return
-
-
-		bt = ht.get_selected_bake_target()
-
-		if not bt:
-			return
-
-		from .. import materials
-		from ..helpers import create_named_entry, set_selection, set_active, get_bake_scene, require_named_entry, set_scene
-		import bpy
-		from ..constants import MIRROR_TYPE
-
-
-
-		mirror, mt = bt.get_mirror_type(ht)
-
-
-		if mt is MIRROR_TYPE.PRIMARY:
-			log.debug(f'{bt.name} is primary of mirror {mirror}, so we should bake it')
-		elif mt is MIRROR_TYPE.SECONDARY:
-			log.debug(f'{bt.name} is secondary of mirror {mirror}, so we should NOT bake it')
-			return
-		else:
-			log.debug(f'{bt.name} is not a mirror, so we should bake it')
-
-		atlas = bt.require_atlas()
-		uv_map = bt.uv_map
-
-
-
-		bake_scene = get_bake_scene(context)
-		# switch to bake scene
-		set_scene(context, bake_scene)
-
-		view_layer = bake_scene.view_layers[0]	#TODO - should make sure there is only one
-
-		#NOTE - one way to create the materials in a reasonable fascion is to name them according to the settings that can be different
-		#		currently a material is defined by 4 properties - target atlas, target uv, [diffuse atlas, diffuse uv] - where [] denotes optional
-		#	    One really useful property of creating all the materials other than potential caching benefits within blender is to be able
-		#		to troubleshoot baking by inspecting materials.
-
-		# The final solution should prepare all materials before executing batch baking
-		# but in this test we will do it here
-
-		#NOTE - we were not going to recreate materials but in this test we are doing the materials setup which SHOULD recreate them in case something was changed
-		variant_materials = get_material_variants(bt, bake_scene, atlas, uv_map, recreate=True)
-
-		# Do baking here
-		for variant_name, variant in bt.iter_bake_scene_variants():
-			target = require_named_entry(bake_scene.objects, variant_name)
-			materials = variant_materials[variant_name]
-			bake_material = bpy.data.materials[materials.bake]
-			preview_material = bpy.data.materials[materials.preview]
-
-			# select bake material as active material
-			target.active_material = bake_material
-			# set active view layer object and selection
-			#TODO - check how to do this for a bake group
-			set_selection(view_layer.objects, target, synchronize_active=True, make_sure_active=True)
-
-			# perform baking
-			bpy.ops.object.bake(type='DIFFUSE', save_mode='EXTERNAL')
-
-			# switch material to preview material
-			target.active_material = preview_material
-
+	frame_operator =	experiments.experiment_1
 
 #TODO - this should be guarded by a devmode boolean
 class FRAME_OT_node_get_links(frame_operator):
 	bl_label = 			"Copy links"
 	bl_idname = 		"frame.create_node_script"
 	bl_description =	"Enumerate links to stdout for programmtic replication"
-
-	frame_operator = operations.devtools.get_node_links
+	frame_operator = 	operations.devtools.get_node_links
 
 #TODO - this should be guarded by a devmode boolean
 class FRAME_OT_clear_bake_scene(frame_operator):
 	bl_label = 			"Remove everything from bake scene"
 	bl_idname = 		"frame.clear_bake_scene"
 	bl_description =	"This is for internal development purposes and should not be seen in distribution"
-	def frame_operator(operator, context, ht):
-		from ..helpers import get_bake_scene
-		import bpy
-		scene = get_bake_scene(context)
-		for item in scene.objects:
-			bpy.data.meshes.remove(item.data, do_unlink=True)
+	frame_operator = 	operations.clear_bake_scene
 
 #TODO - this should be guarded by a devmode boolean
 class FRAME_OT_clear_bake_targets(frame_operator):
 	bl_label = 			"Remove all bake targets"
 	bl_idname = 		"frame.clear_bake_targets"
 	bl_description =	"This is for internal development purposes and should not be seen in distribution"
-	def frame_operator(operator, context, ht):
-		ht.selected_bake_target = -1
-		while len(ht.bake_target_collection):
-			ht.bake_target_collection.remove(0)
+	frame_operator =	operations.clear_bake_targets
 
-
-
-#TODO - this should be moved to operations
 class FRAME_OT_select_objects_by_uv(frame_operator):
 	bl_label = 			"Select objects based on UV selection"
 	bl_idname = 		"frame.select_objects_by_uv"
 	#TODO bl_description
-	def frame_operator(operator, context, ht):
+	frame_operator =	operations.select_objects_by_uv
 
-		import bmesh
-
-		bake_scene = get_bake_scene(context)
-		to_select = list()
-		for obj in bake_scene.objects:
-			mesh = bmesh.new()
-			mesh.from_mesh(obj.data)
-			uv_layer_index = mesh.loops.layers.uv.active
-
-			def check_candidate_object():
-				for face in mesh.faces:
-					for loop in face.loops:
-						uv = loop[uv_layer_index]
-						if uv.select:
-							return True
-				return False
-
-			if check_candidate_object():
-				to_select.append(obj)
-
-			mesh.free()
-
-		view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
-		set_selection(view_layer.objects, *to_select, synchronize_active=True, make_sure_active=True)
-
-#TODO - this should be moved to operations
 class FRAME_OT_reset_uv_transforms(frame_operator):
 	bl_label = 			"Reset UV transforms"
 	bl_idname = 		"frame.reset_uv_transforms"
 	bl_description =	"Resets UV transform to reflect the source object"
-	def frame_operator(operator, context, ht):
+	frame_operator = 	operations.reset_uv_transforms
 
-		bake_scene = get_bake_scene(context)
+class FRAME_OT_recalculate_normals(frame_operator):
+	bl_label = 			"Recalculate normals on selected meshes"
+	bl_idname = 		"frame.recalculate_normals"
+	bl_description =	"Recalculates normals to combat artifacts"
+	frame_operator = 	operations.recalculate_normals
 
-		view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+class FRAME_OT_synchronize_visibility_to_render(frame_operator):
+	bl_label = 			"Show to render only"
+	bl_idname = 		"frame.synchronize_visibility_to_render"
+	bl_description =	"Will only make objects that are going to be rendered visible in the viewlayer"
+	frame_operator = 	operations.synchronize_visibility_to_render
 
-		to_reset = list()
-		for bake_target in ht.bake_target_collection:
-			for variant_name, variant in bake_target.iter_variants():
-				if variant.workmesh.select_get(view_layer=view_layer):
-					to_reset.append(bake_target)
-
-		operations.reset_uv_transformations(to_reset)
+class FRAME_OT_make_everything_visible(frame_operator):
+	bl_label = 			"Show everything"
+	bl_idname = 		"frame.make_everything_visible"
+	bl_description =	"Will make everything in the baking viewlayer visible"
+	frame_operator = 	operations.make_everything_visible

@@ -1,4 +1,4 @@
-from ..helpers import IMPLEMENTATION_PENDING, get_bake_scene, get_work_scene, a_get, a_set, set_scene, set_selection, set_active, clear_selection, require_named_entry, get_nice_name, create_named_entry
+from ..helpers import IMPLEMENTATION_PENDING, get_bake_scene, get_work_scene, a_get, a_set, set_scene, set_selection, set_active, clear_selection, require_named_entry, get_nice_name, create_named_entry, get_bake_target_variant_name, set_rendering
 from ..logging import log_writer as log
 from ..structures import intermediate, iter_dc
 from ..materials import get_material_variants, setup_bake_material
@@ -8,14 +8,37 @@ from .. import constants
 import bpy, bmesh
 import textwrap
 
+#REFACTOR - this module is kinda big and clunky. Would be good to only have the operations in here and the various helpers in helpers or somewhere else
+
 
 #TODO - fix this!
 update_selected_workmesh = IMPLEMENTATION_PENDING
 update_all_workmeshes = IMPLEMENTATION_PENDING
-update_all_materials = IMPLEMENTATION_PENDING
 
 update_selected_workmesh_all_shapekeys = IMPLEMENTATION_PENDING
 update_selected_workmesh_active_shapekey = IMPLEMENTATION_PENDING
+
+bake_all_bake_targets = IMPLEMENTATION_PENDING
+
+#NOTE - it is currently plural here but we can currently only select one bake target at a time
+#NOTE - we may want to have some functions for synchronizing selections such as "select bake targets based on work meshes" or "select work meshes based on bake target"
+def bake_selected_bake_targets(operator, context, ht):
+
+	bake_scene = get_bake_scene(context)
+	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+
+	if bake_target := ht.get_selected_bake_target():
+		if variant := bake_target.variant_collection[bake_target.selected_variant]:
+
+			set_scene(context, bake_scene)
+			#TODO - we should take into account bake groups - maybe also move this out to a more generic function
+			set_rendering(view_layer.objects, variant.workmesh)
+			set_selection(view_layer.objects, variant.workmesh, synchronize_active=True, make_sure_active=True)
+
+
+			print(bake_target, variant)
+
+
 
 
 def select_by_atlas(operator, context, ht):
@@ -56,8 +79,13 @@ def create_targets_from_selection(operator, context, ht):
 			create_baketarget_from_key_blocks(ht, source_object, None, bake_scene)
 
 
-def update_selected_material(operator, context, ht):
+def update_all_materials(operator, context, ht):
 
+	for bake_target in ht.bake_target_collection:
+		for variant_name, variant in bake_target.iter_variants():
+			update_workmesh_materials(context, ht, bake_target, variant)
+
+def update_selected_material(operator, context, ht):
 	if bake_target := ht.get_selected_bake_target():
 		if variant := bake_target.variant_collection[bake_target.selected_variant]:
 			update_workmesh_materials(context, ht, bake_target, variant)
@@ -66,7 +94,7 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 	#TODO - when conditions fail we should add log entries
 	for variant in bake_target.variant_collection:
 
-		pending_name = f'{bake_target.name}_{variant.name}'
+		pending_name = get_bake_target_variant_name(bake_target, variant)
 
 		if source_object := bake_target.source_object:
 			pending_object = source_object.copy()
@@ -124,10 +152,11 @@ def update_workmesh_materials(context, ht,  bake_target, variant):
 		print('no uv')
 		return
 
-	bake_material_name =f'bake-{bake_target.shortname}-{variant.name}'
+	bake_material_name =f'bake-{get_bake_target_variant_name(bake_target, variant)}'
 	bake_material = bpy.data.materials.new(bake_material_name)
 	bake_material.use_nodes = True	#contribution note 9
-	setup_bake_material(bake_material.node_tree, bake_target.atlas, bake_target.uv_map, variant.image, variant.uv_map)
+	#TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?
+	setup_bake_material(bake_material.node_tree, variant.intermediate_atlas, bake_target.source_uv_map, variant.image, variant.uv_map)
 	variant.workmesh.active_material = bake_material
 
 
@@ -518,8 +547,6 @@ def assign_uv_coords(obj, assign_coords):
 	mesh.free()
 
 
-bake_all_bake_targets = IMPLEMENTATION_PENDING
-bake_selected_bake_targets = IMPLEMENTATION_PENDING
 
 
 class guarded_operator:
@@ -625,6 +652,7 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 		enable_packing_box()
 
 
+	#NOTE - if we later do downsampling when doing final bake - we must consider the final pixel margin and not the intermediate one!
 	bake_scene.uvp2_props.pixel_margin = 5	#TODO - not hardcode! We could just not set this and set it in UVP UI but I think it is better this is a setting in FABA so that we don't forget about it
 
 	bpy.ops.uvpackmaster2.uv_pack()
@@ -1112,3 +1140,91 @@ class devtools:
 
 		body = textwrap.indent('\n'.join(result), '\t')
 		log.info(f'Node data:\n\n{body}')
+
+
+def clean_normals(context, object_):
+	context.view_layer.objects.active = object_
+	bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+	bpy.ops.mesh.select_all(action='SELECT')
+	# average normals
+	bpy.ops.mesh.average_normals(average_type='FACE_AREA')
+	# make normals consistent
+	bpy.ops.mesh.normals_make_consistent(inside=False)
+	bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
+def recalculate_normals(operator, context, ht):
+
+	bake_scene = get_bake_scene(context)
+
+	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+
+	for workmesh in context.selected_objects:
+		clean_normals(context, workmesh)
+
+def reset_uv_transforms(operator, context, ht):
+
+	bake_scene = get_bake_scene(context)
+
+	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+
+	to_reset = list()
+	for bake_target in ht.bake_target_collection:
+		for variant_name, variant in bake_target.iter_variants():
+			if variant.workmesh.select_get(view_layer=view_layer):
+				to_reset.append(bake_target)
+
+	operations.reset_uv_transformations(to_reset)
+
+
+def select_objects_by_uv(operator, context, ht):
+
+
+	bake_scene = get_bake_scene(context)
+	to_select = list()
+	for obj in bake_scene.objects:
+		mesh = bmesh.new()
+		mesh.from_mesh(obj.data)
+		uv_layer_index = mesh.loops.layers.uv.active
+
+		def check_candidate_object():
+			for face in mesh.faces:
+				for loop in face.loops:
+					uv = loop[uv_layer_index]
+					if uv.select:
+						return True
+			return False
+
+		if check_candidate_object():
+			to_select.append(obj)
+
+		mesh.free()
+
+	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+	set_selection(view_layer.objects, *to_select, synchronize_active=True, make_sure_active=True)
+
+
+def clear_bake_targets(operator, context, ht):
+	ht.selected_bake_target = -1
+	while len(ht.bake_target_collection):
+		ht.bake_target_collection.remove(0)
+
+def clear_bake_scene(operator, context, ht):
+	scene = get_bake_scene(context)
+	for item in scene.objects:
+		bpy.data.meshes.remove(item.data, do_unlink=True)
+
+
+def synchronize_visibility_to_render(operator, context, ht):
+	bake_scene = get_bake_scene(context)
+	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+
+	for item in view_layer.objects:
+		item.hide_viewport = item.hide_render
+
+
+def make_everything_visible(operator, context, ht):
+	bake_scene = get_bake_scene(context)
+	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+
+	for item in view_layer.objects:
+		item.hide_viewport = False

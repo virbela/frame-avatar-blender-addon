@@ -145,6 +145,25 @@ def set_active(collection, item):
 def clear_active(collection):
 	collection.active = None
 
+
+def set_rendering(collection, *selected, synchronize_active=False, make_sure_active=False):
+	'Replaces current rendering selection'
+	new_selection = set(selected)
+
+	for item in collection:
+		item.hide_render = item not in new_selection
+
+	# if there is an active element in this collection and it is not selected, we deactivate it if synchronize_active is set
+	if synchronize_active and collection.active not in new_selection:
+		collection.active = None
+
+	# select first if make_sure_active is set and there is no active object
+	if make_sure_active and collection.active is None and selected:
+		collection.active = selected[0]
+
+
+
+
 #NOTE - was going to use https://docs.python.org/3/library/operator.html#operator.attrgetter but there is no attrsetter so we'll just define both for consistency
 class attribute_reference:
 	def __init__(self, target, attribute):
@@ -210,4 +229,12 @@ class UUID_manager:
 						self.uuid_map[candidate] = obj
 						obj[self.key] = candidate
 						return candidate
+
+
+def get_bake_target_variant_name(bake_target, variant):
+	if bake_target.multi_variants:
+		return f'{bake_target.shortname}.{variant.name}'
+	else:
+		return f'{bake_target.shortname}'
+
 

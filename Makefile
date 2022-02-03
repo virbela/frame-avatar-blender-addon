@@ -22,13 +22,13 @@ test: vector_test addon_test
 
 #list-actions finds searches for "#WORD" where WORD is any upper case word, followed by an optional colon and then any non character
 list-actions:
-	$(QUIET_MODE) grep -Prn '#[A-Z-]+:?\W' sources/ --include='*.py' --color=always -A2	#Show two lines after match
-	$(QUIET_MODE) grep -Prn '#[A-Z-]+:?\W' docs/ --exclude='*.svg' --color=always -A2	#Show two lines after match
+	$(QUIET_MODE) grep -Prn "#[A-Z-_]+:?(?:\W|$$)" sources/ --include='*.py' --color=always -A2	#Show two lines after match
+	$(QUIET_MODE) grep -Prn "#[A-Z-_]+:?(?:\W|$$)" docs/ --exclude='*.svg' --color=always -A2	#Show two lines after match
 
 #list-actions finds searches for "#WORD" where WORD is any upper case word, followed by an optional colon and then any non character
 list-actions-short:
-	$(QUIET_MODE) grep -Prn '#[A-Z-]+:?\W' sources/ --include='*.py' --color=always
-	$(QUIET_MODE) grep -Prn '#[A-Z-]+:?\W' docs/ --exclude='*.svg' --color=always
+	$(QUIET_MODE) grep -Prn "#[A-Z-_]+:?(?:\W|$$)" sources/ --include='*.py' --color=always
+	$(QUIET_MODE) grep -Prn "#[A-Z-_]+:?(?:\W|$$)" docs/ --exclude='*.svg' --color=always
 
 #Note that this is unlikely to work on windows but at some point we could look into fixing that
 #There is both problems with how we deal with paths and that windows have a different way of making symlinks that require special ntfs tools (could be wrong on this, was a while)
