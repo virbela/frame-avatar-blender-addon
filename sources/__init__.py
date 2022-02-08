@@ -11,6 +11,10 @@ bl_info = {
 }
 #dependencies: UVPackmaster 2.5.8
 
+#ISSUE-6:	Solution depends on UVPackmaster 2
+#	This should be optional
+#	labels: dependency
+
 import bpy
 from .properties import *
 from .ui import *
@@ -25,25 +29,18 @@ from . import materials
 
 # Addon registration
 def register():
-	# global original_inspect_getsourcelines
-	#NOTE why was that? ↑
 
 	for cls in pending_classes:
 		bpy.utils.register_class(cls)
 
 
-	#CLEAN tests under here
-	#print(dir(BakeTarget.bl_rna))
-	#print(BakeTarget.bl_rna.properties['mirror_source'])
-	#BakeTarget.bl_rna.properties['mirror_source'] = bpy.props.PointerProperty(name='Bake target used for mirror', type=BakeTarget.bl_rna.rna_type)
-	#print(BakeTarget.bl_rna.properties['mirror_source'])
-	#print(bpy.types.PointerProperty(BakeTarget.bl_rna))
-
-
-	#BakeTarget.bl_rna.properties['mirror_source'] =  bpy.props.PointerProperty(name='bake ref', type=BakeTarget)()  # bpy.types.PointerProperty(BakeTarget.bl_rna)
-
 	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
-	#TODO		bpy.app.handlers.save_pre.append(...)    #and load_post
+	#ISSUE-5: We should have a save handler that makes sure that images and other large resources are saved the way we want.
+	#	The reasoning here is that if multiple artists need to send a blender file back and forth and the textures are unlikely to change we could rely on a version managing tool for synchronization.
+	#	Currently the artists are not using such a tool and this feature will therefore be labelled as future-feature.
+	#	Note: `bpy.app.handlers.save_pre.append(...)`  and `load_post` for after loading
+	#	labels: future-feature
+
 
 def unregister():
 	del bpy.types.Scene.homeomorphictools

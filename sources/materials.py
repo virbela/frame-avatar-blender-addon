@@ -6,12 +6,12 @@ from .structures import intermediate
 
 def get_material_variants(bt, bake_scene, atlas, uv_map, recreate=False):
 
-	# Setup materials here
-	#TODO - we should handle the case of not using variants
-	#NOTE - Here we create the materials
-	#TODO - this is just for testing!!
-	#TODO - make sure we even have a variant since not all targets have those
-	result = dict()	#NOTE - this cache should not reside here of course but we use it in this test - it should be in a module but should not be a saved state.
+	#ISSUE-7: Material creation needs improvement
+	#	*	We should handle the case when multiple variants are not used (we should use a generic naming function that is discussed elsewere).
+	#	*	Move out the cache `result` to a module and also document why we need it (do we?)
+	#	labels: needs-improvement
+
+	result = dict()
 	for variant_name, variant in bt.iter_bake_scene_variants():
 		target = require_named_entry(bake_scene.objects, variant_name)
 

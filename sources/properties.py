@@ -6,7 +6,9 @@ from .exceptions import InternalError
 #Important notes
 #	Regarding descriptions of properties, please see contribution note 1
 
-#TODO - Add descriptions for all properties
+#ISSUE-9: Not all properties have descriptions
+#	Add descriptions for them
+#	labels: needs-work
 
 UV_ISLAND_MODES = enum_descriptor(
 
@@ -124,6 +126,8 @@ class BakeVariant(frame_property_group):
 	intermediate_atlas:				bpy.props.PointerProperty(name='Intermediate atlas', type=bpy.types.Image)
 
 
+
+#FUTURE - we may want to use work meshes as the container for each bake target in the future so that we can easier deal with selections but now we want to just get the current structure working all the way
 class BakeTarget(frame_property_group):
 
 	name: 					bpy.props.StringProperty(name = "Bake target name", default='Untitled bake target')

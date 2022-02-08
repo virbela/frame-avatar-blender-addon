@@ -54,7 +54,11 @@ class frame_property_group(bpy.types.PropertyGroup):
 			raise ValueError(f'if_missing has unknown value')
 
 
-#DEPRECHATED - should be require_work_scene
+#ISSUE-10: Deprecated functions needs to be replaced or removed
+#	In `helpers.py` there are deprecated functions that needs removal or replacement.
+#	labels: needs-work
+
+#DEPRECATED - should be require_work_scene
 # The context here is only for logging purposes
 def get_work_scene(context):
 	if scene := bpy.data.scenes.get(WORK_SCENE):
@@ -63,7 +67,7 @@ def get_work_scene(context):
 		log.error(f'Work scene `{WORK_SCENE}´ could not be found.')
 
 
-#DEPRECHATED - should be require_bake_scene and comments should be updated
+#DEPRECATED - should be require_bake_scene and comments should be updated
 # The context here is only for logging purposes and is not currently used here but
 # we want to keep the API consistent in case we later do want some logging here
 def get_bake_scene(context):
@@ -93,8 +97,12 @@ def require_named_entry(collection, name):
 	else:
 		raise FrameException.NamedEntryNotFound(collection, name)
 
-#TODO - we should use an enum mode instead of a bunch of booleans which is confusing
-#TODO - ignore_existing is not very well named
+#ISSUE-11: Refactor options for function `create_named_entry`
+#	Currently we use a bunch of booleans but it would be better to use an enum for what operation/profile we want when calling this function.
+#	Another solution is to create multiple static functions in a class.
+#	Note that `ignore_existing` is not very well named for what it does.
+#	labels: needs-refactoring
+
 def create_named_entry(collection, name, *positional, allow_rename=False, recreate=False, ignore_existing=False):
 
 	if name in collection:

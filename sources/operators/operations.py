@@ -18,7 +18,21 @@ update_all_workmeshes = IMPLEMENTATION_PENDING
 update_selected_workmesh_all_shapekeys = IMPLEMENTATION_PENDING
 update_selected_workmesh_active_shapekey = IMPLEMENTATION_PENDING
 
-bake_all_bake_targets = IMPLEMENTATION_PENDING
+def bake_all_bake_targets(operator, context, ht):
+
+	bake_scene = get_bake_scene(context)
+	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+	set_scene(context, bake_scene)
+
+	for bake_target in ht.bake_target_collection:
+		for variant in bake_target.variant_collection:
+			#TODO - we should take into account bake groups - maybe also move this out to a more generic function
+			set_rendering(view_layer.objects, variant.workmesh)
+			set_selection(view_layer.objects, variant.workmesh, synchronize_active=True, make_sure_active=True)
+
+
+			print(bake_target, variant)
+
 
 #NOTE - it is currently plural here but we can currently only select one bake target at a time
 #NOTE - we may want to have some functions for synchronizing selections such as "select bake targets based on work meshes" or "select work meshes based on bake target"
@@ -26,11 +40,11 @@ def bake_selected_bake_targets(operator, context, ht):
 
 	bake_scene = get_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+	set_scene(context, bake_scene)
 
 	if bake_target := ht.get_selected_bake_target():
 		if variant := bake_target.variant_collection[bake_target.selected_variant]:
 
-			set_scene(context, bake_scene)
 			#TODO - we should take into account bake groups - maybe also move this out to a more generic function
 			set_rendering(view_layer.objects, variant.workmesh)
 			set_selection(view_layer.objects, variant.workmesh, synchronize_active=True, make_sure_active=True)
@@ -221,7 +235,7 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 		target.bake_target = new
 
 
-#DEPRECHATED
+#DEPRECATED
 def create_workmesh_from_key_blocks(ht, source_object, key_blocks, bake_scene):
 	#TODO - Here we should run our rules for the naming scheme
 	#One of these would be numbers after to indicate grouping
@@ -911,7 +925,7 @@ def update_bake_scene(operator, context, ht):
 
 
 
-#DEPRECHATED
+#DEPRECATED
 def create_bake_targets_from_shapekeys(operator, context, ht):
 	#BUG - User may create multiple bake targets by calling this over and over
 

@@ -82,6 +82,10 @@ class re_transpiler:
 
 
 
+#ISSUE-8: `node_code_transpiler` needs documenting
+#	Use the comments in here to create better documentation using markup so that it is easier to ingest than in plain text as it currently is in the class comments.
+#	labels: needs-documenting
+
 class node_code_transpiler(re_transpiler):
 
 	_identifier = r'[A-Za-z_][A-Za-z0-9_]*'

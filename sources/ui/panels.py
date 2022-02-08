@@ -15,6 +15,10 @@ class frame_panel(bpy.types.Panel):
 	def __init_subclass__(cls):
 		pending_classes.append(cls)
 
+#ISSUE: Some features should only be available in developer mode
+#	We should have a configuration option for the addon for developer mode and respect the state of that configuration.
+#	We don't necessarily need to avoid registering classes but we should at least hide all UI elements that are development only.
+#	labels: needs-implementation
 
 #TODO - this should be guarded by a devmode boolean
 class FRAME_PT_node_dev_tools(frame_panel):
@@ -26,7 +30,9 @@ class FRAME_PT_node_dev_tools(frame_panel):
 	def draw(self, context):
 		self.layout.operator('frame.create_node_script')
 
-
+#ISSUE: Workflow panel is messy
+#	We should spend some time to figure out how to present the various operations here, maybe make collapsible groups (see class `template_expandable_section`).
+#	labels: needs-planning
 
 class FRAME_PT_workflow(frame_panel):
 	bl_label = "Workflow"
@@ -184,6 +190,10 @@ def draw_variant(layout, variant, bake_scene):
 		else:
 			layout.label(text=f"Intermediate atlas: {variant.intermediate_atlas.name}", icon='FILE_IMAGE')
 
+
+#ISSUE: `FRAME_PT_batch_bake_targets` is messy
+#	Document and tidy up this class.
+#	labels: needs-documenting, needs-tidying
 
 class FRAME_PT_batch_bake_targets(frame_panel):
 	bl_label = "Bake targets"

@@ -2,7 +2,10 @@ import bpy
 from ..properties import *
 from ..helpers import pending_classes, get_homeomorphic_tool_state
 
-#PROBLEM - I (Mikael) messed up at bit in how we handle the unique IDs for collections and need to fix that up properly.
+#ISSUE: Some collections are referenced in a problematic way
+#	Currently we use indices to refer to items in collections but since items can move around (check if this is truth) our indices can be wrong.
+#	When an index becomes the wrong thing without any error occuring this can confuse the user so we should either use a system with UUID or see if there are another better way of dealing with this problem.
+#	labels: needs-research
 
 #TODO - use a similar pattern for the draw call as we use for operators (see contribution note 3)
 

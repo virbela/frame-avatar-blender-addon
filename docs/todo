@@ -99,9 +99,9 @@ Numbered items
         Property                                        Status                  Purpose/Comment
         --------                                        -------                 ---------------
         bake_target_collection                          Implemented             Collection of all bake targets
-            identifier                                  Deprechated             See todo 4
+            identifier                                  Deprecated              See todo 4
             name                                        Implemented             Name of bake target
-            object_name                                 Deprechated             Deprechated due to Todo-4, use object_reference for index
+            object_name                                 Deprecated              Deprecated due to Todo-4, use object_reference for index
             object_reference                            Partially implemented
             shape_key_name                              Implemented             Original name of shape key
             uv_area_weight                              Implemented but ...     Importance of UV island - Not implemented in logic
@@ -129,7 +129,7 @@ Numbered items
                 image                                   Pending
                 uv_map                                  Pending
 
-        bake_target_mirror_collection                   Deprechated             Mirrors will be defined using additional bake targets that have a reference to original
+        bake_target_mirror_collection                   Deprecated              Mirrors will be defined using additional bake targets that have a reference to original
             primary                                     Pending                 Should use index instead to be consistent with other references of bake targets
             secondary                                   Pending                 Should use index instead to be consistent with other references of bake targets
 
