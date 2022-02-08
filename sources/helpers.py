@@ -120,6 +120,11 @@ def create_named_entry(collection, name, *positional, allow_rename=False, recrea
 		return collection.new(name, *positional)
 
 
+#ISSUE-12: Context handling
+#	When modifying the context by switching scene or updating view layers we leave things in a different state than we found it.
+#	Either we need to make sure we override the context properly (if this is possible with stuff like view layer configurations and such)
+#	or we have to keep track of our changes that we want reverted and what changes we want to keep (like with paint assist we may actually want to change the state).
+#	labels: needs-work, needs-research
 
 def set_scene(context, scene):
 	context.window.scene = scene
