@@ -86,11 +86,13 @@ class FRAME_PT_workflow(frame_panel):
 
 			baking = self.layout.box()
 			baking.label(text='Baking')
-			baking.operator('frame.bake_selected')
+			baking.operator('frame.bake_selected_bake_target')
+			baking.operator('frame.bake_selected_workmeshes')
 			baking.operator('frame.bake_all')
 
 			helper_tools = self.layout.box()
 			helper_tools.label(text='Helpers')
+			helper_tools.operator('frame.synchronize_uv_to_vertices')
 			helper_tools.operator('frame.select_objects_by_uv')
 			helper_tools.operator('frame.synchronize_visibility_to_render')
 			helper_tools.operator('frame.make_everything_visible')

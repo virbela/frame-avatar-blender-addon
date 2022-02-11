@@ -29,14 +29,97 @@ def bake_all_bake_targets(operator, context, ht):
 			#TODO - we should take into account bake groups - maybe also move this out to a more generic function
 			set_rendering(view_layer.objects, variant.workmesh)
 			set_selection(view_layer.objects, variant.workmesh, synchronize_active=True, make_sure_active=True)
+			bake_specific_variant(ht, view_layer, bake_target, variant)
 
 
-			print(bake_target, variant)
+#NOTE - it is currently plural here but we can currently only select one bake target at a time
+def bake_selected_workmeshes(operator, context, ht):
+	# We are currently assuming that we already are in the bake scene
+
+	bake_scene = get_bake_scene(context)
+	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+
+	#NOTE - see technical detail 5 for further info on this temporary solution
+	def get_bake_target_and_variant_from_workmesh(workmesh):
+		for bake_target in ht.bake_target_collection:
+			for variant in bake_target.variant_collection:
+				if variant.workmesh == workmesh:
+					return bake_target, variant
+
+		raise Exception()	#TODO
+
+	#TODO - make helper function for this
+	selection = list()
+	for workmesh in view_layer.objects:
+		if workmesh.select_get(view_layer=view_layer):
+			selection.append(get_bake_target_and_variant_from_workmesh(workmesh))
+
+
+	for bake_target, variant in selection:
+		bake_specific_variant(ht, view_layer, bake_target, variant)
+
+
+
+
+	# if bake_target := ht.get_selected_bake_target():
+	# 	if variant := bake_target.variant_collection[bake_target.selected_variant]:
+
+	# 		#TODO - we should take into account bake groups - maybe also move this out to a more generic function
+	# 		set_rendering(view_layer.objects, variant.workmesh)
+	# 		set_selection(view_layer.objects, variant.workmesh, synchronize_active=True, make_sure_active=True)
+
+
+	# 		print(bake_target, variant)
+
+
+
+def bake_specific_variant(ht, view_layer, bake_target, variant):
+	workmesh = variant.workmesh
+
+	#TODO - we should take into account bake groups - maybe also move this out to a more generic function
+	set_rendering(view_layer.objects, workmesh)
+	set_selection(view_layer.objects, workmesh, synchronize_active=True, make_sure_active=True)
+
+	# set active image in material
+	material_nodes = workmesh.active_material.node_tree.nodes
+	material_nodes.active = material_nodes['tex_target']
+
+	# set active UV index to source UV Map (since we want this in the final atlas)
+	uv_layers = workmesh.data.uv_layers
+	uv_layers.active = uv_layers[bake_target.source_uv_map]
+
+	# here we assume the state is correct for this operation but as discussed in issue #12 we may want to do this in a bit of a different manner which would improve how defined the state is here as well
+	bpy.ops.object.bake(type='DIFFUSE')
+
+	#TODO - currently we are not saving the image, we should probably do this after the bulk, though doing it for each part could be good in case there is a problem half way through, something to discuss
+
+#TBD - this feature sort of already exists in blender, you can toggle between mesh selection and uv selection in the uv editor
+#		I did not realize this when implementing this feature.
+def synchronize_uv_to_vertices(operator, context, ht):
+
+	#SECURITY - the video below should be made private and shared with the right people but is currently only unlisted
+	#VIDEO-REF	- https://www.youtube.com/watch?v=yDLP2QPx3kQ
+
+	mesh = bmesh.from_edit_mesh(context.active_object.data)
+	uv_layer = mesh.loops.layers.uv.active
+
+	for vert in mesh.verts:
+		vert.select_set(False)
+
+	for vert in mesh.verts:
+		for loop in vert.link_loops:
+			uv = loop[uv_layer]
+			if uv.select:
+				vert.select_set(True)
+				break
+
+	bmesh.update_edit_mesh(context.active_object.data)
+	#mesh.free()
 
 
 #NOTE - it is currently plural here but we can currently only select one bake target at a time
 #NOTE - we may want to have some functions for synchronizing selections such as "select bake targets based on work meshes" or "select work meshes based on bake target"
-def bake_selected_bake_targets(operator, context, ht):
+def bake_selected_bake_target(operator, context, ht):
 
 	bake_scene = get_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
@@ -44,14 +127,7 @@ def bake_selected_bake_targets(operator, context, ht):
 
 	if bake_target := ht.get_selected_bake_target():
 		if variant := bake_target.variant_collection[bake_target.selected_variant]:
-
-			#TODO - we should take into account bake groups - maybe also move this out to a more generic function
-			set_rendering(view_layer.objects, variant.workmesh)
-			set_selection(view_layer.objects, variant.workmesh, synchronize_active=True, make_sure_active=True)
-
-
-			print(bake_target, variant)
-
+			bake_specific_variant(ht, view_layer, bake_target, variant)
 
 
 
@@ -137,6 +213,9 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 					pending_object.shape_key_remove(key)
 
 		bake_scene.collection.objects.link(pending_object)
+
+		#TODO - should we create a link from workmesh to the bake target variant? Is this possible? See technical detail 5
+		#TODO - we need to document the data structures properly for better planning and overview
 
 		variant.workmesh = pending_object
 		variant.uv_map = local_uv.name

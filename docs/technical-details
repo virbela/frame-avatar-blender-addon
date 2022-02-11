@@ -32,3 +32,9 @@ Note: Technical detail note may sometimes be called tech-note
 4	Index from name
 
 	 bpy_prop_collection defines a find method for getting the numerical ID
+
+5	Data relationships
+
+	Currently a workmesh does not have a property for looking up the variant and bake target it comes from.
+	Now we will iterate through all the variants to map these but later on we may want to deal with this better.
+	It also hinges a bit on how we want to deal with our bake targets, if we should make the meshes be the bearer of the data instead of a separate collection.

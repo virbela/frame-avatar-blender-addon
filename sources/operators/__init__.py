@@ -19,6 +19,15 @@ class FRAME_OT_select_by_atlas(frame_operator):
 	#TODO - bl_description
 	frame_operator = 	operations.select_by_atlas
 
+
+class FRAME_OT_synchronize_uv_to_vertices(frame_operator):
+	bl_label = 			"Select mesh vertices based on UV selection"
+	bl_idname = 		"frame.synchronize_uv_to_vertices"
+	#TODO - bl_description
+	frame_operator = 	operations.synchronize_uv_to_vertices
+
+
+
 class FRAME_OT_create_workmeshes_for_all_targets(frame_operator):
 	bl_label = 			"New work meshes from all bake targets"
 	bl_idname = 		"frame.create_workmeshes_for_all_targets"
@@ -114,12 +123,19 @@ class FRAME_OT_bake_all(frame_operator):
 	#TODO - bl_description
 	frame_operator = 	operations.bake_all_bake_targets
 
-class FRAME_OT_bake_selected(frame_operator):
+class FRAME_OT_bake_selected_bake_target(frame_operator):
 	#TODO - if we support multiple targets in selection we should change to plural here
 	bl_label = 			"Bake selected bake target"
-	bl_idname = 		"frame.bake_selected"
+	bl_idname = 		"frame.bake_selected_bake_target"
 	#TODO - bl_description
-	frame_operator = 	operations.bake_selected_bake_targets
+	frame_operator = 	operations.bake_selected_bake_target
+
+class FRAME_OT_bake_selected_workmeshes(frame_operator):
+	#TODO - if we support multiple targets in selection we should change to plural here
+	bl_label = 			"Bake selected work meshes"
+	bl_idname = 		"frame.bake_selected_workmeshes"
+	#TODO - bl_description
+	frame_operator = 	operations.bake_selected_workmeshes
 
 class FRAME_OT_create_bake_targets_from_shapekeys(frame_operator):
 	bl_label = 			"Create bake targets"
