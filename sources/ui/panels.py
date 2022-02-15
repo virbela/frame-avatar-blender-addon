@@ -1,7 +1,8 @@
 import bpy
 from ..properties import *
 from ..helpers import get_work_scene, get_bake_scene, pending_classes
-from .. import operators
+# from .. import operators
+import sources.operators as operators
 import functools
 
 

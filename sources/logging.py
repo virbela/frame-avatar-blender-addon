@@ -52,7 +52,14 @@ class log_instance(log_base):
 	def process_message(self, message):
 
 		#TODO - messages that are repeating in close temporal proximity should be grouped to prevent spamming
-		preferences = bpy.context.preferences.addons[__package__].preferences
+		try:
+			preferences = bpy.context.preferences.addons[__package__].preferences
+		except KeyError:
+			# XXX DEV(simulate preferences)
+			import types
+			preferences = types.SimpleNamespace()
+			preferences.log_target = "devlog"
+
 		#Get or create text target based on addon preference `log_target´
 		text = bpy.data.texts.get(preferences.log_target) or bpy.data.texts.new(preferences.log_target)
 

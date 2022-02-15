@@ -46,3 +46,9 @@ def unregister():
 	del bpy.types.Scene.homeomorphictools
 	for cls in pending_classes:
 		bpy.utils.unregister_class(cls)
+
+
+if __name__ == '__main__':
+    import os
+    os.system("clear")
+    register()	
