@@ -163,6 +163,7 @@ def load_node_setup_function(name, raw_code):
 
 	tp_context = dict()
 	result = node_code_transpiler.transpile(tp_context, code)
+	return
 
 	body = textwrap.indent(f'{pre}\n{result}', '\t')
 	resulting_code = f'def {name}{tp_context["signature"]}:\n{body}'
