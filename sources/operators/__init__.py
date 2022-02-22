@@ -1,5 +1,5 @@
+from . import operations
 from .base import frame_operator
-from . import operations, experiments
 
 
 class FRAME_OT_select_by_atlas(frame_operator):
@@ -233,13 +233,6 @@ class FRAME_OT_synchronize_mirrors(frame_operator):
 	frame_operator = 	operations.synchronize_mirrors
 
 
-
-#TODO - remove this one for distribution
-class FRAME_OT_experiments(frame_operator):
-	bl_label = 			"Placeholder for experiments"
-	bl_idname = 		"frame.place_holder_for_experiments"
-	bl_description =	"This is for internal development purposes and should not be seen in distribution"
-	frame_operator =	experiments.experiment_1
 
 #TODO - this should be guarded by a devmode boolean
 class FRAME_OT_node_get_links(frame_operator):
