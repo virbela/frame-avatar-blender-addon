@@ -16,15 +16,11 @@ bl_info = {
 #	labels: dependency
 
 import bpy
-from .properties import *
-from .ui import *
+from .ui import * 
 from .operators import *
 from .preferences import *
-from . import logging
-
 from .helpers import pending_classes
-
-from . import materials
+from .properties import HomeomorphicProperties, UIStateProperty
 
 
 # Addon registration
@@ -35,6 +31,7 @@ def register():
 
 
 	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
+	bpy.types.Scene.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
 	#ISSUE-5: We should have a save handler that makes sure that images and other large resources are saved the way we want.
 	#	The reasoning here is that if multiple artists need to send a blender file back and forth and the textures are unlikely to change we could rely on a version managing tool for synchronization.
 	#	Currently the artists are not using such a tool and this feature will therefore be labelled as future-feature.
@@ -43,6 +40,7 @@ def register():
 
 
 def unregister():
+	del bpy.types.Scene.ui_state
 	del bpy.types.Scene.homeomorphictools
 	for cls in pending_classes:
 		bpy.utils.unregister_class(cls)

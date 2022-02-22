@@ -1,5 +1,10 @@
 import bpy
-from .helpers import enum_descriptor, frame_property_group, get_named_entry, require_named_entry, get_bake_scene, register_class
+from .helpers import (
+	enum_descriptor, 
+	get_named_entry, 
+	require_named_entry, 
+	frame_property_group, 
+)
 from .constants import MIRROR_TYPE
 from .exceptions import InternalError
 
@@ -295,10 +300,7 @@ class HomeomorphicProperties(frame_property_group):
 	### Atlas,textures, paint assist ###
 	atlas_size: 						bpy.props.IntProperty(name="Atlas size", default = 4096)
 	color_percentage:					bpy.props.FloatProperty(name="Atlas color region percentage", default = 25.0)
-
 	painting_size:						bpy.props.IntProperty(name="Hand paint texture size", default = 1024)
-
-
 	select_by_atlas_image:				bpy.props.PointerProperty(name='Match atlas', type=bpy.types.Image)
 
 	def get_selected_bake_target(self):
@@ -343,3 +345,13 @@ class HomeomorphicProperties(frame_property_group):
 		else:
 			#TODO - proper exception
 			raise Exception()
+
+
+class UIStateProperty(frame_property_group):
+	workflow_introduction_visible: 			bpy.props.BoolProperty(default=True)
+	workflow_bake_targets_visible: 			bpy.props.BoolProperty(default=True)
+	workflow_work_meshes_visible: 			bpy.props.BoolProperty(default=False)
+	workflow_texture_atlas_visible: 		bpy.props.BoolProperty(default=False)
+	workflow_work_materials_visible: 		bpy.props.BoolProperty(default=False)
+	workflow_baking_visible: 				bpy.props.BoolProperty(default=False)
+	workflow_helpers_visible: 				bpy.props.BoolProperty(default=False)

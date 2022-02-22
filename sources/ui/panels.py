@@ -45,60 +45,65 @@ class FRAME_PT_workflow(frame_panel):
 		if scene := get_work_scene(context):
 			HT = scene.homeomorphictools
 
-			introduction = self.layout.box()
-			introduction.label(text='Introduction')
 			#TODO - this should point to our documentation for the workflow. This could point to a document that requires the artist to be logged in to that web service (like google docs as an example).
 			#We may not want links that anyone can access since the workflow should be considered proprietary
-			get_help = introduction.operator('wm.url_open', text='Help')
-			get_help.url = 'http://example.org/'
-			introduction.operator('frame.setup_bake_scene')
+			introduction = self.layout.box()
+			introduction.prop(scene.ui_state, "workflow_introduction_visible", text="Introduction")
+			if scene.ui_state.workflow_introduction_visible:
+				get_help = introduction.operator('wm.url_open', text='Help')
+				get_help.url = 'http://example.org/'
+				introduction.operator('frame.setup_bake_scene')
 
 
 			bake_targets = self.layout.box()
-			bake_targets.label(text='Bake targets')
-			bake_targets.operator('frame.create_targets_from_selection')
-			bake_targets.operator('frame.validate_targets')
+			bake_targets.prop(scene.ui_state, "workflow_bake_targets_visible", text="Bake Targets")
+			if scene.ui_state.workflow_bake_targets_visible:
+				bake_targets.operator('frame.create_targets_from_selection')
+				bake_targets.operator('frame.validate_targets')
 
 
 			work_meshes = self.layout.box()
-			work_meshes.label(text='Work meshes')
-			work_meshes.operator('frame.create_workmeshes_for_all_targets')
-			work_meshes.operator('frame.create_workmeshes_for_selected_target')
-			work_meshes.operator('frame.update_selected_workmesh_all_shapekeys')
-			work_meshes.operator('frame.update_selected_workmesh_active_shapekey')
-
+			work_meshes.prop(scene.ui_state, "workflow_work_meshes_visible", text="Work Meshes")
+			if scene.ui_state.workflow_work_meshes_visible:
+				work_meshes.operator('frame.create_workmeshes_for_all_targets')
+				work_meshes.operator('frame.create_workmeshes_for_selected_target')
+				work_meshes.operator('frame.update_selected_workmesh_all_shapekeys')
+				work_meshes.operator('frame.update_selected_workmesh_active_shapekey')
 
 			atlas_setup = self.layout.box()
-			atlas_setup.label(text='Texture atlas')
-			atlas_setup.operator('frame.auto_assign_atlas')
-			atlas_setup.operator('frame.pack_uv_islands')
-
+			atlas_setup.prop(scene.ui_state, "workflow_texture_atlas_visible", text="Texture Atlas")
+			if scene.ui_state.workflow_texture_atlas_visible:
+				atlas_setup.operator('frame.auto_assign_atlas')
+				atlas_setup.operator('frame.pack_uv_islands')
 
 			work_materials = self.layout.box()
-			work_materials.label(text='Work materials')
-			work_materials.operator('frame.update_selected_material')
-			work_materials.operator('frame.update_all_materials')
-			work_materials.operator('frame.switch_to_bake_material')
-			work_materials.operator('frame.switch_to_preview_material')
+			work_materials.prop(scene.ui_state, "workflow_work_materials_visible", text="Work Materials")
+			if scene.ui_state.workflow_work_materials_visible:
+				work_materials.operator('frame.update_selected_material')
+				work_materials.operator('frame.update_all_materials')
+				work_materials.operator('frame.switch_to_bake_material')
+				work_materials.operator('frame.switch_to_preview_material')
 
-			work_materials.separator()
-			work_materials.operator('frame.select_by_atlas')
-			work_materials.prop(HT, 'select_by_atlas_image')
+				work_materials.separator()
+				work_materials.operator('frame.select_by_atlas')
+				work_materials.prop(HT, 'select_by_atlas_image')
 
 			baking = self.layout.box()
-			baking.label(text='Baking')
-			baking.operator('frame.bake_selected_bake_target')
-			baking.operator('frame.bake_selected_workmeshes')
-			baking.operator('frame.bake_all')
+			baking.prop(scene.ui_state, "workflow_baking_visible", text="Baking")
+			if scene.ui_state.workflow_baking_visible:
+				baking.operator('frame.bake_selected_bake_target')
+				baking.operator('frame.bake_selected_workmeshes')
+				baking.operator('frame.bake_all')
 
 			helper_tools = self.layout.box()
-			helper_tools.label(text='Helpers')
-			helper_tools.operator('frame.synchronize_uv_to_vertices')
-			helper_tools.operator('frame.select_objects_by_uv')
-			helper_tools.operator('frame.synchronize_visibility_to_render')
-			helper_tools.operator('frame.make_everything_visible')
-			helper_tools.operator('frame.reset_uv_transforms')
-			helper_tools.operator('frame.recalculate_normals')
+			helper_tools.prop(scene.ui_state, "workflow_helpers_visible", text="Helpers")
+			if scene.ui_state.workflow_helpers_visible:
+				helper_tools.operator('frame.synchronize_uv_to_vertices')
+				helper_tools.operator('frame.select_objects_by_uv')
+				helper_tools.operator('frame.synchronize_visibility_to_render')
+				helper_tools.operator('frame.make_everything_visible')
+				helper_tools.operator('frame.reset_uv_transforms')
+				helper_tools.operator('frame.recalculate_normals')
 
 			#TODO - clean this up!
 
@@ -119,12 +124,13 @@ class FRAME_PT_workflow(frame_panel):
 			# materials.operator('frame.switch_to_preview_material')
 
 
-			#TODO - remove or make conditional
-			debug = self.layout.box()
-			debug.label(text='Debug tools')
-			debug.operator('frame.place_holder_for_experiments')
-			debug.operator('frame.clear_bake_scene')
-			debug.operator('frame.clear_bake_targets')
+			if False:
+				#TODO - remove or make conditional
+				debug = self.layout.box()
+				debug.label(text='Debug tools')
+				debug.operator('frame.place_holder_for_experiments')
+				debug.operator('frame.clear_bake_scene')
+				debug.operator('frame.clear_bake_targets')
 
 
 
@@ -300,13 +306,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 					#self.layout.prop(et, 'geom_mirror_axis')		#MAYBE-LATER
 				else:
 					raise InternalError(f'et.bake_mode set to unsupported value {et.bake_mode}')
-
-
-
-
-
-
-
 
 			#TODO - add button for synchronizing primary → secondary (where? here or utils?)
 			# mirrors = self.layout.box()
