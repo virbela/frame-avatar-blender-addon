@@ -1,6 +1,9 @@
-import textwrap, re, inspect
+import re 
+import inspect
+import textwrap
 from inspect import linecache
 from dataclasses import dataclass
+from .logging import log_writer as log
 
 def parse_signature(sig):
 	return inspect.signature(eval(f'lambda {sig}: None'))
@@ -10,6 +13,7 @@ class tp_rule:
 	name: str
 	pattern: re.Pattern
 	function: object
+
 
 def iter_type(t):
 	seen = set()
@@ -102,14 +106,14 @@ class node_code_transpiler(re_transpiler):
 	#
 	#  The purpose of context is to provide a place to shove stuff specific for the transpilation run, this could be any type
 	#  we will use a dict in this particular case for the moment
-	def define_arguments(transpiler, context, argument_list) -> r'^arguments:\s+(.*)$\n':
+	def define_arguments(transpiler, context, argument_list): # -> r'^arguments:\s+(.*)$\n':
 		context['signature'] = parse_signature(f'_tree, {argument_list}')
 		return ''
 
 	#Finds line:		a.b --> c.d
 	#Replaces with: 	_tree.links.new(c.inputs['d'], a.outputs['b'])
 	#Note that we will replace dashes with spaces so if you want node slot "Base Color" you do "Base-Color"
-	def define_connection(transpiler, context, indention, source_object, source_slot, dest_object, dest_slot) -> r'^(\s*)(\S+)\.(\S+)\s*-->\s*(\S+)\.(\S+)$':
+	def define_connection(transpiler, context, indention, source_object, source_slot, dest_object, dest_slot): # -> r'^(\s*)(\S+)\.(\S+)\s*-->\s*(\S+)\.(\S+)$':
 		source_slot = source_slot.replace('-', ' ')
 		dest_slot = dest_slot.replace('-', ' ')
 		return f'{indention}_tree.links.new({dest_object}.inputs[{dest_slot!r}], {source_object}.outputs[{source_slot!r}])'
@@ -120,7 +124,7 @@ class node_code_transpiler(re_transpiler):
 	#The syntax here is: type name storage_name
 	#  storage_name is optional and defaults to the value of name
 	#  This is useful to be able to be concise in local variables in the definition expression, yet retaining verbose naming for objects in blender
-	def define_node(transpiler, context, indention, node_type, name, storage_name) -> rf'^(\s*)({_identifier})\s+({_identifier})(?:\s+({_identifier}))?\s*$':
+	def define_node(transpiler, context, indention, node_type, name, storage_name): # -> rf'^(\s*)({_identifier})\s+({_identifier})(?:\s+({_identifier}))?\s*$':
 		if not storage_name:
 			storage_name = name
 
@@ -128,7 +132,6 @@ class node_code_transpiler(re_transpiler):
 			f'{indention}{name} = _tree.nodes.new({node_type!r})\n'
 			f'{indention}{name}.name = {storage_name!r}\n'
 		)
-
 
 class thunk_return:
 	def __init__(self, value):

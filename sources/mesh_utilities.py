@@ -26,8 +26,6 @@ def get_uv_map_from_mesh(obj, uv_layer=ACTIVE_LAYER):
 
 	return uv_map
 
-
-
 class uv_transformation_calculator:
 	def __init__(self, reference_uv_map):
 

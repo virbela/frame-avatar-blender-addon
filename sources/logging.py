@@ -12,7 +12,6 @@ class log_level(enum.IntEnum):
 	FATAL = 5
 
 
-
 @dataclass
 class pending_log_entry:
 	timestamp: time.struct_time
@@ -82,8 +81,6 @@ class dummy_log_instance(log_base):
 
 	def process_message(self, context, message):
 		pass
-
-
 
 
 log_writer = log_instance()

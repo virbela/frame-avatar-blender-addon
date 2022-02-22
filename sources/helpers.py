@@ -11,6 +11,7 @@ pending_classes = list()
 def IMPLEMENTATION_PENDING(*p, **n):
 	raise InternalError(f'This feature is not implemented! (arguments: {p} {n})')
 
+
 def register_class(cls):
 	pending_classes.append(cls)
 	return cls
@@ -88,6 +89,7 @@ def get_homeomorphic_tool_state(context):
 def get_named_entry(collection, name):
 	return collection.get(name)
 
+
 def require_named_entry(collection, name):
 	if not name:
 		raise FrameException.NoNameGivenForCollectionLookup(collection)
@@ -129,6 +131,7 @@ def create_named_entry(collection, name, *positional, allow_rename=False, recrea
 def set_scene(context, scene):
 	context.window.scene = scene
 
+
 def set_selection(collection, *selected, synchronize_active=False, make_sure_active=False):
 	'Replaces current selection'
 	new_selection = set(selected)
@@ -152,8 +155,10 @@ def set_selection(collection, *selected, synchronize_active=False, make_sure_act
 def clear_selection(collection):
 	set_selection(collection)
 
+
 def set_active(collection, item):
 	collection.active = item
+
 
 def clear_active(collection):
 	collection.active = None
@@ -190,6 +195,7 @@ class a_get(attribute_reference):
 class a_set(attribute_reference):
 	def __call__(self, value):
 		return setattr(self.target, self.attribute, value)
+
 
 def get_nice_name(collection, prefix, max_prefix_length, random_hash_length=8, max_tries=1000):
 
@@ -249,5 +255,3 @@ def get_bake_target_variant_name(bake_target, variant):
 		return f'{bake_target.shortname}.{variant.name}'
 	else:
 		return f'{bake_target.shortname}'
-
-

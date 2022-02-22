@@ -1,16 +1,5 @@
 from .base import frame_operator
-from ..logging import log_writer as log
 from . import operations, experiments
-
-
-
-# class FRAME_OT_new_workmesh_from_selected(frame_operator):
-# 	bl_label = 			"New from selected"
-# 	bl_idname = 		"frame.new_workmesh_from_selected"
-# 	#TODO - bl_description
-# 	frame_operator = 	operations.new_workmesh_from_selected
-
-
 
 
 class FRAME_OT_select_by_atlas(frame_operator):
@@ -244,10 +233,6 @@ class FRAME_OT_synchronize_mirrors(frame_operator):
 	frame_operator = 	operations.synchronize_mirrors
 
 
-
-
-#NOTICE - we currently don't have a reasonable way of quickly including or excluding aspects since python doesn't have a preprocessor. We can solve this somehow later though but currently manual intervention is required
-#	One solution would be to use a variable in a module but the minor drawback is that the code would still be there, even though it would not be run (this is probably a good solution)
 
 #TODO - remove this one for distribution
 class FRAME_OT_experiments(frame_operator):

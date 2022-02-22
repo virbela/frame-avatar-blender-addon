@@ -1,8 +1,7 @@
 import bpy
+from .structures import intermediate
 from .node_utils import load_node_setup_function
 from .helpers import create_named_entry, require_named_entry, get_nice_name
-from .operators import operations
-from .structures import intermediate
 
 def get_material_variants(bt, bake_scene, atlas, uv_map, recreate=False):
 

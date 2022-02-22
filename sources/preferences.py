@@ -7,7 +7,6 @@ class FrameAddonPreferences(bpy.types.AddonPreferences):
 
 	log_target: bpy.props.StringProperty(name='Target filename for addon log', subtype='FILE_NAME')
 
-
 	def draw(self, context):
 		layout = self.layout
 		layout.label(text="Frame Addon Preferences")

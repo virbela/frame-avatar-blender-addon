@@ -56,25 +56,6 @@ UV_MIRROR_AXIS = enum_descriptor(
 )
 
 
-# GEOMETRY_MIRROR_AXIS = enum_descriptor(		#MAYBE-LATER
-
-# 	#Tuple layout - see https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
-# 	#(identifier, 			name, 				description,
-# 	#	icon, 				number),
-
-# 	#NOTE - Suspecting the number is not needed, also since we use our own object to represent these values we could have the long column last and get a more
-# 	#compact and nice table.
-
-# 	('GEOM_MA_X',			'X',				'X Axis',
-# 		'EVENT_X',			0),
-
-# 	('GEOM_MA_Y',			'Y',				'Y Axis',
-# 		'EVENT_Y',			1),
-
-# 	('GEOM_MA_Z',			'Z',				'Z Axis',
-# 		'EVENT_Z',			2),
-# )
-
 UV_BAKE_MODE = enum_descriptor(
 
 	#Tuple layout - see https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
@@ -181,33 +162,11 @@ class BakeTarget(frame_property_group):
 	def require_object(self):
 		return require_named_entry(bpy.data.objects, self.object_name)
 
-	#def get_bake_scene_object(self, context):
-		#bake_scene = get_bake_scene(context)
-		#return get_named_entry(bake_scene.objects, self.get_bake_scene_name())
-
-	#def require_bake_scene_object(self, context):
-	#	bake_scene = get_bake_scene(context)
-	#	return require_named_entry(bake_scene.objects, self.get_bake_scene_name())
-
 	def get_atlas(self):
 		return get_named_entry(bpy.data.images, self.atlas)
 
 	def require_atlas(self):
 		return require_named_entry(bpy.data.images, self.atlas)
-
-
-
-	# @property	#contribution note 8B
-	# def identifier(self):
-	# 	return str(ht.get_bake_target_index(self))
-
-
-		# if self.object_name:
-		# 	if self.shape_key_name:
-		# 		return f'{self.object_name}.{self.shape_key_name}'
-		# 	else:
-		# 		return self.object_name
-
 
 	@property
 	def shortname(self):
@@ -261,11 +220,6 @@ class BakeTarget(frame_property_group):
 		else:
 			yield prefix
 
-
-#TEST
-#BakeTarget.__annotations__['mirror_source'] = bpy.props.PointerProperty(name='Bake target used for mirror', type=BakeTarget)
-# class BakeTargetReference(frame_property_group):
-# 	target:					bpy.props.PointerProperty(name='bake target', type=BakeTarget)
 
 class BakeTargetReference(frame_property_group):
 	target:					bpy.props.IntProperty(name='Bake target identifier', default=-1)

@@ -1,13 +1,13 @@
-#This module is used to define common structures that are only used internally in certain operations.
-#These must not be saved in any blender specific context and must be discarded after use
-#For structures that SHOULD be saved in blender specific contexts are defined in the properties.py module.
+"""
+This module is used to define common structures that are only used internally in certain operations.
+These must not be saved in any blender specific context and must be discarded after use
+For structures that SHOULD be saved in blender specific contexts are defined in the properties.py module.
+"""
 
-from dataclasses import dataclass#, asdict as dc_to_dict
+from dataclasses import dataclass
 
 def iter_dc(d):
-	# return dc_to_dict(d).items()
 	# note: dataclasses.asdict performs a deep copy which will be problematic when referencing blender objects so we will iter it ourselves
-
 	return ((key, getattr(d, key)) for key in d.__dataclass_fields__)
 
 

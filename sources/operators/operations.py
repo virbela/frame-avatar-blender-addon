@@ -1,14 +1,12 @@
 from ..helpers import IMPLEMENTATION_PENDING, get_bake_scene, get_work_scene, a_get, a_set, set_scene, set_selection, set_active, clear_selection, require_named_entry, get_nice_name, create_named_entry, get_bake_target_variant_name, set_rendering
-from ..logging import log_writer as log
-from ..structures import intermediate, iter_dc
 from ..materials import get_material_variants, setup_bake_material
-from ..constants import MIRROR_TYPE
+from ..structures import intermediate, iter_dc
+from ..logging import log_writer as log
 from ..bake_targets import validate_all
+from ..constants import MIRROR_TYPE
 from .. import constants
 import bpy, bmesh
 import textwrap
-
-#REFACTOR - this module is kinda big and clunky. Would be good to only have the operations in here and the various helpers in helpers or somewhere else
 
 
 #TODO - fix this!
@@ -59,20 +57,6 @@ def bake_selected_workmeshes(operator, context, ht):
 		bake_specific_variant(ht, view_layer, bake_target, variant)
 
 
-
-
-	# if bake_target := ht.get_selected_bake_target():
-	# 	if variant := bake_target.variant_collection[bake_target.selected_variant]:
-
-	# 		#TODO - we should take into account bake groups - maybe also move this out to a more generic function
-	# 		set_rendering(view_layer.objects, variant.workmesh)
-	# 		set_selection(view_layer.objects, variant.workmesh, synchronize_active=True, make_sure_active=True)
-
-
-	# 		print(bake_target, variant)
-
-
-
 def bake_specific_variant(ht, view_layer, bake_target, variant):
 	workmesh = variant.workmesh
 
@@ -114,7 +98,7 @@ def synchronize_uv_to_vertices(operator, context, ht):
 				break
 
 	bmesh.update_edit_mesh(context.active_object.data)
-	#mesh.free()
+
 
 
 #NOTE - it is currently plural here but we can currently only select one bake target at a time
@@ -128,7 +112,6 @@ def bake_selected_bake_target(operator, context, ht):
 	if bake_target := ht.get_selected_bake_target():
 		if variant := bake_target.variant_collection[bake_target.selected_variant]:
 			bake_specific_variant(ht, view_layer, bake_target, variant)
-
 
 
 def select_by_atlas(operator, context, ht):
@@ -146,7 +129,6 @@ def select_by_atlas(operator, context, ht):
 	set_selection(view_layer.objects, *selection, synchronize_active=True, make_sure_active=True)
 
 
-
 def validate_targets(operator, context, ht):
 	validate_all(ht)
 
@@ -156,7 +138,6 @@ def create_mirror(ht, primary, secondary):
 	new.primary = primary
 	new.secondary = secondary
 	return new
-
 
 
 def create_targets_from_selection(operator, context, ht):
@@ -175,10 +156,12 @@ def update_all_materials(operator, context, ht):
 		for variant_name, variant in bake_target.iter_variants():
 			update_workmesh_materials(context, ht, bake_target, variant)
 
+
 def update_selected_material(operator, context, ht):
 	if bake_target := ht.get_selected_bake_target():
 		if variant := bake_target.variant_collection[bake_target.selected_variant]:
 			update_workmesh_materials(context, ht, bake_target, variant)
+
 
 def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 	#TODO - when conditions fail we should add log entries
@@ -223,10 +206,12 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 
 		update_workmesh_materials(context, ht, bake_target, variant)
 
+
 def create_workmeshes_for_all_targets(operator, context, ht):
 	bake_scene = get_bake_scene(context)
 	for bake_target in ht.bake_target_collection:
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
+
 
 def create_workmeshes_for_selected_target(operator, context, ht):
 
@@ -251,8 +236,6 @@ def update_workmesh_materials(context, ht,  bake_target, variant):
 	#TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?
 	setup_bake_material(bake_material.node_tree, variant.intermediate_atlas, bake_target.source_uv_map, variant.image, variant.uv_map)
 	variant.workmesh.active_material = bake_material
-
-
 
 
 def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene):
@@ -343,7 +326,6 @@ def create_workmesh_from_key_blocks(ht, source_object, key_blocks, bake_scene):
 				uv_mode = 'UV_IM_MONOCHROME',
 			)
 
-
 	#Configure targets and mirrors
 	for key, target in targets.items():
 		if key.endswith('_L'):
@@ -397,25 +379,6 @@ def create_workmesh_from_key_blocks(ht, source_object, key_blocks, bake_scene):
 		else:
 			bake_scene.collection.objects.link(copy_obj)
 
-		print(target)
-
-		#TODO - store this target in the addon list
-
-
-	# #NOTE - there is a bug where we can only set uv_mode (or any other enum) once from the same context.
-	# #		To avoid this bug we first create dicts that represents the new bake targets and then we instanciate them below
-	# for target in targets.values():
-	# 	new = ht.bake_target_collection.add()
-	# 	for key, value in iter_dc(target):
-	# 		setattr(new, key, value)
-
-	# 	target.bake_target = new
-
-	# #Create mirrors
-	# for mirror in mirror_list:
-	# 	create_mirror(mirror.primary.bake_target.identifier, mirror.secondary.bake_target.identifier)
-
-
 
 def new_workmesh_from_selected(operator, context, ht):
 
@@ -427,9 +390,6 @@ def new_workmesh_from_selected(operator, context, ht):
 
 		else:
 			create_workmesh_from_key_blocks(ht, source_object, None, get_bake_scene(context))
-
-
-
 
 
 def setup_bake_scene(operator, context, ht):
@@ -478,8 +438,6 @@ def get_intermediate_uv_object_list(ht):
 	return uv_object_list
 
 
-
-
 def auto_assign_atlas(operator, context, ht):
 	'Goes through all bake targets and assigns them to the correct intermediate atlas and UV set based on the uv_mode'
 
@@ -499,8 +457,6 @@ def auto_assign_atlas(operator, context, ht):
 	#TBD - should we do it all from beginning? for now yes - maybe later we can have selection
 
 	#TO-DOC - document what happens here properly
-
-
 
 	uv_object_list = get_intermediate_uv_object_list(ht)
 
@@ -547,41 +503,6 @@ def auto_assign_atlas(operator, context, ht):
 			target_bin.allocated += uv_island.area
 
 
-
-
-
-	# for bake_target in ht.bake_target_collection:
-	# 	if bake_target.bake_mode == 'UV_BM_REGULAR':
-
-	# 		if bake_target.uv_mode == 'UV_IM_MONOCHROME':
-	# 			pass	#TODO - implement
-	# 		elif bake_target.uv_mode == 'UV_IM_COLOR':
-	# 			pass	#TODO - implement
-	# 		elif bake_target.uv_mode == 'UV_IM_NIL':
-	# 			pass	#TODO - implement
-	# 		elif bake_target.uv_mode == 'UV_IM_FROZEN':
-	# 			pass	#TODO - implement
-	# 		else:
-	# 			raise Exception()	#TODO internal error
-
-			# # check uv target channel
-			# if bake_target.uv_target_channel == 'UV_TARGET_NIL':
-			# 	pass	#TODO - implement
-			# elif bake_target.uv_target_channel == 'UV_TARGET_COLOR':
-			# 	pass	#TODO - implement
-			# elif bake_target.uv_target_channel == 'UV_TARGET_R':
-			# 	pass	#TODO - implement
-			# elif bake_target.uv_target_channel == 'UV_TARGET_G':
-			# 	pass	#TODO - implement
-			# elif bake_target.uv_target_channel == 'UV_TARGET_B':
-			# 	pass	#TODO - implement
-			# else:
-			# 	raise Exception()	#TODO internal error
-
-
-
-
-
 def get_partitioning_object(scene):
 	'Gets the partitioning object used in UV packing. If no such object exists, we create it. This will be using the current context so take care when calling this!'
 	if existing := scene.objects.get(constants.PARTITIONING_OBJECT):
@@ -613,6 +534,7 @@ def set_uv_selection(obj, state):
 			uv.select = state
 	mesh.free()
 
+
 def set_uv_map(obj, uv_map):
 	obj.data.uv_layers[uv_map].active = True
 
@@ -638,9 +560,6 @@ def assign_uv_coords(obj, assign_coords):
 
 	mesh.to_mesh(obj.data)
 	mesh.free()
-
-
-
 
 class guarded_operator:
 	def __init__(self, operator):
@@ -755,8 +674,6 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 	bpy.ops.object.mode_set(mode='OBJECT')
 
 
-
-
 def pack_uv_islands(operator, context, ht):
 
 	bake_scene = get_bake_scene(context)
@@ -768,7 +685,6 @@ def pack_uv_islands(operator, context, ht):
 	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_green'], 'UVMap', mono_box)
 	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_blue'], 'UVMap', mono_box)
 	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_color'], 'UVMap', color_box)
-
 
 
 #DEPRECATED
@@ -913,14 +829,6 @@ def old_pack_uv_islands(operator, context, ht):
 	# Perform packing
 	bpy.ops.uvpackmaster2.uv_pack()
 
-	# TODO - assign proper atlas and uv-map
-	# EXPERIMENT
-	# for target in color_targets:
-	# 	target.bake_target.atlas = 'tinytest'
-
-
-
-
 	# TODO - handle monochrome targets
 	create_color_blocker()
 	bake_scene.uvp2_props.pack_to_others = True
@@ -946,12 +854,8 @@ def old_pack_uv_islands(operator, context, ht):
 	# Perform packing
 	bpy.ops.uvpackmaster2.uv_pack()
 
-
-
-
 	bpy.ops.object.mode_set(mode='OBJECT')
 	clear_selection(view_layer.objects)
-
 
 
 def copy_object(source_obj, name):
@@ -959,6 +863,7 @@ def copy_object(source_obj, name):
 	new_object.data = source_obj.data.copy()	#Copy data as well
 	new_object.name = name
 	return new_object
+
 
 def update_bake_scene(operator, context, ht):
 	work_scene, bake_scene = get_work_scene(context), get_bake_scene(context)
@@ -999,9 +904,6 @@ def update_bake_scene(operator, context, ht):
 				for skey in new_object.data.shape_keys.key_blocks:
 					if skey.name != bake_target.shape_key_name:
 						new_object.shape_key_remove(skey)
-
-
-
 
 
 #DEPRECATED
@@ -1066,7 +968,6 @@ def create_bake_targets_from_shapekeys(operator, context, ht):
 		#Create mirrors
 		for mirror in mirror_list:
 			create_mirror(ht.get_bake_target_index(mirror.primary.bake_target), ht.get_bake_target_index(mirror.secondary.bake_target))
-
 
 
 class bake_mirrors:
@@ -1174,12 +1075,14 @@ def transfer_variant(source, dest):
 	dest.image = source.image
 	dest.uv_map = source.uv_map
 
+
 def copy_collection(source, dest, transfer):
 	while len(dest):
 		dest.remove(0)
 
 	for item in source:
 		transfer(item, dest.add())
+
 
 def synchronize_mirrors(operator, context, ht):
 	for mirror in ht.bake_target_mirror_collection:
@@ -1194,13 +1097,13 @@ def synchronize_mirrors(operator, context, ht):
 			copy_collection(primary.variant_collection, secondary.variant_collection, transfer_variant)
 			secondary.selected_variant = primary.selected_variant
 
+
 def switch_to_bake_material(operator, context, ht):
 	generic_switch_to_material(context, ht, 'bake')
 
+
 def switch_to_preview_material(operator, context, ht):
 	generic_switch_to_material(context, ht, 'preview')
-
-
 
 
 class devtools:
@@ -1245,6 +1148,7 @@ def clean_normals(context, object_):
 	bpy.ops.mesh.normals_make_consistent(inside=False)
 	bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
+
 def recalculate_normals(operator, context, ht):
 
 	bake_scene = get_bake_scene(context)
@@ -1253,6 +1157,7 @@ def recalculate_normals(operator, context, ht):
 
 	for workmesh in context.selected_objects:
 		clean_normals(context, workmesh)
+
 
 def reset_uv_transforms(operator, context, ht):
 
@@ -1266,12 +1171,10 @@ def reset_uv_transforms(operator, context, ht):
 			if variant.workmesh.select_get(view_layer=view_layer):
 				to_reset.append(bake_target)
 
-	operations.reset_uv_transformations(to_reset)
+	reset_uv_transformations(to_reset)
 
 
 def select_objects_by_uv(operator, context, ht):
-
-
 	bake_scene = get_bake_scene(context)
 	to_select = list()
 	for obj in bake_scene.objects:
@@ -1300,6 +1203,7 @@ def clear_bake_targets(operator, context, ht):
 	ht.selected_bake_target = -1
 	while len(ht.bake_target_collection):
 		ht.bake_target_collection.remove(0)
+
 
 def clear_bake_scene(operator, context, ht):
 	scene = get_bake_scene(context)
