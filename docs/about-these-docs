@@ -10,7 +10,19 @@ Main index
 	glossary			- Contains actions and acronyms.
 							(Actions are words that indicate that we should do something, such as pending tasks)
 
-	gui-planning		- Explanation of graphical user interface for the addon
+	gui-layout			- Explanation of graphical user interface for the addon
 
-	decisions			- Technical decisions made or pending.
+	pending-decisions	- Technical decisions made or pending.
 							This is a good place to write motivations so that if we ever question a decision down the line we can see why it was made which may save us lots of time if reconsideration is warranted.
+
+	contribution-notes	- Specific notes about the project
+
+	needs-work			- Items that needs work or research
+
+	future-plans		- Plans for beyond the pending milestone
+
+	milestones			- Project milestones
+
+	navigation			- Inter documentation references explained
+
+	code-policies		- Specified code policies

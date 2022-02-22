@@ -1,0 +1,45 @@
+Here follows a list of numbered code policies that can be referred to as 'CP{x}' where x is the id of the code policy.
+
+1 - Modules for each view type
+	NOTE: This policy is not yet put into action.
+
+	The policy should reflect a way to separate out UI elements for the purpose.
+	For instance we may want to have a different module for each view type so that we may have:
+
+		panels/viewport.py
+		panels/uv_editor.py
+
+2 - Development mode types
+
+	Initially I thought that developer only structures should only be create in developer mode but this has a problem.
+	At the time of creating the functions we haven't accessed the settings yet so it is better to create these types and then just decide
+	where we want to draw them or let the user access them.
+
+	If there is a reason to we could still do this by an on demand modules that properly registers/unregisters but if this is wanted, a feature should be added to the planning for this.
+
+3 - No branch left unturned
+
+	If some action is only taken under certain conditions, make sure that any unexpected conditions are handled properly.
+	If they should be ignored there should be a comment about it. This way it is easy to see if we have missed something somewhere.
+	When not ignoring we should take the appropriate action, be it log an error, abort a sequence or what have you.
+
+
+4 - Readability and maintainability trumps compactness
+
+	It is important to consider the impact messy code has on our future selves and our collaborators.
+	We should strive for code that is easy to follow and read.
+
+5 - Avoid star imports
+
+	It is harder to see what is going on or what the namespace ends up being.
+
+6 - Context specific functions should have names reflecting required context
+
+	If a function is only valid in a particular context, its name should reflect this.
+	For instance the function name get_uv_map_from_mesh that utilizes bmesh.from_edit_mesh (that requires the mesh to be in edit mode) should be called get_uv_map_from_edit_mesh or similar.
+
+7 - When to adhere to PEPs or not
+
+	In some cases it may improve readability to not adhere to some specific PEP but if we do so we should cover it here.
+	#TODO: decide if exceptions must be camelcase or if FrameException.named_entry_not_found can be accepted as a readable name for an exception.
+	The idea here is that since it is defined in the exceptions module and prefixed with a class, it should be quite obvious that it is an exception type.

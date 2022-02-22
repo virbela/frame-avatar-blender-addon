@@ -1,0 +1,13 @@
+navigation
+
+	Internal references table. The ID of an entry will be denoted {n} in the table below
+
+		format			section					description
+		------			-------					-----------
+		PD{n}			pending-decisions		Pending decisions
+		TD{n}			technical-details		Specific technical details
+		CP{n}			code-policies			Specific code policy
+		M{n}			milestones				Milestones of the project
+		FT{n}			future-plans			Future plans that is beyond the scope of the current milestone but needs to be documented for planning purposes
+		CN{n}			contibution-notes		Generic remarks about the code base
+		NW{n}			needs-work				Aspects that is not properly defined and needs to be properly defined in order to be actionable

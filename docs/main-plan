@@ -1,0 +1,209 @@
+Introduction
+	Note that we will give todo entries numbers and these numbers will be specific to this file.
+	To refer to the third entry in a specific file we will use the notation: /path/to/file:T3
+	Later we will assign milestones to todo notes and we will put labels on the notes such as [M1] for if it needs attention for M1 to be attained.
+	We could also assign a future-plan number or any other reference that helps us understand the priority of the todo entry.
+
+Documentation
+
+	File: main-plan - Main planning file (this document)
+		Information:
+			There can be actionables in other files but this file should comtain the bulk of them
+
+		Todo:
+			* assign appropriate labels to todo entries to help plan future work
+
+Code base
+
+	File structure at time of writing, an asterix at the end means we have mentioned it here in our planning
+		.
+		├── __init__.py					✅
+		├── bake_targets.py				✅
+		├── config.py					✅
+		├── constants.py				✅
+		├── exceptions.py				✅
+		├── helpers.py					✅
+		├── local_math.py				✅
+		├── logging.py					✅
+		├── materials.py				✅
+		├── mesh_utilities.py			✅
+		├── node_utils.py				✅
+		├── operators					✅
+		│   ├── __init__.py				✅
+		│   ├── experiments.py			✅
+		│   ├── base.py					✅
+		│   └── operations.py			✅
+		├── preferences.py				✅
+		├── properties.py				✅
+		├── structures.py				✅
+		└── ui							✅
+		    ├── __init__.py				✅
+		    ├── elements.py				✅
+		    └── panels.py				✅
+
+	File: __init__.py -	Entry point of FABA plugin
+
+		Todo:
+			1	bl_info needs updating
+			2	needs generic cleanup - remove imports not used
+
+		Uses helpers.pending_classes in order to register and unregister
+
+	File: operators/__init__.py - Collection of all operators
+		Todo:
+			1	make sure we have proper labels and descriptions everywhere
+			2	potentially simplify using a table (post M1)
+
+	File: operators/experiments.py - Experiments during development
+		Todo:
+			1	deprecate once not needed anymore
+
+	File: operators/base.py - Base type for operators
+		Todo:
+			1	perhaps put all the custom base types in local_types.py? (see PD3)
+
+	File: operators/operations.py - Currently contains a whole bunch of operations but we should weed out this module and refactor it a bit.
+		Todo:
+			1	separate operations based on concern (baking, materials, selections, utilities etc)
+			2	clean up and properly document features
+			3	module is way too long and clunky
+
+	File: bake_targets.py - Baking functionality
+		Todo:
+			1	implement data validation properly (NW3)
+			2	implement baking properly (a lot of this is curently residing in other modules like in operators/operations.py)
+
+	File: config.py - Default configuration
+		Todo:
+			1	move out to constants or plugin preferences as appropriate
+			2	deprecate module
+
+	File: constants.py - Constant literals and datums
+		Todo:
+			1	make a factory function for datums
+			2	make appropriate constants be part of plugin preferences instead
+
+	File: exceptions.py - Custom exceptions for the FABA plugin
+		Todo:
+			1	potentially rename exceptions (CP7)
+			2	make sure exceptions presents themselves well and represents the problem properly
+
+	File: helpers.py - Generic helpers and utilities
+		Todo:
+			1	separate out blender specific helpers from generic data access or function helpers
+			2	move out internal structures to the proper place
+			3	get rid of star imports (CP5)
+			4	decide what to do about the UUID manager (NW2)
+			5	document poorly documented features
+
+	File: local_math.py - Local math utilities
+		Todo:
+			1	make note of that in an experiment blenders built in vectors were dropping data due to them being 32 bit floating point vectors - if we can use the internal stuff that is better but then we want 64 bit floating points at least.
+			2	write documentation
+
+	File: logging.py - Utilities and implementation for logging purposes
+		Todo:
+			1	utilize the logging in more places in accordance with TD7
+			2	implement log level
+
+	File: materials.py - Utilities for managing materials and creating materials
+		Todo:
+			1	potentially deprecate the node creation code (see PD2)
+			2	make sure templating the materials is aware of if material should be recreated or updated or if exceptions should be raised
+			3	make it more well defined how we should handle the materials
+
+	File: mesh_utilities.py - Utilities for dealing with meshes and UV layers
+		Todo:
+			1	make sure that functions that use bmesh.from_edit_mesh are properly named for being utilized in edit mode (CP6)
+			2	make sure that bmesh usages are properly cleaned up, synchronized and in the proper context
+			3	clean up code - make use of better functions from within blender where available
+
+	File: node_utils.py - Node creation utilities for material nodes
+		Todo:
+			1	move out helper functions
+			2	make proper documentation on how this module works
+			3	consider if we should even do it like this at all, maybe we want to just export a node layout to a json object and store somewhere (see PD2)
+
+	File: preferences.py - Plugin preferences
+		Todo:
+			1	add option for development version
+			2	make note of any other things that should go in here and add to the planning
+
+	File: structures.py - Defines common dataclass stuctures that are used for intermediate data storage in certain operations
+		Todo:
+			1	iter_dc should be moved out to helpers
+			2	make sure these structures are up to date where used - adjust if needed
+			3	make notes of where we use them to make code navigation easier
+
+	File: properties.py - Defines properties used in the plugin (data structures suitable for storage in blenders internal state)
+		Todo:
+			1	move out enumerators to its own module for easier navigation
+			2	make sure properties are up to date with the current plans and implementation
+
+	File: ui/__init__.py - UI module of plugin
+		Todo:
+			1	currently imports all children from .panels and .elements. We should not do this (see CP5).
+			2	if we do need to specify sub modules here it is probably via __all__, look into how this is properly done and change it.
+
+	File: ui/panels.py - Defines the various graphical panels used in the FABA viewport tab.
+
+		Todo:
+			1	move or rename to be consistent with CP1 if CP1 is going to be used. (note PD1)
+			2	move out helper functions to helpers
+			3	remove notes about developer guards, we could define these things and just not draw them or operate on them (see CP2)
+			4	tidy up the workflow panel a bit
+			5	make sure all metadata is present - refer to TD6
+			6	update code to be compliant with CP3
+			7	isolate template_expandable_section and other helpers to not be where the panel definitions are
+			8	fix up FRAME_PT_batch_bake_targets to be less messy, see if we can make some helpers for things we often reuse to make things more readable and maintainable (see CP4)
+			9	implement UI for bake groups
+
+	File: ui/elements.py - Defined UI elements used by ui/panels.py
+
+		Todo:
+			1	identify repeating code to make a specific handler similar to how we do with CN3 to have less duplicated code
+			2	make sure to address issues mentioned about collections and indices (see NW2)
+
+
+
+Initial planning
+
+	Eric via email 2021-12-04
+	    1) Complete bake target channels implementation starting with adding the variants.
+	    2) Implement and test Paint Assist within the FABA.
+
+	    a) Clicking paint button :
+
+	    i) the selected morph will be focussed upon in 3d viewport on the right in paint mode.
+	    ii) the paint color should be set to blue if the Color option is selected.
+	    iii) the paint color should be set to gray if the Greyscale option is selected.
+	    iv) materials will be applied to bake target meshes enabling the AO to be visible while painting.
+	    v) the 1k paint texture should be shown on the left.
+	    vi) show text log on the bottom revealing standard out feedback to artist.
+
+	    b) If another morph is selected while in paint mode:
+
+	    i) save the 1k paint texture the of the previous morph being painted.
+	    ii) do the same things shown above.
+
+	    3) Use the FABA start to finish. Paint the eyes as projected from view. https://drive.google.com/drive/folders/1To1TqYmnm3_Hc3WubbNneVOWB1WNvyIH
+	    4) On export, implement the compositing to the final 4k atlas including all the greyscale layers and color layer.
+	    Implement Frame application GES and SSF chunking adjustments to accommodate for the new layered atlas approach.
+	    5) Push changes to FABA and Frame branches.  Use #frame-deployment channel /loadbranch hook to deploy your Frame branch to our test server.
+	    6) Post an update in our shared discusion with a link to the test server : port running your branch.
+
+
+
+	References:
+
+	    Text wrapping in panels
+	        https://blender.stackexchange.com/questions/74052/wrap-text-within-a-panel
+
+
+	    All nodes
+	        https://github.com/blender/blender/blob/master/release/scripts/startup/nodeitems_builtins.py#L372-L489
+
+	    Areas
+	        https://github.com/blender/blender/blob/594f47ecd2d5367ca936cf6fc6ec8168c2b360d0/source/blender/makesrna/intern/rna_userdef.c#L3813-L3834
+
+

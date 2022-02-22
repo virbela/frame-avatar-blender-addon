@@ -2,11 +2,25 @@ Brief
 	This document is intended to be a place where decisions are logged and explained.
 
 Rationale
-	Without logging the reasons for certain decisions that were made to perhaps fix a bug or work around an issue develoers are bound to repeat old mistakes.
+	Without logging the reasons for certain decisions that were made to perhaps fix a bug or work around an issue developers are bound to repeat old mistakes.
 	This is costly of time and effort and to document such decisions is a good way to prevent it.
 
+Pending entries
 
-Articles
+	1 - Decide for or against CP1 (or propose changes)
+
+	2 - Should we use the node transpiler or should we have a system for exporting/importing to json or other format?
+		Perhaps we should just store a material in the blend file and refer to that stored material and then connect specific named properties to our inputs.
+		This might be a more elegant way of dealing with custom materials and it would probably give more flexibility for both artists and developers.
+
+		However, if we do this, I suggest we do it after M1
+
+	3 - Should we have a module for local custom bases to gather them all in one place?
+
+		Example: operators/base.py
+
+
+Archived entries
 
 	Baking - overview of process
 
@@ -23,8 +37,6 @@ Articles
 
 		Notes
 			¹	The work scene is defined by name and is currently defined in the module 'constants' as the variable 'WORK_SCENE'.
-
-
 
 
 	Logging system
