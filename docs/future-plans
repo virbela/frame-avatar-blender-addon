@@ -1,0 +1,10 @@
+Future plans
+
+	1 - Rethink baketarget/variant to be less complex
+
+		We currently want to get to a working plugin that the artists can use but after that milestone (M1) is reached
+
+	2 - Log important data for trouble shooting reasons.
+
+		By important data we could have things like: selected objects, running operator and such
+

@@ -1,7 +1,6 @@
+Note: Technical detail note may sometimes be called tech-note or TD
 
-Note: Technical detail note may sometimes be called tech-note
-
-1	Setting up baking
+1 - Setting up baking
 
 	For baking we have two options
 		render.bake.use_clear
@@ -17,7 +16,7 @@ Note: Technical detail note may sometimes be called tech-note
 		render.bake.use_pass_color = True
 
 
-2	UV operations
+2 - UV operations
 
 	This is an excerpt from blender/source/blender/editors/uvedit/uvedit_unwrap_ops.c
 
@@ -25,16 +24,27 @@ Note: Technical detail note may sometimes be called tech-note
 
 	This means we probably need to make sure we are in the proper context rather than attempting context override
 
-3	UV Layer
+3 - UV Layer
 
 	When we are performing packing or other operations on the UV layer it is important that the correct layer is active.
 
-4	Index from name
+4 - Index from name
 
 	 bpy_prop_collection defines a find method for getting the numerical ID
 
-5	Data relationships
+5 - Data relationships
 
 	Currently a workmesh does not have a property for looking up the variant and bake target it comes from.
 	Now we will iterate through all the variants to map these but later on we may want to deal with this better.
 	It also hinges a bit on how we want to deal with our bake targets, if we should make the meshes be the bearer of the data instead of a separate collection.
+
+6 - Metadata
+
+	#TODO: Make a per type table that shows what expected metadata there are
+	Types: plugin, Panel, Operator  (add more if needed)
+
+	Goals: We don't want there to be "undocumented operator" or missing descriptive tool tips in the UI.
+
+7 - Logging
+
+	#TODO: Create table over logging levels and decide how to assign the proper log levels

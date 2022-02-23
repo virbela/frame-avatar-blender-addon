@@ -1,3 +1,8 @@
+These todo entries are not bound to a specific module as the ones in main-plan.
+The entries in here should be put into the main-plan if eligable or scrapped if not.
+
+#DEPRECATED - go through and put in proper place or scrap
+
 These todo notes have numbers that are referenced in the source code as "todo note N".
 The purpose of this is to allow for more elaborate descriptions that are needed in multiple places.
 
@@ -18,6 +23,28 @@ Non numbered items
    		Now this is set up when packing but it is easy to change it by mistake by clicking in the UV layer list of the object.
 
    	* have a look at https://docs.blender.org/api/current/bpy.app.handlers.html
+
+	* workflow
+
+		update baking scene
+
+			We create meshes that we use for baking
+			We put these meshes in a specific scene for baking
+			We name them according to a specific pattern - we need to be able to get this name also when making sure we are not creating double meshes
+			We assign materials to these meshes
+
+		clean up normals for baking
+
+			#TBD - selection based? always do all of them? one button for all, one for selected?
+
+			We clean up normals using average face area
+
+	* bake targets
+
+		A bake target can be part of a bake group. If this is the case, the objects will be baked together.
+		The object used for baking should have a particular bake material and we can create this with materials.setup_bake_material2
+
+
 
 
 Numbered items

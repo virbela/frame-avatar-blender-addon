@@ -1,0 +1,16 @@
+This is numbered items that needs work or research.
+
+1 - How to deal with materials
+
+	We need to better define how we want to deal with materials and materials templates in the project.
+
+2 - How to deal with collections and their indices
+
+	When we want to refer to an entry in a collection and we may also remove entries from that collection it may become tricky in the case each item does not have a uique identifier.
+	We should figure out the requirements for this and implement a UUID manager for dealing with this issue. The uuid module has nice random UUIDs one could make use of.
+
+3 - Specification for data validation
+
+	Decide how we should validate data and how the API for it should look.
+	Do we want to run data through a function that gives us an internal structure that gives us all the data and if it is proper or not or do we just want to get a yes/no?
+

@@ -1,0 +1,87 @@
+Tab: FRAME_PT_workflow - Workflow
+
+	Group: introduction - Introduction
+
+		Operator: wm.url_open - Help
+		Operator: frame.setup_bake_scene - First time setup
+
+	Group: bake_targets - Bake targets
+
+		Operator: frame.create_targets_from_selection - New bake targets from selected objects
+		Operator: frame.validate_targets - Validate bake targets
+
+	Group: work_meshes - Work meshes
+
+		Operator: frame.create_workmeshes_for_all_targets - New work meshes from all bake targets
+		Operator: frame.create_workmeshes_for_selected_target - New work meshes from selected bake targets
+		Operator: frame.update_selected_workmesh_all_shapekeys - Update selected
+		Operator: frame.update_selected_workmesh_active_shapekey - Update active shapekey
+
+
+	Group: atlas_setup - Texture atlas
+
+		Operator: frame.auto_assign_atlas - Auto assign atlas/UV
+		Operator: frame.pack_uv_islands - Pack UV islands
+
+
+	Group: work_materials - Work materials
+
+		Operator: frame.update_selected_material - Update selected material
+		Operator: frame.update_all_materials - Update all materials
+		Operator: frame.switch_to_bake_material - Show bake/paint material
+		Operator: frame.switch_to_preview_material - Show preview material
+
+		Separator
+
+		Operator: frame.select_by_atlas - Select work meshes based on atlas
+		Property: ht.select_by_atlas_image - Match atlas
+
+	Group: baking - Baking
+
+		Operator: frame.bake_selected_bake_target - Bake selected bake target
+		Operator: frame.bake_selected_workmeshes - Bake selected work meshes
+		Operator: frame.bake_all - Bake all bake targets
+
+	Group: helper_tools - Helpers
+
+		Operator: frame.synchronize_uv_to_vertices - Select mesh vertices based on UV selection
+		Operator: frame.select_objects_by_uv - Select objects based on UV selection
+		Operator: frame.synchronize_visibility_to_render - Show to render only
+		Operator: frame.make_everything_visible - Show everything
+		Operator: frame.reset_uv_transforms - Reset UV transforms
+		Operator: frame.recalculate_normals - Recalculate normals on selected meshes
+
+
+Archived notes:
+
+	#TO-DOC ↓ Read through this, update/remove as fit - these are older notes
+	Addon panels for category 'Avatar' in space 'VIEW_3D'
+
+		Bake targets (ui.panels.FRAME_PT_batch_bake_targets)
+
+			Bake target list
+				Type:			FRAME_UL_bake_targets
+				Item type:		properties.BakeTarget
+				Description:	List of bake targets from HT.bake_target_collection where HT.selected_bake_target is the selected item
+
+			If there is a selected bake target (et):
+				MAYBE-TODO: Rename et to make more sense
+
+				Search box for object in scene.objects → et.object_name
+
+				If there is such object et.object_name:
+					Search box for shape_keys in the object et.object_name → et.shape_key_name
+
+				Scalar for UV area weight (importance factor) → et.uv_area_weight
+				Cardinal for number of variants this bake has → et.variant_count
+				Option for UV island mode (see documentation on properties.BakeTarget) → et.uv_mode
+
+
+			Bake target mirror entry list (see documentation (#TODO: write) for details regarding how UV island mirroring works)
+				Type:			FRAME_UL_bake_target_mirrors
+				Item type:		properties.BakeTargetMirrorEntry
+				Description:	List of bake targets that should be handled as mirrored targets
+
+
+			Operator to create bake targets from shape key names
+				Calls:			baking.create_bake_targets_from_shapekeys

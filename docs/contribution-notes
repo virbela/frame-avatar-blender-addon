@@ -20,7 +20,7 @@ Generic articles
 
 Specific articles
 
-	1	Property descriptions
+	1 - Property descriptions
 
 		For defining a multiline explanation we can use automatic string concatenation of consecutive string literals¹.
 		Notice that blender will add a period to the end of the description. This means we should not have any trailing
@@ -30,7 +30,7 @@ Specific articles
 			¹	https://docs.python.org/3/reference/lexical_analysis.html#string-literal-concatenation
 
 
-	2	Homeomorphic tool state
+	2 - Homeomorphic tool state
 
 		We get the homeomorphic tool state using the following pattern:
 
@@ -40,7 +40,7 @@ Specific articles
 		If there is a problem retrieving the tool state an error will automatically be written to the log and we only need to concern ourselves with
 		using the tool state if we got it or otherwise abort.
 
-	3	Operators
+	3 - Operators
 
 		Operators should be using the following pattern
 
@@ -57,17 +57,17 @@ Specific articles
 		References:
 			¹	https://docs.blender.org/api/current/bpy.types.Operator.html#bpy.types.Operator.execute
 
-	4	Bake Exceptions
+	4 - Bake Exceptions
 
 		We should ensure that bake exceptions occurs BEFORE any actions have been take so that we bail out before modifying anything.
 		Other exceptions we don't have control of so we will propagate the exception.
 		But since we know that bake exceptions will not mess up the state of the blend file, we can safely return {'CANCELLED'} if those occur.
 
-	5	Internal error
+	5 - Internal error
 
 		These should be raised when we detect a programming error or an invalid state that shouldn't have any reason to be invalid.
 
-	6	Registering classes automatically
+	6 - Registering classes automatically
 		A	Using decorator
 			This use case is for when we define a concrete class
 
@@ -91,21 +91,21 @@ Specific articles
 			Note that we can't have another abstract class as a subclass of the first without it being registered but this
 			should not pose a problem in the current code base
 
-	7 	Read only PointerProperty
+	7  - Read only PointerProperty
 
 		PointerProperty is not mutable.
 
 		https://blenderartists.org/t/custom-pointer-property-is-read-only/1315651/4
 
-	8	Bake target identifier
+	8 - Bake target identifier
 
 		A	We identify the bake target by the object and the shape key. This allows us to rename the bake targets user interface name without disconnecting targets.
 			#POTENTIAL-PROBLEM - If we want to have multiple bake targets from the same shape key this will not work, one need to use the variants-feature for that instead.
 
 		B	Updated version where we use the index as a string but we should not do this later (see todo 4)
 
-	9	NodeTree only exists after use_nodes = True
+	9 - NodeTree only exists after use_nodes = True
 
-	10	Using PointerType properties
+	10 - Using PointerType properties
 
 		It works like the name implies when we are pointing to already registered data types. This means we can't use it to point to instance of where it is used as a property.

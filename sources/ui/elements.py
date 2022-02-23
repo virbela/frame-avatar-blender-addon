@@ -3,7 +3,7 @@ from ..properties import *
 from ..helpers import pending_classes, get_homeomorphic_tool_state
 
 #ISSUE: Some collections are referenced in a problematic way
-#	Currently we use indices to refer to items in collections but since items can move around (check if this is truth) our indices can be wrong.
+#	Currently we use indices to refer to items in collections but since items can move around (check if this is true) our indices can be wrong.
 #	When an index becomes the wrong thing without any error occuring this can confuse the user so we should either use a system with UUID or see if there are another better way of dealing with this problem.
 #	labels: needs-research
 
