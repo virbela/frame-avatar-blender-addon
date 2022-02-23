@@ -8,14 +8,11 @@ class FRAME_OT_select_by_atlas(frame_operator):
 	#TODO - bl_description
 	frame_operator = 	operations.select_by_atlas
 
-
 class FRAME_OT_synchronize_uv_to_vertices(frame_operator):
 	bl_label = 			"Select mesh vertices based on UV selection"
 	bl_idname = 		"frame.synchronize_uv_to_vertices"
 	#TODO - bl_description
 	frame_operator = 	operations.synchronize_uv_to_vertices
-
-
 
 class FRAME_OT_create_workmeshes_for_all_targets(frame_operator):
 	bl_label = 			"New work meshes from all bake targets"
@@ -29,13 +26,11 @@ class FRAME_OT_create_workmeshes_for_selected_target(frame_operator):
 	#TODO - bl_description
 	frame_operator = 	operations.create_workmeshes_for_selected_target
 
-
 class FRAME_OT_create_targets_from_selection(frame_operator):
 	bl_label = 			"New bake targets from selected objects"
 	bl_idname = 		"frame.create_targets_from_selection"
 	#TODO - bl_description
 	frame_operator = 	operations.create_targets_from_selection
-
 
 class FRAME_OT_update_selected_workmesh_all_shapekeys(frame_operator):
 	bl_label = 			"Update selected"
@@ -49,13 +44,11 @@ class FRAME_OT_update_selected_workmesh_active_shapekey(frame_operator):
 	#TODO - bl_description
 	frame_operator = 	operations.update_selected_workmesh_active_shapekey
 
-
 class FRAME_OT_setup_bake_scene(frame_operator):
 	bl_label = 			"First time setup"
 	bl_idname = 		"frame.setup_bake_scene"
 	bl_description = 	"Create bake scene"
 	frame_operator = 	operations.setup_bake_scene
-
 
 class FRAME_OT_validate_targets(frame_operator):
 	bl_label = 			"Validate bake targets"
@@ -180,7 +173,6 @@ class FRAME_OT_remove_bake_group_member(frame_operator):
 	bl_idname = 		'frame.remove_bake_group_member'
 	frame_operator = 	operations.bake_groups.members.remove
 
-
 class FRAME_OT_add_bake_target(frame_operator):
 	bl_label =			"+"
 	bl_description = 	'Create new bake target'
@@ -231,7 +223,6 @@ class FRAME_OT_synchronize_mirrors(frame_operator):
 	bl_description = 	'Copy settings from all primary targets to secondary targets in the mirror list'
 	bl_idname = 		'frame.synchronize_mirrors'
 	frame_operator = 	operations.synchronize_mirrors
-
 
 
 #TODO - this should be guarded by a devmode boolean

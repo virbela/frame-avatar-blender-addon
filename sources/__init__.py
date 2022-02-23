@@ -25,10 +25,8 @@ from .properties import HomeomorphicProperties, UIStateProperty
 
 # Addon registration
 def register():
-
 	for cls in pending_classes:
 		bpy.utils.register_class(cls)
-
 
 	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
 	bpy.types.Scene.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
@@ -47,6 +45,6 @@ def unregister():
 
 
 if __name__ == '__main__':
-    import os
-    os.system("clear")
+	# XXX ScriptWatcher hook for local development
+    import os; os.system("clear")
     register()	

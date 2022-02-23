@@ -15,8 +15,6 @@ class validation_error:
 	class internal_error:
 		pass
 
-
-
 	# Concrete errors - invalid bake target configuration
 	class invalid_object_reference(invalid_bake_target_configuration):
 		pass
@@ -26,7 +24,6 @@ class validation_error:
 
 	class no_atlas_assigned(invalid_bake_target_configuration):
 		pass
-
 
 	# Concrete errors - internal data inconsistencies
 	@dataclass
@@ -102,12 +99,10 @@ def validate_bake_target(ht, bake_target):
 	else:
 		result.append(validation_error.invalid_enum(bake_target, 'bake_mode'))
 
-
 	return result
 
 
 def validate_all(ht):
-
 	result = list()
 	log.info('Validating all bake targets')
 	for bake_target in ht.bake_target_collection:

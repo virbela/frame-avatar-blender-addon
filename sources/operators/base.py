@@ -27,7 +27,7 @@ class frame_operator(bpy.types.Operator):
 
 				return {'FINISHED'}
 			else:
-				raise InternalError(f'{self} does not define `frame_operator´ and can not be executed')	#contribution note 5
+				raise InternalError(f'{self} does not define `frame_operator` and can not be executed')	#contribution note 5
 
 		return {'CANCELLED'}
 

@@ -6,11 +6,11 @@ class InternalError(Exception):
 class FrameException:
 	class FailedToCreateNamedEntry(Exception):
 		def __init__(self, collection, name):
-			super().__init__(f'Failed to create a named entry named `{name}´ in collection {collection}.')
+			super().__init__(f'Failed to create a named entry named `{name}` in collection {collection}.')
 
 	class NamedEntryNotFound(Exception):
 		def __init__(self, collection, name):
-			super().__init__(f'No entry named `{name}´ was found in collection {collection}.')
+			super().__init__(f'No entry named `{name}` was found in collection {collection}.')
 
 	class NoNameGivenForCollectionLookup(Exception):
 		def __init__(self, collection):
@@ -29,9 +29,9 @@ class BakeException:
 	class NoObjectChosen(base):
 		def __init__(self, name):
 			self.name = name
-			super().__init__(f'The operation requries an object to be chosen and no such object `{name}´ exists.')
+			super().__init__(f'The operation requries an object to be chosen and no such object `{name}` exists.')
 
 	class NoSuchScene(base):
 		def __init__(self, name):
 			self.name = name
-			super().__init__(f'The operation requires a scene named `{name}´ which was not found.')
+			super().__init__(f'The operation requires a scene named `{name}` which was not found.')
