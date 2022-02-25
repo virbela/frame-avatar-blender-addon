@@ -140,7 +140,7 @@ def set_selection(collection, *selected, synchronize_active=False, make_sure_act
 	if make_sure_active and collection.active is None and selected:
 		collection.active = selected[0]
 
-# this is just to make code more readable
+
 def clear_selection(collection):
 	set_selection(collection)
 
@@ -244,7 +244,7 @@ def get_bake_target_variant_name(bake_target, variant):
 
 
 def is_dev():
-	# is we are installed as an addon, assume this is a production dist
+	# if we are installed as an addon, assume this is a production dist
 	import addon_utils
 	for mod in addon_utils.modules():
 		if 'frame_avatar_addon' == mod.__name__:
