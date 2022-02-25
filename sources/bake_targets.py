@@ -22,6 +22,9 @@ class validation_error:
 	class too_low_uv_area_weight(invalid_bake_target_configuration):
 		pass
 
+	class too_great_uv_area_weight(invalid_bake_target_configuration):
+		pass
+
 	class no_atlas_assigned(invalid_bake_target_configuration):
 		pass
 
@@ -42,7 +45,7 @@ def validate_bake_target_variant(ht, bake_target):
 def validate_bake_target(ht, bake_target):
 	result = list()
 	# check object reference
-	if bake_target.object_reference is None:
+	if bake_target.get_object() is None:
 		result.append(validation_error.invalid_object_reference(bake_target))
 
 	# check uv area weight
