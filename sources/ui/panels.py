@@ -1,31 +1,23 @@
 import bpy
 import functools
 from ..properties import *
-from ..helpers import require_work_scene, require_bake_scene, pending_classes
+from ..helpers import require_work_scene, require_bake_scene, pending_classes, is_dev
 
 class frame_panel(bpy.types.Panel):
 	#contribution note 6B
 	def __init_subclass__(cls):
 		pending_classes.append(cls)
 
-#ISSUE: Some features should only be available in developer mode
-#	We should have a configuration option for the addon for developer mode and respect the state of that configuration.
-#	We don't necessarily need to avoid registering classes but we should at least hide all UI elements that are development only.
-#	labels: needs-implementation
 
-#TODO - this should be guarded by a devmode boolean
-class FRAME_PT_node_dev_tools(frame_panel):
-	bl_label = "Development Tools"
-	bl_space_type = 'NODE_EDITOR'
-	bl_region_type = 'UI'
-	bl_category = "Avatar"
+if is_dev():
+	class FRAME_PT_node_dev_tools(frame_panel):
+		bl_label = "Avatar Development Tools"
+		bl_space_type = 'NODE_EDITOR'
+		bl_region_type = 'UI'
+		bl_category = "Avatar"
 
-	def draw(self, context):
-		self.layout.operator('frame.create_node_script')
-
-#ISSUE: Workflow panel is messy
-#	We should spend some time to figure out how to present the various operations here, maybe make collapsible groups (see class `template_expandable_section`).
-#	labels: needs-planning
+		def draw(self, context):
+			self.layout.operator('frame.create_node_script')
 
 class FRAME_PT_workflow(frame_panel):
 	bl_label = "Workflow"
@@ -97,11 +89,9 @@ class FRAME_PT_workflow(frame_panel):
 				helper_tools.operator('frame.reset_uv_transforms')
 				helper_tools.operator('frame.recalculate_normals')
 
-			if False:
-				#TODO - remove or make conditional
+			if is_dev():
 				debug = self.layout.box()
 				debug.label(text='Debug tools')
-				debug.operator('frame.place_holder_for_experiments')
 				debug.operator('frame.clear_bake_scene')
 				debug.operator('frame.clear_bake_targets')
 
@@ -170,10 +160,6 @@ def draw_variant(layout, variant, bake_scene):
 			layout.label(text=f"Intermediate atlas: {variant.intermediate_atlas.name}", icon='FILE_IMAGE')
 
 
-#ISSUE: `FRAME_PT_batch_bake_targets` is messy
-#	Document and tidy up this class.
-#	labels: needs-documenting, needs-tidying
-
 class FRAME_PT_batch_bake_targets(frame_panel):
 	bl_label = "Bake targets"
 	bl_space_type = 'VIEW_3D'
@@ -191,8 +177,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 			bake_target_actions = self.layout.row(align=True)
 			bake_target_actions.operator('frame.add_bake_target')
 			bake_target_actions.operator('frame.remove_bake_target')
-			#bake_target_actions.operator('frame.show_selected_bt')	#LATER
-
 
 			#TODO - document the reasoning behind all this
 			#TODO - divy up this into a few functions to make it less messy
@@ -233,8 +217,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 							draw_variant(variants, var, bake_scene)
 
 					self.layout.prop(et, 'uv_mode')
-
-					#TODO - should we use uv_target_channel ?
 
 					if et.uv_mode == 'UV_IM_FROZEN':
 						self.layout.prop(et, 'atlas')

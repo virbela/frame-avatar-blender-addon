@@ -241,3 +241,12 @@ def get_bake_target_variant_name(bake_target, variant):
 	if bake_target.multi_variants:
 		return f'{bake_target.shortname}.{variant.name}'
 	return f'{bake_target.shortname}'
+
+
+def is_dev():
+	# is we are installed as an addon, assume this is a production dist
+	import addon_utils
+	for mod in addon_utils.modules():
+		if 'frame_avatar_addon' == mod.__name__:
+			return False
+	return True
