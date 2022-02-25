@@ -21,6 +21,11 @@ class missing_action(enum.Enum):
 	RETURN_NONE = object()
 
 
+class named_entry_action(enum.Enum):
+	RENAME = enum.auto()
+	RECREATE = enum.auto()
+	GET_EXISTING = enum.auto()
+
 @dataclass
 class enum_entry:
 	identifier: str
@@ -89,21 +94,16 @@ def require_named_entry(collection, name):
 	else:
 		raise FrameException.NamedEntryNotFound(collection, name)
 
-#ISSUE-11: Refactor options for function `create_named_entry`
-#	Currently we use a bunch of booleans but it would be better to use an enum for what operation/profile we want when calling this function.
-#	Another solution is to create multiple static functions in a class.
-#	Note that `ignore_existing` is not very well named for what it does.
-#	labels: needs-refactoring
 
-def create_named_entry(collection, name, *positional, allow_rename=False, recreate=False, ignore_existing=False):
+def create_named_entry(collection, name, *positional, action=named_entry_action.GET_EXISTING):
 
 	if name in collection:
-		if recreate:
+		if action == named_entry_action.RECREATE:
 			collection.remove(collection.get(name))
 			return collection.new(name, *positional)
-		elif ignore_existing:
+		elif action == named_entry_action.GET_EXISTING:
 			return collection.get(name)
-		elif allow_rename:
+		elif action == named_entry_action.RENAME:
 			return collection.new(name, *positional)
 		else:
 			raise FrameException.FailedToCreateNamedEntry(collection, name)

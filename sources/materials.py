@@ -1,7 +1,7 @@
 import bpy
 from .structures import intermediate
 from .node_utils import load_node_setup_function
-from .helpers import create_named_entry, require_named_entry, get_nice_name
+from .helpers import create_named_entry, require_named_entry, get_nice_name, named_entry_action
 
 def get_material_variants(bt, bake_scene, atlas, uv_map, recreate=False):
 
@@ -22,11 +22,11 @@ def get_material_variants(bt, bake_scene, atlas, uv_map, recreate=False):
 			bake_material_name = get_nice_name(result, f'bake-{bt.shortname}-{variant.name}', 32)
 			preview_material_name = get_nice_name(result, f'preview-{bt.shortname}-{variant.name}', 32)
 
-			bake_material = create_named_entry(bpy.data.materials, bake_material_name, recreate=recreate, ignore_existing=True)
+			bake_material = create_named_entry(bpy.data.materials, bake_material_name, action=named_entry_action.RECREATE if recreate else named_entry_action.GET_EXISTING)
 			bake_material.use_nodes = True	#contribution note 9
 			setup_bake_material(bake_material.node_tree, atlas, uv_map, paint_image, paint_uv)
 
-			preview_material = create_named_entry(bpy.data.materials, preview_material_name, recreate=recreate, ignore_existing=True)
+			preview_material = create_named_entry(bpy.data.materials, preview_material_name, action=named_entry_action.RECREATE if recreate else named_entry_action.GET_EXISTING)
 			preview_material.use_nodes = True	#contribution note 9
 			setup_bake_preview_material(preview_material.node_tree, atlas, uv_map)
 

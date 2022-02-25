@@ -8,6 +8,7 @@ from ..helpers import (
     set_active,
     set_selection,
     clear_selection,
+	named_entry_action,
     create_named_entry, 
     require_bake_scene
 )
@@ -27,10 +28,10 @@ def auto_assign_atlas(operator, context, ht):
 	a_width = 4096
 	a_height = 4096
 
-	atlas_color = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_color', 	a_width, a_height, recreate=False, ignore_existing=True)
-	atlas_red = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_red', 		a_width, a_height, recreate=False, ignore_existing=True)
-	atlas_green = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_green', 	a_width, a_height, recreate=False, ignore_existing=True)
-	atlas_blue = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_blue', 	a_width, a_height, recreate=False, ignore_existing=True)
+	atlas_color = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_color', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
+	atlas_red = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_red', 		a_width, a_height, action=named_entry_action.GET_EXISTING)
+	atlas_green = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_green', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
+	atlas_blue = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_blue', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
 
 
 	#TODO - here we need to put things in bins like how the UV packing does below but before we can do this we should look at the variants
