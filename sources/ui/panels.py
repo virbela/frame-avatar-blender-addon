@@ -235,8 +235,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 					if shape_keys := obj.data.shape_keys:
 						self.layout.prop_search(et, "shape_key_name", obj.data.shape_keys, "key_blocks")
 
-
-
 				self.layout.prop(et, 'bake_mode')
 
 				if et.bake_mode == 'UV_BM_REGULAR':
@@ -257,15 +255,12 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 							var = et.variant_collection[et.selected_variant]
 							draw_variant(variants, var, bake_scene)
 
-
-
 					else:	# draw the first entry only
 						if len(et.variant_collection) == 0:
 							variants.label(text='Please revalidate bake target')
 						else:
 							var = et.variant_collection[0]
 							draw_variant(variants, var, bake_scene)
-
 
 					self.layout.prop(et, 'uv_mode')
 
