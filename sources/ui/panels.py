@@ -1,15 +1,7 @@
 import bpy
+import functools
 from ..properties import *
 from ..helpers import get_work_scene, get_bake_scene, pending_classes
-# from .. import operators
-import sources.operators as operators
-import functools
-
-
-import textwrap
-
-def textlines(txt):
-	return textwrap.dedent(txt).strip('\r\n\t ').split('\n')
 
 class frame_panel(bpy.types.Panel):
 	#contribution note 6B
@@ -104,25 +96,6 @@ class FRAME_PT_workflow(frame_panel):
 				helper_tools.operator('frame.make_everything_visible')
 				helper_tools.operator('frame.reset_uv_transforms')
 				helper_tools.operator('frame.recalculate_normals')
-
-			#TODO - clean this up!
-
-			# self.layout.operator('frame.auto_assign_atlas')
-			# self.layout.operator('frame.pack_uv_islands')
-			# self.layout.operator('frame.update_baking_scene')
-			# self.layout.operator('frame.bake_all')
-
-			# helpers = self.layout.box()
-			# helpers.label(text='Extra utilities')
-			# helpers.operator('frame.bake_selected')
-			# helpers.operator('frame.synchronize_mirrors')
-
-
-			# materials = self.layout.box()
-			# materials.label(text='Materials')
-			# materials.operator('frame.switch_to_bake_material')
-			# materials.operator('frame.switch_to_preview_material')
-
 
 			if False:
 				#TODO - remove or make conditional
@@ -268,60 +241,17 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 
 					if et.uv_mode == 'UV_IM_FROZEN':
 						self.layout.prop(et, 'atlas')
-						#TODO - decide what to do here
-						# if et.workmesh:
-						# 	#self.layout.prop_search(et, 'uv_map', obj.data, 'uv_layers')
-						# 	self.layout.prop(et, 'uv_target_channel')
-						# else:
-						# 	self.layout.label(text=f"UV set: (No object)")
 					else:
-
 						if et.atlas is None:
 							self.layout.label(text=f"Atlas: (not assigned)", icon='UNLINKED')
 						else:
 							self.layout.label(text=f"Atlas: {et.atlas.name}", icon_value=et.atlas.preview.icon_id)
 
-						#self.layout.label(text=f"UV set: {et.uv_map or '(not assigned)'}")
-						#self.layout.label(text=f"UV target: {UV_TARGET_CHANNEL.members[et.uv_target_channel].name}", icon=UV_TARGET_CHANNEL.members[et.uv_target_channel].icon)
-
-
-
 				elif et.bake_mode == 'UV_BM_MIRRORED':
-					#self.layout.prop_search(et, 'mirror_source', HT, 'bake_target_collection')
-					#self.layout.prop(et, 'mirror_source')
-
 					pass	#TODO
-					#BUG - when showing the FRAME_UL_bake_targets list in two places we get trouble with shared state
-					# uv_mirror_options = template_expandable_section(self.layout, et, 'UV mirror options', 'uv_mirror_options_expanded')
-					# uv_mirror_options.prop(et, 'uv_mirror_axis')
-					# uv_mirror_options.label(text='Source of mirror')
-					# uv_mirror_options.template_list('FRAME_UL_bake_targets', '', HT,  'bake_target_collection', et, 'mirror_source')
-
-
-					#self.layout.prop(et, 'geom_mirror_axis')		#MAYBE-LATER
 				else:
 					raise InternalError(f'et.bake_mode set to unsupported value {et.bake_mode}')
 
-			#TODO - add button for synchronizing primary → secondary (where? here or utils?)
-			# mirrors = self.layout.box()
-			# mirrors.label(text='Mirrored bake targets')
-			# mirrors.template_list('FRAME_UL_bake_target_mirrors', '', HT,  'bake_target_mirror_collection', HT, 'selected_bake_target_mirror')
-
-			# bake_target_actions = mirrors.row(align=True)
-			# bake_target_actions.operator('frame.add_bake_target_mirror')
-			# bake_target_actions.operator('frame.remove_bake_target_mirror')
-
-			# if HT.selected_bake_target_mirror != -1:
-			# 	tm = HT.bake_target_mirror_collection[HT.selected_bake_target_mirror]
-			# 	row = mirrors.row()
-			# 	row.operator('frame.set_bake_mirror_primary')
-			# 	row.operator('frame.set_bake_mirror_secondary')
-
-
-			# advanced = self.layout.box()
-			# advanced.label(text='Create from shapekeys')
-			# advanced.prop_search(HT, 'source_object', scene, 'objects')
-			# advanced.operator('frame.create_bake_targets_from_shapekeys')
 
 class FRAME_PT_bake_groups(frame_panel):
 	bl_label = "Bake groups"
