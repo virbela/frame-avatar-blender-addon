@@ -257,9 +257,12 @@ class FRAME_PT_bake_groups(frame_panel):
 				group_actions.operator('frame.add_bake_group_member')
 				group_actions.operator('frame.remove_bake_group_member')
 
-				#NOTE - Currently we don't allow to change the target afterwards, instead we have to remove and select a differet target and add it.
-				# This might be slightly confusing for the user though since it is fairly far between the bake targets and bake groups so we may want to improve this later
 
-				# if selected_group.selected_member != -1:
-				# 	selected_member = selected_group.members[selected_group.selected_member]
-				# 	self.layout.prop_search(selected_member, 'target', HT, 'bake_target_collection')
+class FRAME_PT_export(frame_panel):
+	bl_label = "Export"
+	bl_space_type = 'VIEW_3D'
+	bl_region_type = 'UI'
+	bl_category = "Avatar"
+
+	def draw(self, context):
+		self.layout.operator("frame.export")

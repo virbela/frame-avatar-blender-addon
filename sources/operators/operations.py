@@ -1,3 +1,6 @@
+from .ops_export import export
+from .ops_intro import setup_bake_scene
+
 from .ops_baketargets import (
     bake_groups,
     bake_targets,
@@ -30,8 +33,6 @@ from .ops_helpers import (
     synchronize_uv_to_vertices,
     synchronize_visibility_to_render
 )
-
-from .ops_intro import setup_bake_scene
 
 from .ops_texture import  (
     pack_uv_islands,

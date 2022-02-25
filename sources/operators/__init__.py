@@ -9,6 +9,13 @@ class FRAME_OT_setup_bake_scene(frame_operator):
 	bl_description = 	"Create bake scene"
 	frame_operator = 	operations.setup_bake_scene
 
+# Export 
+class FRAME_OT_export(frame_operator):
+	bl_label = 			"Export GLTF"
+	bl_idname = 		"frame.export"
+	bl_description = 	"Export avatar meshes and metadata"
+	frame_operator = 	operations.export
+
 
 # Bake Targets
 class FRAME_OT_create_targets_from_selection(frame_operator):
