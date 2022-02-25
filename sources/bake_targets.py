@@ -73,19 +73,20 @@ def validate_bake_target(ht, bake_target):
 			result.append(validation_error.no_atlas_assigned(bake_target))
 
 
+		# TODO(ranjian0) uv_target_channel is a prop in variant not bake target
 		# check uv target channel
-		if bake_target.uv_target_channel == 'UV_TARGET_NIL':
-			pass	#TODO - implement
-		elif bake_target.uv_target_channel == 'UV_TARGET_COLOR':
-			pass	#TODO - implement
-		elif bake_target.uv_target_channel == 'UV_TARGET_R':
-			pass	#TODO - implement
-		elif bake_target.uv_target_channel == 'UV_TARGET_G':
-			pass	#TODO - implement
-		elif bake_target.uv_target_channel == 'UV_TARGET_B':
-			pass	#TODO - implement
-		else:
-			result.append(validation_error.invalid_enum(bake_target, 'uv_target_channel'))
+		# if bake_target.uv_target_channel == 'UV_TARGET_NIL':
+		# 	pass	#TODO - implement
+		# elif bake_target.uv_target_channel == 'UV_TARGET_COLOR':
+		# 	pass	#TODO - implement
+		# elif bake_target.uv_target_channel == 'UV_TARGET_R':
+		# 	pass	#TODO - implement
+		# elif bake_target.uv_target_channel == 'UV_TARGET_G':
+		# 	pass	#TODO - implement
+		# elif bake_target.uv_target_channel == 'UV_TARGET_B':
+		# 	pass	#TODO - implement
+		# else:
+		# 	result.append(validation_error.invalid_enum(bake_target, 'uv_target_channel'))
 
 
 		# check multi variants
@@ -96,7 +97,6 @@ def validate_bake_target(ht, bake_target):
 
 	elif bake_target.bake_mode == 'UV_BM_MIRRORED':
 		pass	#TODO - implement
-
 		#TODO	mirror_source
 		#TODO	uv_mirror_axis
 	else:
