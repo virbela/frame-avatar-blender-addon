@@ -12,8 +12,11 @@ from ..helpers import (
     clear_selection
 )
 
-disable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.disable_target_box)
-enable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.enable_target_box)
+UVPM2_INSTALLED = hasattr(bpy.ops, "uvpackmaster2")
+
+if UVPM2_INSTALLED:
+	disable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.disable_target_box)
+	enable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.enable_target_box)
 
 
 def auto_assign_atlas(operator, context, ht):
@@ -134,27 +137,30 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 	bpy.ops.mesh.select_all(action='SELECT')	#Select faces in model editor
 	bpy.ops.uv.select_all(action='SELECT')		#Select UVs in UV editor
 
+	if UVPM2_INSTALLED:
+		bpy.ops.uvpackmaster2.split_overlapping_islands()
+		bake_scene.uvp2_props.rot_step = 45
 
-	bpy.ops.uvpackmaster2.split_overlapping_islands()
-	bake_scene.uvp2_props.rot_step = 45
+		# note - we use guarded operators for setting the state of the packing box since setting it to the same state it already is will fail
+		disable_packing_box()
 
-	# note - we use guarded operators for setting the state of the packing box since setting it to the same state it already is will fail
-	disable_packing_box()
+		if box:
+			(	bake_scene.uvp2_props.target_box_p1_x,
+				bake_scene.uvp2_props.target_box_p1_y,
+				bake_scene.uvp2_props.target_box_p2_x,
+				bake_scene.uvp2_props.target_box_p2_y ) = box
 
-	if box:
-		(	bake_scene.uvp2_props.target_box_p1_x,
-			bake_scene.uvp2_props.target_box_p1_y,
-			bake_scene.uvp2_props.target_box_p2_x,
-			bake_scene.uvp2_props.target_box_p2_y ) = box
-
-		enable_packing_box()
+			enable_packing_box()
 
 
-	#NOTE - if we later do downsampling when doing final bake - we must consider the final pixel margin and not the intermediate one!
-	bake_scene.uvp2_props.pixel_margin = 5	#TODO - not hardcode! We could just not set this and set it in UVP UI but I think it is better this is a setting in FABA so that we don't forget about it
+		#NOTE - if we later do downsampling when doing final bake - we must consider the final pixel margin and not the intermediate one!
+		bake_scene.uvp2_props.pixel_margin = 5	#TODO - not hardcode! We could just not set this and set it in UVP UI but I think it is better this is a setting in FABA so that we don't forget about it
 
-	bpy.ops.uvpackmaster2.uv_pack()
-	disable_packing_box()
+		bpy.ops.uvpackmaster2.uv_pack()
+		disable_packing_box()
+	else:
+		bpy.ops.uv.average_islands_scale()
+		bpy.ops.uv.pack_islands()
 
 	clear_selection(view_layer.objects)
 	bpy.ops.object.mode_set(mode='OBJECT')
