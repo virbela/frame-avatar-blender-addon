@@ -106,8 +106,6 @@ class FRAME_PT_workflow(frame_panel):
 				debug.operator('frame.clear_bake_targets')
 
 
-
-
 class FRAME_PT_painting(frame_panel):
 	bl_label = "Texture painting"
 	bl_space_type = 'VIEW_3D'
@@ -135,7 +133,6 @@ class FRAME_PT_uv_packing(frame_panel):
 			self.layout.prop(HT, 'color_percentage')
 			h = int(HT.color_percentage * HT.atlas_size / 100)
 			self.layout.label(text=f'Height in pixels: {h}')
-
 
 
 class template_expandable_section:
