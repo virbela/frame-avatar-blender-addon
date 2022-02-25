@@ -14,13 +14,13 @@ class FRAME_OT_setup_bake_scene(frame_operator):
 class FRAME_OT_create_targets_from_selection(frame_operator):
 	bl_label = 			"New bake targets from selected objects"
 	bl_idname = 		"frame.create_targets_from_selection"
-	#TODO - bl_description
+	bl_description = 	"Create shape key targets from all selected objects"
 	frame_operator = 	operations.create_targets_from_selection
 
 class FRAME_OT_validate_targets(frame_operator):
 	bl_label = 			"Validate bake targets"
 	bl_idname = 		"frame.validate_targets"
-	#TODO - bl_description
+	bl_description = 	"Verify that all bake properties are correctly set"
 	frame_operator = 	operations.validate_targets
 
 
@@ -28,25 +28,25 @@ class FRAME_OT_validate_targets(frame_operator):
 class FRAME_OT_create_workmeshes_for_all_targets(frame_operator):
 	bl_label = 			"New work meshes from all bake targets"
 	bl_idname = 		"frame.create_workmeshes_for_all_targets"
-	#TODO - bl_description
+	bl_description = 	"Create bake meshes for all bake targets"
 	frame_operator = 	operations.create_workmeshes_for_all_targets
 
 class FRAME_OT_create_workmeshes_for_selected_target(frame_operator):
 	bl_label = 			"New work meshes from selected bake targets"
 	bl_idname = 		"frame.create_workmeshes_for_selected_target"
-	#TODO - bl_description
+	bl_description = 	"Create bake meshes for the selected bake targets"
 	frame_operator = 	operations.create_workmeshes_for_selected_target
 
 class FRAME_OT_update_selected_workmesh_all_shapekeys(frame_operator):
 	bl_label = 			"Update selected"
 	bl_idname = 		"frame.update_selected_workmesh_all_shapekeys"
-	#TODO - bl_description
+	bl_description = 	"Update vertex position data for all workmeshes"
 	frame_operator = 	operations.update_selected_workmesh_all_shapekeys
 
 class FRAME_OT_update_selected_workmesh_active_shapekey(frame_operator):
 	bl_label = 			"Update active shapekey"
 	bl_idname = 		"frame.update_selected_workmesh_active_shapekey"
-	#TODO - bl_description
+	bl_description = 	"Update vertex position data for the active shape key mesh"
 	frame_operator = 	operations.update_selected_workmesh_active_shapekey
 
 class FRAME_OT_update_selected_workmesh(frame_operator):
@@ -72,7 +72,7 @@ class FRAME_OT_auto_assign_atlas(frame_operator):
 class FRAME_OT_pack_uv_islands(frame_operator):
 	bl_label = 			"Pack UV islands"
 	bl_idname = 		"frame.pack_uv_islands"
-	#TODO - bl_description
+	bl_description = 	"Go through the bake targets and pack workmesh uvs into intermediate atlases"
 	frame_operator = 	operations.pack_uv_islands
 
 
@@ -80,13 +80,13 @@ class FRAME_OT_pack_uv_islands(frame_operator):
 class FRAME_OT_update_selected_material(frame_operator):
 	bl_label = 			"Update selected material"
 	bl_idname = 		"frame.update_selected_material"
-	#TODO - bl_description
+	bl_description = 	"Update the work mesh material for the selected bake target"
 	frame_operator = 	operations.update_selected_material
 
 class FRAME_OT_update_all_materials(frame_operator):
 	bl_label = 			"Update all materials"
 	bl_idname = 		"frame.update_all_materials"
-	#TODO - bl_description
+	bl_description = 	"Update work mesh materials for all bake targets"
 	frame_operator = 	operations.update_all_materials
 
 class FRAME_OT_switch_to_bake_material(frame_operator):
@@ -104,7 +104,7 @@ class FRAME_OT_switch_to_preview_material(frame_operator):
 class FRAME_OT_select_by_atlas(frame_operator):
 	bl_label = 			"Select work meshes based on atlas"
 	bl_idname = 		"frame.select_by_atlas"
-	#TODO - bl_description
+	bl_description = 	"Select all work meshes in `Match atlas`"
 	frame_operator = 	operations.select_by_atlas
 
 
@@ -113,20 +113,20 @@ class FRAME_OT_bake_selected_bake_target(frame_operator):
 	#TODO - if we support multiple targets in selection we should change to plural here
 	bl_label = 			"Bake selected bake target"
 	bl_idname = 		"frame.bake_selected_bake_target"
-	#TODO - bl_description
+	bl_description = 	"Bake textures for the selected bake target"
 	frame_operator = 	operations.bake_selected_bake_target
 
 class FRAME_OT_bake_selected_workmeshes(frame_operator):
 	#TODO - if we support multiple targets in selection we should change to plural here
 	bl_label = 			"Bake selected work meshes"
 	bl_idname = 		"frame.bake_selected_workmeshes"
-	#TODO - bl_description
+	bl_description = 	"Bake textures for selected work meshes"
 	frame_operator = 	operations.bake_selected_workmeshes
 
 class FRAME_OT_bake_all(frame_operator):
 	bl_label = 			"Bake all bake targets"
 	bl_idname = 		"frame.bake_all"
-	#TODO - bl_description
+	bl_description = 	"Bake textures for all targets and their variants"
 	frame_operator = 	operations.bake_all_bake_targets
 
 
@@ -134,13 +134,13 @@ class FRAME_OT_bake_all(frame_operator):
 class FRAME_OT_synchronize_uv_to_vertices(frame_operator):
 	bl_label = 			"Select mesh vertices based on UV selection"
 	bl_idname = 		"frame.synchronize_uv_to_vertices"
-	#TODO - bl_description
+	bl_description = 	"Sync selection state for mesh and uvs"
 	frame_operator = 	operations.synchronize_uv_to_vertices
 
 class FRAME_OT_select_objects_by_uv(frame_operator):
 	bl_label = 			"Select objects based on UV selection"
 	bl_idname = 		"frame.select_objects_by_uv"
-	#TODO bl_description
+	bl_description = 	"Select all objects in the active uv"
 	frame_operator =	operations.select_objects_by_uv
 
 class FRAME_OT_synchronize_visibility_to_render(frame_operator):
@@ -170,7 +170,7 @@ class FRAME_OT_recalculate_normals(frame_operator):
 class FRAME_OT_update_baking_scene(frame_operator):
 	bl_label = 			"Update baking scene"
 	bl_idname = 		"frame.update_baking_scene"
-	#TODO - bl_description
+	bl_description = 	"Regenerate bake scene objects from bake targets"
 	frame_operator = 	operations.update_bake_scene
 
 class FRAME_OT_synchronize_mirrors(frame_operator):
