@@ -12,9 +12,9 @@ from ..helpers import (
     clear_selection
 )
 
-UVPM2_INSTALLED = hasattr(bpy.ops, "uvpackmaster2")
+UVPM2_INSTALLED = lambda: "uvpackmaster2" in dir(bpy.ops)
 
-if UVPM2_INSTALLED:
+if UVPM2_INSTALLED():
 	disable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.disable_target_box)
 	enable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.enable_target_box)
 
@@ -23,7 +23,6 @@ def auto_assign_atlas(operator, context, ht):
 	'Goes through all bake targets and assigns them to the correct intermediate atlas and UV set based on the uv_mode'
 
 	#TODO - currently we don't take into account that variants may end up on different bins which is fine but we need to store the intermediate target with the variant and not the bake target
-
 	#TODO - currently we will just hardcode the intermediate atlases but later we need to check which to use and create them if needed
 	a_width = 4096
 	a_height = 4096
@@ -106,6 +105,8 @@ def get_intermediate_uv_object_list(ht):
 		if bake_target.bake_mode == 'UV_BM_REGULAR':
 
 			for variant_name, variant in bake_target.iter_variants():
+				if not variant.workmesh: 
+					continue
 
 				mesh = bmesh.new()
 				mesh.from_mesh(variant.workmesh.data)
@@ -137,7 +138,7 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 	bpy.ops.mesh.select_all(action='SELECT')	#Select faces in model editor
 	bpy.ops.uv.select_all(action='SELECT')		#Select UVs in UV editor
 
-	if UVPM2_INSTALLED:
+	if UVPM2_INSTALLED():
 		bpy.ops.uvpackmaster2.split_overlapping_islands()
 		bake_scene.uvp2_props.rot_step = 45
 
