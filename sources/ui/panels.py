@@ -1,7 +1,7 @@
 import bpy
 import functools
 from ..properties import *
-from ..helpers import get_work_scene, get_bake_scene, pending_classes
+from ..helpers import require_work_scene, require_bake_scene, pending_classes
 
 class frame_panel(bpy.types.Panel):
 	#contribution note 6B
@@ -34,7 +34,7 @@ class FRAME_PT_workflow(frame_panel):
 	bl_category = "Avatar"
 
 	def draw(self, context):
-		if scene := get_work_scene(context):
+		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
 
 			#TODO - this should point to our documentation for the workflow. This could point to a document that requires the artist to be logged in to that web service (like google docs as an example).
@@ -113,7 +113,7 @@ class FRAME_PT_painting(frame_panel):
 	bl_category = "Avatar"
 
 	def draw(self, context):
-		if scene := get_work_scene(context):
+		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
 
 			self.layout.prop(HT, 'painting_size')
@@ -126,7 +126,7 @@ class FRAME_PT_uv_packing(frame_panel):
 	bl_category = "Avatar"
 
 	def draw(self, context):
-		if scene := get_work_scene(context):
+		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
 
 			self.layout.prop(HT, 'atlas_size')
@@ -182,9 +182,9 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 
 	def draw(self, context):
 
-		if scene := get_work_scene(context):
+		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
-			bake_scene = get_bake_scene(context)
+			bake_scene = require_bake_scene(context)
 
 			self.layout.template_list('FRAME_UL_bake_targets', '', HT,  'bake_target_collection', HT, 'selected_bake_target')
 
@@ -258,9 +258,9 @@ class FRAME_PT_bake_groups(frame_panel):
 
 	def draw(self, context):
 
-		if scene := get_work_scene(context):
+		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
-			bake_scene = get_bake_scene(context)
+			bake_scene = require_bake_scene(context)
 
 			self.layout.template_list('FRAME_UL_bake_groups', '', HT, 'bake_group_collection', HT, 'selected_bake_group')
 			bake_group_actions = self.layout.row(align=True)

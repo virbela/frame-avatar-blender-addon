@@ -1,9 +1,9 @@
 import bpy
-from ..helpers import get_bake_scene, set_scene, set_rendering, set_selection
+from ..helpers import require_bake_scene, set_scene, set_rendering, set_selection
 
 def bake_all_bake_targets(operator, context, ht):
 
-	bake_scene = get_bake_scene(context)
+	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 	set_scene(context, bake_scene)
 
@@ -17,7 +17,7 @@ def bake_all_bake_targets(operator, context, ht):
 
 def bake_selected_bake_target(operator, context, ht):
 
-	bake_scene = get_bake_scene(context)
+	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 	set_scene(context, bake_scene)
 
@@ -28,7 +28,7 @@ def bake_selected_bake_target(operator, context, ht):
 def bake_selected_workmeshes(operator, context, ht):
 	# We are currently assuming that we already are in the bake scene
 
-	bake_scene = get_bake_scene(context)
+	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
 	#NOTE - see technical detail 5 for further info on this temporary solution

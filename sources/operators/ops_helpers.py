@@ -2,7 +2,7 @@ import bpy
 import bmesh 
 
 from ..constants import MIRROR_TYPE
-from ..helpers import get_bake_scene, set_selection, get_work_scene
+from ..helpers import require_bake_scene, set_selection, require_work_scene
 from .common import set_uv_map, copy_object, copy_collection, transfer_variant
 
 def synchronize_uv_to_vertices(operator, context, ht):
@@ -27,7 +27,7 @@ def synchronize_uv_to_vertices(operator, context, ht):
 
 
 def select_objects_by_uv(operator, context, ht):
-	bake_scene = get_bake_scene(context)
+	bake_scene = require_bake_scene(context)
 	to_select = list()
 	for obj in bake_scene.objects:
 		mesh = bmesh.new()
@@ -52,7 +52,7 @@ def select_objects_by_uv(operator, context, ht):
 
 
 def synchronize_visibility_to_render(operator, context, ht):
-	bake_scene = get_bake_scene(context)
+	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
 	for item in view_layer.objects:
@@ -60,7 +60,7 @@ def synchronize_visibility_to_render(operator, context, ht):
 
 
 def make_everything_visible(operator, context, ht):
-	bake_scene = get_bake_scene(context)
+	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
 	for item in view_layer.objects:
@@ -68,7 +68,7 @@ def make_everything_visible(operator, context, ht):
 
 
 def recalculate_normals(operator, context, ht):
-	bake_scene = get_bake_scene(context)
+	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
 	for workmesh in context.selected_objects:
@@ -76,7 +76,7 @@ def recalculate_normals(operator, context, ht):
 
 
 def update_bake_scene(operator, context, ht):
-	work_scene, bake_scene = get_work_scene(context), get_bake_scene(context)
+	work_scene, bake_scene = require_work_scene(context), require_bake_scene(context)
 
 	#DECISION - should we clear the bake scene each update?
 	#Clear bake scene from meshes (this will remove the objects that own the meshes as ell)
@@ -132,7 +132,7 @@ def synchronize_mirrors(operator, context, ht):
 
 def reset_uv_transforms(operator, context, ht):
 
-	bake_scene = get_bake_scene(context)
+	bake_scene = require_bake_scene(context)
 
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 

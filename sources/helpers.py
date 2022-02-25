@@ -55,35 +55,25 @@ class frame_property_group(bpy.types.PropertyGroup):
 			raise ValueError(f'if_missing has unknown value')
 
 
-#ISSUE-10: Deprecated functions needs to be replaced or removed
-#	In `helpers.py` there are deprecated functions that needs removal or replacement.
-#	labels: needs-work
-
-#DEPRECATED - should be require_work_scene
-# The context here is only for logging purposes
-def get_work_scene(context):
+def require_work_scene(context):
 	if scene := bpy.data.scenes.get(WORK_SCENE):
 		return scene
-	else:
-		log.error(f'Work scene `{WORK_SCENE}´ could not be found.')
+
+	log.error(f'Work scene `{WORK_SCENE}` could not be found.')
 
 
-#DEPRECATED - should be require_bake_scene and comments should be updated
-# The context here is only for logging purposes and is not currently used here but
-# we want to keep the API consistent in case we later do want some logging here
-def get_bake_scene(context):
+def require_bake_scene(context):
 	if scene := bpy.data.scenes.get(BAKE_SCENE):
 		return scene
-	else:
-		return bpy.data.scenes.new(BAKE_SCENE)
+
+	return bpy.data.scenes.new(BAKE_SCENE)
 
 
 def get_homeomorphic_tool_state(context):
-	if work_scene := get_work_scene(context):
+	if work_scene := require_work_scene(context):
 		return work_scene.homeomorphictools
 
-	#TODO raise exception if fail
-
+	raise InternalError("Work scene not Found.")
 
 
 def get_named_entry(collection, name):
@@ -118,8 +108,7 @@ def create_named_entry(collection, name, *positional, allow_rename=False, recrea
 		else:
 			raise FrameException.FailedToCreateNamedEntry(collection, name)
 
-	else:
-		return collection.new(name, *positional)
+	return collection.new(name, *positional)
 
 
 #ISSUE-12: Context handling
@@ -178,8 +167,6 @@ def set_rendering(collection, *selected, synchronize_active=False, make_sure_act
 	# select first if make_sure_active is set and there is no active object
 	if make_sure_active and collection.active is None and selected:
 		collection.active = selected[0]
-
-
 
 
 #NOTE - was going to use https://docs.python.org/3/library/operator.html#operator.attrgetter but there is no attrsetter so we'll just define both for consistency
@@ -253,5 +240,4 @@ class UUID_manager:
 def get_bake_target_variant_name(bake_target, variant):
 	if bake_target.multi_variants:
 		return f'{bake_target.shortname}.{variant.name}'
-	else:
-		return f'{bake_target.shortname}'
+	return f'{bake_target.shortname}'

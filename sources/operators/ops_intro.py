@@ -1,5 +1,5 @@
-from ..helpers import get_bake_scene
+from ..helpers import require_bake_scene
 
 
 def setup_bake_scene(operator, context, ht):
-	get_bake_scene(context)
+	require_bake_scene(context)

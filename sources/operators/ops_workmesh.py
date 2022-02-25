@@ -2,7 +2,7 @@ import bpy
 from .common import set_uv_map
 from ..materials import setup_bake_material
 from ..helpers import (
-    get_bake_scene, 
+    require_bake_scene, 
     IMPLEMENTATION_PENDING,
     get_bake_target_variant_name,
 )
@@ -13,7 +13,7 @@ update_selected_workmesh_all_shapekeys = IMPLEMENTATION_PENDING
 update_selected_workmesh_active_shapekey = IMPLEMENTATION_PENDING
 
 def create_workmeshes_for_all_targets(operator, context, ht):
-	bake_scene = get_bake_scene(context)
+	bake_scene = require_bake_scene(context)
 	for bake_target in ht.bake_target_collection:
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
@@ -21,7 +21,7 @@ def create_workmeshes_for_all_targets(operator, context, ht):
 def create_workmeshes_for_selected_target(operator, context, ht):
 	#TODO - handle no selected target
 	if bake_target := ht.get_selected_bake_target():
-		bake_scene = get_bake_scene(context)
+		bake_scene = require_bake_scene(context)
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
 

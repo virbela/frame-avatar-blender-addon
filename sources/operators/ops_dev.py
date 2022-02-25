@@ -1,6 +1,6 @@
 import bpy
 import textwrap
-from ..helpers import get_bake_scene
+from ..helpers import require_bake_scene
 from ..logging import log_writer as log 
 
 def clear_bake_targets(operator, context, ht):
@@ -10,7 +10,7 @@ def clear_bake_targets(operator, context, ht):
 
 
 def clear_bake_scene(operator, context, ht):
-	scene = get_bake_scene(context)
+	scene = require_bake_scene(context)
 	for item in scene.objects:
 		bpy.data.meshes.remove(item.data, do_unlink=True)
 

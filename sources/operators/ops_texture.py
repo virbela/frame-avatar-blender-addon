@@ -4,12 +4,12 @@ from .common import set_uv_map, guarded_operator
 from ..structures import intermediate
 from ..logging import log_writer as log
 from ..helpers import (
-    create_named_entry, 
-    get_bake_scene,
     set_scene,
     set_active,
     set_selection,
-    clear_selection
+    clear_selection,
+    create_named_entry, 
+    require_bake_scene
 )
 
 UVPM2_INSTALLED = lambda: "uvpackmaster2" in dir(bpy.ops)
@@ -85,7 +85,7 @@ def auto_assign_atlas(operator, context, ht):
 
 def pack_uv_islands(operator, context, ht):
 
-	bake_scene = get_bake_scene(context)
+	bake_scene = require_bake_scene(context)
 	all_uv_object_list = get_intermediate_uv_object_list(ht)
 	mono_box = (0.0, 1.0, 1.0, ht.color_percentage / 100.0)
 	color_box = (0.0, 0.0, 1.0, ht.color_percentage / 100.0)

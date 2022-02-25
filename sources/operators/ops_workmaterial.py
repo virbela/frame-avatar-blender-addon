@@ -2,7 +2,13 @@ import bpy
 from ..constants import MIRROR_TYPE
 from ..logging import log_writer as log
 from ..materials import setup_bake_material, get_material_variants
-from ..helpers import get_bake_target_variant_name, get_bake_scene, require_named_entry, set_scene, set_selection
+from ..helpers import (
+	set_scene, 
+	set_selection,
+	require_bake_scene, 
+	require_named_entry, 
+	get_bake_target_variant_name
+)
 
 def update_all_materials(operator, context, ht):
 
@@ -33,7 +39,7 @@ def select_by_atlas(operator, context, ht):
 				selection.append(variant.workmesh)
 
 
-	bake_scene = get_bake_scene(context)
+	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 	set_scene(context, bake_scene)
 	set_selection(view_layer.objects, *selection, synchronize_active=True, make_sure_active=True)
@@ -57,7 +63,7 @@ def update_workmesh_materials(context, ht,  bake_target, variant):
 
 
 def generic_switch_to_material(context, ht, material_type):
-	bake_scene = get_bake_scene(context)
+	bake_scene = require_bake_scene(context)
 	#todo note 1
 	for bt in ht.bake_target_collection:
 		mirror, mt = bt.get_mirror_type(ht)
