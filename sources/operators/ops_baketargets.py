@@ -3,7 +3,7 @@ from .common import generic_list
 from ..bake_targets import validate_all
 from ..logging import log_writer as log
 from ..structures import intermediate, iter_dc
-from ..helpers import require_bake_scene, a_get, a_set, require_work_scene, set_scene, set_selection
+from ..helpers import require_bake_scene, a_get, a_set, require_work_scene, set_scene, set_selection, is_dev
 
 
 def validate_targets(operator, context, ht):
@@ -55,7 +55,6 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 
 			if R:
 				mirror_list.append(intermediate.mirror(target, R))
-
 			else:
 				log.error(f"Could not create mirror for {key} since there was no such object `{Rk}´")
 
@@ -67,6 +66,11 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 
 	#Create bake targets
 	for target in targets.values():
+		if is_dev():
+			valid_option = [k in target.name for k in ('Body_Human', 'Eye_L', 'Eye_R', 'Face_Human')]
+			if not any(valid_option):
+				continue
+
 		new = ht.bake_target_collection.add()
 		new.variant_collection.add()	# add default variant
 		for key, value in iter_dc(target):
