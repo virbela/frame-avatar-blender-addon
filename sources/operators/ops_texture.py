@@ -124,6 +124,9 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 	set_scene(context, bake_scene)
 
 	uv_object_list = [u for u in all_uv_object_list if u.variant.intermediate_atlas == atlas]
+	if not uv_object_list:
+		# XXX nothing todo for this atlas
+		return
 
 	for uv_island in uv_object_list:
 		scale_factor = uv_island.area * uv_island.bake_target.uv_area_weight
