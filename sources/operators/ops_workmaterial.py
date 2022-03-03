@@ -51,10 +51,14 @@ def update_workmesh_materials(context, ht,  bake_target, variant):
 	#TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
 	if not variant.uv_map:
 		variant.workmesh.active_material = None
-		print('no uv')
+		log.error(f'Missing UV map for {variant}')
 		return
 
 	bake_material_name =f'bake-{get_bake_target_variant_name(bake_target, variant)}'
+	if bake_material_name in bpy.data.materials:
+		# Remove existing
+		bpy.data.materials.remove(bpy.data.materials[bake_material_name])
+	
 	bake_material = bpy.data.materials.new(bake_material_name)
 	bake_material.use_nodes = True	#contribution note 9
 	#TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?
@@ -70,8 +74,8 @@ def generic_switch_to_material(context, ht, material_type):
 		if mt is MIRROR_TYPE.SECONDARY:
 			continue
 
-		atlas = bt.get_atlas()
-		uv_map = bt.uv_map
+		atlas = bt.atlas
+		uv_map = bt.source_uv_map
 
 		if atlas and uv_map:
 			variant_materials = get_material_variants(bt, bake_scene, atlas, uv_map)
@@ -82,4 +86,4 @@ def generic_switch_to_material(context, ht, material_type):
 				# set active material
 				target.active_material = bpy.data.materials[getattr(materials, material_type)]
 		else:
-			log.warning(f'{bt.identifier} lacks atlas or uv_map')
+			log.warning(f'{bt.name} lacks atlas or uv_map')
