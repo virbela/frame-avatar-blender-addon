@@ -157,8 +157,6 @@ class BakeTarget(frame_property_group):
 	variant_collection:				bpy.props.CollectionProperty(type = BakeVariant)
 	selected_variant:				bpy.props.IntProperty(name = "Selected bake variant", default = -1)
 
-
-
 	def get_object(self):
 		return get_named_entry(bpy.data.objects, self.object_name)
 
