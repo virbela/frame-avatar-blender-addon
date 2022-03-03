@@ -128,7 +128,10 @@ class BakeTarget(frame_property_group):
 	source_object:					bpy.props.PointerProperty(name='Source object', type=bpy.types.Object)
 	shape_key_name: 				bpy.props.StringProperty(name="Shape key")
 
-	uv_area_weight: 				bpy.props.FloatProperty(name="UV island area weight", default=1.0)
+	uv_area_weight: 				bpy.props.FloatProperty(
+										name="UV island area weight", default=1.0,
+										min=0.0, max=1.0
+									)
 
 	bake_mode:						bpy.props.EnumProperty(items=tuple(UV_BAKE_MODE), name="UV bake mode", default=0)
 

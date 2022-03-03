@@ -192,8 +192,7 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 				self.layout.prop(et, 'bake_mode')
 
 				if et.bake_mode == 'UV_BM_REGULAR':
-
-					self.layout.prop(et, 'uv_area_weight')
+					self.layout.prop(et, 'uv_area_weight', slider=True)
 
 					variants = self.layout.box()
 					variants.prop(et, 'multi_variants')
