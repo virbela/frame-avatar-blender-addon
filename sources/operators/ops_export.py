@@ -1,11 +1,11 @@
 import os
 import bpy
 import json
+from ..logging import log_writer as log
 from ..helpers import require_bake_scene
 from ..mesh_utilities import uv_transformation_calculator, get_uv_map_from_mesh
 
 def export(operator, context, ht):
-
     obj = ht.source_obj
     obj.hide_set(False)
     obj.hide_viewport = False 
@@ -34,10 +34,10 @@ def export(operator, context, ht):
 
     morphsets_dict = {f"MorphSets_Avatar": uv_transform_extra_data}
     export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
+    log.info(export_json)
 
     filepath = bpy.data.filepath
     directory = os.path.dirname(filepath)
-
     outputfile = os.path.join(directory , f"Avatar.gltf")
     outputfile_glb = os.path.join(directory , f"Avatar.glb")
 
