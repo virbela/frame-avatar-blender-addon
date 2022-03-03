@@ -242,6 +242,16 @@ def get_bake_target_variant_name(bake_target, variant):
 		return f'{bake_target.shortname}.{variant.name}'
 	return f'{bake_target.shortname}'
 
+def purge_object(obj):
+	bpy.data.objects.remove(obj)
+	for block in bpy.data.meshes:
+		if block.users == 0:
+			bpy.data.meshes.remove(block)
+	
+	for block in bpy.data.materials:
+		if block.users == 0:
+			bpy.data.materials.remove(block)
+
 
 def is_dev():
 	# if we are installed as an addon, assume this is a production dist

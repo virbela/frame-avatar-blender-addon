@@ -1,7 +1,9 @@
 import bpy
 from .common import set_uv_map
+from ..logging import log_writer as log
 from ..materials import setup_bake_material
 from ..helpers import (
+	purge_object,
     require_bake_scene, 
     IMPLEMENTATION_PENDING,
     get_bake_target_variant_name,
@@ -31,6 +33,11 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 
 		pending_name = get_bake_target_variant_name(bake_target, variant)
 
+		# if the workmesh was previously created, purge and create anew
+		if pending_name in bpy.data.objects:
+			log.warning(f'Removing duplicate ...')
+			purge_object(bpy.data.objects[pending_name])
+
 		if source_object := bake_target.source_object:
 			pending_object = source_object.copy()
 			pending_object.name = pending_name
@@ -41,10 +48,6 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 			bake_uv = pending_object.data.uv_layers[0]	# Assume first UV map is the bake one
 			local_uv = pending_object.data.uv_layers.new(name='Painting')	#TODO - not hardcode
 			set_uv_map(pending_object, local_uv.name)
-
-			#TBD - what should we do when an object already exists? Remove existing?
-			# if bake_target.name != pending_object.name:
-			# 	log.warning(f'Name was changed to {pending_object.name}')
 
 			# check if this target uses a shape key
 			if shape_key := pending_object.data.shape_keys.key_blocks.get(bake_target.shape_key_name):
