@@ -242,6 +242,7 @@ def get_bake_target_variant_name(bake_target, variant):
 		return f'{bake_target.shortname}.{variant.name}'
 	return f'{bake_target.shortname}'
 
+
 def purge_object(obj):
 	bpy.data.objects.remove(obj)
 	for block in bpy.data.meshes:
