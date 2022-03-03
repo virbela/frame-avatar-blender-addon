@@ -51,8 +51,9 @@ class FRAME_PT_workflow(frame_panel):
 			if scene.ui_state.workflow_work_meshes_visible:
 				work_meshes.operator('frame.create_workmeshes_for_all_targets')
 				work_meshes.operator('frame.create_workmeshes_for_selected_target')
-				work_meshes.operator('frame.update_selected_workmesh_all_shapekeys')
-				work_meshes.operator('frame.update_selected_workmesh_active_shapekey')
+				# TODO(ranjian0)
+				# work_meshes.operator('frame.update_selected_workmesh_all_shapekeys')
+				# work_meshes.operator('frame.update_selected_workmesh_active_shapekey')
 
 			atlas_setup = self.layout.box()
 			atlas_setup.prop(scene.ui_state, "workflow_texture_atlas_visible", text="Texture Atlas")
@@ -76,9 +77,9 @@ class FRAME_PT_workflow(frame_panel):
 			baking = self.layout.box()
 			baking.prop(scene.ui_state, "workflow_baking_visible", text="Baking")
 			if scene.ui_state.workflow_baking_visible:
+				baking.operator('frame.bake_all')
 				baking.operator('frame.bake_selected_bake_target')
 				baking.operator('frame.bake_selected_workmeshes')
-				baking.operator('frame.bake_all')
 
 			helper_tools = self.layout.box()
 			helper_tools.prop(scene.ui_state, "workflow_helpers_visible", text="Helpers")
@@ -231,31 +232,31 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 				else:
 					raise InternalError(f'et.bake_mode set to unsupported value {et.bake_mode}')
 
+# TODO(ranjian0) Take bake groups into account
+# class FRAME_PT_bake_groups(frame_panel):
+# 	bl_label = "Bake groups"
+# 	bl_space_type = 'VIEW_3D'
+# 	bl_region_type = 'UI'
+# 	bl_category = "Avatar"
 
-class FRAME_PT_bake_groups(frame_panel):
-	bl_label = "Bake groups"
-	bl_space_type = 'VIEW_3D'
-	bl_region_type = 'UI'
-	bl_category = "Avatar"
+# 	def draw(self, context):
 
-	def draw(self, context):
+# 		if scene := require_work_scene(context):
+# 			HT = scene.homeomorphictools
+# 			bake_scene = require_bake_scene(context)
 
-		if scene := require_work_scene(context):
-			HT = scene.homeomorphictools
-			bake_scene = require_bake_scene(context)
+# 			self.layout.template_list('FRAME_UL_bake_groups', '', HT, 'bake_group_collection', HT, 'selected_bake_group')
+# 			bake_group_actions = self.layout.row(align=True)
+# 			bake_group_actions.operator('frame.add_bake_group')
+# 			bake_group_actions.operator('frame.remove_bake_group')
 
-			self.layout.template_list('FRAME_UL_bake_groups', '', HT, 'bake_group_collection', HT, 'selected_bake_group')
-			bake_group_actions = self.layout.row(align=True)
-			bake_group_actions.operator('frame.add_bake_group')
-			bake_group_actions.operator('frame.remove_bake_group')
-
-			if selected_group := HT.get_selected_bake_group():
-				group = self.layout.box()
-				group.label(text='Bake group members')
-				group.template_list('FRAME_UL_bake_group_members', '', selected_group, 'members', selected_group, 'selected_member')
-				group_actions = group.row(align=True)
-				group_actions.operator('frame.add_bake_group_member')
-				group_actions.operator('frame.remove_bake_group_member')
+# 			if selected_group := HT.get_selected_bake_group():
+# 				group = self.layout.box()
+# 				group.label(text='Bake group members')
+# 				group.template_list('FRAME_UL_bake_group_members', '', selected_group, 'members', selected_group, 'selected_member')
+# 				group_actions = group.row(align=True)
+# 				group_actions.operator('frame.add_bake_group_member')
+# 				group_actions.operator('frame.remove_bake_group_member')
 
 
 class FRAME_PT_export(frame_panel):
