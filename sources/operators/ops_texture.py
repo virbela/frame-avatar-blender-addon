@@ -4,6 +4,7 @@ from .common import set_uv_map, guarded_operator
 from ..structures import intermediate
 from ..logging import log_writer as log
 from ..helpers import (
+	is_dev,
     set_scene,
     set_active,
     set_selection,
@@ -27,6 +28,8 @@ def auto_assign_atlas(operator, context, ht):
 	#TODO - currently we will just hardcode the intermediate atlases but later we need to check which to use and create them if needed
 	a_width = 4096
 	a_height = 4096
+	if is_dev():
+		a_width, a_height = 256, 256
 
 	atlas_color = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_color', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
 	atlas_red = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_red', 		a_width, a_height, action=named_entry_action.GET_EXISTING)
@@ -165,7 +168,7 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 		disable_packing_box()
 	else:
 		bpy.ops.uv.average_islands_scale()
-		bpy.ops.uv.pack_islands()
+		bpy.ops.uv.pack_islands(margin=0.01)
 
 	clear_selection(view_layer.objects)
 	bpy.ops.object.mode_set(mode='OBJECT')
