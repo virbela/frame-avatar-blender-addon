@@ -6,7 +6,7 @@ from ..helpers import require_bake_scene
 from ..mesh_utilities import uv_transformation_calculator, get_uv_map_from_mesh
 
 def export(operator, context, ht):
-    obj = ht.source_obj
+    obj = ht.source_object
     obj.hide_set(False)
     obj.hide_viewport = False 
     obj.select_set(True)
