@@ -10,7 +10,11 @@ ACTIVE_LAYER = type('ACTIVE_LAYER', (), {})
 def get_uv_map_from_mesh(obj, uv_layer=ACTIVE_LAYER):
 	'If uv_layer is ACTIVE_LAYER, the active UV layer will be used, otherwise, uv_layer is considered to be the index of the wanted UV layer.'
 
-	mesh = bmesh.from_edit_mesh(obj.data)
+	if obj.mode == 'EDIT':
+		mesh = bmesh.from_edit_mesh(obj.data)
+	else:
+		mesh = bmesh.new()
+		mesh.from_mesh(obj.data)
 
 	if uv_layer is ACTIVE_LAYER:
 		uv_layer_index = mesh.loops.layers.uv.active
