@@ -105,8 +105,6 @@ def create_bake_targets_from_shapekeys(operator, context, ht):
 				uv_mode = 'UV_IM_MONOCHROME',
 			)
 
-
-
 		#Configure targets and mirrors
 		for key, target in targets.items():
 			if key.endswith('_L'):
@@ -125,8 +123,6 @@ def create_bake_targets_from_shapekeys(operator, context, ht):
 
 			elif key.endswith('__None'):
 				target.uv_mode = 'UV_IM_NIL'
-
-
 
 		#NOTE - there is a bug where we can only set uv_mode (or any other enum) once from the same context.
 		#		To avoid this bug we first create dicts that represents the new bake targets and then we instanciate them below
