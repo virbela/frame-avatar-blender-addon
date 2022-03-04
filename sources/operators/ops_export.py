@@ -6,12 +6,12 @@ from ..helpers import require_bake_scene
 from ..mesh_utilities import uv_transformation_calculator, get_uv_map_from_mesh
 
 def export(operator, context, ht):
-    obj = ht.source_object
+    obj = context.active_object
     obj.hide_set(False)
     obj.hide_viewport = False 
     obj.select_set(True)
 
-    uv_transform_extra_data = list()		
+    uv_transform_extra_data = dict()		
     uv_transform_map = dict()				
 
     uvtc = uv_transformation_calculator(get_uv_map_from_mesh(obj))
@@ -30,9 +30,28 @@ def export(operator, context, ht):
         if shape_name.endswith('__None'):
             shape_name = shape_name[:-6]
 
-        uv_transform_extra_data.append((shape.name, dict(UVTransform = uv_transform_map.get(shape_name))))
+        #TODO(ranjian0) Implement variants
+        trans = uv_transform_map.get(shape_name)
+        uv_transform = dict(UVTransform = None)
+        if trans:
+            tx, ty, rot, scale = trans
+            uv_transform = {
+                "UVTransform" : {
+                    "scale": scale,
+                    "rotation": rot,
+                    "translation" : [tx, ty]
+                }
+            }
 
-    morphsets_dict = {f"MorphSets_Avatar": uv_transform_extra_data}
+        uv_transform_extra_data[shape.name] = uv_transform
+
+    morphsets_dict = {
+        "MorphSets_Avatar": {
+            "Morphs": uv_transform_extra_data,
+            "Filters": dict()
+        }
+    }
+
     export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
     log.info(export_json)
 
