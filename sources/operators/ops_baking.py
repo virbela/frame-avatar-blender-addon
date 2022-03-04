@@ -68,6 +68,10 @@ def bake_specific_variant(ht, view_layer, bake_target, variant):
 	uv_layers.active = uv_layers[bake_target.source_uv_map]
 
 	# here we assume the state is correct for this operation but as discussed in issue #12 we may want to do this in a bit of a different manner which would improve how defined the state is here as well
+	# Set contribution to color only
+	bpy.context.scene.render.bake.use_pass_color = True
+	bpy.context.scene.render.bake.use_pass_direct = False
+	bpy.context.scene.render.bake.use_pass_indirect = False
 	bpy.ops.object.bake(type='DIFFUSE')
 
 	#TODO - currently we are not saving the image, we should probably do this after the bulk, though doing it for each part could be good in case there is a problem half way through, something to discuss
