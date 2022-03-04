@@ -118,7 +118,7 @@ class vector_2:
 		return abs(self.sum())
 
 	def get_angle(self, other):
-		return acos(self.normalized_dot(other))
+		return acos(round(self.normalized_dot(other), 4))
 
 	def normalized_dot(self, other):
 		dot = self.normalized().dot(other.normalized())
