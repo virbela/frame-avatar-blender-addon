@@ -1,9 +1,9 @@
 import bpy
 from .common import set_uv_map
 from ..logging import log_writer as log
+from ..constants import PAINTING_UV_NAME
 from ..materials import setup_bake_material
 from ..helpers import (
-	purge_object,
     require_bake_scene, 
     IMPLEMENTATION_PENDING,
     get_bake_target_variant_name,
@@ -80,7 +80,7 @@ def update_workmesh_materials(context, ht,  bake_target, variant):
 	#TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
 	if not variant.uv_map:
 		variant.workmesh.active_material = None
-		print('no uv')
+		log.error(f"No uv found for variant {variant}")
 		return
 
 	bake_material_name =f'bake-{get_bake_target_variant_name(bake_target, variant)}'
