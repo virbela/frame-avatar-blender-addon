@@ -28,7 +28,6 @@ def create_workmeshes_for_selected_target(operator, context, ht):
 
 
 def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
-	#TODO - when conditions fail we should add log entries
 	for variant in bake_target.variant_collection:
 
 		pending_name = get_bake_target_variant_name(bake_target, variant)
