@@ -48,7 +48,7 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 
 			# Create UV map for painting
 			bake_uv = pending_object.data.uv_layers[0]	# Assume first UV map is the bake one
-			local_uv = pending_object.data.uv_layers.new(name='Painting')	#TODO - not hardcode
+			local_uv = pending_object.data.uv_layers.new(name=PAINTING_UV_NAME)
 			set_uv_map(pending_object, local_uv.name)
 
 			# check if this target uses a shape key
