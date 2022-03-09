@@ -1,4 +1,5 @@
 import bpy
+from ..exceptions import BakeException
 from ..helpers import require_bake_scene, set_scene, set_rendering, set_selection
 
 def bake_all_bake_targets(operator, context, ht):
@@ -38,7 +39,7 @@ def bake_selected_workmeshes(operator, context, ht):
 				if variant.workmesh == workmesh:
 					return bake_target, variant
 
-		raise Exception()	#TODO
+		raise BakeException.MissingBakeTargetVariant(workmesh)
 
 	#TODO - make helper function for this
 	selection = list()
