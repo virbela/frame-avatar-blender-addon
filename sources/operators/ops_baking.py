@@ -70,6 +70,7 @@ def bake_specific_variant(ht, view_layer, bake_target, variant):
 
 	# here we assume the state is correct for this operation but as discussed in issue #12 we may want to do this in a bit of a different manner which would improve how defined the state is here as well
 	# Set contribution to color only
+	bpy.context.scene.render.engine = 'CYCLES'
 	bpy.context.scene.render.bake.use_pass_color = True
 	bpy.context.scene.render.bake.use_pass_direct = False
 	bpy.context.scene.render.bake.use_pass_indirect = False
