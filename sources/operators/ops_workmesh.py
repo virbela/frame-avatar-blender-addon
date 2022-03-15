@@ -1,9 +1,9 @@
 import bpy
 from .common import set_uv_map
 from ..logging import log_writer as log
+from ..constants import PAINTING_UV_NAME
 from ..materials import setup_bake_material
 from ..helpers import (
-	purge_object,
     require_bake_scene, 
     IMPLEMENTATION_PENDING,
     get_bake_target_variant_name,
@@ -28,15 +28,16 @@ def create_workmeshes_for_selected_target(operator, context, ht):
 
 
 def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
-	#TODO - when conditions fail we should add log entries
 	for variant in bake_target.variant_collection:
 
 		pending_name = get_bake_target_variant_name(bake_target, variant)
 
-		# if the workmesh was previously created, purge and create anew
+		# if the workmesh was previously created, skip 
 		if pending_name in bpy.data.objects:
-			log.warning(f'Removing duplicate ...')
-			purge_object(bpy.data.objects[pending_name])
+			# NOTE(ranjian0) since artists may have performed actions on the workmeshs, 
+			# we choose to skip regeneration.
+			log.warning(f'Skipping existing workmesh ...')
+			continue
 
 		if source_object := bake_target.source_object:
 			pending_object = source_object.copy()
@@ -46,7 +47,7 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 
 			# Create UV map for painting
 			bake_uv = pending_object.data.uv_layers[0]	# Assume first UV map is the bake one
-			local_uv = pending_object.data.uv_layers.new(name='Painting')	#TODO - not hardcode
+			local_uv = pending_object.data.uv_layers.new(name=PAINTING_UV_NAME)
 			set_uv_map(pending_object, local_uv.name)
 
 			# check if this target uses a shape key
@@ -78,7 +79,7 @@ def update_workmesh_materials(context, ht,  bake_target, variant):
 	#TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
 	if not variant.uv_map:
 		variant.workmesh.active_material = None
-		print('no uv')
+		log.error(f"No uv found for variant {variant}")
 		return
 
 	bake_material_name =f'bake-{get_bake_target_variant_name(bake_target, variant)}'

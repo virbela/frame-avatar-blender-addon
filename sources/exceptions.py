@@ -35,3 +35,8 @@ class BakeException:
 		def __init__(self, name):
 			self.name = name
 			super().__init__(f'The operation requires a scene named `{name}` which was not found.')
+
+	class MissingBakeTargetVariant(base):
+		def __init__(self, name):
+			self.name = name
+			super().__init__(f'A bake target was not found for `{name}`.')
