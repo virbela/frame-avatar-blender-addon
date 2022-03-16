@@ -28,8 +28,6 @@ def auto_assign_atlas(operator, context, ht):
 	#TODO - currently we will just hardcode the intermediate atlases but later we need to check which to use and create them if needed
 	a_width = ht.atlas_size
 	a_height = ht.atlas_size
-	if is_dev():
-		a_width, a_height = 256, 256
 
 	atlas_color = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_color', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
 	atlas_red = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_red', 		a_width, a_height, action=named_entry_action.GET_EXISTING)
