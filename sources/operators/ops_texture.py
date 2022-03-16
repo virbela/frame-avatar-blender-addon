@@ -26,8 +26,8 @@ def auto_assign_atlas(operator, context, ht):
 
 	#TODO - currently we don't take into account that variants may end up on different bins which is fine but we need to store the intermediate target with the variant and not the bake target
 	#TODO - currently we will just hardcode the intermediate atlases but later we need to check which to use and create them if needed
-	a_width = 4096
-	a_height = 4096
+	a_width = ht.atlas_size
+	a_height = ht.atlas_size
 	if is_dev():
 		a_width, a_height = 256, 256
 
