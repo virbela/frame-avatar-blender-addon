@@ -106,10 +106,8 @@ def pack_uv_islands(operator, context, ht):
 
 def get_intermediate_uv_object_list(ht):
 	uv_object_list = list()
-	#todo note 1
-	for bake_target in ht.bake_target_collection:
-		#mirror, mt = bake_target.get_mirror_type(ht)
 
+	for bake_target in ht.bake_target_collection:
 		if bake_target.bake_mode == 'UV_BM_REGULAR':
 
 			for variant_name, variant in bake_target.iter_variants():
