@@ -63,12 +63,9 @@ def export(operator, context, ht):
     bpy.ops.export_scene.gltf(
         filepath=outputfile, 
         export_format='GLTF_EMBEDDED', 
-        export_texcoords=True, 
-        export_normals=True, 
         use_selection=True, 
         export_extras=False, 
         export_morph=True, 
-        will_save_settings=True
     )
 
     with open(outputfile, 'r') as openfile:
@@ -90,12 +87,9 @@ def export(operator, context, ht):
     bpy.ops.export_scene.gltf(
         filepath=outputfile_glb, 
         export_format='GLB', 
-        export_texcoords=True, 
-        export_normals=True, 
         use_selection=True, 
         export_extras=True, 
         export_morph=True, 
-        will_save_settings=True
     )
 
     bpy.ops.object.delete()
