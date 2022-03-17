@@ -4,8 +4,6 @@ from .common import set_uv_map, guarded_operator
 from ..structures import intermediate
 from ..logging import log_writer as log
 from ..helpers import (
-	is_dev,
-	require_work_scene,
     set_scene,
     set_active,
     set_selection,
