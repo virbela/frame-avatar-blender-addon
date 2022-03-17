@@ -122,7 +122,6 @@ def set_scene(context, scene):
 
 
 def set_selection(collection, *selected, synchronize_active=False, make_sure_active=False):
-	'Replaces current selection'
 	new_selection = set(selected)
 
 	for item in collection:
