@@ -18,7 +18,7 @@ def export(operator, context, ht):
 
     bake_scene = require_bake_scene(context)
     for name, item in bake_scene.objects.items():
-        print(f'Getting transform for: {name}')
+        log.info(f'Getting transform for: {name}')
         uv_transform_map[name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
 
 

@@ -4,8 +4,6 @@ from .constants import IGNORED
 from dataclasses import dataclass
 
 
-
-
 class validation_error:
 	# Abstract errors
 	@dataclass
@@ -112,6 +110,6 @@ def validate_all(ht):
 		result += validate_bake_target(ht, bake_target)
 
 	for item in result:
-		print(result)
+		log.info(item)
 
 	return result
