@@ -79,6 +79,7 @@ class FRAME_PT_workflow(frame_panel):
 			if scene.ui_state.workflow_baking_visible:
 				bake_scene = require_bake_scene(context)
 				baking.prop(bake_scene.cycles, "samples", text="Bake Samples")
+				baking.prop(bake_scene.render.bake, "margin", text="Bake Margin")
 				baking.operator('frame.bake_all')
 				baking.operator('frame.bake_selected_bake_target')
 				baking.operator('frame.bake_selected_workmeshes')
