@@ -5,6 +5,7 @@ from ..structures import intermediate
 from ..logging import log_writer as log
 from ..helpers import (
 	is_dev,
+	require_work_scene,
     set_scene,
     set_active,
     set_selection,
@@ -86,6 +87,7 @@ def auto_assign_atlas(operator, context, ht):
 
 
 def pack_uv_islands(operator, context, ht):
+	last_active_scene = context.scene
 
 	bake_scene = require_bake_scene(context)
 	all_uv_object_list = get_intermediate_uv_object_list(ht)
@@ -97,6 +99,7 @@ def pack_uv_islands(operator, context, ht):
 	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_blue'], 'UVMap', mono_box)
 	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_color'], 'UVMap', color_box)
 
+	set_scene(context, last_active_scene)
 
 def get_intermediate_uv_object_list(ht):
 	uv_object_list = list()
@@ -131,7 +134,11 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 
 	for uv_island in uv_object_list:
 		scale_factor = uv_island.area * uv_island.bake_target.uv_area_weight
-		copy_and_transform_uv(uv_island.bake_target.source_object, uv_island.bake_target.source_uv_map, uv_island.variant.workmesh, uv_map, scale_factor)
+		copy_and_transform_uv(
+			uv_island.bake_target.source_object, 
+			uv_island.bake_target.source_uv_map, 
+			uv_island.variant.workmesh, uv_map, scale_factor
+		)
 
 	#TO-FIX skipping partitioning object temporarily
 	set_selection(view_layer.objects, *(u.variant.workmesh for u in uv_object_list))
