@@ -1,16 +1,17 @@
 import os
 import bpy
 import json
+from contextlib import contextmanager
 from ..logging import log_writer as log
-from ..helpers import require_bake_scene, require_work_scene
 from ..mesh_utilities import uv_transformation_calculator, get_uv_map_from_mesh
+from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
 
 def export(operator, context, ht):
-    export_glb(context)
+    export_glb(context, ht)
     composite_atlas(context)
 
-def export_glb(context):
+def export_glb(context, ht):
     obj = context.active_object
     obj.hide_set(False)
     obj.hide_viewport = False 
@@ -26,16 +27,10 @@ def export_glb(context):
         log.info(f'Getting transform for: {name}')
         uv_transform_map[name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
 
-
-    shape_keys = obj.data.shape_keys.key_blocks[1:]
-    for shape in shape_keys:
-        shape_name = str(shape.name)
-
-        #Strip __None if present
+    def get_transform(shape_name):
         if shape_name.endswith('__None'):
             shape_name = shape_name[:-6]
 
-        #TODO(ranjian0) Implement variants
         trans = uv_transform_map.get(shape_name)
         uv_transform = dict(UVTransform = None)
         if trans:
@@ -47,14 +42,26 @@ def export_glb(context):
                     "translation" : [tx, ty]
                 }
             }
+        return uv_transform
 
-        uv_transform_extra_data[shape.name] = uv_transform
+    for bake_target in ht.bake_target_collection:
+        result = None
+        if bake_target.multi_variants:            
+            variants = {'Variants': {}}
+            for variant in bake_target.variant_collection:
+                shape_name = get_bake_target_variant_name(bake_target, variant)
+                variants['Variants'][variant.name] = get_transform(shape_name)
+            result = variants
+        else:
+            variant = bake_target.variant_collection[0]
+            shape_name = get_bake_target_variant_name(bake_target, variant)
+            result = get_transform(shape_name)
+                
+        uv_transform_extra_data[bake_target.shortname] = result
 
     morphsets_dict = {
-        "MorphSets_Avatar": {
-            "Morphs": uv_transform_extra_data,
-            "Filters": dict()
-        }
+        "Morphs": uv_transform_extra_data,
+        "Filters": dict()
     }
 
     export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
@@ -62,58 +69,45 @@ def export_glb(context):
 
     filepath = bpy.data.filepath
     directory = os.path.dirname(filepath)
-    outputfile = os.path.join(directory , f"morphic_avatar.gltf")
-    outputfile_glb = os.path.join(directory , f"morphic_avatar.glb")
 
-    bpy.ops.export_scene.gltf(
-        filepath=outputfile, 
-        export_format='GLTF_EMBEDDED',
-        # disable all default options
-        export_texcoords = False,
-        export_normals = False,
-        export_colors = False,
-        export_animations=False,
-        export_skins=False,
-        export_materials='NONE',
-        # enable only what we want
-        use_selection=True,
-        export_morph=True,
-        export_morph_normal=False 
-    )
-    with open(outputfile, 'r') as openfile:
-        json_data = json.load(openfile)
+    outputfile_glb = os.path.join(directory , "morphic_avatar.glb")
 
-    json_data["extras"] = morphsets_dict
+    with clear_custom_props(obj):
+        obj['MorphSets_Avatar'] = morphsets_dict
 
-    # save modified GLTF
-    with open(outputfile, 'w') as exportfile:
-        json.dump(json_data, exportfile, indent=4)
+        bpy.ops.export_scene.gltf(
+            filepath=outputfile_glb, 
+            export_format='GLB', 
+            # disable all default options
+            export_texcoords = False,
+            export_normals = False,
+            export_colors = False,
+            export_animations=False,
+            export_skins=False,
+            export_materials='NONE',
+            # valid options
+            use_selection=True, 
+            export_extras=True, 
+            export_morph=True,
+        )
 
-    # open modified GLTF, re-export as GLB
-    obj.select_set(False)
-
-    bpy.ops.import_scene.gltf(filepath=outputfile)
-    imported_gltf = bpy.context.active_object
-    imported_gltf.select_set(True)
-
-    bpy.ops.export_scene.gltf(
-        filepath=outputfile_glb, 
-        export_format='GLB', 
-        # disable all default options
-        export_texcoords = False,
-        export_normals = False,
-        export_colors = False,
-        export_animations=False,
-        export_skins=False,
-        export_materials='NONE',
-        # valid options
-        use_selection=True, 
-        export_extras=True, 
-        export_morph=True, 
-        export_morph_normal=False
-    )
-
-    bpy.ops.object.delete()
+        if is_dev():
+            # Check gltf export
+            bpy.ops.export_scene.gltf(
+                filepath=os.path.join(directory , "morphic_avatar.gltf"), 
+                export_format='GLTF_EMBEDDED', 
+                # disable all default options
+                export_texcoords = False,
+                export_normals = False,
+                export_colors = False,
+                export_animations=False,
+                export_skins=False,
+                export_materials='NONE',
+                # valid options
+                use_selection=True, 
+                export_extras=True, 
+                export_morph=True,
+            )
 
 
 def composite_atlas(context):
@@ -169,3 +163,18 @@ def composite_atlas(context):
                 os.path.join(dirname, f),
                 os.path.join(dirname, 'useAtlas.jpg')
             )
+
+@contextmanager
+def clear_custom_props(item):
+    prop_keys = list(item.keys())
+
+    # remove all custom props
+    props = dict()
+    for key in prop_keys:
+        props[key] = item.pop(key)
+
+    yield
+
+    # reset props
+    for k,v in props.items():
+        item[k] = v
