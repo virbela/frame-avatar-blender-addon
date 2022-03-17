@@ -57,20 +57,24 @@ def export(operator, context, ht):
 
     filepath = bpy.data.filepath
     directory = os.path.dirname(filepath)
-    outputfile = os.path.join(directory , f"Avatar.gltf")
-    outputfile_glb = os.path.join(directory , f"Avatar.glb")
+    outputfile = os.path.join(directory , f"morphic_avatar.gltf")
+    outputfile_glb = os.path.join(directory , f"morphic_avatar.glb")
 
     bpy.ops.export_scene.gltf(
         filepath=outputfile, 
-        export_format='GLTF_EMBEDDED', 
-        export_texcoords=True, 
-        export_normals=True, 
-        use_selection=True, 
-        export_extras=False, 
-        export_morph=True, 
-        will_save_settings=True
+        export_format='GLTF_EMBEDDED',
+        # disable all default options
+        export_texcoords = False,
+        export_normals = False,
+        export_colors = False,
+        export_animations=False,
+        export_skins=False,
+        export_materials='NONE',
+        # enable only what we want
+        use_selection=True,
+        export_morph=True,
+        export_morph_normal=False 
     )
-
     with open(outputfile, 'r') as openfile:
         json_data = json.load(openfile)
 
@@ -90,12 +94,18 @@ def export(operator, context, ht):
     bpy.ops.export_scene.gltf(
         filepath=outputfile_glb, 
         export_format='GLB', 
-        export_texcoords=True, 
-        export_normals=True, 
+        # disable all default options
+        export_texcoords = False,
+        export_normals = False,
+        export_colors = False,
+        export_animations=False,
+        export_skins=False,
+        export_materials='NONE',
+        # valid options
         use_selection=True, 
         export_extras=True, 
         export_morph=True, 
-        will_save_settings=True
+        export_morph_normal=False
     )
 
     bpy.ops.object.delete()
