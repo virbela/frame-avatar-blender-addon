@@ -4,7 +4,6 @@ from .common import set_uv_map, guarded_operator
 from ..structures import intermediate
 from ..logging import log_writer as log
 from ..helpers import (
-	is_dev,
     set_scene,
     set_active,
     set_selection,
@@ -26,16 +25,18 @@ def auto_assign_atlas(operator, context, ht):
 
 	#TODO - currently we don't take into account that variants may end up on different bins which is fine but we need to store the intermediate target with the variant and not the bake target
 	#TODO - currently we will just hardcode the intermediate atlases but later we need to check which to use and create them if needed
-	a_width = 4096
-	a_height = 4096
-	if is_dev():
-		a_width, a_height = 256, 256
+	a_width = ht.atlas_size
+	a_height = ht.atlas_size
 
 	atlas_color = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_color', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
 	atlas_red = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_red', 		a_width, a_height, action=named_entry_action.GET_EXISTING)
 	atlas_green = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_green', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
 	atlas_blue = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_blue', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
 
+	for at in [atlas_blue, atlas_green, atlas_red, atlas_color]:
+		if tuple(at.size) != (a_width, a_height):
+			at.scale(a_width, a_height)
+			at.update()
 
 	#TODO - here we need to put things in bins like how the UV packing does below but before we can do this we should look at the variants
 	#TBD - should we do it all from beginning? for now yes - maybe later we can have selection
@@ -88,6 +89,7 @@ def auto_assign_atlas(operator, context, ht):
 
 
 def pack_uv_islands(operator, context, ht):
+	last_active_scene = context.scene
 
 	bake_scene = require_bake_scene(context)
 	all_uv_object_list = get_intermediate_uv_object_list(ht)
@@ -99,6 +101,7 @@ def pack_uv_islands(operator, context, ht):
 	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_blue'], 'UVMap', mono_box)
 	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_color'], 'UVMap', color_box)
 
+	set_scene(context, last_active_scene)
 
 def get_intermediate_uv_object_list(ht):
 	uv_object_list = list()
@@ -133,7 +136,11 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 
 	for uv_island in uv_object_list:
 		scale_factor = uv_island.area * uv_island.bake_target.uv_area_weight
-		copy_and_transform_uv(uv_island.bake_target.source_object, uv_island.bake_target.source_uv_map, uv_island.variant.workmesh, uv_map, scale_factor)
+		copy_and_transform_uv(
+			uv_island.bake_target.source_object, 
+			uv_island.bake_target.source_uv_map, 
+			uv_island.variant.workmesh, uv_map, scale_factor
+		)
 
 	#TO-FIX skipping partitioning object temporarily
 	set_selection(view_layer.objects, *(u.variant.workmesh for u in uv_object_list))
@@ -177,7 +184,11 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 def copy_and_transform_uv(source_object, source_layer, target_object, target_layer, scale_factor=1.0):
 
 	#TODO - investigate if we can get uv layer index without actually changing it and getting mesh.loops.layers.uv.active
-	bpy.ops.object.mode_set(mode='OBJECT')
+	try:
+		bpy.ops.object.mode_set(mode='OBJECT')
+	except:
+		# No need, context already set
+		pass
 
 	#TODO - would be great if we made a context manager for these commands so that we could reset all changes when exiting the context (this applies to a lot of things outside this function too)
 	set_uv_map(source_object, source_layer)

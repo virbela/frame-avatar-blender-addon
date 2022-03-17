@@ -4,20 +4,22 @@ from ..helpers import require_bake_scene, set_scene, set_rendering, set_selectio
 
 def bake_all_bake_targets(operator, context, ht):
 
+	last_active_scene = context.scene
 	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 	set_scene(context, bake_scene)
 
-	for bake_target in ht.bake_target_collection:
-		for variant in bake_target.variant_collection:
-			#TODO - we should take into account bake groups - maybe also move this out to a more generic function
-			set_rendering(view_layer.objects, variant.workmesh)
-			set_selection(view_layer.objects, variant.workmesh, synchronize_active=True, make_sure_active=True)
+	for idx, bake_target in enumerate(ht.bake_target_collection, start=1):
+		for variant in bake_target.variant_collection:			
 			bake_specific_variant(ht, view_layer, bake_target, variant)
+			run_bake()
+
+	set_scene(context, last_active_scene)
 
 
 def bake_selected_bake_target(operator, context, ht):
 
+	last_active_scene = context.scene
 	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 	set_scene(context, bake_scene)
@@ -25,6 +27,9 @@ def bake_selected_bake_target(operator, context, ht):
 	if bake_target := ht.get_selected_bake_target():
 		if variant := bake_target.variant_collection[bake_target.selected_variant]:
 			bake_specific_variant(ht, view_layer, bake_target, variant)
+			run_bake()
+
+	set_scene(context, last_active_scene)
 
 def bake_selected_workmeshes(operator, context, ht):
 	# We are currently assuming that we already are in the bake scene
@@ -50,7 +55,7 @@ def bake_selected_workmeshes(operator, context, ht):
 
 	for bake_target, variant in selection:
 		bake_specific_variant(ht, view_layer, bake_target, variant)
-
+		run_bake()
 
 
 def bake_specific_variant(ht, view_layer, bake_target, variant):
@@ -68,12 +73,10 @@ def bake_specific_variant(ht, view_layer, bake_target, variant):
 	uv_layers = workmesh.data.uv_layers
 	uv_layers.active = uv_layers[bake_target.source_uv_map]
 
-	# here we assume the state is correct for this operation but as discussed in issue #12 we may want to do this in a bit of a different manner which would improve how defined the state is here as well
-	# Set contribution to color only
+def run_bake():
 	bpy.context.scene.render.engine = 'CYCLES'
+	bpy.context.scene.render.bake.use_clear = False
 	bpy.context.scene.render.bake.use_pass_color = True
 	bpy.context.scene.render.bake.use_pass_direct = False
 	bpy.context.scene.render.bake.use_pass_indirect = False
 	bpy.ops.object.bake(type='DIFFUSE')
-
-	#TODO - currently we are not saving the image, we should probably do this after the bulk, though doing it for each part could be good in case there is a problem half way through, something to discuss

@@ -4,7 +4,7 @@ from .base import frame_operator
 
 # Introduction
 class FRAME_OT_setup_bake_scene(frame_operator):
-	bl_label = 			"First time setup"
+	bl_label = 			"Create Bake Scene"
 	bl_idname = 		"frame.setup_bake_scene"
 	bl_description = 	"Create bake scene"
 	frame_operator = 	operations.setup_bake_scene
