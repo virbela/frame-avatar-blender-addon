@@ -112,7 +112,6 @@ def export_glb(context, ht):
 
 def composite_atlas(context):
     work_scene = require_work_scene(context)
-    # switch on nodes and get reference
 
     work_scene.use_nodes = True
     tree = work_scene.node_tree
@@ -145,7 +144,7 @@ def composite_atlas(context):
     file_node.format.file_format = 'JPEG'
     file_node.format.quality = 100
     file_node.base_path = os.path.dirname(bpy.data.filepath)
-    file_node.file_slots[0].path = "useAtlas"
+    file_node.file_slots[0].path = "hasAtlas"
 
     # link nodes
     links = tree.links
@@ -158,10 +157,10 @@ def composite_atlas(context):
 
     dirname = os.path.dirname(bpy.data.filepath)
     for f in os.listdir(dirname):
-        if 'useAtlas' in f:
+        if 'hasAtlas' in f:
             os.rename(
                 os.path.join(dirname, f),
-                os.path.join(dirname, 'useAtlas.jpg')
+                os.path.join(dirname, 'hasAtlas.jpg')
             )
 
 @contextmanager
