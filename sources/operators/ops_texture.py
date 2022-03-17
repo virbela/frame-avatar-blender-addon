@@ -34,6 +34,7 @@ def auto_assign_atlas(operator, context, ht):
 	atlas_blue = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_blue', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
 
 	for at in [atlas_blue, atlas_green, atlas_red, atlas_color]:
+		at.generated_color = (0.9, 0.9, 0.9, 1.0)
 		if tuple(at.size) != (a_width, a_height):
 			at.scale(a_width, a_height)
 			at.update()
