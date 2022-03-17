@@ -33,6 +33,10 @@ def auto_assign_atlas(operator, context, ht):
 	atlas_green = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_green', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
 	atlas_blue = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_blue', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
 
+	for at in [atlas_blue, atlas_green, atlas_red, atlas_color]:
+		if tuple(at.size) != (a_width, a_height):
+			at.scale(a_width, a_height)
+			at.update()
 
 	#TODO - here we need to put things in bins like how the UV packing does below but before we can do this we should look at the variants
 	#TBD - should we do it all from beginning? for now yes - maybe later we can have selection
