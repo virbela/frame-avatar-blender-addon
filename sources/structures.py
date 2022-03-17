@@ -30,9 +30,6 @@ class intermediate:
 			bake:				str
 			preview:			str
 
-
-
-
 	class packing:
 		@dataclass
 		class bake_target:
@@ -47,8 +44,6 @@ class intermediate:
 			name:				str
 			allocated:			float		= 0.0
 			atlas:				object		= None
-
-
 
 	@dataclass
 	class mirror:
