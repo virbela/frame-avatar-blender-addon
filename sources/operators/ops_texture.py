@@ -180,7 +180,11 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 def copy_and_transform_uv(source_object, source_layer, target_object, target_layer, scale_factor=1.0):
 
 	#TODO - investigate if we can get uv layer index without actually changing it and getting mesh.loops.layers.uv.active
-	bpy.ops.object.mode_set(mode='OBJECT')
+	try:
+		bpy.ops.object.mode_set(mode='OBJECT')
+	except:
+		# No need, context already set
+		pass
 
 	#TODO - would be great if we made a context manager for these commands so that we could reset all changes when exiting the context (this applies to a lot of things outside this function too)
 	set_uv_map(source_object, source_layer)
