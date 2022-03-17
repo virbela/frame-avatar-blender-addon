@@ -66,11 +66,9 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 
 	#Create bake targets
 	for target in targets.values():
-		if is_dev():
-			valid_option = [k in target.name for k in ('Body_Human', 'Eye_L', 'Eye_R', 'Face_Human')]
-			if not any(valid_option):
-				continue
-
+		if 'basis' in  target.name.lower():
+			continue 
+		
 		new = ht.bake_target_collection.add()
 		new.variant_collection.add()	# add default variant
 		for key, value in iter_dc(target):
