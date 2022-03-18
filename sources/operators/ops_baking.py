@@ -74,6 +74,7 @@ def bake_specific_variant(ht, view_layer, bake_target, variant):
 	uv_layers.active = uv_layers[bake_target.source_uv_map]
 
 def run_bake():
+	bpy.context.scene.cycles.device = 'GPU'
 	bpy.context.scene.render.engine = 'CYCLES'
 	bpy.context.scene.render.bake.use_clear = False
 	bpy.context.scene.render.bake.use_pass_color = True
