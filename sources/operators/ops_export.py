@@ -44,6 +44,18 @@ def export_glb(context, ht):
             }
         return uv_transform
 
+    def get_variant_channel(variant):
+        if variant.uv_target_channel == 'UV_TARGET_COLOR':
+            return (1, 1, 1)
+        elif variant.uv_target_channel == 'UV_TARGET_R':
+            return (1, 0, 0)
+        elif variant.uv_target_channel == 'UV_TARGET_G':
+            return (0, 1, 0)
+        elif variant.uv_target_channel == 'UV_TARGET_B':
+            return (0, 0, 1)
+        else:
+            return (0, 0, 0)
+
     for bake_target in ht.bake_target_collection:
         result = None
         if bake_target.multi_variants:            
@@ -51,11 +63,13 @@ def export_glb(context, ht):
             for variant in bake_target.variant_collection:
                 shape_name = get_bake_target_variant_name(bake_target, variant)
                 variants['Variants'][variant.name] = get_transform(shape_name)
+                variants['Variants'][variant.name]['UVChannel'] = get_variant_channel(variant)
             result = variants
         else:
             variant = bake_target.variant_collection[0]
             shape_name = get_bake_target_variant_name(bake_target, variant)
             result = get_transform(shape_name)
+            result['UVChannel'] = get_variant_channel(variant)
                 
         uv_transform_extra_data[bake_target.shortname] = result
 

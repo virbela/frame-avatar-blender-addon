@@ -81,11 +81,23 @@ def auto_assign_atlas(operator, context, ht):
 		(monochrome_targets, mono_bins),
 		(color_targets, color_bins),
 	]
+	def get_channel_from_bin(atlas_bin):
+		if atlas_bin.name == 'color':
+			return 'UV_TARGET_COLOR'
+		elif atlas_bin.name == 'red':
+			return 'UV_TARGET_R'
+		elif atlas_bin.name == 'green':
+			return 'UV_TARGET_G'
+		elif atlas_bin.name == 'blue':
+			return 'UV_TARGET_B'
+		return 'UV_TARGET_NIL'
+
 
 	for target_list, bin_list in all_targets:
 		for uv_island in sorted(target_list, reverse=True, key=lambda island: island.area):
 			uv_island.bin = target_bin = min(bin_list, key=lambda bin: bin.allocated)
 			uv_island.variant.intermediate_atlas = target_bin.atlas
+			uv_island.variant.uv_target_channel = get_channel_from_bin(target_bin)
 			target_bin.allocated += uv_island.area
 
 
@@ -131,6 +143,7 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 	uv_object_list = [u for u in all_uv_object_list if u.variant.intermediate_atlas == atlas]
 	if not uv_object_list:
 		# XXX nothing todo for this atlas
+		log.info("Missing UV object list!")
 		return
 
 	for uv_island in uv_object_list:
@@ -151,6 +164,7 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 	bpy.ops.mesh.select_all(action='SELECT')	#Select faces in model editor
 	bpy.ops.uv.select_all(action='SELECT')		#Select UVs in UV editor
 
+	# TODO(ranjian0) Find a way to box pack with default blender packer
 	if UVPM2_INSTALLED():
 		bpy.ops.uvpackmaster2.split_overlapping_islands()
 		bake_scene.uvp2_props.rot_step = 45
