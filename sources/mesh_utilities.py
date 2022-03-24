@@ -1,4 +1,5 @@
 import bmesh
+from mathutils import Vector
 from .local_math import convert_vectors, ROTATION_TRESHOLD
 from .logging import log_writer as log
 
@@ -46,7 +47,7 @@ class uv_transformation_calculator:
 		self.reference_distance = max_len
 		self.reference_uv_map = reference_uv_map
 
-		#Todo - make sure we found proper endpoints?
+		log.info(f"UV endpoints {self.ep1}:{reference_uv_map[self.ep1]} - {self.ep2}:{reference_uv_map[self.ep2]}")
 
 
 	def calculate_transform(self, target_uv_map):
@@ -65,7 +66,9 @@ class uv_transformation_calculator:
 			reference_vector = (R2 - R1).normalized()
 			target_vector = (T2 - T1).normalized()
 
-			rotation = reference_vector.get_signed_angle(target_vector)
+			rv = Vector((reference_vector.x, reference_vector.y))
+			tv = Vector((target_vector.x, target_vector.y))
+			rotation = rv.angle_signed(tv)
 
 			# Note: If we want to quantize rotation we should do that here (this could be an option in that case)
 			# Note: If we do quantize rotation and the islands are not actually quantized in the rotation we will fail the verification step
@@ -79,11 +82,11 @@ class uv_transformation_calculator:
 			e1 = ((R1.rotate(rotation) * scale + translation) - T1).error()
 			e2 = ((R2.rotate(rotation) * scale + translation) - T2).error()
 
-			log.info(f'Translation: {translation} Rotation: {rotation} Errors: {e1, e2}')
+			log.info(f'Translation: {translation} Rotation: {rotation} Scale: {scale} Errors: {e1, e2}')
 
 			if e1 > ROTATION_TRESHOLD or e2 > ROTATION_TRESHOLD:
 				raise ValueError('Failed to properly calculate transform')
 
 			return [translation.x, translation.y, rotation, scale]
 		except ValueError as source_error:
-			raise ValueError(f'Failed to calcualte transform of UV map using reference points {R1} - {R2} and target points {T1} - {T2}.') from source_error
+			raise ValueError(f'Failed to calculate transform of UV map using reference points {R1} - {R2} and target points {T1} - {T2}.') from source_error

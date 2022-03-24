@@ -1,7 +1,7 @@
 from math import acos, pi, cos, sin, sqrt, tau
 
 ZERO_TRESHOLD = 1e-12
-ROTATION_TRESHOLD = 1e-5
+ROTATION_TRESHOLD = 1e-6
 
 def quantize_value(value, step):
 	return round(value / step) * step
@@ -118,12 +118,12 @@ class vector_2:
 		return abs(self.sum())
 
 	def get_angle(self, other):
-		return acos(round(self.normalized_dot(other), 4))
+		return acos(self.normalized_dot(other))
 
 	def normalized_dot(self, other):
 		dot = self.normalized().dot(other.normalized())
 		#Make sure dot is between 0 and 1
-		return clamp(dot, -1, 1)
+		return clamp(dot, 0, 1)
 
 	def dot(self, other):
 		return self.x * other.x + self.y * other.y
