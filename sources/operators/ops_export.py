@@ -46,15 +46,15 @@ def export_glb(context, ht):
 
     def get_variant_channel(variant):
         if variant.uv_target_channel == 'UV_TARGET_COLOR':
-            return (1, 1, 1)
+            return (0, 0, 0, 1)
         elif variant.uv_target_channel == 'UV_TARGET_R':
-            return (1, 0, 0)
+            return (1, 0, 0, 0)
         elif variant.uv_target_channel == 'UV_TARGET_G':
-            return (0, 1, 0)
+            return (0, 1, 0, 0)
         elif variant.uv_target_channel == 'UV_TARGET_B':
-            return (0, 0, 1)
+            return (0, 0, 1, 0)
         else:
-            return (0, 0, 0)
+            return (0, 0, 0, 0)
 
     for bake_target in ht.bake_target_collection:
         result = None
