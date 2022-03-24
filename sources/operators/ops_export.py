@@ -93,7 +93,7 @@ def export_glb(context, ht):
             filepath=outputfile_glb, 
             export_format='GLB', 
             # disable all default options
-            export_texcoords = False,
+            export_texcoords = True,
             export_normals = False,
             export_colors = False,
             export_animations=False,
@@ -111,7 +111,7 @@ def export_glb(context, ht):
                 filepath=os.path.join(directory , "morphic_avatar.gltf"), 
                 export_format='GLTF_EMBEDDED', 
                 # disable all default options
-                export_texcoords = False,
+                export_texcoords = True,
                 export_normals = False,
                 export_colors = False,
                 export_animations=False,
