@@ -55,9 +55,9 @@ class uv_transformation_calculator:
 		rotation = reference_vector.angle_signed(target_vector)
 
 		#Calculate translation
-		original = R2 - R1
+		original = R1.copy()
 		original.rotate(Matrix.Rotation(rotation, 2))
-		translation = (T2 - T1) - (original * scale)
+		translation = T1 - (original * scale)
 
 		log.info(f"UV Transform: T:{translation} R:{rotation} S:{scale}")
 
