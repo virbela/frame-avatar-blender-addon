@@ -3,7 +3,7 @@ import bpy
 import json
 from contextlib import contextmanager
 from ..logging import log_writer as log
-from ..mesh_utilities import uv_transformation_calculator, get_uv_map_from_mesh
+from ..uvtransform import uv_transformation_calculator, get_uv_map_from_mesh
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
 
