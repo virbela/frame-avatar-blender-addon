@@ -6,7 +6,6 @@ from .helpers import (
 	frame_property_group, 
 )
 from .constants import MIRROR_TYPE
-from .exceptions import InternalError
 
 #Important notes
 #	Regarding descriptions of properties, please see contribution note 1
