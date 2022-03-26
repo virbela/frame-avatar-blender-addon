@@ -14,7 +14,7 @@ from ..helpers import (
 )
 
 UVPM2_INSTALLED = lambda: "uvpackmaster2" in dir(bpy.ops)
-UVPM3_INSTALLED = lambda: "uvpackmaster2" in dir(bpy.ops)
+UVPM3_INSTALLED = lambda: "uvpackmaster3" in dir(bpy.ops)
 UVPM_INSTALLED = lambda: UVPM2_INSTALLED() or UVPM3_INSTALLED()
 
 def auto_assign_atlas(operator, context, ht):
