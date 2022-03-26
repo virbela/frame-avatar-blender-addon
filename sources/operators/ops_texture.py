@@ -204,7 +204,6 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 		#TODO - not hardcode pixel margin! 
 		bake_scene.uvpm3_props.pixel_margin_enable = True
 		bake_scene.uvpm3_props.pixel_margin = 5	
-
 		bpy.ops.uvpackmaster3.pack()
 	else:
 		bpy.ops.uv.average_islands_scale()
