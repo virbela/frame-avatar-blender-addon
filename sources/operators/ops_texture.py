@@ -14,11 +14,8 @@ from ..helpers import (
 )
 
 UVPM2_INSTALLED = lambda: "uvpackmaster2" in dir(bpy.ops)
-
-if UVPM2_INSTALLED():
-	disable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.disable_target_box)
-	enable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.enable_target_box)
-
+UVPM3_INSTALLED = lambda: "uvpackmaster2" in dir(bpy.ops)
+UVPM_INSTALLED = lambda: UVPM2_INSTALLED() or UVPM3_INSTALLED()
 
 def auto_assign_atlas(operator, context, ht):
 	'Goes through all bake targets and assigns them to the correct intermediate atlas and UV set based on the uv_mode'
@@ -116,6 +113,7 @@ def pack_uv_islands(operator, context, ht):
 
 	set_scene(context, last_active_scene)
 
+
 def get_intermediate_uv_object_list(ht):
 	uv_object_list = list()
 
@@ -166,6 +164,9 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 
 	# TODO(ranjian0) Find a way to box pack with default blender packer
 	if UVPM2_INSTALLED():
+		disable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.disable_target_box)
+		enable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.enable_target_box)
+
 		bpy.ops.uvpackmaster2.split_overlapping_islands()
 		bake_scene.uvp2_props.rot_step = 45
 
@@ -186,6 +187,25 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 
 		bpy.ops.uvpackmaster2.uv_pack()
 		disable_packing_box()
+	elif UVPM3_INSTALLED():
+		bpy.ops.uvpackmaster3.split_overlapping()
+		bake_scene.uvpm3_props.rotation_step = 45
+
+		if box:
+			bake_scene.uvpm3_props.custom_target_box_enable = True
+			(	bake_scene.uvpm3_props.custom_target_box.p1_x,
+				bake_scene.uvpm3_props.custom_target_box.p1_y,
+				bake_scene.uvpm3_props.custom_target_box.p2_x,
+				bake_scene.uvpm3_props.custom_target_box.p2_y ) = box
+
+
+		#NOTE - if we later do downsampling when doing final bake 
+		#     - we must consider the final pixel margin and not the intermediate one!
+		#TODO - not hardcode pixel margin! 
+		bake_scene.uvpm3_props.pixel_margin_enable = True
+		bake_scene.uvpm3_props.pixel_margin = 5	
+
+		bpy.ops.uvpackmaster3.pack()
 	else:
 		bpy.ops.uv.average_islands_scale()
 		bpy.ops.uv.pack_islands(margin=0.01)
