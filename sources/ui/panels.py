@@ -1,6 +1,7 @@
 import bpy
 import functools
 from ..properties import *
+from ..exceptions import InternalError
 from ..helpers import require_work_scene, require_bake_scene, pending_classes, is_dev
 
 class frame_panel(bpy.types.Panel):
