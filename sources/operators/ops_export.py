@@ -148,13 +148,21 @@ def composite_atlas(context):
     image_node_b.image = bpy.data.images['atlas_intermediate_blue']
     image_node_b.location = 300,-300
 
+    image_node_color = tree.nodes.new(type='CompositorNodeImage')
+    image_node_color.image = bpy.data.images['atlas_intermediate_color']
+    image_node_color.location = 450,-450
+
     # create combine rgba node
     comb_node = tree.nodes.new('CompositorNodeCombRGBA')   
     comb_node.location = 500,0
 
+    mult_node = tree.nodes.new('CompositorNodeMixRGB')
+    mult_node.blend_type = 'MULTIPLY'
+    mult_node.location = 700, 0
+
     # Create file output node
     file_node = tree.nodes.new('CompositorNodeOutputFile')   
-    file_node.location = 700,0
+    file_node.location = 900,0
     file_node.format.file_format = 'JPEG'
     file_node.format.quality = 100
     file_node.base_path = os.path.dirname(bpy.data.filepath)
@@ -165,7 +173,9 @@ def composite_atlas(context):
     links.new(image_node_r.outputs[0], comb_node.inputs[0])
     links.new(image_node_g.outputs[0], comb_node.inputs[1])
     links.new(image_node_b.outputs[0], comb_node.inputs[2])
-    links.new(comb_node.outputs[0], file_node.inputs[0])
+    links.new(comb_node.outputs[0], mult_node.inputs[1])
+    links.new(image_node_color.outputs[0], mult_node.inputs[2])
+    links.new(mult_node.outputs[0], file_node.inputs[0])
 
     bpy.ops.render.render(use_viewport=True)
 
