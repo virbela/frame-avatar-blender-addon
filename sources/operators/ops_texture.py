@@ -135,13 +135,13 @@ def get_intermediate_uv_object_list(ht):
 
 
 def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_map, box=None):
-	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+	view_layer = bake_scene.view_layers[0]
 	set_scene(context, bake_scene)
 
 	uv_object_list = [u for u in all_uv_object_list if u.variant.intermediate_atlas == atlas]
 	if not uv_object_list:
 		# XXX nothing todo for this atlas
-		log.info("Missing UV object list!")
+		log.info(f"Missing UV object list for {atlas.name}!")
 		return
 
 	for uv_island in uv_object_list:
@@ -162,7 +162,6 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 	bpy.ops.mesh.select_all(action='SELECT')	#Select faces in model editor
 	bpy.ops.uv.select_all(action='SELECT')		#Select UVs in UV editor
 
-	# TODO(ranjian0) Find a way to box pack with default blender packer
 	if UVPM2_INSTALLED():
 		disable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.disable_target_box)
 		enable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.enable_target_box)
@@ -201,11 +200,16 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 
 		#NOTE - if we later do downsampling when doing final bake 
 		#     - we must consider the final pixel margin and not the intermediate one!
-		#TODO - not hardcode pixel margin! 
+		#TODO - dont hardcode pixel margin! 
 		bake_scene.uvpm3_props.pixel_margin_enable = True
-		bake_scene.uvpm3_props.pixel_margin = 5	
-		bpy.ops.uvpackmaster3.pack()
+		bake_scene.uvpm3_props.pixel_margin = 5
+		for area in bpy.context.screen.areas:
+			if area.type == 'IMAGE_EDITOR':
+				override = bpy.context.copy()
+				override['area'] = area
+				bpy.ops.uvpackmaster3.pack(override, mode_id='pack.single_tile')
 	else:
+		# TODO(ranjian0) Find a way to box pack with default blender packer.
 		bpy.ops.uv.average_islands_scale()
 		bpy.ops.uv.pack_islands(margin=0.01)
 
