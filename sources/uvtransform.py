@@ -17,7 +17,9 @@ def get_uv_map_from_mesh(obj):
 	uv_map = dict()
 	for face in mesh.faces:
 		for loop in face.loops:
-			uv_map[loop.vert.index] = loop[uv_layer_index].uv.copy()
+			uv = loop[uv_layer_index].uv.copy()
+			uv.y = 1.0 - uv.y
+			uv_map[loop.vert.index] = uv
 
 	return uv_map
 
