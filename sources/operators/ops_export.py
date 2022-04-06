@@ -3,7 +3,7 @@ import bpy
 import json
 from contextlib import contextmanager
 from ..logging import log_writer as log
-from ..uvtransform import uv_transformation_calculator, get_uv_map_from_mesh
+from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
 
@@ -31,15 +31,15 @@ def export_glb(context, ht):
         if shape_name.endswith('__None'):
             shape_name = shape_name[:-6]
 
-        trans = uv_transform_map.get(shape_name)
+        trans: UVTransform = uv_transform_map.get(shape_name)
         uv_transform = dict(UVTransform = None)
         if trans:
-            tx, ty, rot, scale = trans
             uv_transform = {
                 "UVTransform" : {
-                    "scale": scale,
-                    "rotation": rot,
-                    "translation" : [tx, ty]
+                    "scale": trans.scale,
+                    "rotation": trans.rotation,
+                    "centroid": list(trans.centroid),
+                    "translation" : list(trans.translation)
                 }
             }
         return uv_transform
@@ -79,6 +79,9 @@ def export_glb(context, ht):
             base = bake_target.name[:-2]
             Rk = f'{base}_L' if '_R' in bake_target.name else f'base_R'
             R = ht.bake_target_collection.get(Rk)
+            if not R:
+                log.info(f'Missing mirror source for {bake_target}')
+                continue
             uv_transform_extra_data[bake_target.shortname] = uv_transform_extra_data[R.shortname]
             uv_transform_extra_data[bake_target.shortname]['is_mirror'] = True
 
