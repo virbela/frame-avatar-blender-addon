@@ -73,6 +73,15 @@ def export_glb(context, ht):
                 
         uv_transform_extra_data[bake_target.shortname] = result
 
+    for bake_target in ht.bake_target_collection:
+        if bake_target.bake_mode == 'UV_BM_MIRRORED':
+            # -- set the uv transform to opposite mirror
+            base = bake_target.name[:-2]
+            Rk = f'{base}_L' if '_R' in bake_target.name else f'base_R'
+            R = ht.bake_target_collection.get(Rk)
+            uv_transform_extra_data[bake_target.shortname] = uv_transform_extra_data[R.shortname]
+            uv_transform_extra_data[bake_target.shortname]['is_mirror'] = True
+
     morphsets_dict = {
         "Morphs": uv_transform_extra_data,
         "Filters": dict()
