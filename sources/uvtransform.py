@@ -1,7 +1,14 @@
 import bmesh
-from mathutils import Matrix
+from mathutils import Vector
+from dataclasses import dataclass
 from .logging import log_writer as log
 
+@dataclass
+class UVTransform:
+	centroid: Vector
+	translation: Vector
+	scale: float
+	rotation: float
 
 def get_uv_map_from_mesh(obj):
 	'If uv_layer is ACTIVE_LAYER, the active UV layer will be used, otherwise, uv_layer is considered to be the index of the wanted UV layer.'
@@ -41,6 +48,13 @@ class uv_transformation_calculator:
 
 		log.info(f"UV endpoints {self.ep1}:{reference_uv_map[self.ep1]} - {self.ep2}:{reference_uv_map[self.ep2]}")
 
+	def get_centroid(self, uv_map):
+		vecs = list(uv_map.values())
+		sorted_x = sorted(vecs, key = lambda v:v.x)
+		sorted_y = sorted(vecs, key = lambda v:v.y)
+		min_x, max_x = sorted_x[0].x, sorted_x[-1].x
+		min_y, max_y = sorted_y[0].y, sorted_y[-1].y
+		return Vector(((min_x + max_x) / 2, (min_y + max_y) / 2))
 
 	def calculate_transform(self, target_uv_map):
 		#Get reference and target endpoints as vectors
@@ -56,11 +70,17 @@ class uv_transformation_calculator:
 		target_vector = (T2 - T1).normalized()
 		rotation = reference_vector.angle_signed(target_vector)
 
+		
 		#Calculate translation
-		original = R1.copy()
-		original.rotate(Matrix.Rotation(rotation, 2))
-		translation = T1 - (original * scale)
+		reference_centroid = self.get_centroid(self.reference_uv_map)
+		target_centroid = self.get_centroid(target_uv_map)
+		translation = target_centroid - reference_centroid
 
-		log.info(f"UV Transform: T:{translation} R:{rotation} S:{scale}")
-
-		return [translation.x, translation.y, rotation, scale]
+		transform = UVTransform(
+			centroid=reference_centroid, 
+			translation=translation,
+			scale=scale,
+			rotation=rotation
+		)
+		log.info(f"UV Transform: {transform}")
+		return transform
