@@ -225,11 +225,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 
 					if et.uv_mode == 'UV_IM_FROZEN':
 						self.layout.prop(et, 'atlas')
-					else:
-						if et.atlas is None:
-							self.layout.label(text=f"Atlas: (not assigned)", icon='UNLINKED')
-						else:
-							self.layout.label(text=f"Atlas: {et.atlas.name}", icon_value=et.atlas.preview.icon_id)
 
 				elif et.bake_mode == 'UV_BM_MIRRORED':
 					pass	#TODO
