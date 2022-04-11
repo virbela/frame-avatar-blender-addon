@@ -1,5 +1,6 @@
 import bpy
 import enum
+import addon_utils
 from dataclasses import dataclass
 from .logging import log_writer as log
 from .constants import *
@@ -255,7 +256,6 @@ def purge_object(obj):
 
 def is_dev():
 	# if we are installed as an addon, assume this is a production dist
-	import addon_utils
 	for mod in addon_utils.modules():
 		if 'frame_avatar_addon' == mod.__name__:
 			return False
