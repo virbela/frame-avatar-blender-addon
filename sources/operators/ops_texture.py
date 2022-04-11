@@ -102,6 +102,8 @@ def pack_uv_islands(operator, context, ht):
 	last_active_scene = context.scene
 
 	bake_scene = require_bake_scene(context)
+	set_scene(context, bake_scene)
+
 	all_uv_object_list = get_intermediate_uv_object_list(ht)
 	mono_box = (0.0, 1.0, 1.0, ht.color_percentage / 100.0)
 	color_box = (0.0, 0.0, 1.0, ht.color_percentage / 100.0)
@@ -136,7 +138,6 @@ def get_intermediate_uv_object_list(ht):
 
 def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_map, box=None):
 	view_layer = bake_scene.view_layers[0]
-	set_scene(context, bake_scene)
 
 	uv_object_list = [u for u in all_uv_object_list if u.variant.intermediate_atlas == atlas]
 	if not uv_object_list:
@@ -203,11 +204,7 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 		#TODO - dont hardcode pixel margin! 
 		bake_scene.uvpm3_props.pixel_margin_enable = True
 		bake_scene.uvpm3_props.pixel_margin = 5
-		for area in bpy.context.screen.areas:
-			if area.type == 'IMAGE_EDITOR':
-				override = bpy.context.copy()
-				override['area'] = area
-				bpy.ops.uvpackmaster3.pack(override, mode_id='pack.single_tile')
+		bpy.ops.uvpackmaster3.pack(mode_id='pack.single_tile')
 	else:
 		# TODO(ranjian0) Find a way to box pack with default blender packer.
 		bpy.ops.uv.average_islands_scale()
