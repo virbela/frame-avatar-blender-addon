@@ -32,8 +32,8 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 
 		pending_name = get_bake_target_variant_name(bake_target, variant)
 
-		# if the workmesh was previously created, skip 
-		if pending_name in bpy.data.objects:
+		# if the workmesh was previously created in the bake scene, skip 
+		if pending_name in bake_scene.objects:
 			# NOTE(ranjian0) since artists may have performed actions on the workmeshs, 
 			# we choose to skip regeneration.
 			log.warning(f'Skipping existing workmesh ...')
