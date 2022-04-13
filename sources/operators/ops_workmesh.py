@@ -1,7 +1,7 @@
 import bpy
 from .common import set_uv_map
 from ..logging import log_writer as log
-from ..constants import PAINTING_UV_NAME
+from ..constants import PAINTING_UV_MAP, TARGET_UV_MAP
 from ..materials import setup_bake_material
 from ..helpers import (
     require_bake_scene, 
@@ -47,7 +47,8 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 
 			# Create UV map for painting
 			bake_uv = pending_object.data.uv_layers[0]	# Assume first UV map is the bake one
-			local_uv = pending_object.data.uv_layers.new(name=PAINTING_UV_NAME)
+			bake_uv.name = TARGET_UV_MAP
+			local_uv = pending_object.data.uv_layers.new(name=PAINTING_UV_MAP)
 			set_uv_map(pending_object, local_uv.name)
 
 			# check if this target uses a shape key
