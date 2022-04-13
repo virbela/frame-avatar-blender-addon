@@ -64,19 +64,14 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 
 		bake_scene.collection.objects.link(pending_object)
 
-		#TODO - should we create a link from workmesh to the bake target variant? Is this possible? See technical detail 5
-		#TODO - we need to document the data structures properly for better planning and overview
-
 		variant.workmesh = pending_object
 		variant.uv_map = local_uv.name
-		bake_target.uv_map = bake_uv.name		#TODO - should the target be in each variant perhaps?
+		bake_target.uv_map = bake_uv.name
 
 		update_workmesh_materials(context, ht, bake_target, variant)
 
 
 def update_workmesh_materials(context, ht,  bake_target, variant):
-	#TODO - create all materials
-
 	#TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
 	if not variant.uv_map:
 		variant.workmesh.active_material = None
