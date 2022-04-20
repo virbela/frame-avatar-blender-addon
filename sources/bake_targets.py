@@ -35,8 +35,22 @@ class validation_error:
 
 
 
-def validate_bake_target_variant(ht, bake_target):
-	pass	#TODO - implement
+def validate_bake_target_variant(ht, bake_target, variant):
+	# TODO(ranjian0) uv_target_channel is a prop in variant not bake target
+	# check uv target channel
+	# if bake_target.uv_target_channel == 'UV_TARGET_NIL':
+	# 	pass	#TODO - implement
+	# elif bake_target.uv_target_channel == 'UV_TARGET_COLOR':
+	# 	pass	#TODO - implement
+	# elif bake_target.uv_target_channel == 'UV_TARGET_R':
+	# 	pass	#TODO - implement
+	# elif bake_target.uv_target_channel == 'UV_TARGET_G':
+	# 	pass	#TODO - implement
+	# elif bake_target.uv_target_channel == 'UV_TARGET_B':
+	# 	pass	#TODO - implement
+	# else:
+	# 	result.append(validation_error.invalid_enum(bake_target, 'uv_target_channel'))
+
 	return []
 
 
@@ -70,27 +84,10 @@ def validate_bake_target(ht, bake_target):
 		if bake_target.atlas is None:
 			result.append(validation_error.no_atlas_assigned(bake_target))
 
-
-		# TODO(ranjian0) uv_target_channel is a prop in variant not bake target
-		# check uv target channel
-		# if bake_target.uv_target_channel == 'UV_TARGET_NIL':
-		# 	pass	#TODO - implement
-		# elif bake_target.uv_target_channel == 'UV_TARGET_COLOR':
-		# 	pass	#TODO - implement
-		# elif bake_target.uv_target_channel == 'UV_TARGET_R':
-		# 	pass	#TODO - implement
-		# elif bake_target.uv_target_channel == 'UV_TARGET_G':
-		# 	pass	#TODO - implement
-		# elif bake_target.uv_target_channel == 'UV_TARGET_B':
-		# 	pass	#TODO - implement
-		# else:
-		# 	result.append(validation_error.invalid_enum(bake_target, 'uv_target_channel'))
-
-
 		# check multi variants
 		if bake_target.multi_variants:
 			for variant in bake_target.variant_collection:
-				result += validate_bake_target_variant(ht, bake_target)
+				result += validate_bake_target_variant(ht, bake_target, variant)
 
 
 	elif bake_target.bake_mode == 'UV_BM_MIRRORED':
