@@ -1,5 +1,6 @@
 import bpy
 from .common import generic_list
+from ..constants import TARGET_UV_MAP
 from ..bake_targets import validate_all
 from ..logging import log_writer as log
 from ..structures import intermediate, iter_dc
@@ -13,6 +14,10 @@ def validate_targets(operator, context, ht):
 def create_targets_from_selection(operator, context, ht):
 	bake_scene = require_bake_scene(context)
 	for source_object in context.selected_objects:
+		# change the main uvmap name
+		source_uv = source_object.data.uv_layers[0]	# Assume first UV map is the source one
+		source_uv.name = TARGET_UV_MAP
+
 		if shape_keys := source_object.data.shape_keys:
 			create_baketarget_from_key_blocks(ht, source_object, shape_keys.key_blocks, bake_scene)
 		else:
