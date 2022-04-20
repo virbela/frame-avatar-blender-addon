@@ -142,8 +142,6 @@ class BakeTarget(frame_property_group):
 	#geom_mirror_axis:				bpy.props.EnumProperty(items=tuple(GEOMETRY_MIRROR_AXIS), name="Geometry mirror axis", default=0)		#MAYBE-LATER
 
 	uv_mode:						bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
-
-	#atlas:							bpy.props.StringProperty(name="Atlas name")
 	atlas:							bpy.props.PointerProperty(name="Atlas image", type=bpy.types.Image)
 	# ↑ This is used for storing the automatic choice as well as the manual (frozen) one
 
