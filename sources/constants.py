@@ -14,5 +14,5 @@ BAKE_SCENE = 'Baking'
 PARTITIONING_OBJECT = '_uv_partitioning_object_'
 BAKE_MATERIAL = 'BakeMaterial'
 
-TARGET_UV_MAP = 'TargetUVMap'
-PAINTING_UV_MAP = 'PaintingUVMap'
+TARGET_UV_MAP = 'TargetMap'
+PAINTING_UV_MAP = 'PaintingMap'

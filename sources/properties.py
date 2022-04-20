@@ -5,7 +5,7 @@ from .helpers import (
 	require_named_entry, 
 	frame_property_group, 
 )
-from .constants import MIRROR_TYPE
+from .constants import MIRROR_TYPE, TARGET_UV_MAP
 
 #Important notes
 #	Regarding descriptions of properties, please see contribution note 1
@@ -146,7 +146,7 @@ class BakeTarget(frame_property_group):
 	# ↑ This is used for storing the automatic choice as well as the manual (frozen) one
 
 	#TBD - use this? - yes we need UV map for when rescaling from source
-	source_uv_map:					bpy.props.StringProperty(name="UV map", default='UVMap')
+	source_uv_map:					bpy.props.StringProperty(name="UV map", default=TARGET_UV_MAP)
 
 
 	#Variants

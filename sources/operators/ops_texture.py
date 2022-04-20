@@ -1,5 +1,6 @@
 import bpy
 import bmesh
+from ..constants import TARGET_UV_MAP
 from .common import set_uv_map, guarded_operator 
 from ..structures import intermediate
 from ..logging import log_writer as log
@@ -106,10 +107,10 @@ def pack_uv_islands(operator, context, ht):
 	mono_box = (0.0, 1.0, 1.0, ht.color_percentage / 100.0)
 	color_box = (0.0, 0.0, 1.0, ht.color_percentage / 100.0)
 
-	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_red'], 'UVMap', mono_box)
-	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_green'], 'UVMap', mono_box)
-	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_blue'], 'UVMap', mono_box)
-	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_color'], 'UVMap', color_box)
+	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_red'], TARGET_UV_MAP, mono_box)
+	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_green'], TARGET_UV_MAP, mono_box)
+	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_blue'], TARGET_UV_MAP, mono_box)
+	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_color'], TARGET_UV_MAP, color_box)
 
 	set_scene(context, last_active_scene)
 
