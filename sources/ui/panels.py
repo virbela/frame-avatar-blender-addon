@@ -78,13 +78,15 @@ class FRAME_PT_workflow(frame_panel):
 			baking = self.layout.box()
 			baking.prop(scene.ui_state, "workflow_baking_visible", text="Baking")
 			if scene.ui_state.workflow_baking_visible:
-				bake_scene = require_bake_scene(context)
-				baking.prop(bake_scene.cycles, "samples", text="Bake Samples")
-				baking.prop(bake_scene.render.bake, "margin", text="Bake Margin")
-				baking.operator('frame.bake_all')
-				baking.operator('frame.bake_selected_bake_target')
-				baking.operator('frame.bake_selected_workmeshes')
-
+				try:
+					bake_scene = require_bake_scene(context)
+					baking.prop(bake_scene.cycles, "samples", text="Bake Samples")
+					baking.prop(bake_scene.render.bake, "margin", text="Bake Margin")
+					baking.operator('frame.bake_all')
+					baking.operator('frame.bake_selected_bake_target')
+					baking.operator('frame.bake_selected_workmeshes')
+				except AttributeError:
+					baking.label(text='Please ensure Cycles Render Engine is enabled in the addons list!', icon='ERROR')
 			helper_tools = self.layout.box()
 			helper_tools.prop(scene.ui_state, "workflow_helpers_visible", text="Helpers")
 			if scene.ui_state.workflow_helpers_visible:

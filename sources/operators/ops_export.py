@@ -2,17 +2,29 @@ import os
 import bpy
 import json
 from contextlib import contextmanager
+from .common import popup_message
 from ..logging import log_writer as log
 from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
 
 def export(operator, context, ht):
-    export_glb(context, ht)
-    composite_atlas(context)
+    if export_glb(context, ht):
+        composite_atlas(context)
 
 def export_glb(context, ht):
     obj = context.active_object
+
+    if not obj.data.shape_keys:
+        #XXX Probably Not the main avatar object
+        popup_message("Selected object is not an Homeomorphic avatar", 'Context Error')
+        return False
+    
+    if obj.name != 'Avatar':
+        #XXX Probably Not the main avatar object
+        popup_message("Avatar object name invalid! Try 'Avatar'.", 'Context Error')
+        return False
+
     obj.hide_set(False)
     obj.hide_viewport = False 
     obj.select_set(True)
@@ -134,6 +146,8 @@ def export_glb(context, ht):
                 export_extras=True, 
                 export_morph=True,
             )
+
+    return True
 
 
 def composite_atlas(context):

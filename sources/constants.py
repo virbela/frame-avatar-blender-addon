@@ -9,9 +9,10 @@ class MIRROR_TYPE(enum.Enum):
 
 IGNORED = type('IGNORED', (), {})
 
-
 WORK_SCENE = 'Scene'
 BAKE_SCENE = 'Baking'
 PARTITIONING_OBJECT = '_uv_partitioning_object_'
 BAKE_MATERIAL = 'BakeMaterial'
-PAINTING_UV_NAME = 'Painting'
+
+TARGET_UV_MAP = 'TargetMap'
+PAINTING_UV_MAP = 'PaintingMap'

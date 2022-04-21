@@ -1,7 +1,7 @@
 import bpy
 from .common import set_uv_map
 from ..logging import log_writer as log
-from ..constants import PAINTING_UV_NAME
+from ..constants import PAINTING_UV_MAP, TARGET_UV_MAP
 from ..materials import setup_bake_material
 from ..helpers import (
     require_bake_scene, 
@@ -47,7 +47,8 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 
 			# Create UV map for painting
 			bake_uv = pending_object.data.uv_layers[0]	# Assume first UV map is the bake one
-			local_uv = pending_object.data.uv_layers.new(name=PAINTING_UV_NAME)
+			bake_uv.name = TARGET_UV_MAP
+			local_uv = pending_object.data.uv_layers.new(name=PAINTING_UV_MAP)
 			set_uv_map(pending_object, local_uv.name)
 
 			# check if this target uses a shape key
@@ -63,19 +64,14 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 
 		bake_scene.collection.objects.link(pending_object)
 
-		#TODO - should we create a link from workmesh to the bake target variant? Is this possible? See technical detail 5
-		#TODO - we need to document the data structures properly for better planning and overview
-
 		variant.workmesh = pending_object
 		variant.uv_map = local_uv.name
-		bake_target.uv_map = bake_uv.name		#TODO - should the target be in each variant perhaps?
+		bake_target.uv_map = bake_uv.name
 
 		update_workmesh_materials(context, ht, bake_target, variant)
 
 
 def update_workmesh_materials(context, ht,  bake_target, variant):
-	#TODO - create all materials
-
 	#TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
 	if not variant.uv_map:
 		variant.workmesh.active_material = None

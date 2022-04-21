@@ -1,4 +1,4 @@
-
+import bpy
 
 class guarded_operator:
 	def __init__(self, operator):
@@ -51,3 +51,9 @@ def transfer_variant(source, dest):
 	dest.name = source.name
 	dest.image = source.image
 	dest.uv_map = source.uv_map
+
+def popup_message(message, title="Error", icon="ERROR"):
+    def oops(self, context):
+        self.layout.label(text=message)
+
+    bpy.context.window_manager.popup_menu(oops, title=title, icon=icon)

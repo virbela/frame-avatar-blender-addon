@@ -5,7 +5,7 @@ from .helpers import (
 	require_named_entry, 
 	frame_property_group, 
 )
-from .constants import MIRROR_TYPE
+from .constants import MIRROR_TYPE, TARGET_UV_MAP
 
 #Important notes
 #	Regarding descriptions of properties, please see contribution note 1
@@ -142,13 +142,11 @@ class BakeTarget(frame_property_group):
 	#geom_mirror_axis:				bpy.props.EnumProperty(items=tuple(GEOMETRY_MIRROR_AXIS), name="Geometry mirror axis", default=0)		#MAYBE-LATER
 
 	uv_mode:						bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
-
-	#atlas:							bpy.props.StringProperty(name="Atlas name")
 	atlas:							bpy.props.PointerProperty(name="Atlas image", type=bpy.types.Image)
 	# ↑ This is used for storing the automatic choice as well as the manual (frozen) one
 
 	#TBD - use this? - yes we need UV map for when rescaling from source
-	source_uv_map:					bpy.props.StringProperty(name="UV map", default='UVMap')
+	source_uv_map:					bpy.props.StringProperty(name="UV map", default=TARGET_UV_MAP)
 
 
 	#Variants
