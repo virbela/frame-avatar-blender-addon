@@ -152,6 +152,9 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 			uv_island.bake_target.source_uv_map, 
 			uv_island.variant.workmesh, uv_map, scale_factor
 		)
+	# ensure meshes are not hidden
+	for obl in uv_object_list:
+		obl.variant.workmesh.hide_set(False)
 
 	#TO-FIX skipping partitioning object temporarily
 	set_selection(view_layer.objects, *(u.variant.workmesh for u in uv_object_list))
