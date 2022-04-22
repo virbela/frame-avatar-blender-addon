@@ -5,6 +5,7 @@ from .helpers import (
 	require_named_entry, 
 	frame_property_group, 
 )
+from .logging import log_writer as log
 from .constants import MIRROR_TYPE, TARGET_UV_MAP
 
 #Important notes
@@ -232,6 +233,16 @@ class BakeTargetMirrorEntry(frame_property_group):
 	primary: 				bpy.props.IntProperty(name='Primary bake target identifier', default=-1)
 	secondary: 				bpy.props.IntProperty(name='Secondary bake target identifier', default=-1)
 
+def update_atlas_size(self, context):
+	atlas_images = [im for im in bpy.data.images if 'atlas_intermediate' in im.name]
+	if atlas_images:
+		ats = self.atlas_size
+		for at in atlas_images:
+			at.generated_color = (1.0, 1.0, 1.0, 1.0)
+			if tuple(at.size) != (ats, ats):
+				log.info(f"Resizing '{at.name}' from {tuple(at.size)} to {(ats, ats)}")
+				at.scale(ats, ats)
+				at.update()
 
 class HomeomorphicProperties(frame_property_group):
 
@@ -250,7 +261,7 @@ class HomeomorphicProperties(frame_property_group):
 	source_object: 						bpy.props.StringProperty(name="Object name")
 
 	### Atlas,textures, paint assist ###
-	atlas_size: 						bpy.props.IntProperty(name="Atlas size", default = 4096)
+	atlas_size: 						bpy.props.IntProperty(name="Atlas size", default = 4096, update=update_atlas_size)
 	color_percentage:					bpy.props.FloatProperty(name="Atlas color region percentage", default = 25.0)
 	painting_size:						bpy.props.IntProperty(name="Hand paint texture size", default = 1024)
 	select_by_atlas_image:				bpy.props.PointerProperty(name='Match atlas', type=bpy.types.Image)
