@@ -9,8 +9,13 @@ from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_t
 
 
 def export(operator, context, ht):
-    if export_glb(context, ht):
-        composite_atlas(context)
+    try:
+        if export_glb(context, ht):
+            composite_atlas(context)
+    except FileExistsError:
+        popup_message("Export files already exist in the current folder!") 
+    except PermissionError:
+        popup_message("Please save the current blend file!")
 
 def export_glb(context, ht):
     obj = context.active_object
