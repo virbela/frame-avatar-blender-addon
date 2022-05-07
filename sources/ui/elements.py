@@ -43,7 +43,7 @@ class FRAME_UL_bake_group_members(frame_ui_list):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 		if ht := get_homeomorphic_tool_state(context):	#contibution note 2
 			if item.target < len(ht.bake_target_collection):
-				if target := ht.bake_target_collection[item.target]:	#TODO - we should use a UUID system to do this correctly
+				if target := ht.bake_target_collection[item.target]:
 					layout.prop(target, 'name', icon=UV_ISLAND_MODES.members[target.uv_mode].icon, text='', emboss=False, translate=False)
 				else:
 					layout.label(icon='UNLINKED', text=item.target)
@@ -61,7 +61,7 @@ class FRAME_UL_bake_target_mirrors(frame_ui_list):
 				'This is a helper function that will say (Not assigned) if the string is empty but otherwise indicate the contents but also convey it is a broken link'
 
 				if txt:
-					return f'`{txt}´ N/A'
+					return f'`{txt}` N/A'
 				else:
 					return '(Not Available)'
 
@@ -81,3 +81,12 @@ class FRAME_UL_bake_target_mirrors(frame_ui_list):
 			else:
 				row.label(text=na(item.primary), icon='UNLINKED')
 				row.label(text=na(item.secondary))
+
+
+class FRAME_UL_effects(frame_ui_list):
+	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+
+		if ht := get_homeomorphic_tool_state(context):
+			if item.target < len(ht.effect_collection):
+				if target := ht.effect_collection[item.target]:
+					layout.prop(target, 'name', icon="FORCE_TURBULENCE", text='', emboss=False, translate=False)

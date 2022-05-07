@@ -219,3 +219,11 @@ class bake_variants:
 		if bake_target := ht.get_selected_bake_target():
 			generic_list.remove(bake_target.variant_collection, a_get(bake_target, 'selected_variant'), a_set(bake_target, 'selected_variant'))
 
+
+class effects:
+
+	def add(operator, context, ht):
+		generic_list.add(ht.effect_collection, a_get(ht, 'selected_effect'), a_set(ht, 'selected_effect'))
+
+	def remove(operator, context, ht):
+		generic_list.remove(ht.effect_collection, a_get(ht, 'selected_effect'), a_set(ht, 'selected_effect'))

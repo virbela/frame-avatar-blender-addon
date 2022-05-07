@@ -244,11 +244,20 @@ def update_atlas_size(self, context):
 				at.scale(ats, ats)
 				at.update()
 
+class EffectProperty(frame_property_group):
+	name: 					bpy.props.StringProperty(name="Effect Name", default='Untitled Effect')
+	target:					bpy.props.IntProperty(name='Effect identifier', default=-1)
+
+	shapekey: 				bpy.props.PointerProperty(name="Parent Shapekey", type=bpy.types.Key)
+
 class HomeomorphicProperties(frame_property_group):
 
 	### Bake targets ###
 
 	#Note that we use -1 to indicate that nothing is selected for integer selections
+	effect_collection: 					bpy.props.CollectionProperty(type = EffectProperty)
+	selected_effect: 					bpy.props.IntProperty(name = "Selected effect", default = -1)
+
 	bake_target_collection: 			bpy.props.CollectionProperty(type = BakeTarget)
 	selected_bake_target: 				bpy.props.IntProperty(name = "Selected bake target", default = -1)
 

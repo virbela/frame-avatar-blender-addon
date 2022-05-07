@@ -260,6 +260,27 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 # 				group_actions.operator('frame.remove_bake_group_member')
 
 
+class FRAME_PT_effects(frame_panel):
+	bl_label = "Effects"
+	bl_space_type = 'VIEW_3D'
+	bl_region_type = 'UI'
+	bl_category = "Avatar"
+
+	def draw(self, context):
+		ob = context.object
+		if scene := require_work_scene(context):
+			HT = scene.homeomorphictools
+			self.layout.template_list('FRAME_UL_effects', '', HT, 'effect_collection', HT, 'selected_effect')
+			effect_actions = self.layout.row(align=True)
+			effect_actions.operator('frame.add_effect')
+			effect_actions.operator('frame.remove_effect')
+
+			if HT.selected_effect != -1:
+				key = ob.data.shape_keys
+				et = HT.effect_collection[HT.selected_effect]
+				# self.layout.prop_search(et, "shapekey", key, "key_blocks")
+
+
 class FRAME_PT_export(frame_panel):
 	bl_label = "Export"
 	bl_space_type = 'VIEW_3D'

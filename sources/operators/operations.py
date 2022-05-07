@@ -2,6 +2,7 @@ from .ops_export import export
 from .ops_intro import setup_bake_scene
 
 from .ops_baketargets import (
+    effects,
     bake_groups,
     bake_targets,
     bake_mirrors,

@@ -277,6 +277,20 @@ class FRAME_OT_remove_bake_group_member(frame_operator):
 	bl_idname = 		'frame.remove_bake_group_member'
 	frame_operator = 	operations.bake_groups.members.remove
 
+# Effects
+
+class FRAME_OT_remove_effect(frame_operator):
+	bl_label = 			"-"
+	bl_description = 	'Remove selected effect'
+	bl_idname = 		'frame.remove_effect'
+	frame_operator = 	operations.effects.remove
+
+class FRAME_OT_add_effect(frame_operator):
+	bl_label = 			"+"
+	bl_description = 	'Add variant'
+	bl_idname = 		'frame.add_effect'
+	frame_operator =	operations.effects.add
+
 
 # DEVMODE
 class FRAME_OT_node_get_links(frame_operator):
