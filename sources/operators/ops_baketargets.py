@@ -42,6 +42,9 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 	else:
 		for sk in key_blocks:
 			key = sk.name
+			if 'effect' in key.lower():
+				continue
+
 			targets[key] = intermediate.pending.bake_target(
 				name = f'{source_object.name}_{key}',
 				object_name = source_object.name,
@@ -101,6 +104,9 @@ def create_bake_targets_from_shapekeys(operator, context, ht):
 		mirror_list = list()
 		for sk in shape_keys:
 			key = sk.name
+			if 'effect' in key.lower():
+				continue
+
 			targets[key] = intermediate.pending.bake_target(
 				name = f'{ht.source_object}_{key}',
 				object_name = ht.source_object,
@@ -117,7 +123,6 @@ def create_bake_targets_from_shapekeys(operator, context, ht):
 
 				if R:
 					mirror_list.append(intermediate.mirror(target, R))
-
 				else:
 					log.error(f"Could not create mirror for {key} since there was no such object `{Rk}´")
 
