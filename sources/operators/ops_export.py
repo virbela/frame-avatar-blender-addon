@@ -262,7 +262,7 @@ def clear_custom_props(item):
         item[k] = v
 
 
-def calculate_effect_delta(obj, effect: EffectProperty):
+def calculate_effect_delta(obj, effect):
     """ Return ids and final positions of all transformed verts of target shapekey relative to base shapekey 
     """
 
