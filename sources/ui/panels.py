@@ -58,6 +58,11 @@ class FRAME_PT_workflow(frame_panel):
 			atlas_setup = self.layout.box()
 			atlas_setup.prop(scene.ui_state, "workflow_texture_atlas_visible", text="Texture Atlas")
 			if scene.ui_state.workflow_texture_atlas_visible:
+				atlas_setup.prop(HT, 'atlas_size')
+				atlas_setup.prop(HT, 'color_percentage')
+				h = int(HT.color_percentage * HT.atlas_size / 100)
+				atlas_setup.label(text=f'Height in pixels: {h}')
+
 				atlas_setup.operator('frame.auto_assign_atlas')
 				atlas_setup.operator('frame.pack_uv_islands')
 
@@ -102,34 +107,6 @@ class FRAME_PT_workflow(frame_panel):
 				debug.operator('frame.clear_bake_scene')
 				debug.operator('frame.clear_bake_targets')
 
-
-class FRAME_PT_painting(frame_panel):
-	bl_label = "Texture painting"
-	bl_space_type = 'VIEW_3D'
-	bl_region_type = 'UI'
-	bl_category = "Avatar"
-
-	def draw(self, context):
-		if scene := require_work_scene(context):
-			HT = scene.homeomorphictools
-
-			self.layout.prop(HT, 'painting_size')
-
-
-class FRAME_PT_uv_packing(frame_panel):
-	bl_label = "Texture atlas"
-	bl_space_type = 'VIEW_3D'
-	bl_region_type = 'UI'
-	bl_category = "Avatar"
-
-	def draw(self, context):
-		if scene := require_work_scene(context):
-			HT = scene.homeomorphictools
-
-			self.layout.prop(HT, 'atlas_size')
-			self.layout.prop(HT, 'color_percentage')
-			h = int(HT.color_percentage * HT.atlas_size / 100)
-			self.layout.label(text=f'Height in pixels: {h}')
 
 
 class template_expandable_section:
