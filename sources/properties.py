@@ -248,7 +248,14 @@ class EffectProperty(frame_property_group):
 	name: 					bpy.props.StringProperty(name="Effect Name", default='Untitled Effect')
 	target:					bpy.props.IntProperty(name='Effect identifier', default=-1)
 
-	shapekey: 				bpy.props.PointerProperty(name="Parent Shapekey", type=bpy.types.Key)
+	parent_shapekey: 		bpy.props.StringProperty(
+								name="Parent Shapekey",
+								description="Shape key used as the relative key for this effect"
+							)
+	effect_shapekey:		bpy.props.StringProperty(
+								name="Effect Shapekey",
+								description="Shape key with the final effect"
+							)
 
 class HomeomorphicProperties(frame_property_group):
 
@@ -274,6 +281,10 @@ class HomeomorphicProperties(frame_property_group):
 	color_percentage:					bpy.props.FloatProperty(name="Atlas color region percentage", default = 25.0)
 	painting_size:						bpy.props.IntProperty(name="Hand paint texture size", default = 1024)
 	select_by_atlas_image:				bpy.props.PointerProperty(name='Match atlas', type=bpy.types.Image)
+
+	def get_selected_effect(self):
+		if self.selected_effect:
+			return self.effect_collection[self.selected_effect]
 
 	def get_selected_bake_target(self):
 		if self.selected_bake_target != -1:
