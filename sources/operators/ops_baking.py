@@ -80,4 +80,5 @@ def run_bake():
 	bpy.context.scene.render.bake.use_pass_color = True
 	bpy.context.scene.render.bake.use_pass_direct = False
 	bpy.context.scene.render.bake.use_pass_indirect = False
+	bpy.context.scene.view_settings.view_transform = 'Standard'
 	bpy.ops.object.bake(type='DIFFUSE')
