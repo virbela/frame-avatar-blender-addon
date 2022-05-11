@@ -1,6 +1,7 @@
 import os
 import bpy
 import json
+import uuid
 from contextlib import contextmanager
 from .common import popup_message
 from ..logging import log_writer as log
@@ -101,6 +102,17 @@ def export_glb(context, ht):
                 continue
             uv_transform_extra_data[bake_target.shortname] = uv_transform_extra_data[R.shortname]
             uv_transform_extra_data[bake_target.shortname]['is_mirror'] = True
+
+    # build effects
+    for effect in ht.effect_collection:
+        effect_verts = calculate_effect_delta(obj, effect)
+        data = {
+            effect.name: {
+                "ids": [v[0] for v in effect_verts],
+                "positions": [v[1] for v in effect_verts]
+            }
+        }
+        uv_transform_extra_data[effect.parent_shapekey]['effects'] = data
 
     morphsets_dict = {
         "Morphs": uv_transform_extra_data,
@@ -248,3 +260,54 @@ def clear_custom_props(item):
     # reset props
     for k,v in props.items():
         item[k] = v
+
+
+def calculate_effect_delta(obj, effect: EffectProperty):
+    """ Return ids and final positions of all transformed verts of target shapekey relative to base shapekey 
+    """
+
+    base = obj.data.shape_keys.key_blocks.get(effect.parent_shapekey)
+    if not base:
+        popup_message(f"Object has no shapkey {effect.parent_shapekey}")
+
+    ef = obj.data.shape_keys.key_blocks.get(effect.effect_shapekey)
+    if not ef:
+        popup_message(f"Object has no shapkey {effect.effect_shapekey}")
+
+    base_obj = obj_from_shapekey(obj, effect.parent_shapekey)
+    effect_obj = obj_from_shapekey(obj, effect.effect_shapekey)
+
+    
+    base_positions = sorted([(v.index, v.co) for v in base_obj.data.vertices], key=lambda v: v[0])
+    effect_positions = sorted([(v.index, v.co) for v in effect_obj.data.vertices], key=lambda v: v[0])
+
+    result = []
+    for bp, ep in zip(base_positions, effect_positions):
+        bpc = bp[1]
+        epc = ep[1]
+
+        diff = (bpc - epc).length
+        if diff > 1e-3:
+            result.append((ep[0], ep[1].to_tuple()))
+
+    bpy.data.meshes.remove(base_obj.data, do_unlink=True)
+    bpy.data.meshes.remove(effect_obj.data, do_unlink=True)
+    return result
+
+def obj_from_shapekey(obj, keyname):
+    pending_object = obj.copy()
+    pending_object.name = f"{keyname}_effect_object_{uuid.uuid4()}"
+    pending_object.data = obj.data.copy()
+    pending_object.data.name = f"{keyname}_effect_object_{uuid.uuid4()}"
+
+    #Remove all shapekeys except the one this object represents
+    for key in pending_object.data.shape_keys.key_blocks:
+        if key.name != keyname:
+            pending_object.shape_key_remove(key)
+
+    #Remove remaining
+    for key in pending_object.data.shape_keys.key_blocks:
+        pending_object.shape_key_remove(key)
+
+    bpy.context.scene.collection.objects.link(pending_object)
+    return pending_object
