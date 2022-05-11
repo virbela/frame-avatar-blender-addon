@@ -44,7 +44,6 @@ class FRAME_PT_workflow(frame_panel):
 			bake_targets.prop(scene.ui_state, "workflow_bake_targets_visible", text="Bake Targets")
 			if scene.ui_state.workflow_bake_targets_visible:
 				bake_targets.operator('frame.create_targets_from_selection')
-				bake_targets.operator('frame.validate_targets')
 
 
 			work_meshes = self.layout.box()
