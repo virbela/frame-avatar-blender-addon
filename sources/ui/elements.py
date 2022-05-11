@@ -85,8 +85,4 @@ class FRAME_UL_bake_target_mirrors(frame_ui_list):
 
 class FRAME_UL_effects(frame_ui_list):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-
-		if ht := get_homeomorphic_tool_state(context):
-			if item.target < len(ht.effect_collection):
-				if target := ht.effect_collection[item.target]:
-					layout.prop(target, 'name', icon="FORCE_TURBULENCE", text='', emboss=False, translate=False)
+		layout.prop(item, 'name', icon="FORCE_TURBULENCE", text='', emboss=False, translate=False)
