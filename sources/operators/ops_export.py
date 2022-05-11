@@ -199,29 +199,41 @@ def composite_atlas(context):
     image_node_r.image = bpy.data.images['atlas_intermediate_red']
     image_node_r.location = 0,0
 
+    image_node_r_denoise = tree.nodes.new(type='CompositorNodeDenoise')
+    image_node_r_denoise.location = 200, 150 
+
     image_node_g = tree.nodes.new(type='CompositorNodeImage')
     image_node_g.image = bpy.data.images['atlas_intermediate_green']
     image_node_g.location = 150,-150
+
+    image_node_g_denoise = tree.nodes.new(type='CompositorNodeDenoise')
+    image_node_g_denoise.location = 350, 0 
 
     image_node_b = tree.nodes.new(type='CompositorNodeImage')
     image_node_b.image = bpy.data.images['atlas_intermediate_blue']
     image_node_b.location = 300,-300
 
+    image_node_b_denoise = tree.nodes.new(type='CompositorNodeDenoise')
+    image_node_b_denoise.location = 500, -150 
+
     image_node_color = tree.nodes.new(type='CompositorNodeImage')
     image_node_color.image = bpy.data.images['atlas_intermediate_color']
     image_node_color.location = 450,-450
 
+    image_node_color_denoise = tree.nodes.new(type='CompositorNodeDenoise')
+    image_node_color_denoise.location = 650, -300 
+
     # create combine rgba node
     comb_node = tree.nodes.new('CompositorNodeCombRGBA')   
-    comb_node.location = 500,0
+    comb_node.location = 700,0
 
     mult_node = tree.nodes.new('CompositorNodeMixRGB')
     mult_node.blend_type = 'MULTIPLY'
-    mult_node.location = 700, 0
+    mult_node.location = 900, 0
 
     # Create file output node
     file_node = tree.nodes.new('CompositorNodeOutputFile')   
-    file_node.location = 900,0
+    file_node.location = 1100,0
     file_node.format.file_format = 'JPEG'
     file_node.format.quality = 100
     file_node.base_path = os.path.dirname(bpy.data.filepath)
@@ -229,11 +241,19 @@ def composite_atlas(context):
 
     # link nodes
     links = tree.links
-    links.new(image_node_r.outputs[0], comb_node.inputs[0])
-    links.new(image_node_g.outputs[0], comb_node.inputs[1])
-    links.new(image_node_b.outputs[0], comb_node.inputs[2])
+    links.new(image_node_r.outputs[0], image_node_r_denoise.inputs[0])
+    links.new(image_node_r_denoise.outputs[0], comb_node.inputs[0])
+
+    links.new(image_node_g.outputs[0], image_node_g_denoise.inputs[0])
+    links.new(image_node_g_denoise.outputs[0], comb_node.inputs[1])
+
+    links.new(image_node_b.outputs[0], image_node_b_denoise.inputs[0])
+    links.new(image_node_b_denoise.outputs[0], comb_node.inputs[2])
+    
     links.new(comb_node.outputs[0], mult_node.inputs[1])
-    links.new(image_node_color.outputs[0], mult_node.inputs[2])
+    links.new(image_node_color.outputs[0], image_node_color_denoise.inputs[0])
+    links.new(image_node_color_denoise.outputs[0], mult_node.inputs[2])
+
     links.new(mult_node.outputs[0], file_node.inputs[0])
 
     bpy.ops.render.render(use_viewport=True)
@@ -293,6 +313,7 @@ def calculate_effect_delta(obj, effect):
     bpy.data.meshes.remove(base_obj.data, do_unlink=True)
     bpy.data.meshes.remove(effect_obj.data, do_unlink=True)
     return result
+
 
 def obj_from_shapekey(obj, keyname):
     pending_object = obj.copy()
