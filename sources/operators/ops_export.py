@@ -165,6 +165,22 @@ def composite_atlas(context):
     for node in tree.nodes:
         tree.nodes.remove(node)
 
+    atlases = (
+        'atlas_intermediate_red', 
+        'atlas_intermediate_green', 
+        'atlas_intermediate_blue', 
+        'atlas_intermediate_color'
+    )
+    missing = []
+    for img in atlases:
+        if img not in bpy.data.images:
+            missing.append(img)
+
+    if missing:
+        missing_atlas_names = ', '.join([at.split('_')[-1] for at in missing])
+        popup_message(f"Atlases [ {missing_atlas_names} ] not found!", title="Export Error")
+        return
+
     # create input image node
     # TODO(ranjian0) Ensure images exists, warn otherwise
     image_node_r = tree.nodes.new(type='CompositorNodeImage')
