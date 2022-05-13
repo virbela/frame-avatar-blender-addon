@@ -46,7 +46,8 @@ def unregister():
 
 if __name__ == '__main__':
 	# XXX ScriptWatcher hook for local development
-	import os; os.system("clear")
+	import os; os.system("cls" if os.name == "nt" else "clear")
+
 	try:
 		unregister()
 	except:
