@@ -12,8 +12,7 @@ from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_t
 def export(operator, context, ht):
     try:
         if export_glb(context, ht):
-            pass
-            # composite_atlas(context)
+            composite_atlas(context)
     except FileExistsError:
         popup_message("Export files already exist in the current folder!") 
     except PermissionError:
@@ -114,7 +113,7 @@ def export_glb(context, ht):
             }
         }
         uv_transform_extra_data[effect.parent_shapekey]['effects'] = data
-    return
+
     morphsets_dict = {
         "Morphs": uv_transform_extra_data,
         "Filters": dict()
