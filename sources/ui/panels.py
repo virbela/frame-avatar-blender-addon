@@ -253,9 +253,10 @@ class FRAME_PT_effects(frame_panel):
 
 			if HT.selected_effect != -1:
 				key = ob.data.shape_keys
-				et = HT.effect_collection[HT.selected_effect]
-				self.layout.prop_search(et, "parent_shapekey", key, "key_blocks")
-				self.layout.prop_search(et, "effect_shapekey", key, "key_blocks")
+				if key:
+					et = HT.effect_collection[HT.selected_effect]
+					self.layout.prop_search(et, "parent_shapekey", key, "key_blocks")
+					self.layout.prop_search(et, "effect_shapekey", key, "key_blocks")
 
 
 class FRAME_PT_export(frame_panel):
