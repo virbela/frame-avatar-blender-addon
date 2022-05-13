@@ -82,6 +82,11 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 		for key, value in iter_dc(target):
 			setattr(new, key, value)
 
+		if "eye_l" in new.name.lower():
+			new.multi_variants = True
+			new.uv_mode = "UV_IM_COLOR"
+			create_eye_variants(new) 
+
 		target.bake_target = new
 
 
@@ -145,6 +150,34 @@ def create_bake_targets_from_shapekeys(operator, context, ht):
 		for mirror in mirror_list:
 			create_mirror(ht.get_bake_target_index(mirror.primary.bake_target), ht.get_bake_target_index(mirror.secondary.bake_target))
 
+def create_eye_variants(bk):
+	eye_names = [
+		"blue",
+		"grey",
+		"amber",
+		"green",
+		"hazel",
+		"amethyst"
+	]
+
+	# default variant
+	dv = bk.variant_collection[0]
+	dv.name = "brown"
+	if bpy.data.images.get('eye_texture.png'):
+		dv.image = bpy.data.images['eye_texture.png']
+
+	for name in eye_names:
+		variant = bk.variant_collection.add()
+		variant.name = name
+		tex = None 
+		for img in bpy.data.images:
+			if 'eye_' not in img.name:
+				continue
+			if name in img.name:
+				tex = img
+				break 
+		if tex:
+			variant.image = tex
 
 class bake_mirrors:
 	def set_primary(operator, context, ht):
