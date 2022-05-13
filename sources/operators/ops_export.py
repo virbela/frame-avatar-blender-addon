@@ -12,7 +12,8 @@ from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_t
 def export(operator, context, ht):
     try:
         if export_glb(context, ht):
-            composite_atlas(context)
+            pass
+            # composite_atlas(context)
     except FileExistsError:
         popup_message("Export files already exist in the current folder!") 
     except PermissionError:
@@ -113,7 +114,7 @@ def export_glb(context, ht):
             }
         }
         uv_transform_extra_data[effect.parent_shapekey]['effects'] = data
-
+    return
     morphsets_dict = {
         "Morphs": uv_transform_extra_data,
         "Filters": dict()
@@ -307,11 +308,26 @@ def calculate_effect_delta(obj, effect):
         epc = ep[1]
 
         diff = (bpc - epc).length
-        if diff > 1e-3:
+        if diff > 0.003:
             result.append((ep[0], ep[1].to_tuple()))
 
     bpy.data.meshes.remove(base_obj.data, do_unlink=True)
     bpy.data.meshes.remove(effect_obj.data, do_unlink=True)
+
+    # XXX Debug View Selected Verts
+    # import bmesh
+    # me = base_obj.data
+    # bm = bmesh.new()
+    # bm.from_mesh(me)
+    # for i, v in enumerate(bm.verts):
+    #     v.select_set(False)
+    #     if v.index in [r[0] for r in result]:
+    #         v.select_set(True)
+
+    # bm.select_mode |= {'VERT'}
+    # bm.select_flush_mode()
+    # bm.to_mesh(me)
+    # bm.free()
     return result
 
 
