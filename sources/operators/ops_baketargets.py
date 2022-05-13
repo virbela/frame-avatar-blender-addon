@@ -42,6 +42,7 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 	else:
 		for sk in key_blocks:
 			key = sk.name
+			# XXX Skip all effect key blocks
 			if 'effect' in key.lower():
 				continue
 
@@ -88,6 +89,19 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 			create_eye_variants(new) 
 
 		target.bake_target = new
+
+	def create_mirror(primary, secondary):
+		new = ht.bake_target_mirror_collection.add()
+		new.primary = primary
+		new.secondary = secondary
+		return new
+
+	for mirror in mirror_list:
+		create_mirror(ht.get_bake_target_index(mirror.primary.bake_target), ht.get_bake_target_index(mirror.secondary.bake_target))
+	
+	for mirror in ht.bake_target_mirror_collection:
+		bk = ht.bake_target_collection[mirror.secondary]
+		bk.bake_mode = 'UV_BM_MIRRORED'
 
 
 def create_bake_targets_from_shapekeys(operator, context, ht):
