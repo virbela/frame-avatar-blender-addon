@@ -2,6 +2,7 @@ import os
 import bpy
 import json
 import uuid
+import tempfile
 from contextlib import contextmanager
 from .common import popup_message
 from ..logging import log_writer as log
@@ -127,6 +128,9 @@ def export_glb(context, ht):
 
     outputfile_glb = os.path.join(directory , "morphic_avatar.glb")
 
+    obj = bpy.data.objects['Avatar']
+    bpy.context.view_layer.objects.active = obj
+    obj.select_set(True)
     with clear_custom_props(obj):
         obj['MorphSets_Avatar'] = morphsets_dict
 
@@ -201,6 +205,8 @@ def composite_atlas(context):
 
     image_node_r_denoise = tree.nodes.new(type='CompositorNodeDenoise')
     image_node_r_denoise.location = 200, 150 
+    image_node_r_denoise.use_hdr = False 
+    image_node_r_denoise.prefilter = "NONE"
 
     image_node_g = tree.nodes.new(type='CompositorNodeImage')
     image_node_g.image = bpy.data.images['atlas_intermediate_green']
@@ -208,6 +214,8 @@ def composite_atlas(context):
 
     image_node_g_denoise = tree.nodes.new(type='CompositorNodeDenoise')
     image_node_g_denoise.location = 350, 0 
+    image_node_g_denoise.use_hdr = False 
+    image_node_g_denoise.prefilter = "NONE"
 
     image_node_b = tree.nodes.new(type='CompositorNodeImage')
     image_node_b.image = bpy.data.images['atlas_intermediate_blue']
@@ -215,6 +223,8 @@ def composite_atlas(context):
 
     image_node_b_denoise = tree.nodes.new(type='CompositorNodeDenoise')
     image_node_b_denoise.location = 500, -150 
+    image_node_b_denoise.use_hdr = False 
+    image_node_b_denoise.prefilter = "NONE"
 
     image_node_color = tree.nodes.new(type='CompositorNodeImage')
     image_node_color.image = bpy.data.images['atlas_intermediate_color']
@@ -222,6 +232,8 @@ def composite_atlas(context):
 
     image_node_color_denoise = tree.nodes.new(type='CompositorNodeDenoise')
     image_node_color_denoise.location = 650, -300 
+    image_node_color_denoise.use_hdr = False 
+    image_node_color_denoise.prefilter = "NONE"
 
     # create combine rgba node
     comb_node = tree.nodes.new('CompositorNodeCombRGBA')   
@@ -297,7 +309,6 @@ def calculate_effect_delta(obj, effect):
     base_obj = obj_from_shapekey(obj, effect.parent_shapekey)
     effect_obj = obj_from_shapekey(obj, effect.effect_shapekey)
 
-    
     base_positions = sorted([(v.index, v.co) for v in base_obj.data.vertices], key=lambda v: v[0])
     effect_positions = sorted([(v.index, v.co) for v in effect_obj.data.vertices], key=lambda v: v[0])
 
@@ -346,4 +357,33 @@ def obj_from_shapekey(obj, keyname):
         pending_object.shape_key_remove(key)
 
     bpy.context.scene.collection.objects.link(pending_object)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        filepath = os.path.join(tmpdir, "mesh.glb")
+        # -- export to tmp dir
+        [o.select_set(False) for o in bpy.data.objects]
+
+        pending_object.select_set(True)
+        bpy.context.view_layer.objects.active = pending_object
+
+        bpy.ops.export_scene.gltf(
+            filepath=filepath, 
+            export_format='GLB', 
+            # disable all default options
+            export_texcoords = True,
+            export_normals = False,
+            export_colors = False,
+            export_animations=False,
+            export_skins=False,
+            export_materials='NONE',
+            # valid options
+            use_selection=True, 
+            export_extras=False, 
+            export_morph=False,
+        )
+        bpy.data.meshes.remove(pending_object.data, do_unlink=True)
+
+        bpy.ops.import_scene.gltf(filepath=filepath)
+        pending_object = bpy.context.object
+
     return pending_object
