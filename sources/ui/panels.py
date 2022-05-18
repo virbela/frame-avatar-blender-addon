@@ -244,6 +244,9 @@ class FRAME_PT_effects(frame_panel):
 
 	def draw(self, context):
 		ob = context.object
+		if not ob:
+			return 
+
 		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
 			self.layout.template_list('FRAME_UL_effects', '', HT, 'effect_collection', HT, 'selected_effect')
@@ -266,4 +269,9 @@ class FRAME_PT_export(frame_panel):
 	bl_category = "Avatar"
 
 	def draw(self, context):
+		if scene := require_work_scene(context):
+			HT = scene.homeomorphictools
+			self.layout.prop(HT, "export_atlas")
+			self.layout.prop(HT, "export_glb")
+			self.layout.prop(HT, "denoise")
 		self.layout.operator("frame.export")

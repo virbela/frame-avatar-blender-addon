@@ -2,7 +2,7 @@ import bpy
 from ..exceptions import BakeException
 from ..helpers import require_bake_scene, set_scene, set_rendering, set_selection
 
-def bake_all_bake_targets(operator, context, ht):
+def bake_all_bake_targets(operator: bpy.types.Operator, context, ht):
 
 	last_active_scene = context.scene
 	bake_scene = require_bake_scene(context)
@@ -10,9 +10,13 @@ def bake_all_bake_targets(operator, context, ht):
 	set_scene(context, bake_scene)
 
 	for idx, bake_target in enumerate(ht.bake_target_collection, start=1):
+		operator.report({'INFO'}, f"Baking target {idx} / {len(ht.bake_target_collection)}.")
+		print(f"Baking for {bake_target}")
 		for variant in bake_target.variant_collection:			
 			bake_specific_variant(ht, view_layer, bake_target, variant)
-			run_bake()
+			# XXX bake cannot run as async here because of the loop, means we don't get
+			# meaningful progress indicator
+			run_bake(invoke=False)
 
 	set_scene(context, last_active_scene)
 
@@ -31,9 +35,8 @@ def bake_selected_bake_target(operator, context, ht):
 
 	set_scene(context, last_active_scene)
 
-def bake_selected_workmeshes(operator, context, ht):
-	# We are currently assuming that we already are in the bake scene
 
+def bake_selected_workmeshes(operator, context, ht):
 	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
@@ -73,7 +76,8 @@ def bake_specific_variant(ht, view_layer, bake_target, variant):
 	uv_layers = workmesh.data.uv_layers
 	uv_layers.active = uv_layers[bake_target.source_uv_map]
 
-def run_bake():
+
+def run_bake(invoke=True):
 	bpy.context.scene.cycles.device = 'GPU'
 	bpy.context.scene.render.engine = 'CYCLES'
 	bpy.context.scene.render.bake.use_clear = False
@@ -81,4 +85,7 @@ def run_bake():
 	bpy.context.scene.render.bake.use_pass_direct = False
 	bpy.context.scene.render.bake.use_pass_indirect = False
 	bpy.context.scene.view_settings.view_transform = 'Standard'
-	bpy.ops.object.bake(type='DIFFUSE')
+	if invoke:
+		bpy.ops.object.bake('INVOKE_DEFAULT', type='DIFFUSE')
+	else:
+		bpy.ops.object.bake(type='DIFFUSE')
