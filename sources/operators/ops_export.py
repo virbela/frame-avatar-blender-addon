@@ -11,9 +11,21 @@ from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_t
 
 
 def export(operator, context, ht):
+    scene = require_work_scene(context)
+    if scene is None:
+        popup_message("Could not find work scene!", "Scene Error")
+        return
+
+    HT = scene.homeomorphictools
     try:
-        if export_glb(context, ht):
-            composite_atlas(context)
+        if HT.export_glb:
+            success = export_glb(context, ht)
+            if not success:
+                # XXX exit early if mesh export failed
+                return
+        if HT.export_atlas:
+            composite_atlas(context, denoise=HT.denoise)
+
     except FileExistsError:
         popup_message("Export files already exist in the current folder!") 
     except PermissionError:
@@ -171,7 +183,7 @@ def export_glb(context, ht):
     return True
 
 
-def composite_atlas(context):
+def composite_atlas(context, denoise=True):
     work_scene = require_work_scene(context)
 
     work_scene.use_nodes = True
