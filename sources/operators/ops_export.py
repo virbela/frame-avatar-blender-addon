@@ -31,6 +31,7 @@ def export(operator, context, ht):
     except PermissionError:
         popup_message("Please save the current blend file!")
 
+
 def export_glb(context, ht):
     obj = context.active_object
 
