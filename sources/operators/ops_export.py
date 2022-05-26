@@ -327,7 +327,7 @@ def export_animation(context, ht):
 
     for vat in vats:
         mat = bpy.data.materials.new(vat.name)
-        mat.user_nodes = True
+        mat.use_nodes = True
         vat_exporter.data.materials.append(mat)
         material_add_texture(mat, vat)
 
