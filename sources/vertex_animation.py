@@ -7,7 +7,7 @@ def generate_vat_from_mesh(context, object):
     vertex_count = len(object.data.vertices)
     frame_count = len(frame_range(context.scene))
 
-    meshes = get_per_frame_mesh_data(context, data, objects)
+    meshes = get_per_frame_mesh_data(context, data, [object])
     export_mesh_data = meshes[0].copy()
     create_export_mesh_object(context, data, export_mesh_data)
     offsets, normals = get_vertex_data(data, meshes)
