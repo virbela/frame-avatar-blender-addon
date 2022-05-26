@@ -286,6 +286,7 @@ class HomeomorphicProperties(frame_property_group):
 	denoise: 							bpy.props.BoolProperty(name="Denoise Atlas", default=False)
 	export_atlas: 						bpy.props.BoolProperty(name="Export Atlas", default=True)
 	export_glb: 						bpy.props.BoolProperty(name="Export GLB", default=True)
+	export_animation: 					bpy.props.BoolProperty(name="Export Animation", default=True)
 
 	def get_selected_effect(self):
 		if self.selected_effect:

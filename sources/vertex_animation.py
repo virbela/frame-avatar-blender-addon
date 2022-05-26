@@ -1,10 +1,11 @@
 import bpy 
 import uuid
 import bmesh
-from typing import List
+import numpy
 from bpy.types import Action, Context, Object
 
 def generate_vat_from_object(context: Context, object: Object):
+    result = []
     actions = get_object_actions(object)
     vertex_count = len(object.data.vertices)
     for action in actions:
@@ -15,7 +16,9 @@ def generate_vat_from_object(context: Context, object: Object):
 
         offsets = get_vertex_data(meshes)
         texture_size = vertex_count, action.frame_range.y - action.frame_range.x
-        bake_vertex_data(action.name, offsets, texture_size)
+        tex = bake_vertex_data(action.name, offsets, texture_size)
+        result.append(tex)
+    return result
 
 
 def get_per_frame_mesh(context: Context, action: Action, object: Object):
@@ -60,7 +63,7 @@ def get_vertex_data(meshes):
         for v in me.vertices:
             offset = v.co - original[v.index].co
             x, y, z = offset
-            offsets.extend((x, -y, z, 1))
+            offsets.extend((x, y, z))
         if not me.users:
             bpy.data.meshes.remove(me)
     return offsets
@@ -73,10 +76,11 @@ def bake_vertex_data(name, offsets, size):
         name=name,
         width=width,
         height=height,
-        alpha=True,
         float_buffer=True
     )
-    offset_texture.pixels = offsets
+    
+    offset_texture.pixels = numpy.array(offsets, dtype=numpy.float16)
+    return offset_texture
 
 
 def get_object_actions(obj: bpy.types.Object):

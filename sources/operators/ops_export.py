@@ -4,27 +4,32 @@ import json
 import uuid
 import tempfile
 from contextlib import contextmanager
+
 from .common import popup_message
 from ..logging import log_writer as log
+from ..vertex_animation import generate_vat_from_object
 from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
 
-def export(operator, context, ht):
+def export(operator, context, HT):
     scene = require_work_scene(context)
     if scene is None:
         popup_message("Could not find work scene!", "Scene Error")
         return
 
-    HT = scene.homeomorphictools
     try:
+        if HT.export_animation:
+            export_animation(context, HT)
+
         if HT.export_glb:
-            success = export_glb(context, ht)
+            success = export_glb(context, HT)
             if not success:
                 # XXX exit early if mesh export failed
                 return
         if HT.export_atlas:
-            composite_atlas(context, denoise=HT.denoise)
+            export_atlas(context, denoise=HT.denoise)
+
 
     except FileExistsError:
         popup_message("Export files already exist in the current folder!") 
@@ -184,7 +189,7 @@ def export_glb(context, ht):
     return True
 
 
-def composite_atlas(context, denoise=True):
+def export_atlas(context, denoise=True):
     work_scene = require_work_scene(context)
 
     work_scene.use_nodes = True
@@ -290,6 +295,42 @@ def composite_atlas(context, denoise=True):
                 os.path.join(dirname, f),
                 os.path.join(dirname, 'hasAtlas.jpg')
             )
+
+
+def export_animation(context, ht):
+
+    vats = []
+    for bake_target in ht.bake_target_collection:
+        if bake_target.multi_variants:
+            # TODO(ranjian0) Figure out if baketargets with multiple variants can ba animated
+            continue
+
+        obj = bake_target.variant_collection[0].workmesh
+        if not obj:
+            # TODO(ranjian0) 
+            # Possible variants not generated yet, or some other fail condition
+            continue
+
+        has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
+        if not has_armature:
+            # Object has no armature!
+            continue
+
+        vats.append(generate_vat_from_object(context, obj))
+
+    # -- create dummy object  and materials to export all the VAT textures
+    me = bpy.data.meshes.new("vat_exporter_" + "mesh")
+    vat_exporter = bpy.data.objects.new("vat_exporter", me)
+    me.from_pydata([(0, 0, 0)], [], [])
+    me.update()
+    bpy.context.collection.objects.link(vat_exporter)
+
+    for vat in vats:
+        mat = bpy.data.materials.new(vat.name)
+        mat.user_nodes = True
+        vat_exporter.data.materials.append(mat)
+        material_add_texture(mat, vat)
+
 
 @contextmanager
 def clear_custom_props(item):
@@ -400,3 +441,10 @@ def obj_from_shapekey(obj, keyname):
         pending_object = bpy.context.object
 
     return pending_object
+
+
+def material_add_texture(material, tex):
+    texnode = material.node_tree.nodes.new(type='ShaderNodeTexImage')
+    texnode.image = tex 
+    bsdf = material.node_tree.nodes['Principled BSDF']
+    material.node_tree.links.new(texnode.outputs[0], bsdf.inputs[0])
