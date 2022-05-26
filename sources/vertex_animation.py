@@ -79,7 +79,7 @@ def bake_vertex_data(name, offsets, size):
         float_buffer=True
     )
     
-    offset_texture.pixels = numpy.array(offsets, dtype=numpy.float16)
+    offset_texture.pixels = offsets
     return offset_texture
 
 
