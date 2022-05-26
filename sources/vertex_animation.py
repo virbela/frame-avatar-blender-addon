@@ -1,33 +1,35 @@
 import bpy 
+import uuid
 import bmesh
+from typing import List
+from bpy.types import Action, Context, Object
 
-def generate_vat_from_mesh(context, object):
-
-    data = bpy.data
+def generate_vat_from_object(context: Context, object: Object):
+    actions = get_object_actions(object)
     vertex_count = len(object.data.vertices)
-    frame_count = len(frame_range(context.scene))
+    for action in actions:
+        meshes = get_per_frame_mesh(context, action, object)
 
-    meshes = get_per_frame_mesh_data(context, data, [object])
-    export_mesh_data = meshes[0].copy()
-    create_export_mesh_object(context, data, export_mesh_data)
-    offsets, normals = get_vertex_data(data, meshes)
-    texture_size = vertex_count, frame_count
-    bake_vertex_data(context, data, offsets, normals, texture_size)
+        export_mesh_data = meshes[0].copy()
+        create_export_mesh_object(context, export_mesh_data)
 
-def get_per_frame_mesh_data(context, data, objects):
-    """Return a list of combined mesh data per frame"""
+        offsets = get_vertex_data(meshes)
+        texture_size = vertex_count, action.frame_range.y - action.frame_range.x
+        bake_vertex_data(action.name, offsets, texture_size)
+
+
+def get_per_frame_mesh(context: Context, action: Action, object: Object):
     meshes = []
-    for i in frame_range(context.scene):
+    for i in range(*tuple(map(int, action.frame_range))):
         context.scene.frame_set(i)
         depsgraph = context.evaluated_depsgraph_get()
-        bm = bmesh.new()
-        for ob in objects:
-            eval_object = ob.evaluated_get(depsgraph)
-            me = data.meshes.new_from_object(eval_object)
-            me.transform(ob.matrix_world)
-            bm.from_mesh(me)
-            data.meshes.remove(me)
-        me = data.meshes.new("mesh")
+        bm = bmesh.new()        
+        eval_object = object.evaluated_get(depsgraph)
+        me = bpy.data.meshes.new_from_object(eval_object)
+        me.transform(object.matrix_world)
+        bm.from_mesh(me)
+        bpy.data.meshes.remove(me)
+        me = bpy.data.meshes.new("mesh")
         bm.to_mesh(me)
         bm.free()
         me.calc_normals()
@@ -35,22 +37,22 @@ def get_per_frame_mesh_data(context, data, objects):
     return meshes
 
 
-def create_export_mesh_object(context, data, me):
+def create_export_mesh_object(context, me):
     """Return a mesh object with correct UVs"""
     while len(me.uv_layers) < 2:
         me.uv_layers.new()
     uv_layer = me.uv_layers[1]
-    uv_layer.name = "vertex_anim"
+    uv_layer.name = f"vertex_anim_{uuid.uuid4()}"
     for loop in me.loops:
         uv_layer.data[loop.index].uv = (
             (loop.vertex_index + 0.5)/len(me.vertices), 128/255
         )
-    ob = data.objects.new("export_mesh", me)
+    ob = bpy.data.objects.new(f"export_mesh_{uuid.uuid4()}", me)
     context.scene.collection.objects.link(ob)
     return ob
 
 
-def get_vertex_data(data, meshes):
+def get_vertex_data(meshes):
     """Return lists of vertex offsets and normals from a list of mesh data"""
     original = meshes[0].vertices
     offsets = []
@@ -60,18 +62,14 @@ def get_vertex_data(data, meshes):
             x, y, z = offset
             offsets.extend((x, -y, z, 1))
         if not me.users:
-            data.meshes.remove(me)
+            bpy.data.meshes.remove(me)
     return offsets
 
-def frame_range(scene):
-    """Return a range object with with scene's frame start, end, and step"""
-    return range(scene.frame_start, scene.frame_end, scene.frame_step)
 
-
-def bake_vertex_data(name, data, offsets, size):
-    """Stores vertex offsets and normals in seperate image textures"""
+def bake_vertex_data(name, offsets, size):
+    """Stores vertex offsets in seperate image textures"""
     width, height = size
-    offset_texture = data.images.new(
+    offset_texture = bpy.data.images.new(
         name=name,
         width=width,
         height=height,
@@ -79,3 +77,11 @@ def bake_vertex_data(name, data, offsets, size):
         float_buffer=True
     )
     offset_texture.pixels = offsets
+
+
+def get_object_actions(obj: bpy.types.Object):
+    actions = []
+    for action in bpy.data.actions:
+        if obj.user_of_id(action) > 0:
+            actions.append(action)
+    return actions
