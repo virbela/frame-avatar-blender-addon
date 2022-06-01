@@ -13,7 +13,7 @@ def generate_vat_from_object(context: Context, object: Object):
         meshes = get_per_frame_mesh(context, action, object)
         offsets = get_vertex_data(meshes)
         texture_size = vertex_count, int(action.frame_range.y - action.frame_range.x)
-        tex = bake_vertex_data(f"{object.name}_{action.name}", offsets, texture_size)
+        tex = bake_vertex_data(f"{object.name}.{action.name}", offsets, texture_size)
         result.append(tex)
     # reset frame
     context.scene.frame_set(1)
