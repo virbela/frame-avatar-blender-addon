@@ -25,8 +25,8 @@ def export(operator, context, HT):
                 # XXX exit early if mesh export failed
                 return
 
-        # if HT.export_atlas:
-        #     export_atlas(context, denoise=HT.denoise)
+        if HT.export_atlas:
+            export_atlas(context, denoise=HT.denoise)
 
     except FileExistsError:
         popup_message("Export files already exist in the current folder!") 
