@@ -3,7 +3,6 @@ import bpy
 import json
 import uuid
 import tempfile
-import itertools
 from contextlib import contextmanager
 
 from .common import popup_message
@@ -20,28 +19,14 @@ def export(operator, context, HT):
         return
 
     try:
-        animation_objs = None
-        if HT.export_animation:
-            animation_objs = export_animation(context, HT)
-
         if HT.export_glb:
-            success = export_glb(context, HT, animation_objs)
+            success = export_glb(context, HT)
             if not success:
                 # XXX exit early if mesh export failed
                 return
+
         if HT.export_atlas:
             export_atlas(context, denoise=HT.denoise)
-
-        # -- cleanup
-        if animation_objs:
-            for obj in animation_objs:
-                for mat in obj.data.materials:
-                    for image in bpy.data.images:
-                        if image.name == mat.name:
-                            bpy.data.images.remove(image)
-                    bpy.data.materials.remove(mat)
-                bpy.data.meshes.remove(obj.data)
-
 
     except FileExistsError:
         popup_message("Export files already exist in the current folder!") 
@@ -147,14 +132,6 @@ def export_glb(context, ht, animation_objects):
         }
         uv_transform_extra_data[effect.parent_shapekey]['effects'] = data
 
-    # build animations
-    animation_materials = [mat for obj in animation_objects for mat in obj.data.materials]
-    for target, animations in itertools.groupby(animation_materials, lambda mat: mat.name.split('.')[0]):
-        uv_transform_extra_data[target]['animations'] = {
-            anim.name.split('.')[1]: anim.name
-            for anim in animations
-        }
-        # log.info(uv_transform_extra_data[target])
 
     morphsets_dict = {
         "Morphs": uv_transform_extra_data,
@@ -173,8 +150,7 @@ def export_glb(context, ht, animation_objects):
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
     if ht.export_animation:
-        for ob in animation_objects:
-            ob.select_set(True)
+        export_animation(context, ht)
 
     with clear_custom_props(obj):
         obj['MorphSets_Avatar'] = morphsets_dict
@@ -345,26 +321,6 @@ def export_animation(context, ht):
 
         vats.extend(generate_vat_from_object(context, obj))
 
-    vat_objects = []
-    for vat in vats:
-        # -- create dummy object and materials to export all the VAT textures
-        id = uuid.uuid4()
-        me = bpy.data.meshes.new(f"vat_exporter_mesh_{id}")
-        vat_exporter = bpy.data.objects.new(f"vat_exporter_{id}", me)
-        me.from_pydata([(-1.0, -1.0, 0.0), (1.0, -1.0, 0.0), (-1.0, 1.0, 0.0), (1.0, 1.0, 0.0)], [], [(0,1,3,2)])
-        me.update()
-        bpy.context.collection.objects.link(vat_exporter)
-
-        if vat.name in bpy.data.materials:
-            bpy.data.materials.remove(bpy.data.materials[vat.name])
-    
-        mat = bpy.data.materials.new(vat.name)
-        mat.use_nodes = True
-        vat_exporter.data.materials.append(mat)
-        material_add_texture(mat, vat)
-        vat_objects.append(vat_exporter)
-    return vat_objects
-
 
 @contextmanager
 def clear_custom_props(item):
@@ -476,10 +432,3 @@ def obj_from_shapekey(obj, keyname):
 
     return pending_object
 
-
-def material_add_texture(material, tex):
-    texnode = material.node_tree.nodes.new(type='ShaderNodeTexImage')
-    texnode.location = -400, 200
-    texnode.image = tex 
-    bsdf = material.node_tree.nodes['Principled BSDF']
-    material.node_tree.links.new(texnode.outputs[0], bsdf.inputs[0])
