@@ -25,8 +25,8 @@ def export(operator, context, HT):
                 # XXX exit early if mesh export failed
                 return
 
-        if HT.export_atlas:
-            export_atlas(context, denoise=HT.denoise)
+        # if HT.export_atlas:
+        #     export_atlas(context, denoise=HT.denoise)
 
     except FileExistsError:
         popup_message("Export files already exist in the current folder!") 
@@ -34,7 +34,7 @@ def export(operator, context, HT):
         popup_message("Please save the current blend file!")
 
 
-def export_glb(context, ht, animation_objects):
+def export_glb(context, ht):
     obj = context.active_object
 
     if not obj.data.shape_keys:
@@ -189,6 +189,13 @@ def export_glb(context, ht, animation_objects):
                 export_morph=True,
             )
 
+    if ht.export_animation:
+        # -- cleanup animation shapekeys
+        for kb in obj.data.shape_keys.key_blocks:
+            if kb.name.startswith('fabanim.'):
+                print("Post Export Removing ..", kb.name)
+                obj.shape_key_remove(kb)        
+
     return True
 
 
@@ -302,7 +309,6 @@ def export_atlas(context, denoise=True):
 
 def export_animation(context, ht):
 
-    vats = []
     for bake_target in ht.bake_target_collection:
         if bake_target.multi_variants:
             # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
@@ -319,7 +325,7 @@ def export_animation(context, ht):
             # Object has no armature!
             continue
 
-        vats.extend(generate_vat_from_object(context, obj))
+        generate_vat_from_object(context, obj, bake_target.source_object)
 
 
 @contextmanager

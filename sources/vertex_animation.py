@@ -1,23 +1,24 @@
 import bpy 
 import bmesh
-from bpy.types import Action, Context, Object
+from bpy.types import Action, Context, Object, ShapeKey
 
 from .helpers import require_bake_scene
 
 
-def generate_vat_from_object(context: Context, object: Object):
-    result = []
+def generate_vat_from_object(context: Context, object: Object, avatar: Object):
     actions = get_object_actions(object)
-    vertex_count = len(object.data.vertices)
+
     for action in actions:
+        print(action)
         meshes = get_per_frame_mesh(context, action, object)
-        offsets = get_vertex_data(meshes)
-        texture_size = vertex_count, int(action.frame_range.y - action.frame_range.x)
-        tex = bake_vertex_data(f"{object.name}.{action.name}", offsets, texture_size)
-        result.append(tex)
+        # -- create shapekey in avatar
+        for frame, mesh in enumerate(meshes, start=1):
+            sk_name = f'fabanim.{object.name}.{action.name}#{frame}'
+            avatar.shape_key_add(name=sk_name, from_mix=False)
+            shape_key_from_mesh(sk_name, avatar, mesh)
+
     # reset frame
     context.scene.frame_set(1)
-    return result
 
 
 def get_per_frame_mesh(context: Context, action: Action, object: Object):
@@ -38,7 +39,7 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object):
         bm.from_mesh(me)
         bpy.data.meshes.remove(me)
         
-        me = bpy.data.meshes.new(f"{object.name}_{action.name}_animmesh{i}")
+        me = bpy.data.meshes.new(f"fabanim.{object.name}.{action.name}#{i}")
         bm.to_mesh(me)
         bm.free()
         me.calc_normals()
@@ -47,30 +48,12 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object):
 
 
 def get_vertex_data(meshes):
-    """Return lists of vertex offsets and normals from a list of mesh data"""
-    original = meshes[0].vertices
-    offsets = []
-    for me in reversed(meshes):
-        for v in me.vertices:
-            offset = v.co - original[v.index].co
-            x, y, z = offset
-            offsets.extend((x, y, z, 1))
+    result = []
+    for me in meshes:
+        result.append([v.copy() for v in me.vertices])
         if not me.users:
             bpy.data.meshes.remove(me)
-    return offsets
-
-
-def bake_vertex_data(name, offsets, size):
-    """Stores vertex offsets in seperate image textures"""
-    width, height = size
-    offset_texture = bpy.data.images.new(
-        name=name,
-        width=width,
-        height=height,
-        float_buffer=True
-    )
-    offset_texture.pixels = offsets
-    return offset_texture
+    return result
 
 
 def get_object_actions(obj: bpy.types.Object):
@@ -79,3 +62,19 @@ def get_object_actions(obj: bpy.types.Object):
         if obj.user_of_id(action) > 0:
             actions.append(action)
     return actions
+
+
+def shape_key_from_mesh(name, avatar, mesh):
+    print('Generating animation shapekey..', name)
+    bm = bmesh.new()
+    bm.from_mesh(avatar.data)
+    shape = bm.verts.layers.shape[name]
+
+    for vert in bm.verts:
+        vert[shape] = mesh.vertices[vert.index].co.copy()
+
+    bm.to_mesh(avatar.data)
+    bm.free()
+
+    if not mesh.users:
+        bpy.data.meshes.remove(mesh)
