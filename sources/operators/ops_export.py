@@ -4,32 +4,35 @@ import json
 import uuid
 import tempfile
 from contextlib import contextmanager
+
 from .common import popup_message
 from ..logging import log_writer as log
+from ..vertex_animation import generate_vat_from_object
 from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
 
-def export(operator, context, ht):
+def export(operator, context, HT):
     scene = require_work_scene(context)
     if scene is None:
         popup_message("Could not find work scene!", "Scene Error")
         return
 
-    HT = scene.homeomorphictools
     try:
         if HT.export_glb:
-            success = export_glb(context, ht)
+            success = export_glb(context, HT)
             if not success:
                 # XXX exit early if mesh export failed
                 return
+
         if HT.export_atlas:
-            composite_atlas(context, denoise=HT.denoise)
+            export_atlas(context, denoise=HT.denoise)
 
     except FileExistsError:
         popup_message("Export files already exist in the current folder!") 
     except PermissionError:
         popup_message("Please save the current blend file!")
+
 
 def export_glb(context, ht):
     obj = context.active_object
@@ -55,6 +58,8 @@ def export_glb(context, ht):
 
     bake_scene = require_bake_scene(context)
     for name, item in bake_scene.objects.items():
+        if item.type != 'MESH':
+            continue
         log.info(f'Getting transform for: {name}')
         uv_transform_map[name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
 
@@ -127,6 +132,7 @@ def export_glb(context, ht):
         }
         uv_transform_extra_data[effect.parent_shapekey]['effects'] = data
 
+
     morphsets_dict = {
         "Morphs": uv_transform_extra_data,
         "Filters": dict()
@@ -143,6 +149,9 @@ def export_glb(context, ht):
     obj = bpy.data.objects['Avatar']
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
+    if ht.export_animation:
+        export_animation(context, ht)
+
     with clear_custom_props(obj):
         obj['MorphSets_Avatar'] = morphsets_dict
 
@@ -155,7 +164,7 @@ def export_glb(context, ht):
             export_colors = False,
             export_animations=False,
             export_skins=False,
-            export_materials='NONE',
+            export_materials='EXPORT',
             # valid options
             use_selection=True, 
             export_extras=True, 
@@ -173,17 +182,24 @@ def export_glb(context, ht):
                 export_colors = False,
                 export_animations=False,
                 export_skins=False,
-                export_materials='NONE',
+                export_materials='EXPORT',
                 # valid options
                 use_selection=True, 
                 export_extras=True, 
                 export_morph=True,
             )
 
+    if ht.export_animation:
+        # -- cleanup animation shapekeys
+        for kb in obj.data.shape_keys.key_blocks:
+            if kb.name.startswith('fabanim.'):
+                print("Post Export Removing ..", kb.name)
+                obj.shape_key_remove(kb)        
+
     return True
 
 
-def composite_atlas(context, denoise=True):
+def export_atlas(context, denoise=True):
     work_scene = require_work_scene(context)
 
     work_scene.use_nodes = True
@@ -289,6 +305,28 @@ def composite_atlas(context, denoise=True):
                 os.path.join(dirname, f),
                 os.path.join(dirname, 'hasAtlas.jpg')
             )
+
+
+def export_animation(context, ht):
+
+    for bake_target in ht.bake_target_collection:
+        if bake_target.multi_variants:
+            # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
+            continue
+
+        obj = bake_target.variant_collection[0].workmesh
+        if not obj:
+            # TODO(ranjian0) 
+            # Possible variants not generated yet, or some other fail condition
+            continue
+
+        has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
+        if not has_armature:
+            # Object has no armature!
+            continue
+
+        generate_vat_from_object(context, obj, bake_target.source_object)
+
 
 @contextmanager
 def clear_custom_props(item):
@@ -399,3 +437,4 @@ def obj_from_shapekey(obj, keyname):
         pending_object = bpy.context.object
 
     return pending_object
+

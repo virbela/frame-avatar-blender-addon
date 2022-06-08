@@ -168,7 +168,6 @@ def create_eye_variants(bk):
 	eye_names = [
 		"blue",
 		"grey",
-		"amber",
 		"green",
 		"hazel",
 		"amethyst"
