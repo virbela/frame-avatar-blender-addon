@@ -49,6 +49,8 @@ from .ops_workmaterial import (
 )
 
 from .ops_workmesh import (
+    workmesh_to_shapekey,
+    shapekey_to_workmesh,
     update_all_workmeshes,
     update_selected_workmesh,
     create_workmeshes_for_all_targets, 

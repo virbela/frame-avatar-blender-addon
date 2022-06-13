@@ -77,6 +77,20 @@ class FRAME_OT_update_all_workmeshes(frame_operator):
     frame_operator = 	operations.update_all_workmeshes
 
 
+class FRAME_OT_workmesh_to_shapekey(frame_operator):
+    bl_label = 			"Update shapekey geometry for the selected workmeshj"
+    bl_idname = 		"frame.workmesh_to_shapekey"
+    #TODO - bl_description
+    frame_operator = 	operations.workmesh_to_shapekey
+
+
+class FRAME_OT_shapekey_to_workmesh(frame_operator):
+    bl_label = 			"Update selected workmesh from the shapekey"
+    bl_idname = 		"frame.shapekey_to_workmesh"
+    #TODO - bl_description
+    frame_operator = 	operations.shapekey_to_workmesh
+
+
 # Texture Atlas
 class FRAME_OT_auto_assign_atlas(frame_operator):
     bl_label = 			"Auto assign atlas/UV"

@@ -40,6 +40,14 @@ def update_all_workmeshes(operator, context, ht):
 				update_workmesh_materials(context, ht, bake_target, variant)
 
 
+def workmesh_to_shapekey(operator, context, ht):
+	pass 
+
+
+def shapekey_to_workmesh(operator, context, ht):
+	pass
+
+
 def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 	for variant in bake_target.variant_collection:
 
