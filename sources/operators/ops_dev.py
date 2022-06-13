@@ -8,6 +8,10 @@ def clear_bake_targets(operator, context, ht):
 	while len(ht.bake_target_collection):
 		ht.bake_target_collection.remove(0)
 
+	ht.selected_bake_target_mirror = -1
+	while len(ht.bake_target_mirror_collection):
+		ht.bake_target_mirror_collection.remove(0)
+
 
 def clear_bake_scene(operator, context, ht):
 	scene = require_bake_scene(context)
