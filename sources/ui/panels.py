@@ -51,6 +51,8 @@ class FRAME_PT_workflow(frame_panel):
 			if scene.ui_state.workflow_work_meshes_visible:
 				work_meshes.operator('frame.create_workmeshes_for_all_targets')
 				work_meshes.operator('frame.create_workmeshes_for_selected_target')
+				work_meshes.separator()
+				work_meshes.operator('frame.update_all_workmeshes')
 				# TODO(ranjian0)
 				# work_meshes.operator('frame.update_selected_workmesh_all_shapekeys')
 				# work_meshes.operator('frame.update_selected_workmesh_active_shapekey')

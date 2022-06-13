@@ -10,7 +10,6 @@ from ..helpers import (
 )
 
 update_selected_workmesh = IMPLEMENTATION_PENDING
-update_all_workmeshes = IMPLEMENTATION_PENDING
 update_selected_workmesh_all_shapekeys = IMPLEMENTATION_PENDING
 update_selected_workmesh_active_shapekey = IMPLEMENTATION_PENDING
 
@@ -25,6 +24,20 @@ def create_workmeshes_for_selected_target(operator, context, ht):
 	if bake_target := ht.get_selected_bake_target():
 		bake_scene = require_bake_scene(context)
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
+
+
+def update_all_workmeshes(operator, context, ht):
+	bake_scene = require_bake_scene(context)
+	for bake_target in ht.bake_target_collection:
+		for variant in bake_target.variant_collection:
+			obj_name = get_bake_target_variant_name(bake_target, variant)
+			obj = bake_scene.objects.get(obj_name)
+			if obj and not variant.workmesh:
+				variant.workmesh = obj
+				variant.uv_map = PAINTING_UV_MAP
+				bake_target.uv_map = TARGET_UV_MAP
+
+				update_workmesh_materials(context, ht, bake_target, variant)
 
 
 def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
