@@ -138,12 +138,9 @@ def export_glb(context, ht):
         "Filters": dict()
     }
 
-    export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
-    log.info(export_json)
 
     filepath = bpy.data.filepath
     directory = os.path.dirname(filepath)
-
     outputfile_glb = os.path.join(directory , "morphic_avatar.glb")
 
     obj = bpy.data.objects['Avatar']
@@ -172,6 +169,10 @@ def export_glb(context, ht):
         )
 
         if is_dev():
+            export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
+            with open(os.path.join(directory, 'morphs.json'), 'w') as f:
+                print(export_json, file=f)
+
             # Check gltf export
             bpy.ops.export_scene.gltf(
                 filepath=os.path.join(directory , "morphic_avatar.gltf"), 
@@ -281,20 +282,28 @@ def export_atlas(context, denoise=True):
 
     # link nodes
     links = tree.links
-    links.new(image_node_r.outputs[0], image_node_r_denoise.inputs[0])
-    links.new(image_node_r_denoise.outputs[0], comb_node.inputs[0])
+    if denoise:
+        links.new(image_node_r.outputs[0], image_node_r_denoise.inputs[0])
+        links.new(image_node_r_denoise.outputs[0], comb_node.inputs[0])
 
-    links.new(image_node_g.outputs[0], image_node_g_denoise.inputs[0])
-    links.new(image_node_g_denoise.outputs[0], comb_node.inputs[1])
+        links.new(image_node_g.outputs[0], image_node_g_denoise.inputs[0])
+        links.new(image_node_g_denoise.outputs[0], comb_node.inputs[1])
 
-    links.new(image_node_b.outputs[0], image_node_b_denoise.inputs[0])
-    links.new(image_node_b_denoise.outputs[0], comb_node.inputs[2])
-    
-    links.new(comb_node.outputs[0], mult_node.inputs[1])
-    links.new(image_node_color.outputs[0], image_node_color_denoise.inputs[0])
-    links.new(image_node_color_denoise.outputs[0], mult_node.inputs[2])
+        links.new(image_node_b.outputs[0], image_node_b_denoise.inputs[0])
+        links.new(image_node_b_denoise.outputs[0], comb_node.inputs[2])
+        
+        links.new(comb_node.outputs[0], mult_node.inputs[1])
+        links.new(image_node_color.outputs[0], image_node_color_denoise.inputs[0])
+        links.new(image_node_color_denoise.outputs[0], mult_node.inputs[2])
 
-    links.new(mult_node.outputs[0], file_node.inputs[0])
+        links.new(mult_node.outputs[0], file_node.inputs[0])
+    else:
+        links.new(image_node_r.outputs[0], comb_node.inputs[0])
+        links.new(image_node_g.outputs[0], comb_node.inputs[1])
+        links.new(image_node_b.outputs[0], comb_node.inputs[2])
+        links.new(comb_node.outputs[0], mult_node.inputs[1])
+        links.new(image_node_color.outputs[0], mult_node.inputs[2])
+        links.new(mult_node.outputs[0], file_node.inputs[0])        
 
     bpy.ops.render.render(use_viewport=True)
 
