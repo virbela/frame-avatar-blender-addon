@@ -6,10 +6,14 @@ from .helpers import require_bake_scene
 
 
 def generate_vat_from_object(context: Context, object: Object, avatar: Object):
-    actions = get_object_actions(object)
-
-    for action in actions:
-        print(action)
+    armature = object.parent
+    if (armature.type != 'ARMATURE'):
+        # TODO(ranjian0) What to do here!
+        # Ideally at this point, we have a single armature controlling all the morph workmeshes
+        return
+    
+    action = armature.animation_data.action
+    for action in [action]:
         meshes = get_per_frame_mesh(context, action, object)
         # -- create shapekey in avatar
         for frame, mesh in enumerate(meshes, start=1):
@@ -24,7 +28,7 @@ def generate_vat_from_object(context: Context, object: Object, avatar: Object):
 def get_per_frame_mesh(context: Context, action: Action, object: Object):
     meshes = []
     sx, sy = action.frame_range
-    object.animation_data.action = action
+    # object.animation_data.action = action
     bakescene = require_bake_scene(context)
 
     # range stop is exclusive, so add one
