@@ -4,7 +4,7 @@ from ..constants import TARGET_UV_MAP
 from ..bake_targets import validate_all
 from ..logging import log_writer as log
 from ..structures import intermediate, iter_dc
-from ..helpers import require_bake_scene, a_get, a_set, require_work_scene, set_scene, set_selection, is_dev
+from ..helpers import require_bake_scene, a_get, a_set, require_work_scene, set_scene, set_selection
 
 
 def validate_targets(operator, context, ht):
@@ -22,6 +22,10 @@ def create_targets_from_selection(operator, context, ht):
 			create_baketarget_from_key_blocks(ht, source_object, shape_keys.key_blocks, bake_scene)
 		else:
 			create_baketarget_from_key_blocks(ht, source_object, None, bake_scene)
+
+	for mirror in ht.bake_target_mirror_collection:
+		bk = ht.bake_target_collection[mirror.secondary]
+		bk.bake_mode = 'UV_BM_MIRRORED'
 
 
 def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene):
@@ -98,10 +102,6 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 
 	for mirror in mirror_list:
 		create_mirror(ht.get_bake_target_index(mirror.primary.bake_target), ht.get_bake_target_index(mirror.secondary.bake_target))
-	
-	for mirror in ht.bake_target_mirror_collection:
-		bk = ht.bake_target_collection[mirror.secondary]
-		bk.bake_mode = 'UV_BM_MIRRORED'
 
 
 def create_bake_targets_from_shapekeys(operator, context, ht):
@@ -163,6 +163,7 @@ def create_bake_targets_from_shapekeys(operator, context, ht):
 		#Create mirrors
 		for mirror in mirror_list:
 			create_mirror(ht.get_bake_target_index(mirror.primary.bake_target), ht.get_bake_target_index(mirror.secondary.bake_target))
+
 
 def create_eye_variants(bk):
 	eye_names = [
