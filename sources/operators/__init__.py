@@ -91,6 +91,13 @@ class FRAME_OT_shapekey_to_workmesh(frame_operator):
     frame_operator = 	operations.shapekey_to_workmesh
 
 
+class FRAME_OT_workmesh_symmetrize(frame_operator):
+    bl_label = 			"Symmetrize workmesh"
+    bl_idname = 		"frame.workmesh_symmetrize"
+    bl_description =    "Make the workmesh symmetrical along X axis"
+    frame_operator = 	operations.workmesh_symmetrize
+
+
 # Texture Atlas
 class FRAME_OT_auto_assign_atlas(frame_operator):
     bl_label = 			"Auto assign atlas/UV"

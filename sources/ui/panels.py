@@ -57,6 +57,7 @@ class FRAME_PT_workflow(frame_panel):
 				row = work_meshes.row(align=True)
 				row.operator('frame.workmesh_to_shapekey', text='Workmesh to Shapekey')
 				row.operator('frame.shapekey_to_workmesh', text='Shapekey to Workmesh')
+				work_meshes.operator('frame.workmesh_symmetrize')
 				# TODO(ranjian0)
 				# work_meshes.operator('frame.update_selected_workmesh_all_shapekeys')
 				# work_meshes.operator('frame.update_selected_workmesh_active_shapekey')

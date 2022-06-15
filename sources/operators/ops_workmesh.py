@@ -1,5 +1,6 @@
 import bpy
 import bmesh
+import mathutils
 from .common import set_uv_map
 from ..logging import log_writer as log
 from ..constants import PAINTING_UV_MAP, TARGET_UV_MAP
@@ -94,6 +95,35 @@ def shapekey_to_workmesh(operator, context, ht):
 	
 	for vert in workmesh.data.vertices:
 		vert.co = shapekey_data[vert.index]
+
+
+def workmesh_symmetrize(operator, context, ht): 
+	for obj in context.selected_objects:
+		mesh = obj.data
+		right_verts = [v for v in mesh.vertices if v.co.x > 0.0]
+		left_verts = [v for v in mesh.vertices if v.co.x < 0.0]
+
+		size = len(left_verts)
+		kd = mathutils.kdtree.KDTree(size)
+		for v in left_verts:
+			kd.insert(v.co, v.index)
+		kd.balance()
+
+		bm = bmesh.new()
+		bm.from_mesh(mesh)
+		bm.verts.ensure_lookup_table()
+
+		for vert in right_verts:
+			vert_mirror = vert.co.copy()
+			vert_mirror.x *= -1
+
+			_, index, dist = kd.find(vert_mirror)
+			if dist > 0.0:
+				bm.verts[index].co = vert_mirror
+
+		bm.to_mesh(mesh)
+		bm.free()
+		mesh.update()
 
 
 def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
