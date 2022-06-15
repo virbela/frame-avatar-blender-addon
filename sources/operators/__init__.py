@@ -73,21 +73,21 @@ class FRAME_OT_update_selected_workmesh(frame_operator):
 class FRAME_OT_update_all_workmeshes(frame_operator):
     bl_label = 			"Update all work meshes"
     bl_idname = 		"frame.update_all_workmeshes"
-    #TODO - bl_description
+    bl_description =    "Reset all the bake target workmeshes(uv, materials)"
     frame_operator = 	operations.update_all_workmeshes
 
 
 class FRAME_OT_workmesh_to_shapekey(frame_operator):
     bl_label = 			"Update shapekey geometry for the selected workmeshj"
     bl_idname = 		"frame.workmesh_to_shapekey"
-    #TODO - bl_description
+    bl_description =    "Transfer the selected workmesh(es) geometry to the corresponding shapekey(s)"
     frame_operator = 	operations.workmesh_to_shapekey
 
 
 class FRAME_OT_shapekey_to_workmesh(frame_operator):
     bl_label = 			"Update selected workmesh from the shapekey"
     bl_idname = 		"frame.shapekey_to_workmesh"
-    #TODO - bl_description
+    bl_description =    "Transfer the active shapekey geometry to the corresponding workmesh"
     frame_operator = 	operations.shapekey_to_workmesh
 
 

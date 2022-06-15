@@ -1,4 +1,5 @@
 import bpy
+import bmesh
 from .common import set_uv_map
 from ..logging import log_writer as log
 from ..constants import PAINTING_UV_MAP, TARGET_UV_MAP
@@ -7,6 +8,7 @@ from ..helpers import (
     require_bake_scene, 
     IMPLEMENTATION_PENDING,
     get_bake_target_variant_name,
+    require_work_scene,
 )
 
 update_selected_workmesh = IMPLEMENTATION_PENDING
@@ -41,7 +43,28 @@ def update_all_workmeshes(operator, context, ht):
 
 
 def workmesh_to_shapekey(operator, context, ht):
-	pass 
+	work_scene = require_work_scene(context)
+	avatar_object = work_scene.objects.get('Avatar')
+	if not avatar_object:
+		return
+	
+	for object in  context.selected_objects:
+		shape_name = object.name
+		# Handle multiple variant names 
+		if '.' in shape_name:
+			shape_name = shape_name.split('.')[0]
+
+		workmesh = object.data
+		# -- set corresponding shapekey 
+		bm = bmesh.new()
+		bm.from_mesh(avatar_object.data)
+		shape = bm.verts.layers.shape[shape_name]
+
+		for vert in bm.verts:
+			vert[shape] = workmesh.vertices[vert.index].co.copy()
+
+		bm.to_mesh(avatar_object.data)
+		bm.free()
 
 
 def shapekey_to_workmesh(operator, context, ht):
