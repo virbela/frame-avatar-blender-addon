@@ -68,7 +68,32 @@ def workmesh_to_shapekey(operator, context, ht):
 
 
 def shapekey_to_workmesh(operator, context, ht):
-	pass
+	work_scene = require_work_scene(context)
+	avatar_object = work_scene.objects.get('Avatar')
+	if not avatar_object:
+		return
+
+	# -- get mesh data for active shapekey
+	shapekey_data = {}
+	active_shapekey = avatar_object.data.shape_keys.key_blocks[avatar_object.active_shape_key_index]
+
+	bm = bmesh.new()
+	bm.from_mesh(avatar_object.data)
+	shape = bm.verts.layers.shape[active_shapekey.name]
+
+	for vert in bm.verts:
+		shapekey_data[vert.index] = vert[shape]
+	bm.free()
+
+	# -- get corresponding workmesh and update vertices
+	bake_scene = require_bake_scene(context)
+	workmesh = bake_scene.objects.get(active_shapekey.name)
+	if not workmesh:
+		print("Missing workmesh!")
+		return
+	
+	for vert in workmesh.data.vertices:
+		vert.co = shapekey_data[vert.index]
 
 
 def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
