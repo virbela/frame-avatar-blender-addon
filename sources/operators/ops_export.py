@@ -93,6 +93,10 @@ def export_glb(context, ht):
             return (0, 0, 0, 0)
 
     for bake_target in ht.bake_target_collection:
+        if 'effect' in bake_target.shortname.lower():
+            log.info("Skipping effect bake target")
+            continue
+
         result = None
         if bake_target.multi_variants:            
             variants = {'Variants': {}}

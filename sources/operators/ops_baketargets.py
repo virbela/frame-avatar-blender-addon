@@ -123,8 +123,8 @@ def create_bake_targets_from_shapekeys(operator, context, ht):
 		mirror_list = list()
 		for sk in shape_keys:
 			key = sk.name
-			if 'effect' in key.lower():
-				continue
+			# if 'effect' in key.lower():
+			# 	continue
 
 			targets[key] = intermediate.pending.bake_target(
 				name = f'{ht.source_object}_{key}',
@@ -154,6 +154,10 @@ def create_bake_targets_from_shapekeys(operator, context, ht):
 		#NOTE - there is a bug where we can only set uv_mode (or any other enum) once from the same context.
 		#		To avoid this bug we first create dicts that represents the new bake targets and then we instanciate them below
 		for target in targets.values():
+			if target.name in [bt.name for bt in ht.bake_target_collection]:
+				log.info("Skip existing bake target")
+				continue
+
 			new = ht.bake_target_collection.add()
 			for key, value in iter_dc(target):
 				setattr(new, key, value)
