@@ -81,6 +81,7 @@ def export_glb(context, ht):
         return uv_transform
 
     def get_variant_channel(variant):
+        print(variant.name, variant.uv_target_channel)
         if variant.uv_target_channel == 'UV_TARGET_COLOR':
             return (0, 0, 0, 1)
         elif variant.uv_target_channel == 'UV_TARGET_R':
@@ -98,6 +99,7 @@ def export_glb(context, ht):
             continue
 
         result = None
+        print(bake_target)
         if bake_target.multi_variants:            
             variants = {'Variants': {}}
             for variant in bake_target.variant_collection:

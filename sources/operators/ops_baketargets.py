@@ -47,8 +47,8 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 		for sk in key_blocks:
 			key = sk.name
 			# XXX Skip all effect key blocks
-			if 'effect' in key.lower():
-				continue
+			# if 'effect' in key.lower():
+			# 	continue
 
 			targets[key] = intermediate.pending.bake_target(
 				name = f'{source_object.name}_{key}',
@@ -81,6 +81,11 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 	for target in targets.values():
 		if 'basis' in  target.name.lower():
 			continue 
+
+		if target.name in [bt.name for bt in ht.bake_target_collection]:
+			log.info("Skip existing bake target")
+			continue
+
 		
 		new = ht.bake_target_collection.add()
 		new.variant_collection.add()	# add default variant
@@ -102,71 +107,6 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 
 	for mirror in mirror_list:
 		create_mirror(ht.get_bake_target_index(mirror.primary.bake_target), ht.get_bake_target_index(mirror.secondary.bake_target))
-
-
-def create_bake_targets_from_shapekeys(operator, context, ht):
-	#BUG - User may create multiple bake targets by calling this over and over
-
-	if source := bpy.data.objects.get(ht.source_object):
-		shape_keys = source.data.shape_keys.key_blocks
-
-		def create_mirror(primary, secondary):
-			new = ht.bake_target_mirror_collection.add()
-			new.primary = primary
-			new.secondary = secondary
-			return new
-
-		#TODO - Here we should run our rules for the naming scheme
-
-		#Create all targets
-		targets = dict()
-		mirror_list = list()
-		for sk in shape_keys:
-			key = sk.name
-			# if 'effect' in key.lower():
-			# 	continue
-
-			targets[key] = intermediate.pending.bake_target(
-				name = f'{ht.source_object}_{key}',
-				object_name = ht.source_object,
-				shape_key_name = key,
-				uv_mode = 'UV_IM_MONOCHROME',
-			)
-
-		#Configure targets and mirrors
-		for key, target in targets.items():
-			if key.endswith('_L'):
-				base = key[:-2]
-				Rk = f'{base}_R'
-				R = targets.get(Rk)
-
-				if R:
-					mirror_list.append(intermediate.mirror(target, R))
-				else:
-					log.error(f"Could not create mirror for {key} since there was no such object `{Rk}´")
-
-			elif key.endswith('_R'):
-				pass
-
-			elif key.endswith('__None'):
-				target.uv_mode = 'UV_IM_NIL'
-
-		#NOTE - there is a bug where we can only set uv_mode (or any other enum) once from the same context.
-		#		To avoid this bug we first create dicts that represents the new bake targets and then we instanciate them below
-		for target in targets.values():
-			if target.name in [bt.name for bt in ht.bake_target_collection]:
-				log.info("Skip existing bake target")
-				continue
-
-			new = ht.bake_target_collection.add()
-			for key, value in iter_dc(target):
-				setattr(new, key, value)
-
-			target.bake_target = new
-
-		#Create mirrors
-		for mirror in mirror_list:
-			create_mirror(ht.get_bake_target_index(mirror.primary.bake_target), ht.get_bake_target_index(mirror.secondary.bake_target))
 
 
 def create_eye_variants(bk):
