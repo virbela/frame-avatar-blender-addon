@@ -344,7 +344,7 @@ def export_animation(context, ht):
             continue
 
         animated_objects.append(obj)
-    log.info("Animated Objects", animated_objects)
+    log.info(f"Animated Objects {animated_objects}")
     generate_animation_shapekeys(context, avatar_obj, animated_objects)
 
 
