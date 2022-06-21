@@ -1,25 +1,27 @@
 import bpy 
 import bmesh
-from bpy.types import Action, Context, Object, ShapeKey
+from typing import List
+from bpy.types import Action, Context, Object
 
+from .logging import log_writer as log
 from .helpers import require_bake_scene
 
 
-def generate_vat_from_object(context: Context, object: Object, avatar: Object):
-    armature = object.parent
-    if (armature.type != 'ARMATURE'):
-        # TODO(ranjian0) What to do here!
-        # Ideally at this point, we have a single armature controlling all the morph workmeshes
-        return
-    
-    action = armature.animation_data.action
-    for action in [action]:
-        meshes = get_per_frame_mesh(context, action, object)
-        # -- create shapekey in avatar
-        for frame, mesh in enumerate(meshes, start=1):
-            sk_name = f'fabanim.{object.name}.{action.name}#{frame}'
-            avatar.shape_key_add(name=sk_name, from_mix=False)
-            shape_key_from_mesh(sk_name, avatar, mesh)
+def generate_animation_shapekeys(context: Context, avatar: Object, animated_objects: List[Object]):
+    armatures = [o for o in require_bake_scene(context).objects if o.type == 'ARMATURE']
+    if len(armatures) > 1 or len(armatures) == 0:
+        log.error("Expected a single armature in the bake scene")
+
+    armature = armatures.pop()
+    for action in bpy.data.actions:
+        armature.animation_data.action = action
+        for anim_obj in animated_objects:
+            meshes = get_per_frame_mesh(context, action, anim_obj)
+            # -- create shapekey in avatar
+            for frame, mesh in enumerate(meshes, start=1):
+                sk_name = f'fabanim.{anim_obj.name}.{action.name}#{frame}'
+                avatar.shape_key_add(name=sk_name, from_mix=False)
+                shape_key_from_mesh(sk_name, avatar, mesh)
 
     # reset frame
     context.scene.frame_set(1)
@@ -28,7 +30,6 @@ def generate_vat_from_object(context: Context, object: Object, avatar: Object):
 def get_per_frame_mesh(context: Context, action: Action, object: Object):
     meshes = []
     sx, sy = action.frame_range
-    # object.animation_data.action = action
     bakescene = require_bake_scene(context)
 
     # range stop is exclusive, so add one

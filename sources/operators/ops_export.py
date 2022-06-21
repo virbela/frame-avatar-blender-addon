@@ -7,7 +7,7 @@ from contextlib import contextmanager
 
 from .common import popup_message
 from ..logging import log_writer as log
-from ..vertex_animation import generate_vat_from_object
+from ..vertex_animation import generate_animation_shapekeys
 from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
@@ -322,7 +322,12 @@ def export_atlas(context, denoise=True):
 
 def export_animation(context, ht):
 
+    avatar_obj = None
+    animated_objects = []
     for bake_target in ht.bake_target_collection:
+        if not avatar_obj:
+            avatar_obj = bake_target.source_object 
+
         if bake_target.multi_variants:
             # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
             continue
@@ -338,7 +343,9 @@ def export_animation(context, ht):
             # Object has no armature!
             continue
 
-        generate_vat_from_object(context, obj, bake_target.source_object)
+        animated_objects.append(obj)
+    log.info("Animated Objects", animated_objects)
+    generate_animation_shapekeys(context, avatar_obj, animated_objects)
 
 
 @contextmanager
