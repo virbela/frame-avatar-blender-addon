@@ -16,7 +16,10 @@ def clear_bake_targets(operator, context, ht):
 def clear_bake_scene(operator, context, ht):
 	scene = require_bake_scene(context)
 	for item in scene.objects:
-		bpy.data.meshes.remove(item.data, do_unlink=True)
+		if item.type == 'MESH':
+			bpy.data.meshes.remove(item.data, do_unlink=True)
+		elif item.type == 'ARMATURE':
+			bpy.data.armatures.remove(item.data, do_unlink=True)
 
 
 class devtools:
