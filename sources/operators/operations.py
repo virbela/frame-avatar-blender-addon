@@ -8,8 +8,7 @@ from .ops_baketargets import (
     bake_mirrors,
     bake_variants,
     validate_targets,
-    create_targets_from_selection,
-    create_bake_targets_from_shapekeys
+    create_targets_from_selection
 )
 
 from .ops_baking import (

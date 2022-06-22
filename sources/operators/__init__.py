@@ -250,12 +250,6 @@ class FRAME_OT_remove_bake_target_variant(frame_operator):
     bl_idname = 		'frame.remove_bake_target_variant'
     frame_operator = 	operations.bake_variants.remove
 
-class FRAME_OT_create_bake_targets_from_shapekeys(frame_operator):
-    bl_label = 			"Create bake targets"
-    bl_description = 	'Creates bake targets based on a specific naming convention'
-    bl_idname = 		'frame.create_bake_targets_from_shapekeys'
-    frame_operator = 	operations.create_bake_targets_from_shapekeys
-
 class FRAME_OT_set_bake_mirror_primary(frame_operator):
     bl_label = 			"Set primary"
     bl_description = 	'Set primary bake target of selected mirror entry'
