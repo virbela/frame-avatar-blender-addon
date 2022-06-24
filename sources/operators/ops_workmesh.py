@@ -68,6 +68,33 @@ def workmesh_to_shapekey(operator, context, ht):
 		bm.free()
 
 
+def all_workmeshes_to_shapekey(operator, context, ht):
+	bake_scene = require_bake_scene(context)
+	work_scene = require_work_scene(context)
+	avatar_object = work_scene.objects.get('Avatar')
+	if not avatar_object:
+		return
+
+	workmeshes = [m for m in bake_scene.objects if m.type == "MESH"]
+	for object in  workmeshes:
+		shape_name = object.name
+		# Handle multiple variant names 
+		if '.' in shape_name:
+			shape_name = shape_name.split('.')[0]
+
+		workmesh = object.data
+		# -- set corresponding shapekey 
+		bm = bmesh.new()
+		bm.from_mesh(avatar_object.data)
+		shape = bm.verts.layers.shape[shape_name]
+
+		for vert in bm.verts:
+			vert[shape] = workmesh.vertices[vert.index].co.copy()
+
+		bm.to_mesh(avatar_object.data)
+		bm.free()
+
+
 def shapekey_to_workmesh(operator, context, ht):
 	work_scene = require_work_scene(context)
 	avatar_object = work_scene.objects.get('Avatar')
@@ -95,6 +122,34 @@ def shapekey_to_workmesh(operator, context, ht):
 	
 	for vert in workmesh.data.vertices:
 		vert.co = shapekey_data[vert.index]
+
+
+def all_shapekeys_to_workmeshes(operator, context, ht):
+	bake_scene = require_bake_scene(context)
+	work_scene = require_work_scene(context)
+	avatar_object = work_scene.objects.get('Avatar')
+	if not avatar_object:
+		return
+
+	for key in avatar_object.data.shape_keys.key_blocks:
+		shapekey_data = {}
+
+		bm = bmesh.new()
+		bm.from_mesh(avatar_object.data)
+		shape = bm.verts.layers.shape[key.name]
+
+		for vert in bm.verts:
+			shapekey_data[vert.index] = vert[shape]
+		bm.free()
+
+		# -- get corresponding workmesh and update vertices
+		workmesh = bake_scene.objects.get(key.name)
+		if not workmesh:
+			log.info(f"Missing workmesh for {key.name}!")
+			return
+		
+		for vert in workmesh.data.vertices:
+			vert.co = shapekey_data[vert.index]
 
 
 def workmesh_symmetrize(operator, context, ht): 

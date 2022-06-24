@@ -53,6 +53,8 @@ from .ops_workmesh import (
     shapekey_to_workmesh,
     update_all_workmeshes,
     update_selected_workmesh,
+    all_workmeshes_to_shapekey,
+    all_shapekeys_to_workmeshes,
     create_workmeshes_for_all_targets, 
     create_workmeshes_for_selected_target,
     update_selected_workmesh_all_shapekeys,

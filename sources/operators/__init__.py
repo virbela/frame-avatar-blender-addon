@@ -78,17 +78,31 @@ class FRAME_OT_update_all_workmeshes(frame_operator):
 
 
 class FRAME_OT_workmesh_to_shapekey(frame_operator):
-    bl_label = 			"Update shapekey geometry for the selected workmeshj"
+    bl_label = 			"Selected workmesh to shapekey"
     bl_idname = 		"frame.workmesh_to_shapekey"
     bl_description =    "Transfer the selected workmesh(es) geometry to the corresponding shapekey(s)"
     frame_operator = 	operations.workmesh_to_shapekey
 
 
+class FRAME_OT_all_workmeshes_to_shapekeys(frame_operator):
+    bl_label = 			"All workmeshes to shapekeys"
+    bl_idname = 		"frame.all_workmesh_to_shapekey"
+    bl_description =    "Transfer the all workmesh geometry to the corresponding shapekey"
+    frame_operator = 	operations.all_workmeshes_to_shapekey
+
+
 class FRAME_OT_shapekey_to_workmesh(frame_operator):
-    bl_label = 			"Update selected workmesh from the shapekey"
+    bl_label = 			"Active shapekey to workmesh"
     bl_idname = 		"frame.shapekey_to_workmesh"
     bl_description =    "Transfer the active shapekey geometry to the corresponding workmesh"
     frame_operator = 	operations.shapekey_to_workmesh
+
+
+class FRAME_OT_all_shapekey_to_workmesh(frame_operator):
+    bl_label = 			"All shapekeys to workmeshes"
+    bl_idname = 		"frame.all_shapekey_to_workmesh"
+    bl_description =    "Transfer all shapekey geometry to the corresponding workmesh"
+    frame_operator = 	operations.all_shapekeys_to_workmeshes
 
 
 class FRAME_OT_workmesh_symmetrize(frame_operator):
