@@ -158,6 +158,8 @@ def workmesh_symmetrize(operator, context, ht):
 		right_verts = [v for v in mesh.vertices if v.co.x > 0.0]
 		left_verts = [v for v in mesh.vertices if v.co.x < 0.0]
 
+		print(len(mesh.vertices), len(right_verts) + len(left_verts))
+
 		size = len(left_verts)
 		kd = mathutils.kdtree.KDTree(size)
 		for v in left_verts:
