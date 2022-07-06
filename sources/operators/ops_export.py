@@ -155,6 +155,7 @@ def export_glb(context, ht):
     if ht.export_animation:
         export_animation(context, ht)
 
+    post_process_effects(ht.effect_collection, obj)
     with clear_custom_props(obj):
         obj['MorphSets_Avatar'] = morphsets_dict
 
@@ -460,3 +461,16 @@ def obj_from_shapekey(obj, keyname):
 
     return pending_object
 
+
+def post_process_effects(effects, object):
+    """ Ensure effect shapekeys have an 'effect' string suffix 
+    """
+    for effect in effects:
+        if 'effect' in effect.effect_shapekey:
+            continue 
+
+        ef = object.data.shape_keys.key_blocks.get(effect.effect_shapekey)
+        if not ef:
+            continue 
+
+        ef.name = f"{ef.name}_effect"
