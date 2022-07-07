@@ -145,12 +145,12 @@ def draw_variant(layout, variant, bake_scene):
 	#TODO - this should perhaps not be visible?
 	if variant.intermediate_atlas is None:
 		layout.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
-		layout.prop(variant, "intermediate_atlas")
 	else:
 		if preview := variant.intermediate_atlas.preview:
 			layout.label(text=f"Intermediate atlas: {variant.intermediate_atlas.name}", icon_value=preview.icon_id)
 		else:
 			layout.label(text=f"Intermediate atlas: {variant.intermediate_atlas.name}", icon='FILE_IMAGE')
+	layout.prop(variant, "intermediate_atlas")
 
 
 class FRAME_PT_batch_bake_targets(frame_panel):
