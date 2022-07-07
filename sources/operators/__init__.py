@@ -345,7 +345,7 @@ class FRAME_OT_clear_bake_scene(frame_operator):
 class FRAME_OT_clear_bake_targets(frame_operator):
     bl_label = 			"Remove all bake targets"
     bl_idname = 		"frame.clear_bake_targets"
-    bl_description =	"This is for internal development purposes and should not be seen in distribution"
+    bl_description =	"Remove all the bake targets"
     frame_operator =	operations.clear_bake_targets
 
 # TODO(ranjian0)
