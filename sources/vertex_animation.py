@@ -11,6 +11,7 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
     armatures = [o for o in require_bake_scene(context).objects if o.type == 'ARMATURE']
     if len(armatures) > 1 or len(armatures) == 0:
         log.error("Expected a single armature in the bake scene")
+        return
 
     armature = armatures.pop()
     for action in bpy.data.actions:
