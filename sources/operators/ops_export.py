@@ -93,8 +93,9 @@ def export_glb(context, ht):
         else:
             return (0, 0, 0, 0)
 
+    effect_names = [e.effect_shapekey for e in ht.effect_collection]
     for bake_target in ht.bake_target_collection:
-        if 'effect' in bake_target.shortname.lower():
+        if 'effect' in bake_target.shortname.lower() or bake_target.shortname.lower() in effect_names:
             log.info("Skipping effect bake target")
             continue
 
@@ -474,3 +475,4 @@ def post_process_effects(effects, object):
             continue 
 
         ef.name = f"{ef.name}_effect"
+        effect.effect_shapekey = ef.name
