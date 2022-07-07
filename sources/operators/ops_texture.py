@@ -32,6 +32,12 @@ def auto_assign_atlas(operator, context, ht):
 	atlas_blue = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_blue', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
 
 	for at in [atlas_blue, atlas_green, atlas_red, atlas_color]:
+		if len(at.pixels) == 0:
+			# image data disappered, rebuild
+			name = at.name
+			bpy.data.images.remove(at)
+			at = bpy.data.images.new(name, a_width, a_height)
+
 		at.generated_color = (1.0, 1.0, 1.0, 1.0)
 		if tuple(at.size) != (a_width, a_height):
 			at.scale(a_width, a_height)
@@ -65,13 +71,13 @@ def auto_assign_atlas(operator, context, ht):
 
 	#NOTE - we support multiple color bins but it is not used yet
 	color_bins = [
-		intermediate.packing.atlas_bin('color', atlas=atlas_color),
+		intermediate.packing.atlas_bin('color', atlas=bpy.data.images["atlas_intermediate_color"]),
 	]
 
 	mono_bins = [
-		intermediate.packing.atlas_bin('red', atlas=atlas_red),
-		intermediate.packing.atlas_bin('green', atlas=atlas_green),
-		intermediate.packing.atlas_bin('blue', atlas=atlas_blue),
+		intermediate.packing.atlas_bin('red', atlas=bpy.data.images["atlas_intermediate_red"]),
+		intermediate.packing.atlas_bin('green', atlas=bpy.data.images["atlas_intermediate_green"]),
+		intermediate.packing.atlas_bin('blue', atlas=bpy.data.images["atlas_intermediate_blue"]),
 	]
 
 
