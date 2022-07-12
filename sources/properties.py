@@ -98,7 +98,18 @@ UV_TARGET_CHANNEL = enum_descriptor(
 		'EVENT_B',			4),
 )
 
-
+def update_atlas(self, context):
+	# when atlas is set, also set the uv_channel
+	if 'red' in self.intermediate_atlas.name:
+		self.uv_target_channel = 'UV_TARGET_R'
+	elif 'green' in self.intermediate_atlas.name:
+		self.uv_target_channel = 'UV_TARGET_G'
+	elif 'blue' in self.intermediate_atlas.name:
+		self.uv_target_channel = 'UV_TARGET_B'
+	elif 'color' in self.intermediate_atlas.name:
+		self.uv_target_channel = 'UV_TARGET_COLOR'
+	else:
+		self.uv_target_channel = 'UV_TARGET_NIL'
 
 class BakeVariant(frame_property_group):
 	name: 					bpy.props.StringProperty(name="Variant name", default='Untitled variant')
@@ -109,7 +120,7 @@ class BakeVariant(frame_property_group):
 
 	#NOTE - we are not caring about target channel right now - we instead use intermediate_atlas
 	uv_target_channel:				bpy.props.EnumProperty(items=tuple(UV_TARGET_CHANNEL), name="UV target channel", default=0)
-	intermediate_atlas:				bpy.props.PointerProperty(name='Intermediate atlas', type=bpy.types.Image)
+	intermediate_atlas:				bpy.props.PointerProperty(name='Intermediate atlas', type=bpy.types.Image, update=update_atlas)
 
 
 

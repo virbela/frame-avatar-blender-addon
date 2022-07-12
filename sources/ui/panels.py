@@ -151,7 +151,7 @@ def draw_variant(layout, variant, bake_scene):
 		else:
 			layout.label(text=f"Intermediate atlas: {variant.intermediate_atlas.name}", icon='FILE_IMAGE')
 	layout.prop(variant, "intermediate_atlas")
-	layout.prop(variant, "uv_target_channel")
+	# layout.prop(variant, "uv_target_channel")
 
 
 class FRAME_PT_batch_bake_targets(frame_panel):
