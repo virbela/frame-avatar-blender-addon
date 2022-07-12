@@ -1,4 +1,5 @@
 import bpy
+from ..constants import WORK_SCENE, BAKE_SCENE
 
 class guarded_operator:
 	def __init__(self, operator):
@@ -57,3 +58,15 @@ def popup_message(message, title="Error", icon="ERROR"):
         self.layout.label(text=message)
 
     bpy.context.window_manager.popup_menu(oops, title=title, icon=icon)
+
+def poll_bake_scene(context):
+	return context.scene.name == BAKE_SCENE
+
+def poll_work_scene(context):
+	return context.scene.name == WORK_SCENE
+
+def poll_selected_objects(context):
+	return context.selected_objects
+
+def poll_baketargets(context):
+	return  len(context.scene.homeomorphictools.bake_target_collection)

@@ -10,6 +10,14 @@ from ..helpers import (
     get_homeomorphic_tool_state 
 )
 
+from .common import (
+    poll_bake_scene,
+    poll_work_scene,
+    poll_baketargets,
+    poll_selected_objects
+)
+
+
 # Introduction
 class FRAME_OT_setup_bake_scene(frame_operator):
     bl_label = 			"Create Bake Scene"
@@ -31,6 +39,7 @@ class FRAME_OT_create_targets_from_selection(frame_operator):
     bl_idname = 		"frame.create_targets_from_selection"
     bl_description = 	"Create shape key targets from all selected objects"
     frame_operator = 	operations.create_targets_from_selection
+    frame_poll =        poll_selected_objects
 
 class FRAME_OT_validate_targets(frame_operator):
     bl_label = 			"Validate bake targets"
@@ -45,6 +54,7 @@ class FRAME_OT_create_workmeshes_for_all_targets(frame_operator):
     bl_idname = 		"frame.create_workmeshes_for_all_targets"
     bl_description = 	"Create bake meshes for all bake targets"
     frame_operator = 	operations.create_workmeshes_for_all_targets
+    frame_poll =        poll_baketargets
 
 class FRAME_OT_create_workmeshes_for_selected_target(frame_operator):
     bl_label = 			"New work meshes from selected bake targets"
@@ -82,6 +92,7 @@ class FRAME_OT_workmesh_to_shapekey(frame_operator):
     bl_idname = 		"frame.workmesh_to_shapekey"
     bl_description =    "Transfer the selected workmesh(es) geometry to the corresponding shapekey(s)"
     frame_operator = 	operations.workmesh_to_shapekey
+    frame_poll =        poll_bake_scene
 
 
 class FRAME_OT_all_workmeshes_to_shapekeys(frame_operator):
@@ -89,6 +100,7 @@ class FRAME_OT_all_workmeshes_to_shapekeys(frame_operator):
     bl_idname = 		"frame.all_workmesh_to_shapekey"
     bl_description =    "Transfer the all workmesh geometry to the corresponding shapekey"
     frame_operator = 	operations.all_workmeshes_to_shapekey
+    frame_poll =        poll_bake_scene
 
 
 class FRAME_OT_shapekey_to_workmesh(frame_operator):
@@ -96,6 +108,7 @@ class FRAME_OT_shapekey_to_workmesh(frame_operator):
     bl_idname = 		"frame.shapekey_to_workmesh"
     bl_description =    "Transfer the active shapekey geometry to the corresponding workmesh"
     frame_operator = 	operations.shapekey_to_workmesh
+    frame_poll=         poll_work_scene
 
 
 class FRAME_OT_all_shapekey_to_workmesh(frame_operator):
@@ -103,6 +116,7 @@ class FRAME_OT_all_shapekey_to_workmesh(frame_operator):
     bl_idname = 		"frame.all_shapekey_to_workmesh"
     bl_description =    "Transfer all shapekey geometry to the corresponding workmesh"
     frame_operator = 	operations.all_shapekeys_to_workmeshes
+    frame_poll =        poll_work_scene
 
 
 class FRAME_OT_workmesh_symmetrize(frame_operator):

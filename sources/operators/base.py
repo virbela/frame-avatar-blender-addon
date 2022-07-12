@@ -5,11 +5,16 @@ from ..exceptions import BakeException, InternalError
 from ..logging import log_writer as log
 
 class frame_operator(bpy.types.Operator):
-	frame_operator = None
+	frame_operator = lambda context, HT: None
+	frame_poll = lambda context : True
 
 	#contribution note 6B
 	def __init_subclass__(cls):
 		pending_classes.append(cls)
+
+	@classmethod
+	def poll(self, context):
+		return self.frame_poll(context)
 
 	def execute(self, context):
 		if HT := get_homeomorphic_tool_state(context):	#contribution note 2
