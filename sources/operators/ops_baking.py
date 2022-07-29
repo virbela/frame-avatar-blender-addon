@@ -56,7 +56,7 @@ def bake_selected_workmeshes(operator, context, ht):
 			selection.append(get_bake_target_and_variant_from_workmesh(workmesh))
 
 
-	for bake_target, variant in selection:
+	for _, variant in selection:
 		workmesh = variant.workmesh
 
 		ensure_color_output_node_ready(variant, workmesh.active_material.node_tree)
@@ -134,5 +134,4 @@ def ensure_color_output_node_ready(variant, tree):
 	# rebuild the links
 	tree.links.new(texnode.outputs[0], diffusenode.inputs[0])
 	tree.links.new(diffusenode.outputs[0], outputnode.inputs[0])
-	# print(texnode, outputnode, diffusenode)
 	
