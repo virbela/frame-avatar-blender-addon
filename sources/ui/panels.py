@@ -70,7 +70,7 @@ class FRAME_PT_workflow(frame_panel):
 				atlas_setup.prop(HT, 'atlas_size')
 				atlas_setup.prop(HT, 'color_percentage')
 				h = int(HT.color_percentage * HT.atlas_size / 100)
-				atlas_setup.label(text=f'Height in pixels: {h}')
+				atlas_setup.label(text=f'Color Region Height in pixels: {h}')
 
 				atlas_setup.operator('frame.auto_assign_atlas')
 				atlas_setup.operator('frame.pack_uv_islands')
