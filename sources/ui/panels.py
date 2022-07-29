@@ -270,11 +270,16 @@ class FRAME_PT_effects(frame_panel):
 			effect_actions.operator('frame.remove_effect')
 
 			if HT.selected_effect != -1:
-				key = ob.data.shape_keys
-				if key:
-					et = HT.effect_collection[HT.selected_effect]
-					self.layout.prop_search(et, "parent_shapekey", key, "key_blocks")
-					self.layout.prop_search(et, "effect_shapekey", key, "key_blocks")
+				if ob.type == "MESH":
+					key = ob.data.shape_keys
+					if key:
+						et = HT.effect_collection[HT.selected_effect]
+						self.layout.prop_search(et, "parent_shapekey", key, "key_blocks")
+						self.layout.prop_search(et, "effect_shapekey", key, "key_blocks")
+					else:
+						self.layout.label(text="Selected object is not an Avatar!", icon="ERROR")	
+				else:
+					self.layout.label(text="Selected object has no shapekeys!", icon="ERROR")
 
 
 class FRAME_PT_export(frame_panel):
