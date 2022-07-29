@@ -57,8 +57,21 @@ def bake_selected_workmeshes(operator, context, ht):
 
 
 	for bake_target, variant in selection:
-		bake_specific_variant(ht, view_layer, bake_target, variant)
-		run_bake()
+		workmesh = variant.workmesh
+
+		#TODO - we should take into account bake groups - maybe also move this out to a more generic function
+		# set_rendering(view_layer.objects, workmesh)
+		# set_selection(view_layer.objects, workmesh, synchronize_active=True, make_sure_active=True)
+
+		# set active image in material
+		material_nodes = workmesh.active_material.node_tree.nodes
+		material_nodes.active = material_nodes['tex_target']
+
+		# set active UV index to source UV Map (since we want this in the final atlas)
+		uv_layers = workmesh.data.uv_layers
+		uv_layers.active = uv_layers[bake_target.source_uv_map]
+
+	run_bake()
 
 
 def bake_specific_variant(ht, view_layer, bake_target, variant):
