@@ -59,13 +59,15 @@ def bake_selected_workmeshes(operator, context, ht):
 	for bake_target, variant in selection:
 		workmesh = variant.workmesh
 
+		ensure_color_output_node_ready(variant, workmesh.active_material.node_tree)
+
 		# set active image in material
 		material_nodes = workmesh.active_material.node_tree.nodes
 		material_nodes.active = material_nodes['tex_target']
 
 		# set active UV index to source UV Map (since we want this in the final atlas)
 		uv_layers = workmesh.data.uv_layers
-		uv_layers.active = uv_layers[bake_target.source_uv_map]
+		uv_layers.active = uv_layers[ht.baking_target_uvmap]
 
 	run_bake(ht)
 
@@ -109,6 +111,28 @@ def run_bake(ht, invoke=True):
 		bpy.ops.object.bake(type=ht.baking_options)
 
 
-def ensure_color_output_node_ready(material_nodes):
+def ensure_color_output_node_ready(variant, tree):
+	material_nodes = tree.nodes
+	material_links = tree.links
+
 	# ensure the texture output goes through diffusebsdf
-	pass
+	texnode = None 
+	for node in material_nodes:
+		if isinstance(node, bpy.types.ShaderNodeTexImage):
+			if node.image == variant.image:
+				texnode = node
+				break
+
+	outputnode = [n for n in material_nodes if isinstance(n, bpy.types.ShaderNodeOutputMaterial)].pop()
+	diffusenode = [n for n in material_nodes if isinstance(n, bpy.types.ShaderNodeBsdfPrincipled)].pop()
+
+	# remove all links from the texnode or the diffuse node
+	for link in material_links:
+		if link.from_node in [texnode, diffusenode]:
+			tree.links.remove(link)
+
+	# rebuild the links
+	tree.links.new(texnode.outputs[0], diffusenode.inputs[0])
+	tree.links.new(diffusenode.outputs[0], outputnode.inputs[0])
+	# print(texnode, outputnode, diffusenode)
+	
