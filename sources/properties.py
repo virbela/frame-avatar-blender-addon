@@ -98,6 +98,17 @@ UV_TARGET_CHANNEL = enum_descriptor(
 		'EVENT_B',			4),
 )
 
+
+BAKING_MODE = enum_descriptor(
+	('COMBINED',			'Combined',				'Full bake',
+		'',			0),
+
+	('COLOR',				'Color',				'Color only bake',
+		'',			1),
+
+)
+
+
 def update_atlas(self, context):
 	# when atlas is set, also set the uv_channel
 	if 'red' in self.intermediate_atlas.name:
@@ -298,6 +309,10 @@ class HomeomorphicProperties(frame_property_group):
 	export_atlas: 						bpy.props.BoolProperty(name="Export Atlas", default=True)
 	export_glb: 						bpy.props.BoolProperty(name="Export GLB", default=True)
 	export_animation: 					bpy.props.BoolProperty(name="Export Animation", default=True)
+
+	### Baking options
+	baking_target_uvmap: 				bpy.props.StringProperty(name="Bake UV map", default=TARGET_UV_MAP)
+	baking_options:						bpy.props.EnumProperty(items=tuple(BAKING_MODE), name="Bake Mode", default=1)
 
 	def get_selected_effect(self):
 		if self.selected_effect:

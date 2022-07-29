@@ -1,6 +1,7 @@
 import bpy
 import functools
 from ..properties import *
+from ..logging import log_writer as log
 from ..exceptions import InternalError
 from ..helpers import require_work_scene, require_bake_scene, pending_classes, is_dev
 
@@ -92,12 +93,16 @@ class FRAME_PT_workflow(frame_panel):
 			if scene.ui_state.workflow_baking_visible:
 				try:
 					bake_scene = require_bake_scene(context)
+					selection = [o for o in context.selected_objects]
 					baking.prop(bake_scene.cycles, "samples", text="Bake Samples")
 					baking.prop(bake_scene.render.bake, "margin", text="Bake Margin")
+					baking.row(align=True).prop(HT, 'baking_options', expand=True)
+					baking.prop_search(HT, 'baking_target_uvmap', selection[0].data, "uv_layers")
 					baking.operator('frame.bake_all')
 					baking.operator('frame.bake_selected_bake_target')
 					baking.operator('frame.bake_selected_workmeshes')
-				except AttributeError:
+				except AttributeError as e:
+					log.info(e)
 					baking.label(text='Please ensure Cycles Render Engine is enabled in the addons list!', icon='ERROR')
 			helper_tools = self.layout.box()
 			helper_tools.prop(scene.ui_state, "workflow_helpers_visible", text="Helpers")
@@ -180,7 +185,7 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 				self.layout.prop_search(et, "source_object", scene, "objects")
 
 				if obj := et.source_object:
-					if shape_keys := obj.data.shape_keys:
+					if obj.data.shape_keys:
 						self.layout.prop_search(et, "shape_key_name", obj.data.shape_keys, "key_blocks")
 
 				self.layout.prop(et, 'bake_mode')

@@ -98,3 +98,12 @@ def run_bake(invoke=True):
 		bpy.ops.object.bake('INVOKE_DEFAULT', type='DIFFUSE')
 	else:
 		bpy.ops.object.bake(type='DIFFUSE')
+
+
+def set_bake_mode_options(context, HT):
+	# switch between color and combined bake
+	pass
+
+def ensure_color_output_node_ready(material_nodes):
+	# ensure the texture output goes through diffusebsdf
+	pass
