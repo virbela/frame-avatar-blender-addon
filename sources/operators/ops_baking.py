@@ -59,10 +59,6 @@ def bake_selected_workmeshes(operator, context, ht):
 	for bake_target, variant in selection:
 		workmesh = variant.workmesh
 
-		#TODO - we should take into account bake groups - maybe also move this out to a more generic function
-		# set_rendering(view_layer.objects, workmesh)
-		# set_selection(view_layer.objects, workmesh, synchronize_active=True, make_sure_active=True)
-
 		# set active image in material
 		material_nodes = workmesh.active_material.node_tree.nodes
 		material_nodes.active = material_nodes['tex_target']
