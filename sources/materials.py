@@ -86,7 +86,7 @@ setup_bake_material = load_node_setup_function('setup_bake_material', '''
 		tex_diffuse.location = 		(-869, -31)
 
 		uvm_diffuse.UV 		--> 	tex_diffuse.Vector
-		tex_diffuse.Color 	--> 	ao.Color
+		tex_diffuse.Color 	--> 	nbp_ao.Base-Color
 
 		tex_diffuse.image = diffuse_image
 		uvm_diffuse.uv_map = diffuse_uv_map
