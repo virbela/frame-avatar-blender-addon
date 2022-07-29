@@ -145,13 +145,13 @@ class FRAME_OT_pack_uv_islands(frame_operator):
 
 # Work Materials
 class FRAME_OT_update_selected_material(frame_operator):
-    bl_label = 			"Update selected material"
+    bl_label = 			"Update selected baketarget material"
     bl_idname = 		"frame.update_selected_material"
     bl_description = 	"Update the work mesh material for the selected bake target"
     frame_operator = 	operations.update_selected_material
 
 class FRAME_OT_update_all_materials(frame_operator):
-    bl_label = 			"Update all materials"
+    bl_label = 			"Update all baketarget materials"
     bl_idname = 		"frame.update_all_materials"
     bl_description = 	"Update work mesh materials for all bake targets"
     frame_operator = 	operations.update_all_materials
