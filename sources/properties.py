@@ -103,7 +103,7 @@ BAKING_MODE = enum_descriptor(
 	('COMBINED',			'Combined',				'Full bake',
 		'',			0),
 
-	('COLOR',				'Color',				'Color only bake',
+	('DIFFUSE',				'Color',				'Color only bake',
 		'',			1),
 
 )

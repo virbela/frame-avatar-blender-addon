@@ -16,7 +16,7 @@ def bake_all_bake_targets(operator: bpy.types.Operator, context, ht):
 			bake_specific_variant(ht, view_layer, bake_target, variant)
 			# XXX bake cannot run as async here because of the loop, means we don't get
 			# meaningful progress indicator
-			run_bake(invoke=False)
+			run_bake(ht, invoke=False)
 
 	set_scene(context, last_active_scene)
 
@@ -31,7 +31,7 @@ def bake_selected_bake_target(operator, context, ht):
 	if bake_target := ht.get_selected_bake_target():
 		if variant := bake_target.variant_collection[bake_target.selected_variant]:
 			bake_specific_variant(ht, view_layer, bake_target, variant)
-			run_bake()
+			run_bake(ht)
 
 	set_scene(context, last_active_scene)
 
@@ -67,7 +67,7 @@ def bake_selected_workmeshes(operator, context, ht):
 		uv_layers = workmesh.data.uv_layers
 		uv_layers.active = uv_layers[bake_target.source_uv_map]
 
-	run_bake()
+	run_bake(ht)
 
 
 def bake_specific_variant(ht, view_layer, bake_target, variant):
@@ -86,23 +86,28 @@ def bake_specific_variant(ht, view_layer, bake_target, variant):
 	uv_layers.active = uv_layers[bake_target.source_uv_map]
 
 
-def run_bake(invoke=True):
+def run_bake(ht, invoke=True):
 	bpy.context.scene.cycles.device = 'GPU'
 	bpy.context.scene.render.engine = 'CYCLES'
 	bpy.context.scene.render.bake.use_clear = False
-	bpy.context.scene.render.bake.use_pass_color = True
-	bpy.context.scene.render.bake.use_pass_direct = False
-	bpy.context.scene.render.bake.use_pass_indirect = False
+	if ht.baking_options == "DIFFUSE":
+		bpy.context.scene.render.bake.use_pass_color = True
+		bpy.context.scene.render.bake.use_pass_direct = False
+		bpy.context.scene.render.bake.use_pass_indirect = False
+	elif ht.baking_options == "COMBINED":
+		bpy.context.scene.render.bake.use_pass_direct = True
+		bpy.context.scene.render.bake.use_pass_indirect = True
+		bpy.context.scene.render.bake.use_pass_diffuse = True
+		bpy.context.scene.render.bake.use_pass_glossy = True
+		bpy.context.scene.render.bake.use_pass_emit = True
+		bpy.context.scene.render.bake.use_pass_transmission = True
+
 	bpy.context.scene.view_settings.view_transform = 'Standard'
 	if invoke:
-		bpy.ops.object.bake('INVOKE_DEFAULT', type='DIFFUSE')
+		bpy.ops.object.bake('INVOKE_DEFAULT', type=ht.baking_options)
 	else:
-		bpy.ops.object.bake(type='DIFFUSE')
+		bpy.ops.object.bake(type=ht.baking_options)
 
-
-def set_bake_mode_options(context, HT):
-	# switch between color and combined bake
-	pass
 
 def ensure_color_output_node_ready(material_nodes):
 	# ensure the texture output goes through diffusebsdf
