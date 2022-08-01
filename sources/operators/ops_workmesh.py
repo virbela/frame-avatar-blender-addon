@@ -6,6 +6,7 @@ from ..logging import log_writer as log
 from ..constants import PAINTING_UV_MAP, TARGET_UV_MAP
 from ..materials import setup_bake_material
 from ..helpers import (
+    ensure_applied_rotation,
     require_bake_scene, 
     IMPLEMENTATION_PENDING,
     get_bake_target_variant_name,
@@ -22,8 +23,7 @@ def create_workmeshes_for_all_targets(operator, context, ht):
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
 
-def create_workmeshes_for_selected_target(operator, context, ht):
-	#TODO - handle no selected target
+def create_workmeshes_for_selected_target(operator, context, ht):	
 	if bake_target := ht.get_selected_bake_target():
 		bake_scene = require_bake_scene(context)
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
@@ -196,6 +196,8 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 			continue
 
 		if source_object := bake_target.source_object:
+			ensure_applied_rotation(source_object)
+
 			pending_object = source_object.copy()
 			pending_object.name = pending_name
 			pending_object.data = source_object.data.copy()

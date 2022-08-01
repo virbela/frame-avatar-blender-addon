@@ -7,7 +7,7 @@ from pathlib import Path
 from contextlib import contextmanager
 
 from ..logging import log_writer as log
-from ..helpers import get_prefs, popup_message
+from ..helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..animation import generate_animation_shapekeys
 from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
@@ -37,6 +37,7 @@ def export(operator, context, HT):
 
 def export_glb(context, ht):
     obj = context.active_object
+    ensure_applied_rotation(obj)
 
     if not obj.data.shape_keys:
         #XXX Probably Not the main avatar object
@@ -356,6 +357,7 @@ def export_animation(context, ht):
             # Object has no armature!
             continue
 
+        ensure_applied_rotation(obj)
         animated_objects.append(obj)
     log.info(f"Animated Objects {animated_objects}")
     generate_animation_shapekeys(context, avatar_obj, animated_objects)
