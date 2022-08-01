@@ -93,13 +93,16 @@ class FRAME_PT_workflow(frame_panel):
 				try:
 					bake_scene = require_bake_scene(context)
 					selection = [o for o in context.selected_objects]
-					baking.prop(bake_scene.cycles, "samples", text="Bake Samples")
-					baking.prop(bake_scene.render.bake, "margin", text="Bake Margin")
+					col = baking.column(align=True)
+					col.prop(bake_scene.cycles, "samples", text="Bake Samples")
+					col.prop(bake_scene.render.bake, "margin", text="Bake Margin")
 					baking.row(align=True).prop(HT, 'baking_options', expand=True)
 					baking.prop_search(HT, 'baking_target_uvmap', selection[0].data, "uv_layers")
-					baking.operator('frame.bake_all')
-					baking.operator('frame.bake_selected_bake_target')
-					baking.operator('frame.bake_selected_workmeshes')
+
+					col = baking.column(align=True)
+					col.operator('frame.bake_all')
+					col.operator('frame.bake_selected_bake_target')
+					col.operator('frame.bake_selected_workmeshes')
 				except AttributeError as e:
 					log.info(e)
 					baking.label(text='Please ensure Cycles Render Engine is enabled in the addons list!', icon='ERROR')
