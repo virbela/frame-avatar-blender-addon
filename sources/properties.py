@@ -1,7 +1,8 @@
 import bpy
 from .helpers import (
+	popup_message, 
 	enum_descriptor, 
-	get_named_entry, 
+	get_named_entry,
 	require_named_entry, 
 	frame_property_group, 
 )
@@ -122,8 +123,24 @@ def update_atlas(self, context):
 	else:
 		self.uv_target_channel = 'UV_TARGET_NIL'
 
+
+def get_bakevariant_name(self):
+	return self.get("name", 'Untitled variant')
+
+
+def set_bakevariant_name(self, value):
+	# XXX THIS should only happen for multi variants
+	# -- update workmesh name
+	workmeshname = self.workmesh.name
+	if '.' in workmeshname:
+		target, variant = workmeshname.split('.')
+		self.workmesh.name = f"{target}.{value}"
+
+	self['name'] = value
+
+
 class BakeVariant(frame_property_group):
-	name: 					bpy.props.StringProperty(name="Variant name", default='Untitled variant')
+	name: 					bpy.props.StringProperty(name="Variant name", default='Untitled variant', get=get_bakevariant_name, set=set_bakevariant_name)
 	image:					bpy.props.PointerProperty(name="Image texture", type=bpy.types.Image)
 	uv_map:					bpy.props.StringProperty(name="UV Map")
 
@@ -134,11 +151,38 @@ class BakeVariant(frame_property_group):
 	intermediate_atlas:				bpy.props.PointerProperty(name='Intermediate atlas', type=bpy.types.Image, update=update_atlas)
 
 
+def get_baketarget_name(self):
+	return self.get("name", 'Untitled bake target')
+
+
+def set_baketarget_name(self, value):
+	newname = value.strip(f"{self.source_object.name}_")
+
+	# -- rename shapekey
+	keys = self.source_object.data.shape_keys.key_blocks
+	shapekey = keys.get(self.shape_key_name)
+	if not shapekey: 
+		# -- error shapekey was not found
+		popup_message(f"Shapekey {self.shape_key_name} was not found!", "ShapekeyError")
+		return
+	shapekey.name = newname
+	self.shape_key_name = newname
+
+	# for each variant in this bake target
+	# -- rename workmesh
+	for variant in self.variant_collection:
+		variantname = newname
+		if self.multi_variants:
+			variantname = f"{newname}.{variant.name}"
+		variant.workmesh.name = variantname
+
+	self['name'] = value
+	log.info(f"Renaming baketarget to {value} ... ")
 
 #FUTURE - we may want to use work meshes as the container for each bake target in the future so that we can easier deal with selections but now we want to just get the current structure working all the way
 class BakeTarget(frame_property_group):
 
-	name: 					bpy.props.StringProperty(name = "Bake target name", default='Untitled bake target')
+	name: 					bpy.props.StringProperty(name = "Bake target name", default='Untitled bake target', get=get_baketarget_name, set=set_baketarget_name)
 
 	object_name: 			bpy.props.StringProperty(
 		name = 					"Object name",
