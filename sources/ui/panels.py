@@ -179,8 +179,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 			col.operator('frame.show_selected_bt', icon='EDITMODE_HLT', text='')
 			col.operator('frame.clear_bake_targets', icon='X', text='')
 
-			#TODO - document the reasoning behind all this
-			#TODO - divy up this into a few functions to make it less messy
 			if HT.selected_bake_target != -1:
 				et = HT.bake_target_collection[HT.selected_bake_target]
 
