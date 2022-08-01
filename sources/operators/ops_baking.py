@@ -16,8 +16,7 @@ def bake_all_bake_targets(operator: bpy.types.Operator, context, ht):
 			bake_specific_variant(ht, view_layer, bake_target, variant)
 			# XXX bake cannot run as async here because of the loop, means we don't get
 			# meaningful progress indicator
-			run_bake(ht, invoke=False)
-
+	run_bake(ht)
 	set_scene(context, last_active_scene)
 
 
@@ -75,6 +74,8 @@ def bake_selected_workmeshes(operator, context, ht):
 def bake_specific_variant(ht, view_layer, bake_target, variant):
 	workmesh = variant.workmesh
 
+	ensure_color_output_node_ready(variant, workmesh.active_material.node_tree)
+
 	#TODO - we should take into account bake groups - maybe also move this out to a more generic function
 	set_rendering(view_layer.objects, workmesh)
 	set_selection(view_layer.objects, workmesh, synchronize_active=True, make_sure_active=True)
@@ -85,7 +86,7 @@ def bake_specific_variant(ht, view_layer, bake_target, variant):
 
 	# set active UV index to source UV Map (since we want this in the final atlas)
 	uv_layers = workmesh.data.uv_layers
-	uv_layers.active = uv_layers[bake_target.source_uv_map]
+	uv_layers.active = uv_layers[ht.baking_target_uvmap]
 
 
 def run_bake(ht, invoke=True):
