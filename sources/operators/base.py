@@ -13,8 +13,8 @@ class frame_operator(bpy.types.Operator):
 		pending_classes.append(cls)
 
 	@classmethod
-	def poll(self, context):
-		return self.frame_poll(context)
+	def poll(cls, context):
+		return cls.frame_poll(context)
 
 	def execute(self, context):
 		if HT := get_homeomorphic_tool_state(context):	#contribution note 2

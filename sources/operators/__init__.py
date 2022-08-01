@@ -3,9 +3,12 @@ from collections import deque
 
 from . import operations
 from .base import frame_operator
+from ..logging import log_writer as log
 from ..helpers import (
     set_rendering,
     set_selection,
+    register_class,
+    pending_classes,
     require_bake_scene,
     get_homeomorphic_tool_state 
 )
@@ -142,13 +145,13 @@ class FRAME_OT_pack_uv_islands(frame_operator):
 
 # Work Materials
 class FRAME_OT_update_selected_material(frame_operator):
-    bl_label = 			"Update selected material"
+    bl_label = 			"Update selected baketarget material"
     bl_idname = 		"frame.update_selected_material"
     bl_description = 	"Update the work mesh material for the selected bake target"
     frame_operator = 	operations.update_selected_material
 
 class FRAME_OT_update_all_materials(frame_operator):
-    bl_label = 			"Update all materials"
+    bl_label = 			"Update all baketarget materials"
     bl_idname = 		"frame.update_all_materials"
     bl_description = 	"Update work mesh materials for all bake targets"
     frame_operator = 	operations.update_all_materials
@@ -246,7 +249,7 @@ class FRAME_OT_synchronize_mirrors(frame_operator):
 
 # Bake Targets UI List
 class FRAME_OT_add_bake_target(frame_operator):
-    bl_label =			"+"
+    bl_label =			"Add Baketarget"
     bl_description = 	'Create new bake target'
     bl_idname = 		'frame.add_bake_target'
     frame_operator = 	operations.bake_targets.add
@@ -255,13 +258,13 @@ class FRAME_OT_show_selected_bt(frame_operator):
     bl_label =			"Edit selected"
     bl_description = 	(
                             'Edit selected bake target.\n'
-                            'Activates shape key is needed'
+                            'Activates shape key as needed'
                         )
     bl_idname = 		'frame.show_selected_bt'
     frame_operator = 	operations.bake_targets.edit_selected
 
 class FRAME_OT_remove_bake_target(frame_operator):
-    bl_label = 			"-"
+    bl_label = 			"Remove Selected"
     bl_description = 	'Remove selected bake target'
     bl_idname = 		'frame.remove_bake_target'
     frame_operator = 	operations.bake_targets.remove
@@ -373,7 +376,8 @@ class BakeTask:
         self.bake_target = bake_target
         self.variant = variant
 
-        self._bake_img = bake_target.atlas 
+        self._bake_img = bake_target.atlas
+        log.info(f"BakeTask<{id}> initialized with <{bake_target}, {variant}, {bake_target.atlas}>")
 
     def run(self):
         workmesh = self.variant.workmesh
@@ -402,6 +406,7 @@ class BakeTask:
     def finished(self):
         return self._bake_img.is_dirty
 
+@register_class
 class FRANE_OT_modal_bake_all_targets(bpy.types.Operator):
     bl_label =          "Task queue for baking all targets"
     bl_idname =         "frame.modal_bake_all"

@@ -1,7 +1,8 @@
 import bpy
 from .helpers import (
+	popup_message, 
 	enum_descriptor, 
-	get_named_entry, 
+	get_named_entry,
 	require_named_entry, 
 	frame_property_group, 
 )
@@ -98,6 +99,17 @@ UV_TARGET_CHANNEL = enum_descriptor(
 		'EVENT_B',			4),
 )
 
+
+BAKING_MODE = enum_descriptor(
+	('COMBINED',			'Combined',				'Full bake',
+		'',			0),
+
+	('DIFFUSE',				'Color',				'Color only bake',
+		'',			1),
+
+)
+
+
 def update_atlas(self, context):
 	# when atlas is set, also set the uv_channel
 	if 'red' in self.intermediate_atlas.name:
@@ -111,8 +123,24 @@ def update_atlas(self, context):
 	else:
 		self.uv_target_channel = 'UV_TARGET_NIL'
 
+
+def get_bakevariant_name(self):
+	return self.get("name", 'Untitled variant')
+
+
+def set_bakevariant_name(self, value):
+	# XXX THIS should only happen for multi variants
+	# -- update workmesh name
+	workmeshname = self.workmesh.name
+	if '.' in workmeshname:
+		target, variant = workmeshname.split('.')
+		self.workmesh.name = f"{target}.{value}"
+
+	self['name'] = value
+
+
 class BakeVariant(frame_property_group):
-	name: 					bpy.props.StringProperty(name="Variant name", default='Untitled variant')
+	name: 					bpy.props.StringProperty(name="Variant name", default='Untitled variant', get=get_bakevariant_name, set=set_bakevariant_name)
 	image:					bpy.props.PointerProperty(name="Image texture", type=bpy.types.Image)
 	uv_map:					bpy.props.StringProperty(name="UV Map")
 
@@ -123,11 +151,38 @@ class BakeVariant(frame_property_group):
 	intermediate_atlas:				bpy.props.PointerProperty(name='Intermediate atlas', type=bpy.types.Image, update=update_atlas)
 
 
+def get_baketarget_name(self):
+	return self.get("name", 'Untitled bake target')
+
+
+def set_baketarget_name(self, value):
+	newname = value.strip(f"{self.source_object.name}_")
+
+	# -- rename shapekey
+	keys = self.source_object.data.shape_keys.key_blocks
+	shapekey = keys.get(self.shape_key_name)
+	if not shapekey: 
+		# -- error shapekey was not found
+		popup_message(f"Shapekey {self.shape_key_name} was not found!", "ShapekeyError")
+		return
+	shapekey.name = newname
+	self.shape_key_name = newname
+
+	# for each variant in this bake target
+	# -- rename workmesh
+	for variant in self.variant_collection:
+		variantname = newname
+		if self.multi_variants:
+			variantname = f"{newname}.{variant.name}"
+		variant.workmesh.name = variantname
+
+	self['name'] = value
+	log.info(f"Renaming baketarget to {value} ... ")
 
 #FUTURE - we may want to use work meshes as the container for each bake target in the future so that we can easier deal with selections but now we want to just get the current structure working all the way
 class BakeTarget(frame_property_group):
 
-	name: 					bpy.props.StringProperty(name = "Bake target name", default='Untitled bake target')
+	name: 					bpy.props.StringProperty(name = "Bake target name", default='Untitled bake target', get=get_baketarget_name, set=set_baketarget_name)
 
 	object_name: 			bpy.props.StringProperty(
 		name = 					"Object name",
@@ -298,6 +353,10 @@ class HomeomorphicProperties(frame_property_group):
 	export_atlas: 						bpy.props.BoolProperty(name="Export Atlas", default=True)
 	export_glb: 						bpy.props.BoolProperty(name="Export GLB", default=True)
 	export_animation: 					bpy.props.BoolProperty(name="Export Animation", default=True)
+
+	### Baking options
+	baking_target_uvmap: 				bpy.props.StringProperty(name="Bake UV map", default=TARGET_UV_MAP)
+	baking_options:						bpy.props.EnumProperty(items=tuple(BAKING_MODE), name="Bake Mode", default=1)
 
 	def get_selected_effect(self):
 		if self.selected_effect:

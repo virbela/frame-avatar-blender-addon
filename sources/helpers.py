@@ -1,11 +1,14 @@
+import os
 import bpy
 import enum
+import uuid
+import bmesh
+import threading
 import addon_utils
 from dataclasses import dataclass
 from .logging import log_writer as log
-from .constants import *
-from .exceptions import *
-import threading, uuid
+from .constants import BAKE_SCENE, WORK_SCENE
+from .exceptions import InternalError, FrameException
 
 pending_classes = list()
 
@@ -260,3 +263,40 @@ def is_dev():
 		if 'frame_avatar_addon' == mod.__name__:
 			return False
 	return True
+
+
+def get_prefs():
+	try:
+		preferences = bpy.context.preferences.addons[__package__].preferences
+		return preferences
+	except KeyError:
+		# XXX DEV(simulate preferences)
+		import types
+		preferences = types.SimpleNamespace()
+		preferences.log_target = "devlog"
+		preferences.custom_export_dir = os.getenv('FRAME_EXPORT_DIR')
+		preferences.save_intermediate_atlases = False
+		return preferences
+
+
+def popup_message(message, title="Error", icon="ERROR"):
+    def oops(self, context):
+        self.layout.label(text=message)
+
+    bpy.context.window_manager.popup_menu(oops, title=title, icon=icon)
+
+
+def ensure_applied_rotation(object):
+	"Ensure obj has rotation applied"
+	rot = object.rotation_euler
+	if (rot.x, rot.y, rot.z) == (0, 0, 0):
+		# -- rotation already applied
+		return
+
+	bm = bmesh.new()
+	bm.from_mesh(object.data)
+	for v in bm.verts:
+		v.co = object.matrix_world @ v.co
+	bm.to_mesh(object.data)
+	bm.free()
+	object.rotation_euler = (0, 0, 0)

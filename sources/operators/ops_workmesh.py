@@ -6,6 +6,7 @@ from ..logging import log_writer as log
 from ..constants import PAINTING_UV_MAP, TARGET_UV_MAP
 from ..materials import setup_bake_material
 from ..helpers import (
+    ensure_applied_rotation,
     require_bake_scene, 
     IMPLEMENTATION_PENDING,
     get_bake_target_variant_name,
@@ -22,8 +23,7 @@ def create_workmeshes_for_all_targets(operator, context, ht):
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
 
-def create_workmeshes_for_selected_target(operator, context, ht):
-	#TODO - handle no selected target
+def create_workmeshes_for_selected_target(operator, context, ht):	
 	if bake_target := ht.get_selected_bake_target():
 		bake_scene = require_bake_scene(context)
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
@@ -40,7 +40,7 @@ def update_all_workmeshes(operator, context, ht):
 				variant.uv_map = PAINTING_UV_MAP
 				bake_target.uv_map = TARGET_UV_MAP
 
-				update_workmesh_materials(context, ht, bake_target, variant)
+				update_workmesh_materials(bake_target, variant)
 
 
 def workmesh_to_shapekey(operator, context, ht):
@@ -196,6 +196,8 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 			continue
 
 		if source_object := bake_target.source_object:
+			ensure_applied_rotation(source_object)
+
 			pending_object = source_object.copy()
 			pending_object.name = pending_name
 			pending_object.data = source_object.data.copy()
@@ -208,7 +210,7 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 			set_uv_map(pending_object, local_uv.name)
 
 			# check if this target uses a shape key
-			if shape_key := pending_object.data.shape_keys.key_blocks.get(bake_target.shape_key_name):
+			if _ := pending_object.data.shape_keys.key_blocks.get(bake_target.shape_key_name):
 				#Remove all shapekeys except the one this object represents
 				for key in pending_object.data.shape_keys.key_blocks:
 					if key.name != bake_target.shape_key_name:
@@ -224,10 +226,10 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 		variant.uv_map = local_uv.name
 		bake_target.uv_map = bake_uv.name
 
-		update_workmesh_materials(context, ht, bake_target, variant)
+		update_workmesh_materials(bake_target, variant)
 
 
-def update_workmesh_materials(context, ht,  bake_target, variant):
+def update_workmesh_materials(bake_target, variant):
 	#TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
 	if not variant.uv_map:
 		variant.workmesh.active_material = None

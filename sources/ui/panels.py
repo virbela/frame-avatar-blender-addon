@@ -1,6 +1,8 @@
+from ast import increment_lineno
 import bpy
 import functools
 from ..properties import *
+from ..logging import log_writer as log
 from ..exceptions import InternalError
 from ..helpers import require_work_scene, require_bake_scene, pending_classes, is_dev
 
@@ -69,7 +71,7 @@ class FRAME_PT_workflow(frame_panel):
 				atlas_setup.prop(HT, 'atlas_size')
 				atlas_setup.prop(HT, 'color_percentage')
 				h = int(HT.color_percentage * HT.atlas_size / 100)
-				atlas_setup.label(text=f'Height in pixels: {h}')
+				atlas_setup.label(text=f'Color Region Height in pixels: {h}')
 
 				atlas_setup.operator('frame.auto_assign_atlas')
 				atlas_setup.operator('frame.pack_uv_islands')
@@ -77,11 +79,9 @@ class FRAME_PT_workflow(frame_panel):
 			work_materials = self.layout.box()
 			work_materials.prop(scene.ui_state, "workflow_work_materials_visible", text="Work Materials")
 			if scene.ui_state.workflow_work_materials_visible:
-				work_materials.operator('frame.update_all_materials')
-				work_materials.operator('frame.update_selected_material')
-				# TODO(ranjian0) Fix
-				# work_materials.operator('frame.switch_to_bake_material')
-				# work_materials.operator('frame.switch_to_preview_material')
+				col = work_materials.column(align=True)
+				col.operator('frame.update_all_materials')
+				col.operator('frame.update_selected_material')
 
 				work_materials.separator()
 				work_materials.operator('frame.select_by_atlas')
@@ -92,28 +92,35 @@ class FRAME_PT_workflow(frame_panel):
 			if scene.ui_state.workflow_baking_visible:
 				try:
 					bake_scene = require_bake_scene(context)
-					baking.prop(bake_scene.cycles, "samples", text="Bake Samples")
-					baking.prop(bake_scene.render.bake, "margin", text="Bake Margin")
-					baking.operator('frame.bake_all')
-					baking.operator('frame.bake_selected_bake_target')
-					baking.operator('frame.bake_selected_workmeshes')
-				except AttributeError:
+					selection = [o for o in context.selected_objects]
+					col = baking.column(align=True)
+					col.prop(bake_scene.cycles, "samples", text="Bake Samples")
+					col.prop(bake_scene.render.bake, "margin", text="Bake Margin")
+					baking.row(align=True).prop(HT, 'baking_options', expand=True)
+					baking.prop_search(HT, 'baking_target_uvmap', selection[0].data, "uv_layers")
+
+					col = baking.column(align=True)
+					col.operator('frame.bake_all')
+					col.operator('frame.bake_selected_bake_target')
+					col.operator('frame.bake_selected_workmeshes')
+				except AttributeError as e:
+					log.info(e)
 					baking.label(text='Please ensure Cycles Render Engine is enabled in the addons list!', icon='ERROR')
 			helper_tools = self.layout.box()
 			helper_tools.prop(scene.ui_state, "workflow_helpers_visible", text="Helpers")
 			if scene.ui_state.workflow_helpers_visible:
-				helper_tools.operator('frame.synchronize_uv_to_vertices')
-				helper_tools.operator('frame.select_objects_by_uv')
-				helper_tools.operator('frame.synchronize_visibility_to_render')
-				helper_tools.operator('frame.make_everything_visible')
-				helper_tools.operator('frame.reset_uv_transforms')
-				helper_tools.operator('frame.recalculate_normals')
+				col = helper_tools.column(align=True)
+				col.operator('frame.synchronize_uv_to_vertices')
+				col.operator('frame.select_objects_by_uv')
+				col.operator('frame.synchronize_visibility_to_render')
+				col.operator('frame.make_everything_visible')
+				col.operator('frame.reset_uv_transforms')
+				col.operator('frame.recalculate_normals')
 
 			if is_dev():
 				debug = self.layout.box()
 				debug.label(text='Debug tools')
 				debug.operator('frame.clear_bake_scene')
-				debug.operator('frame.clear_bake_targets')
 
 
 
@@ -134,24 +141,19 @@ class template_expandable_section:
 
 
 def draw_variant(layout, variant, bake_scene):
-	layout.prop(variant, 'image')
+	col = layout.column(align=True)
 
-	layout.prop_search(variant, 'workmesh', bake_scene, 'objects')
+	col.prop(variant, 'image')
+	col.prop_search(variant, 'workmesh', bake_scene, 'objects')
 	if variant.workmesh:
-		layout.prop_search(variant, 'uv_map', variant.workmesh.data, 'uv_layers')
+		col.prop_search(variant, 'uv_map', variant.workmesh.data, 'uv_layers')
 	else:
-		layout.label(text='Select work mesh to choose UV map')
+		col.label(text='Select work mesh to choose UV map')
 
 	#TODO - this should perhaps not be visible?
+	col.prop(variant, "intermediate_atlas")
 	if variant.intermediate_atlas is None:
-		layout.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
-	else:
-		if preview := variant.intermediate_atlas.preview:
-			layout.label(text=f"Intermediate atlas: {variant.intermediate_atlas.name}", icon_value=preview.icon_id)
-		else:
-			layout.label(text=f"Intermediate atlas: {variant.intermediate_atlas.name}", icon='FILE_IMAGE')
-	layout.prop(variant, "intermediate_atlas")
-	# layout.prop(variant, "uv_target_channel")
+		col.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
 
 
 class FRAME_PT_batch_bake_targets(frame_panel):
@@ -166,25 +168,30 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 			HT = scene.homeomorphictools
 			bake_scene = require_bake_scene(context)
 
-			self.layout.template_list('FRAME_UL_bake_targets', '', HT,  'bake_target_collection', HT, 'selected_bake_target')
+			row = self.layout.row()
 
-			bake_target_actions = self.layout.row(align=True)
-			bake_target_actions.operator('frame.add_bake_target')
-			bake_target_actions.operator('frame.remove_bake_target')
+			rows = 3
+			if HT.selected_bake_target != -1:
+				rows = 5
 
-			#TODO - document the reasoning behind all this
-			#TODO - divy up this into a few functions to make it less messy
+			row.template_list('FRAME_UL_bake_targets', '', HT,  'bake_target_collection', HT, 'selected_bake_target', rows=rows)
+			col = row.column(align=True)
+			col.operator('frame.add_bake_target', icon='ADD', text='')
+			col.operator('frame.remove_bake_target', icon='REMOVE', text='')
+			col.separator()
+			col.operator('frame.show_selected_bt', icon='EDITMODE_HLT', text='')
+			col.operator('frame.clear_bake_targets', icon='X', text='')
+
 			if HT.selected_bake_target != -1:
 				et = HT.bake_target_collection[HT.selected_bake_target]
 
 				self.layout.prop_search(et, "source_object", scene, "objects")
 
 				if obj := et.source_object:
-					if shape_keys := obj.data.shape_keys:
+					if obj.data.shape_keys:
 						self.layout.prop_search(et, "shape_key_name", obj.data.shape_keys, "key_blocks")
 
 				self.layout.prop(et, 'bake_mode')
-
 				if et.bake_mode == 'UV_BM_REGULAR':
 					self.layout.prop(et, 'uv_area_weight', slider=True)
 
@@ -210,7 +217,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 							draw_variant(variants, var, bake_scene)
 
 					self.layout.prop(et, 'uv_mode')
-
 					if et.uv_mode == 'UV_IM_FROZEN':
 						self.layout.prop(et, 'atlas')
 
@@ -218,32 +224,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 					pass	#TODO
 				else:
 					raise InternalError(f'et.bake_mode set to unsupported value {et.bake_mode}')
-
-# TODO(ranjian0) Take bake groups into account
-# class FRAME_PT_bake_groups(frame_panel):
-# 	bl_label = "Bake groups"
-# 	bl_space_type = 'VIEW_3D'
-# 	bl_region_type = 'UI'
-# 	bl_category = "Avatar"
-
-# 	def draw(self, context):
-
-# 		if scene := require_work_scene(context):
-# 			HT = scene.homeomorphictools
-# 			bake_scene = require_bake_scene(context)
-
-# 			self.layout.template_list('FRAME_UL_bake_groups', '', HT, 'bake_group_collection', HT, 'selected_bake_group')
-# 			bake_group_actions = self.layout.row(align=True)
-# 			bake_group_actions.operator('frame.add_bake_group')
-# 			bake_group_actions.operator('frame.remove_bake_group')
-
-# 			if selected_group := HT.get_selected_bake_group():
-# 				group = self.layout.box()
-# 				group.label(text='Bake group members')
-# 				group.template_list('FRAME_UL_bake_group_members', '', selected_group, 'members', selected_group, 'selected_member')
-# 				group_actions = group.row(align=True)
-# 				group_actions.operator('frame.add_bake_group_member')
-# 				group_actions.operator('frame.remove_bake_group_member')
 
 
 class FRAME_PT_effects(frame_panel):
@@ -265,11 +245,16 @@ class FRAME_PT_effects(frame_panel):
 			effect_actions.operator('frame.remove_effect')
 
 			if HT.selected_effect != -1:
-				key = ob.data.shape_keys
-				if key:
-					et = HT.effect_collection[HT.selected_effect]
-					self.layout.prop_search(et, "parent_shapekey", key, "key_blocks")
-					self.layout.prop_search(et, "effect_shapekey", key, "key_blocks")
+				if ob.type == "MESH":
+					key = ob.data.shape_keys
+					if key:
+						et = HT.effect_collection[HT.selected_effect]
+						self.layout.prop_search(et, "parent_shapekey", key, "key_blocks")
+						self.layout.prop_search(et, "effect_shapekey", key, "key_blocks")
+					else:
+						self.layout.label(text="Selected object is not an Avatar!", icon="ERROR")	
+				else:
+					self.layout.label(text="Selected object has no shapekeys!", icon="ERROR")
 
 
 class FRAME_PT_export(frame_panel):

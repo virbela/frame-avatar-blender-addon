@@ -5,8 +5,7 @@ distribution_name = frame-avatar-blender-addon
 QUIET_MODE = @
 
 distribution/$(distribution_name).zip: $(wildcard sources/*.py)
-	cd distribution && \
-	ln -fs ../sources $(module_name) && \
+	ln -fs ./sources $(module_name) && \
 	zip -r $(distribution_name).zip $(module_name) -x $(module_name)/*.pyc && \
 	rm -f $(module_name)
 

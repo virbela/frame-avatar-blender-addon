@@ -11,7 +11,6 @@ from ..helpers import (
 )
 
 def update_all_materials(operator, context, ht):
-
 	for bake_target in ht.bake_target_collection:
 		for variant_name, variant in bake_target.iter_variants():
 			update_workmesh_materials(context, ht, bake_target, variant)
@@ -29,6 +28,7 @@ def switch_to_bake_material(operator, context, ht):
 
 def switch_to_preview_material(operator, context, ht):
 	generic_switch_to_material(context, ht, 'preview')
+
 
 def select_by_atlas(operator, context, ht):
 

@@ -3,11 +3,12 @@ import bpy
 import json
 import uuid
 import tempfile
+from pathlib import Path
 from contextlib import contextmanager
 
-from .common import popup_message
 from ..logging import log_writer as log
-from ..vertex_animation import generate_animation_shapekeys
+from ..helpers import ensure_applied_rotation, get_prefs, popup_message
+from ..animation import generate_animation_shapekeys
 from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
@@ -36,6 +37,7 @@ def export(operator, context, HT):
 
 def export_glb(context, ht):
     obj = context.active_object
+    ensure_applied_rotation(obj)
 
     if not obj.data.shape_keys:
         #XXX Probably Not the main avatar object
@@ -146,8 +148,11 @@ def export_glb(context, ht):
     }
 
 
+    prefs = get_prefs()
     filepath = bpy.data.filepath
     directory = os.path.dirname(filepath)
+    if os.path.exists(prefs.glb_export_dir):
+        directory = str(Path(prefs.glb_export_dir).absolute())
     outputfile_glb = os.path.join(directory , "morphic_avatar.glb")
 
     obj = bpy.data.objects['Avatar']
@@ -281,11 +286,16 @@ def export_atlas(context, denoise=True):
     mult_node.location = 900, 0
 
     # Create file output node
+    prefs = get_prefs()
+    directory = os.path.dirname(bpy.data.filepath)
+    if os.path.exists(prefs.atlas_export_dir):
+        directory = str(Path(prefs.atlas_export_dir).absolute())
+
     file_node = tree.nodes.new('CompositorNodeOutputFile')   
     file_node.location = 1100,0
     file_node.format.file_format = 'JPEG'
     file_node.format.quality = 100
-    file_node.base_path = os.path.dirname(bpy.data.filepath)
+    file_node.base_path = directory
     file_node.file_slots[0].path = "hasAtlas"
 
     # link nodes
@@ -347,6 +357,7 @@ def export_animation(context, ht):
             # Object has no armature!
             continue
 
+        ensure_applied_rotation(obj)
         animated_objects.append(obj)
     log.info(f"Animated Objects {animated_objects}")
     generate_animation_shapekeys(context, avatar_obj, animated_objects)

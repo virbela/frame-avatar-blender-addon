@@ -16,8 +16,7 @@ def bake_all_bake_targets(operator: bpy.types.Operator, context, ht):
 			bake_specific_variant(ht, view_layer, bake_target, variant)
 			# XXX bake cannot run as async here because of the loop, means we don't get
 			# meaningful progress indicator
-			run_bake(invoke=False)
-
+	run_bake(ht)
 	set_scene(context, last_active_scene)
 
 
@@ -31,7 +30,7 @@ def bake_selected_bake_target(operator, context, ht):
 	if bake_target := ht.get_selected_bake_target():
 		if variant := bake_target.variant_collection[bake_target.selected_variant]:
 			bake_specific_variant(ht, view_layer, bake_target, variant)
-			run_bake()
+			run_bake(ht)
 
 	set_scene(context, last_active_scene)
 
@@ -56,12 +55,10 @@ def bake_selected_workmeshes(operator, context, ht):
 			selection.append(get_bake_target_and_variant_from_workmesh(workmesh))
 
 
-	for bake_target, variant in selection:
+	for _, variant in selection:
 		workmesh = variant.workmesh
 
-		#TODO - we should take into account bake groups - maybe also move this out to a more generic function
-		# set_rendering(view_layer.objects, workmesh)
-		# set_selection(view_layer.objects, workmesh, synchronize_active=True, make_sure_active=True)
+		ensure_color_output_node_ready(variant, workmesh.active_material.node_tree)
 
 		# set active image in material
 		material_nodes = workmesh.active_material.node_tree.nodes
@@ -69,13 +66,15 @@ def bake_selected_workmeshes(operator, context, ht):
 
 		# set active UV index to source UV Map (since we want this in the final atlas)
 		uv_layers = workmesh.data.uv_layers
-		uv_layers.active = uv_layers[bake_target.source_uv_map]
+		uv_layers.active = uv_layers[ht.baking_target_uvmap]
 
-	run_bake()
+	run_bake(ht)
 
 
 def bake_specific_variant(ht, view_layer, bake_target, variant):
 	workmesh = variant.workmesh
+
+	ensure_color_output_node_ready(variant, workmesh.active_material.node_tree)
 
 	#TODO - we should take into account bake groups - maybe also move this out to a more generic function
 	set_rendering(view_layer.objects, workmesh)
@@ -87,18 +86,53 @@ def bake_specific_variant(ht, view_layer, bake_target, variant):
 
 	# set active UV index to source UV Map (since we want this in the final atlas)
 	uv_layers = workmesh.data.uv_layers
-	uv_layers.active = uv_layers[bake_target.source_uv_map]
+	uv_layers.active = uv_layers[ht.baking_target_uvmap]
 
 
-def run_bake(invoke=True):
+def run_bake(ht, invoke=True):
 	bpy.context.scene.cycles.device = 'GPU'
 	bpy.context.scene.render.engine = 'CYCLES'
 	bpy.context.scene.render.bake.use_clear = False
-	bpy.context.scene.render.bake.use_pass_color = True
-	bpy.context.scene.render.bake.use_pass_direct = False
-	bpy.context.scene.render.bake.use_pass_indirect = False
+	if ht.baking_options == "DIFFUSE":
+		bpy.context.scene.render.bake.use_pass_color = True
+		bpy.context.scene.render.bake.use_pass_direct = False
+		bpy.context.scene.render.bake.use_pass_indirect = False
+	elif ht.baking_options == "COMBINED":
+		bpy.context.scene.render.bake.use_pass_direct = True
+		bpy.context.scene.render.bake.use_pass_indirect = True
+		bpy.context.scene.render.bake.use_pass_diffuse = True
+		bpy.context.scene.render.bake.use_pass_glossy = True
+		bpy.context.scene.render.bake.use_pass_emit = True
+		bpy.context.scene.render.bake.use_pass_transmission = True
+
 	bpy.context.scene.view_settings.view_transform = 'Standard'
 	if invoke:
-		bpy.ops.object.bake('INVOKE_DEFAULT', type='DIFFUSE')
+		bpy.ops.object.bake('INVOKE_DEFAULT', type=ht.baking_options)
 	else:
-		bpy.ops.object.bake(type='DIFFUSE')
+		bpy.ops.object.bake(type=ht.baking_options)
+
+
+def ensure_color_output_node_ready(variant, tree):
+	material_nodes = tree.nodes
+	material_links = tree.links
+
+	# ensure the texture output goes through diffusebsdf
+	texnode = None 
+	for node in material_nodes:
+		if isinstance(node, bpy.types.ShaderNodeTexImage):
+			if node.image == variant.image:
+				texnode = node
+				break
+
+	outputnode = [n for n in material_nodes if isinstance(n, bpy.types.ShaderNodeOutputMaterial)].pop()
+	diffusenode = [n for n in material_nodes if isinstance(n, bpy.types.ShaderNodeBsdfPrincipled)].pop()
+
+	# remove all links from the texnode or the diffuse node
+	for link in material_links:
+		if link.from_node in [texnode, diffusenode]:
+			tree.links.remove(link)
+
+	# rebuild the links
+	tree.links.new(texnode.outputs[0], diffusenode.inputs[0])
+	tree.links.new(diffusenode.outputs[0], outputnode.inputs[0])
+	
