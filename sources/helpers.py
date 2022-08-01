@@ -263,6 +263,7 @@ def is_dev():
 			return False
 	return True
 
+
 def get_prefs():
 	try:
 		preferences = bpy.context.preferences.addons[__package__].preferences
@@ -275,3 +276,10 @@ def get_prefs():
 		preferences.custom_export_dir = os.getenv('FRAME_EXPORT_DIR')
 		preferences.save_intermediate_atlases = False
 		return preferences
+
+
+def popup_message(message, title="Error", icon="ERROR"):
+    def oops(self, context):
+        self.layout.label(text=message)
+
+    bpy.context.window_manager.popup_menu(oops, title=title, icon=icon)

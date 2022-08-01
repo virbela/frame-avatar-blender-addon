@@ -5,7 +5,7 @@ import uuid
 import tempfile
 from contextlib import contextmanager
 
-from .common import popup_message
+from ..helpers import popup_message
 from ..logging import log_writer as log
 from ..animation import generate_animation_shapekeys
 from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh

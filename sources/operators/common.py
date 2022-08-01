@@ -53,12 +53,6 @@ def transfer_variant(source, dest):
 	dest.image = source.image
 	dest.uv_map = source.uv_map
 
-def popup_message(message, title="Error", icon="ERROR"):
-    def oops(self, context):
-        self.layout.label(text=message)
-
-    bpy.context.window_manager.popup_menu(oops, title=title, icon=icon)
-
 def poll_bake_scene(context):
 	return context.scene.name == BAKE_SCENE
 
