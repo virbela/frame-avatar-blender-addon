@@ -1,3 +1,4 @@
+from ast import increment_lineno
 import bpy
 import functools
 from ..properties import *
@@ -140,24 +141,19 @@ class template_expandable_section:
 
 
 def draw_variant(layout, variant, bake_scene):
-	layout.prop(variant, 'image')
+	col = layout.column(align=True)
 
-	layout.prop_search(variant, 'workmesh', bake_scene, 'objects')
+	col.prop(variant, 'image')
+	col.prop_search(variant, 'workmesh', bake_scene, 'objects')
 	if variant.workmesh:
-		layout.prop_search(variant, 'uv_map', variant.workmesh.data, 'uv_layers')
+		col.prop_search(variant, 'uv_map', variant.workmesh.data, 'uv_layers')
 	else:
-		layout.label(text='Select work mesh to choose UV map')
+		col.label(text='Select work mesh to choose UV map')
 
 	#TODO - this should perhaps not be visible?
+	col.prop(variant, "intermediate_atlas")
 	if variant.intermediate_atlas is None:
-		layout.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
-	else:
-		if preview := variant.intermediate_atlas.preview:
-			layout.label(text=f"Intermediate atlas: {variant.intermediate_atlas.name}", icon_value=preview.icon_id)
-		else:
-			layout.label(text=f"Intermediate atlas: {variant.intermediate_atlas.name}", icon='FILE_IMAGE')
-	layout.prop(variant, "intermediate_atlas")
-	# layout.prop(variant, "uv_target_channel")
+		col.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
 
 
 class FRAME_PT_batch_bake_targets(frame_panel):
@@ -172,11 +168,19 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 			HT = scene.homeomorphictools
 			bake_scene = require_bake_scene(context)
 
-			self.layout.template_list('FRAME_UL_bake_targets', '', HT,  'bake_target_collection', HT, 'selected_bake_target')
+			row = self.layout.row()
 
-			bake_target_actions = self.layout.row(align=True)
-			bake_target_actions.operator('frame.add_bake_target')
-			bake_target_actions.operator('frame.remove_bake_target')
+			rows = 3
+			if HT.selected_bake_target != -1:
+				rows = 5
+
+			row.template_list('FRAME_UL_bake_targets', '', HT,  'bake_target_collection', HT, 'selected_bake_target', rows=rows)
+			col = row.column(align=True)
+			col.operator('frame.add_bake_target', icon='ADD', text='')
+			col.operator('frame.remove_bake_target', icon='REMOVE', text='')
+			col.separator()
+			col.operator('frame.show_selected_bt', icon='EDITMODE_HLT', text='')
+			col.operator('frame.clear_bake_targets', icon='X', text='')
 
 			#TODO - document the reasoning behind all this
 			#TODO - divy up this into a few functions to make it less messy
@@ -190,7 +194,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 						self.layout.prop_search(et, "shape_key_name", obj.data.shape_keys, "key_blocks")
 
 				self.layout.prop(et, 'bake_mode')
-
 				if et.bake_mode == 'UV_BM_REGULAR':
 					self.layout.prop(et, 'uv_area_weight', slider=True)
 
@@ -216,7 +219,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 							draw_variant(variants, var, bake_scene)
 
 					self.layout.prop(et, 'uv_mode')
-
 					if et.uv_mode == 'UV_IM_FROZEN':
 						self.layout.prop(et, 'atlas')
 

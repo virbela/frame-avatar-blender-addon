@@ -249,7 +249,7 @@ class FRAME_OT_synchronize_mirrors(frame_operator):
 
 # Bake Targets UI List
 class FRAME_OT_add_bake_target(frame_operator):
-    bl_label =			"+"
+    bl_label =			"Add Baketarget"
     bl_description = 	'Create new bake target'
     bl_idname = 		'frame.add_bake_target'
     frame_operator = 	operations.bake_targets.add
@@ -258,13 +258,13 @@ class FRAME_OT_show_selected_bt(frame_operator):
     bl_label =			"Edit selected"
     bl_description = 	(
                             'Edit selected bake target.\n'
-                            'Activates shape key is needed'
+                            'Activates shape key as needed'
                         )
     bl_idname = 		'frame.show_selected_bt'
     frame_operator = 	operations.bake_targets.edit_selected
 
 class FRAME_OT_remove_bake_target(frame_operator):
-    bl_label = 			"-"
+    bl_label = 			"Remove Selected"
     bl_description = 	'Remove selected bake target'
     bl_idname = 		'frame.remove_bake_target'
     frame_operator = 	operations.bake_targets.remove
