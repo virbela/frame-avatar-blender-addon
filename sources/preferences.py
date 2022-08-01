@@ -14,11 +14,9 @@ class FrameAddonPreferences(bpy.types.AddonPreferences):
 										name='Atlas Export Dir', 
 										description='Folder to use for atlas export (default is current blendfile folder).', subtype='DIR_PATH'
 									)
-	save_intermediate_atlases: 		bpy.props.BoolProperty(name="Save intermediate atlases externally", default=False)
 
 	def draw(self, context):
 		layout = self.layout
 		layout.prop(self, 'log_target')
 		layout.prop(self, 'glb_export_dir')
 		layout.prop(self, 'atlas_export_dir')
-		layout.prop(self, 'save_intermediate_atlases')
