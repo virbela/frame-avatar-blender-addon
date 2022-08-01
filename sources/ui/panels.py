@@ -78,8 +78,9 @@ class FRAME_PT_workflow(frame_panel):
 			work_materials = self.layout.box()
 			work_materials.prop(scene.ui_state, "workflow_work_materials_visible", text="Work Materials")
 			if scene.ui_state.workflow_work_materials_visible:
-				work_materials.operator('frame.update_all_materials')
-				work_materials.operator('frame.update_selected_material')
+				col = work_materials.column(align=True)
+				col.operator('frame.update_all_materials')
+				col.operator('frame.update_selected_material')
 				# TODO(ranjian0) Fix
 				# work_materials.operator('frame.switch_to_bake_material')
 				# work_materials.operator('frame.switch_to_preview_material')
