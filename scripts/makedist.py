@@ -38,7 +38,7 @@ upto = args[0]
 earliest = git("rev-list", "--reverse", upto).split(b"\n")[0].strip().decode()
 
 basename = "frame_avatar_addon"
-outfilename = "distribution/%s_%s.zip" % (basename, upto)
+outfilename = f"{basename}_{upto}.zip"
 if pathlib.Path(outfilename).exists():
     os.remove(outfilename)
 out = zipfile.ZipFile(outfilename, "x")
