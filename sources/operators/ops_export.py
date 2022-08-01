@@ -7,7 +7,7 @@ from contextlib import contextmanager
 
 from .common import popup_message
 from ..logging import log_writer as log
-from ..vertex_animation import generate_animation_shapekeys
+from ..animation import generate_animation_shapekeys
 from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
