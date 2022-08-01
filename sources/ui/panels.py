@@ -109,18 +109,18 @@ class FRAME_PT_workflow(frame_panel):
 			helper_tools = self.layout.box()
 			helper_tools.prop(scene.ui_state, "workflow_helpers_visible", text="Helpers")
 			if scene.ui_state.workflow_helpers_visible:
-				helper_tools.operator('frame.synchronize_uv_to_vertices')
-				helper_tools.operator('frame.select_objects_by_uv')
-				helper_tools.operator('frame.synchronize_visibility_to_render')
-				helper_tools.operator('frame.make_everything_visible')
-				helper_tools.operator('frame.reset_uv_transforms')
-				helper_tools.operator('frame.recalculate_normals')
+				col = helper_tools.column(align=True)
+				col.operator('frame.synchronize_uv_to_vertices')
+				col.operator('frame.select_objects_by_uv')
+				col.operator('frame.synchronize_visibility_to_render')
+				col.operator('frame.make_everything_visible')
+				col.operator('frame.reset_uv_transforms')
+				col.operator('frame.recalculate_normals')
 
 			if is_dev():
 				debug = self.layout.box()
 				debug.label(text='Debug tools')
 				debug.operator('frame.clear_bake_scene')
-				debug.operator('frame.clear_bake_targets')
 
 
 
