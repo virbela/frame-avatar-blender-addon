@@ -82,9 +82,6 @@ class FRAME_PT_workflow(frame_panel):
 				col = work_materials.column(align=True)
 				col.operator('frame.update_all_materials')
 				col.operator('frame.update_selected_material')
-				# TODO(ranjian0) Fix
-				# work_materials.operator('frame.switch_to_bake_material')
-				# work_materials.operator('frame.switch_to_preview_material')
 
 				work_materials.separator()
 				work_materials.operator('frame.select_by_atlas')
@@ -226,32 +223,6 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 					pass	#TODO
 				else:
 					raise InternalError(f'et.bake_mode set to unsupported value {et.bake_mode}')
-
-# TODO(ranjian0) Take bake groups into account
-# class FRAME_PT_bake_groups(frame_panel):
-# 	bl_label = "Bake groups"
-# 	bl_space_type = 'VIEW_3D'
-# 	bl_region_type = 'UI'
-# 	bl_category = "Avatar"
-
-# 	def draw(self, context):
-
-# 		if scene := require_work_scene(context):
-# 			HT = scene.homeomorphictools
-# 			bake_scene = require_bake_scene(context)
-
-# 			self.layout.template_list('FRAME_UL_bake_groups', '', HT, 'bake_group_collection', HT, 'selected_bake_group')
-# 			bake_group_actions = self.layout.row(align=True)
-# 			bake_group_actions.operator('frame.add_bake_group')
-# 			bake_group_actions.operator('frame.remove_bake_group')
-
-# 			if selected_group := HT.get_selected_bake_group():
-# 				group = self.layout.box()
-# 				group.label(text='Bake group members')
-# 				group.template_list('FRAME_UL_bake_group_members', '', selected_group, 'members', selected_group, 'selected_member')
-# 				group_actions = group.row(align=True)
-# 				group_actions.operator('frame.add_bake_group_member')
-# 				group_actions.operator('frame.remove_bake_group_member')
 
 
 class FRAME_PT_effects(frame_panel):
