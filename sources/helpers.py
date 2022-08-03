@@ -274,8 +274,8 @@ def get_prefs():
 		import types
 		preferences = types.SimpleNamespace()
 		preferences.log_target = "devlog"
-		preferences.custom_export_dir = os.getenv('FRAME_EXPORT_DIR')
-		preferences.save_intermediate_atlases = False
+		preferences.glb_export_dir = ""
+		preferences.atlas_export_dir = ""
 		return preferences
 
 
