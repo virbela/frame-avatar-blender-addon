@@ -341,10 +341,39 @@ class FRAME_OT_remove_effect(frame_operator):
 
 class FRAME_OT_add_effect(frame_operator):
     bl_label = 			"+"
-    bl_description = 	'Add variant'
+    bl_description = 	'Add Effect'
     bl_idname = 		'frame.add_effect'
     frame_operator =	operations.effects.add
 
+
+class FRAME_OT_remove_position_effect(frame_operator):
+    bl_label = 			"-"
+    bl_description = 	'Remove position effect'
+    bl_idname = 		'frame.remove_position_effect'
+    frame_operator = 	operations.effects.remove_position_effect
+
+    index: bpy.props.IntProperty()
+
+class FRAME_OT_add_position_effect(frame_operator):
+    bl_label = 			"+"
+    bl_description = 	'Add postion effect'
+    bl_idname = 		'frame.add_position_effect'
+    frame_operator =	operations.effects.add_position_effect
+
+
+class FRAME_OT_remove_color_effect(frame_operator):
+    bl_label = 			"-"
+    bl_description = 	'Remove color effect'
+    bl_idname = 		'frame.remove_color_effect'
+    frame_operator = 	operations.effects.remove_color_effect
+
+    index: bpy.props.IntProperty()
+
+class FRAME_OT_add_color_effect(frame_operator):
+    bl_label = 			"+"
+    bl_description = 	'Add postion effect'
+    bl_idname = 		'frame.add_color_effect'
+    frame_operator =	operations.effects.add_color_effect
 
 # DEVMODE
 class FRAME_OT_node_get_links(frame_operator):

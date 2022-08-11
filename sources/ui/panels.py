@@ -234,7 +234,7 @@ class FRAME_PT_effects(frame_panel):
 
 	def draw(self, context):
 		ob = context.object
-		if not ob:
+		if not ob or ob.type != 'MESH':
 			return 
 
 		if scene := require_work_scene(context):
@@ -245,16 +245,30 @@ class FRAME_PT_effects(frame_panel):
 			effect_actions.operator('frame.remove_effect')
 
 			if HT.selected_effect != -1:
-				if ob.type == "MESH":
-					key = ob.data.shape_keys
-					if key:
-						et = HT.effect_collection[HT.selected_effect]
-						self.layout.prop_search(et, "parent_shapekey", key, "key_blocks")
-						self.layout.prop_search(et, "effect_shapekey", key, "key_blocks")
-					else:
-						self.layout.label(text="Selected object is not an Avatar!", icon="ERROR")	
-				else:
-					self.layout.label(text="Selected object has no shapekeys!", icon="ERROR")
+				et = HT.effect_collection[HT.selected_effect]
+				self.layout.prop(et, "type")
+
+				key = ob.data.shape_keys
+				if et.type == 'POSITION':
+					for idx, pos in enumerate(et.positions):
+						box = self.layout.box()
+						row = box.row()
+						row.prop_search(pos, "parent_shapekey", key, "key_blocks", text="")
+						row.label(icon='TRIA_RIGHT')
+						row.prop_search(pos, "effect_shapekey", key, "key_blocks", text="")
+						row.operator("frame.remove_position_effect", icon="X", text="").index = idx
+					self.layout.operator("frame.add_position_effect")
+
+				elif et.type == 'COLOR':
+					for idx, col in enumerate(et.colors):
+						box = self.layout.box()
+						row = box.row()
+						row.prop_search(col, "shape", key, "key_blocks", text="")
+						row.label(icon='TRIA_RIGHT')
+						row.prop(col, "color", text="")
+						row.operator("frame.remove_color_effect", icon="X", text="").index = idx
+						box.prop_search(col, "vert_group", ob, "vertex_groups", text="")
+					self.layout.operator("frame.add_color_effect")
 
 
 class FRAME_PT_export(frame_panel):
