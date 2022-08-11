@@ -453,7 +453,12 @@ def get_verts_or_vgroup(obj, color_effect):
     def filter_by_vgroup(data):
         index, _ = data
         group = obj.vertex_groups.get(color_effect.vert_group)
-        return group.weight(index) > 0.5
+        try:
+            group.weight(index)
+        except RuntimeError:
+            # current vert not in vgroup
+            return False
+        return True
 
     # only the vertices with a weight in the vert group
     data_only_in_group = filter(filter_by_vgroup, data)
