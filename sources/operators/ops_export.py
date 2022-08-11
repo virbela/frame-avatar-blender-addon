@@ -95,7 +95,7 @@ def export_glb(context, ht):
         else:
             return (0, 0, 0, 0)
 
-    effect_names = [e.effect_shapekey for e in ht.effect_collection]
+    effect_names = [pos.effect_shapekey for e in ht.effect_collection for pos in e.positions]
     for bake_target in ht.bake_target_collection:
         if 'effect' in bake_target.shortname.lower() or bake_target.shortname.lower() in effect_names:
             log.info("Skipping effect bake target")
@@ -140,7 +140,7 @@ def export_glb(context, ht):
                     "ids": [v[0] for v in effect_verts],
                     "data": [v[1] for v in effect_verts]
                 }
-                morph = uv_transform_extra_data[effect.parent_shapekey]
+                morph = uv_transform_extra_data[pos.parent_shapekey]
                 if 'effects' not in morph.keys():
                     morph['effects'] = dict()
 
@@ -153,7 +153,7 @@ def export_glb(context, ht):
                     "ids": [v[0] for v in effect_verts],
                     "data": [v[1] for v in effect_verts]
                 }
-                morph = uv_transform_extra_data[effect.parent_shapekey]
+                morph = uv_transform_extra_data[col.shape]
                 if 'effects' not in morph.keys():
                     morph['effects'] = dict()
 
@@ -178,7 +178,7 @@ def export_glb(context, ht):
     if ht.export_animation:
         export_animation(context, ht)
 
-    post_process_effects(ht.effect_collection, obj)
+    # post_process_effects(ht.effect_collection, obj)
     with clear_custom_props(obj):
         obj['MorphSets_Avatar'] = morphsets_dict
 
@@ -444,7 +444,7 @@ def calculate_effect_delta(obj, effect):
 
 
 def get_verts_or_vgroup(obj, color_effect):
-    data = sorted([(v.index, color_effect.color) for v in obj.data.vertices], key=lambda v: v[0])
+    data = sorted([(v.index, list(color_effect.color)[:3]) for v in obj.data.vertices], key=lambda v: v[0])
 
     if not color_effect.vert_group:
         # no vert weights, return all verts
