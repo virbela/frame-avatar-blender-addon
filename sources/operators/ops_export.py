@@ -132,15 +132,32 @@ def export_glb(context, ht):
 
     # build effects
     for effect in ht.effect_collection:
-        effect_verts = calculate_effect_delta(obj, effect)
-        data = {
-            effect.name: {
-                "ids": [v[0] for v in effect_verts],
-                "positions": [v[1] for v in effect_verts]
-            }
-        }
-        uv_transform_extra_data[effect.parent_shapekey]['effects'] = data
+        if effect.type == "POSITION":
+            for pos in effect.positions:
+                effect_verts = calculate_effect_delta(obj, pos)
+                data = {
+                    "type": 'POSITION',
+                    "ids": [v[0] for v in effect_verts],
+                    "data": [v[1] for v in effect_verts]
+                }
+                morph = uv_transform_extra_data[effect.parent_shapekey]
+                if 'effects' not in morph.keys():
+                    morph['effects'] = dict()
 
+                morph['effects'][effect.name] = data
+        elif effect.type == "COLOR":
+            for col in effect.colors:
+                effect_verts = get_verts_or_vgroup(obj, col)
+                data = {
+                    "type": "COLOR",
+                    "ids": [v[0] for v in effect_verts],
+                    "data": [v[1] for v in effect_verts]
+                }
+                morph = uv_transform_extra_data[effect.parent_shapekey]
+                if 'effects' not in morph.keys():
+                    morph['effects'] = dict()
+
+                morph['effects'][effect.name] = data
 
     morphsets_dict = {
         "Morphs": uv_transform_extra_data,
@@ -424,6 +441,23 @@ def calculate_effect_delta(obj, effect):
     # bm.to_mesh(me)
     # bm.free()
     return result
+
+
+def get_verts_or_vgroup(obj, color_effect):
+    data = sorted([(v.index, color_effect.color) for v in obj.data.vertices], key=lambda v: v[0])
+
+    if not color_effect.vert_group:
+        # no vert weights, return all verts
+        return data
+
+    def filter_by_vgroup(data):
+        index, _ = data
+        group = obj.vertex_groups.get(color_effect.vert_group)
+        return group.weight(index) > 0.5
+
+    # only the vertices with a weight in the vert group
+    data_only_in_group = filter(filter_by_vgroup, data)
+    return list(data_only_in_group)
 
 
 def obj_from_shapekey(obj, keyname):
