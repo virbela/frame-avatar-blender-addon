@@ -144,7 +144,7 @@ def export_glb(context, ht):
                 if 'effects' not in morph.keys():
                     morph['effects'] = dict()
 
-                morph['effects'][effect.name] = data
+                morph['effects'][effect.name.strip(' ')] = data
         elif effect.type == "COLOR":
             for col in effect.colors:
                 effect_verts = get_verts_or_vgroup(obj, col)
@@ -157,7 +157,7 @@ def export_glb(context, ht):
                 if 'effects' not in morph.keys():
                     morph['effects'] = dict()
 
-                morph['effects'][effect.name] = data
+                morph['effects'][effect.name.strip(' ')] = data
 
     morphsets_dict = {
         "Morphs": uv_transform_extra_data,
