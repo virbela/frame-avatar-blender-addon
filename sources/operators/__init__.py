@@ -356,7 +356,7 @@ class FRAME_OT_remove_position_effect(frame_operator):
 
 class FRAME_OT_add_position_effect(frame_operator):
     bl_label = 			"+"
-    bl_description = 	'Add postion effect'
+    bl_description = 	'Add position effect'
     bl_idname = 		'frame.add_position_effect'
     frame_operator =	operations.effects.add_position_effect
 
@@ -371,7 +371,7 @@ class FRAME_OT_remove_color_effect(frame_operator):
 
 class FRAME_OT_add_color_effect(frame_operator):
     bl_label = 			"+"
-    bl_description = 	'Add postion effect'
+    bl_description = 	'Add color effect'
     bl_idname = 		'frame.add_color_effect'
     frame_operator =	operations.effects.add_color_effect
 
