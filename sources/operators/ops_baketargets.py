@@ -223,3 +223,23 @@ class effects:
 
 	def remove(operator, context, ht):
 		generic_list.remove(ht.effect_collection, a_get(ht, 'selected_effect'), a_set(ht, 'selected_effect'))
+
+	def add_position_effect(operator, context, ht):
+		if ht.selected_effect != -1:
+			et = ht.effect_collection[ht.selected_effect]
+			pos = et.positions.add()
+
+	def remove_position_effect(operator, context, ht):
+		if ht.selected_effect != -1:
+			et = ht.effect_collection[ht.selected_effect]
+			et.positions.remove(operator.index)
+
+	def add_color_effect(operator, context, ht):
+		if ht.selected_effect != -1:
+			et = ht.effect_collection[ht.selected_effect]
+			pos = et.colors.add()
+
+	def remove_color_effect(operator, context, ht):
+		if ht.selected_effect != -1:
+			et = ht.effect_collection[ht.selected_effect]
+			et.colors.remove(operator.index)

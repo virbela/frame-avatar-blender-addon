@@ -110,6 +110,16 @@ BAKING_MODE = enum_descriptor(
 )
 
 
+EFFECT_TYPE = enum_descriptor(
+	('POSITION',			'Position Effect',			'Effect to transform shape positions',
+		'',			0),
+
+	('COLOR',				'Color Effect',				'Effect to override shape color',
+		'',			1),
+
+)
+
+
 def update_atlas(self, context):
 	# when atlas is set, also set the uv_channel
 	if 'red' in self.intermediate_atlas.name:
@@ -289,15 +299,18 @@ class BakeTarget(frame_property_group):
 class BakeTargetReference(frame_property_group):
 	target:					bpy.props.IntProperty(name='Bake target identifier', default=-1)
 
+
 class BakeGroup(frame_property_group):
 	name: 					bpy.props.StringProperty(name="Group name", default='Untitled group')
 	members:				bpy.props.CollectionProperty(type = BakeTargetReference)
 	selected_member:		bpy.props.IntProperty(name = "Selected bake target", default = -1)
 
+
 class BakeTargetMirrorEntry(frame_property_group):
 	#Here I wanted to use PointerProperty but they don't really act as the name implies. See contribution note 7 for more details.
 	primary: 				bpy.props.IntProperty(name='Primary bake target identifier', default=-1)
 	secondary: 				bpy.props.IntProperty(name='Secondary bake target identifier', default=-1)
+
 
 def update_atlas_size(self, context):
 	atlas_images = [im for im in bpy.data.images if 'atlas_intermediate' in im.name]
@@ -310,10 +323,8 @@ def update_atlas_size(self, context):
 				at.scale(ats, ats)
 				at.update()
 
-class EffectProperty(frame_property_group):
-	name: 					bpy.props.StringProperty(name="Effect Name", default='Untitled Effect')
-	target:					bpy.props.IntProperty(name='Effect identifier', default=-1)
 
+class PositionEffect(frame_property_group):
 	parent_shapekey: 		bpy.props.StringProperty(
 								name="Parent Shapekey",
 								description="Shape key used as the relative key for this effect"
@@ -322,6 +333,26 @@ class EffectProperty(frame_property_group):
 								name="Effect Shapekey",
 								description="Shape key with the final effect"
 							)
+
+class ColorEffect(frame_property_group):
+	shape: 					bpy.props.StringProperty(name="Target Shapekey")
+	color: 					bpy.props.FloatVectorProperty(name="Color", subtype='COLOR',
+								size = 4,
+								min = 0.0,
+								max = 1.0,
+								default = (1.0,1.0,1.0,1.0)
+							)
+	vert_group: 			bpy.props.StringProperty(name="Vertex Group")
+
+
+class EffectProperty(frame_property_group):
+	name: 					bpy.props.StringProperty(name="Effect Name", default='Untitled Effect')
+	type: 					bpy.props.EnumProperty(items=tuple(EFFECT_TYPE), name="Effect Type")
+	target:					bpy.props.IntProperty(name='Effect identifier', default=-1)
+
+	positions: 				bpy.props.CollectionProperty(type = PositionEffect)
+	colors: 				bpy.props.CollectionProperty(type = ColorEffect)
+
 
 class HomeomorphicProperties(frame_property_group):
 
