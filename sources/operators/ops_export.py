@@ -310,7 +310,7 @@ def export_atlas(context, denoise=True):
 
     file_node = tree.nodes.new('CompositorNodeOutputFile')   
     file_node.location = 1100,0
-    file_node.format.file_format = 'JPEG'
+    file_node.format.file_format = 'PNG'
     file_node.format.quality = 100
     file_node.base_path = directory
     file_node.file_slots[0].path = "hasAtlas"
@@ -347,7 +347,7 @@ def export_atlas(context, denoise=True):
         if 'hasAtlas' in f:
             os.rename(
                 os.path.join(dirname, f),
-                os.path.join(dirname, 'hasAtlas.jpg')
+                os.path.join(dirname, 'hasAtlas.png')
             )
 
 
