@@ -353,7 +353,7 @@ def export_atlas(context, denoise=True):
 
 def export_animation(context, ht):
 
-    avatar_obj = None
+    avatar_obj = bpy.data.objects['Avatar']
     animated_objects = []
     for bake_target in ht.bake_target_collection:
         if not avatar_obj:
