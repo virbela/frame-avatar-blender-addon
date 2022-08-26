@@ -47,8 +47,8 @@ def create_baketarget_from_key_blocks(ht, source_object, key_blocks, bake_scene)
 		for sk in key_blocks:
 			key = sk.name
 			# XXX Skip all effect key blocks
-			# if 'effect' in key.lower():
-			# 	continue
+			if 'effect' in key.lower():
+				continue
 
 			targets[key] = intermediate.pending.bake_target(
 				name = f'{source_object.name}_{key}',
