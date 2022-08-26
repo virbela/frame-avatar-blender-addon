@@ -139,6 +139,10 @@ def get_bakevariant_name(self):
 
 
 def set_bakevariant_name(self, value):
+	if not self.workmesh:
+		self['name'] = value 
+		return 
+
 	# XXX THIS should only happen for multi variants
 	# -- update workmesh name
 	workmeshname = self.workmesh.name
@@ -166,6 +170,12 @@ def get_baketarget_name(self):
 
 
 def set_baketarget_name(self, value):
+	if not self.source_object:
+		# Initial name set from the create bake targets operator
+		self['name'] = value 
+		return
+	
+	# This is manual user name editing
 	newname = value.strip(f"{self.source_object.name}_")
 
 	# -- rename shapekey
