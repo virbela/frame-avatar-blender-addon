@@ -79,15 +79,17 @@ def all_workmeshes_to_shapekey(operator, context, ht):
 	for object in  workmeshes:
 		shape_name = object.name
 		# Handle multiple variant names 
-		if '.' in shape_name:
+		if '.' in shape_name and 'offset' not in shape_name.lower():
 			shape_name = shape_name.split('.')[0]
 
 		workmesh = object.data
 		# -- set corresponding shapekey 
 		bm = bmesh.new()
 		bm.from_mesh(avatar_object.data)
+		if shape_name not in bm.verts.layers.shape:
+			continue
+ 
 		shape = bm.verts.layers.shape[shape_name]
-
 		for vert in bm.verts:
 			vert[shape] = workmesh.vertices[vert.index].co.copy()
 
@@ -145,11 +147,21 @@ def all_shapekeys_to_workmeshes(operator, context, ht):
 		# -- get corresponding workmesh and update vertices
 		workmesh = bake_scene.objects.get(key.name)
 		if not workmesh:
-			log.info(f"Missing workmesh for {key.name}!")
-			return
+			# -- try get variants
+			objects = [o for o in bake_scene.objects if f"{key.name}." in o.name]
+			if objects:
+				workmesh = objects
+			else:
+				log.info(f"Missing workmesh for {key.name}!")
+				continue
 		
-		for vert in workmesh.data.vertices:
-			vert.co = shapekey_data[vert.index]
+		if isinstance(workmesh, list):
+			for wm in workmesh:
+				for vert in wm.data.vertices:
+					vert.co = shapekey_data[vert.index]
+		else:
+			for vert in workmesh.data.vertices:
+				vert.co = shapekey_data[vert.index]
 
 
 def workmesh_symmetrize(operator, context, ht): 
