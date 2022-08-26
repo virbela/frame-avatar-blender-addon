@@ -124,6 +124,9 @@ def ensure_color_output_node_ready(variant, tree):
 				texnode = node
 				break
 
+	if not texnode:
+		return
+
 	outputnode = [n for n in material_nodes if isinstance(n, bpy.types.ShaderNodeOutputMaterial)].pop()
 	diffusenode = [n for n in material_nodes if isinstance(n, bpy.types.ShaderNodeBsdfPrincipled)].pop()
 
