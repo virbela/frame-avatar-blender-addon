@@ -2,6 +2,7 @@ import bmesh
 from mathutils import Vector
 from dataclasses import dataclass
 from .logging import log_writer as log
+from .constants import TARGET_UV_MAP
 
 @dataclass
 class UVTransform:
@@ -19,7 +20,7 @@ def get_uv_map_from_mesh(obj):
 		mesh = bmesh.new()
 		mesh.from_mesh(obj.data)
 
-	uv_layer_index = mesh.loops.layers.uv.active
+	uv_layer_index = mesh.loops.layers.uv.get(TARGET_UV_MAP)
 
 	uv_map = dict()
 	for face in mesh.faces:
