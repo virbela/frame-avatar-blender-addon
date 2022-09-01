@@ -14,9 +14,8 @@ from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_t
 
 
 def export(operator, context, HT):
-    scene = require_work_scene(context)
-    if scene is None:
-        popup_message("Could not find work scene!", "Scene Error")
+    if not validate_export(context, HT):
+        popup_message("Export validation failed! Check console for errors!", "Validation Error")
         return
 
     try:
@@ -34,6 +33,17 @@ def export(operator, context, HT):
     except PermissionError:
         popup_message("Please save the current blend file!")
 
+
+def validate_export(context, HT):
+    scene = require_work_scene(context)
+    if scene is None:
+        return False
+
+    # -- check for valid relationship between bake targets, shapekeys and workmeshes
+
+    # -- 
+
+    return True
 
 def export_glb(context, ht):
     obj = context.active_object
@@ -97,6 +107,9 @@ def export_glb(context, ht):
 
     effect_names = [pos.effect_shapekey for e in ht.effect_collection for pos in e.positions]
     for bake_target in ht.bake_target_collection:
+        if not bake_target.export:
+            continue
+
         if 'effect' in bake_target.shortname.lower() or bake_target.shortname.lower() in effect_names:
             log.info("Skipping effect bake target")
             continue
