@@ -226,8 +226,6 @@ class BakeTarget(frame_property_group):
 	mirror_source:					bpy.props.IntProperty(name='Bake target used for mirror')
 	uv_mirror_options_expanded:		bpy.props.BoolProperty(name="UV mirror options expanded", default=True)
 
-	#geom_mirror_axis:				bpy.props.EnumProperty(items=tuple(GEOMETRY_MIRROR_AXIS), name="Geometry mirror axis", default=0)		#MAYBE-LATER
-
 	uv_mode:						bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
 	atlas:							bpy.props.PointerProperty(name="Atlas image", type=bpy.types.Image)
 	# ↑ This is used for storing the automatic choice as well as the manual (frozen) one
@@ -240,6 +238,9 @@ class BakeTarget(frame_property_group):
 	multi_variants:					bpy.props.BoolProperty(name="Multiple variants", default=False)
 	variant_collection:				bpy.props.CollectionProperty(type = BakeVariant)
 	selected_variant:				bpy.props.IntProperty(name = "Selected bake variant", default = -1)
+
+	# Flag export
+	export:							bpy.props.BoolProperty(name="Export Bake Target", default=True)
 
 	def get_object(self):
 		return get_named_entry(bpy.data.objects, self.object_name)

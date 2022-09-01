@@ -184,6 +184,7 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 
 			if HT.selected_bake_target != -1:
 				et = HT.bake_target_collection[HT.selected_bake_target]
+				col.prop(et, "export", toggle=True, text="", icon="EXPORT")
 
 				self.layout.prop_search(et, "source_object", scene, "objects")
 
