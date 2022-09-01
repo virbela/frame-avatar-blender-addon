@@ -205,34 +205,38 @@ def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
 			# NOTE(ranjian0) since artists may have performed actions on the workmeshs, 
 			# we choose to skip regeneration.
 			log.warning(f'Skipping existing workmesh ...')
-			continue
+			pending_object = bake_scene.objects.get(pending_name)
+			bake_uv = pending_object.data.uv_layers[TARGET_UV_MAP]
+			local_uv = pending_object.data.uv_layers[PAINTING_UV_MAP]
 
-		if source_object := bake_target.source_object:
-			ensure_applied_rotation(source_object)
+		else:
 
-			pending_object = source_object.copy()
-			pending_object.name = pending_name
-			pending_object.data = source_object.data.copy()
-			pending_object.data.name = pending_name
+			if source_object := bake_target.source_object:
+				ensure_applied_rotation(source_object)
 
-			# Create UV map for painting
-			bake_uv = pending_object.data.uv_layers[0]	# Assume first UV map is the bake one
-			bake_uv.name = TARGET_UV_MAP
-			local_uv = pending_object.data.uv_layers.new(name=PAINTING_UV_MAP)
-			set_uv_map(pending_object, local_uv.name)
+				pending_object = source_object.copy()
+				pending_object.name = pending_name
+				pending_object.data = source_object.data.copy()
+				pending_object.data.name = pending_name
 
-			# check if this target uses a shape key
-			if _ := pending_object.data.shape_keys.key_blocks.get(bake_target.shape_key_name):
-				#Remove all shapekeys except the one this object represents
-				for key in pending_object.data.shape_keys.key_blocks:
-					if key.name != bake_target.shape_key_name:
+				# Create UV map for painting
+				bake_uv = pending_object.data.uv_layers[0]	# Assume first UV map is the bake one
+				bake_uv.name = TARGET_UV_MAP
+				local_uv = pending_object.data.uv_layers.new(name=PAINTING_UV_MAP)
+				set_uv_map(pending_object, local_uv.name)
+
+				# check if this target uses a shape key
+				if _ := pending_object.data.shape_keys.key_blocks.get(bake_target.shape_key_name):
+					#Remove all shapekeys except the one this object represents
+					for key in pending_object.data.shape_keys.key_blocks:
+						if key.name != bake_target.shape_key_name:
+							pending_object.shape_key_remove(key)
+
+					#Remove remaining
+					for key in pending_object.data.shape_keys.key_blocks:
 						pending_object.shape_key_remove(key)
 
-				#Remove remaining
-				for key in pending_object.data.shape_keys.key_blocks:
-					pending_object.shape_key_remove(key)
-
-		bake_scene.collection.objects.link(pending_object)
+			bake_scene.collection.objects.link(pending_object)
 
 		variant.workmesh = pending_object
 		variant.uv_map = local_uv.name
