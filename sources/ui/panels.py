@@ -280,8 +280,8 @@ class FRAME_PT_export(frame_panel):
 	def draw(self, context):
 		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
+			self.layout.prop(HT, "denoise")
 			self.layout.prop(HT, "export_atlas")
 			self.layout.prop(HT, "export_glb")
 			self.layout.prop(HT, "export_animation")
-			self.layout.prop(HT, "denoise")
 		self.layout.operator("frame.export")
