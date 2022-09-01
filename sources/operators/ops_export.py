@@ -361,17 +361,20 @@ def export_animation(context, ht):
 
         if bake_target.multi_variants:
             # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
+            log.info(f"Skipping multivariant {bake_target.name}")
             continue
 
         obj = bake_target.variant_collection[0].workmesh
         if not obj:
             # TODO(ranjian0) 
             # Possible variants not generated yet, or some other fail condition
+            log.info(f"Skipping missing workmesh {bake_target.name}")
             continue
 
         has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
         if not has_armature:
             # Object has no armature!
+            log.info(f"Skipping missing armature {bake_target.name}")
             continue
 
         ensure_applied_rotation(obj)
