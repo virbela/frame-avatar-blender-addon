@@ -221,11 +221,13 @@ def export_glb(context, ht):
             )
 
     if ht.export_animation:
+        last_idx = obj.active_shape_key_index
         # -- cleanup animation shapekeys
         for kb in obj.data.shape_keys.key_blocks:
             if kb.name.startswith('fabanim.'):
                 print("Post Export Removing ..", kb.name)
-                obj.shape_key_remove(kb)        
+                obj.shape_key_remove(kb)
+        obj.active_shape_key_index = last_idx
 
     return True
 
