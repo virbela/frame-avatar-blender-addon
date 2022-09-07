@@ -2,6 +2,7 @@ import os
 import bpy
 import json
 import uuid
+import numpy
 import tempfile
 from pathlib import Path
 from contextlib import contextmanager
@@ -38,10 +39,6 @@ def validate_export(context, HT):
     scene = require_work_scene(context)
     if scene is None:
         return False
-
-    # -- check for valid relationship between bake targets, shapekeys and workmeshes
-
-    # -- 
 
     return True
 

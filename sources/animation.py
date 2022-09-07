@@ -1,5 +1,7 @@
+import os
 import bpy 
 import bmesh
+import numpy
 from typing import List
 from bpy.types import Action, Context, Object
 
@@ -13,11 +15,24 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
         log.error("Expected a single armature in the bake scene")
         return
 
+    filepath = bpy.data.filepath
+    directory = os.path.dirname(filepath)
+    blob_file = open(os.path.join(directory, "animations.npy"), 'wb')
+
+    animation_buffer = numpy.zeros((386 * 3, 52, len(animated_objects)), dtype=numpy.float32)
+    frame_counter = {o.name:0 for o in animated_objects}
     armature = armatures.pop()
     for action in bpy.data.actions:
         armature.animation_data.action = action
-        for anim_obj in animated_objects:
+        for oid, anim_obj in enumerate(animated_objects):
             meshes = get_per_frame_mesh(context, action, anim_obj)
+            # -- add to blob file
+            for mesh in meshes:
+                buff = numpy.empty(len(mesh.vertices) * 3, dtype=numpy.float64)
+                mesh.vertices.foreach_get('co', buff)
+                animation_buffer[:,frame_counter[anim_obj.name],oid] = buff
+                frame_counter[anim_obj.name] += 1
+
             # -- create shapekey in avatar
             for frame, mesh in enumerate(meshes, start=1):
                 sk_name = f'fabanim.{anim_obj.name}.{action.name}#{frame}'
@@ -26,6 +41,8 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
 
     # reset frame
     context.scene.frame_set(1)
+    numpy.save(blob_file, animation_buffer, allow_pickle=False)
+    blob_file.close()
 
 
 def get_per_frame_mesh(context: Context, action: Action, object: Object):
