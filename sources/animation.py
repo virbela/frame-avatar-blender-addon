@@ -10,6 +10,10 @@ from .helpers import require_bake_scene, require_work_scene
 
 
 def generate_animation_shapekeys(context: Context, avatar: Object, animated_objects: List[Object]):
+    scene = require_work_scene(context)
+    HT = scene.homeomorphictools
+    export_full_blob = all([ea.checked for ea in HT.export_animation_actions])
+
     armatures = [o for o in require_bake_scene(context).objects if o.type == 'ARMATURE']
     if len(armatures) > 1 or len(armatures) == 0:
         log.error("Expected a single armature in the bake scene")
@@ -30,15 +34,16 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
         export_action_animation(context, action, animated_objects, num_verts, export_indices)
         for oid, anim_obj in enumerate(animated_objects):
             meshes = get_per_frame_mesh(context, action, anim_obj)
-            # -- add to blob file
-            for mesh in meshes:
-                count = len(mesh.vertices)
-                buff = np.empty(count * 3, dtype=np.float64)
-                mesh.vertices.foreach_get('co', buff)
-                # duplicate by gltf verts
-                buff = buff.reshape((count, 3))[export_indices]
-                animation_buffer[:,frame_counter[anim_obj.name],oid] = buff.ravel()
-                frame_counter[anim_obj.name] += 1
+            if export_full_blob:
+                # -- add to blob file
+                for mesh in meshes:
+                    count = len(mesh.vertices)
+                    buff = np.empty(count * 3, dtype=np.float64)
+                    mesh.vertices.foreach_get('co', buff)
+                    # duplicate by gltf verts
+                    buff = buff.reshape((count, 3))[export_indices]
+                    animation_buffer[:,frame_counter[anim_obj.name],oid] = buff.ravel()
+                    frame_counter[anim_obj.name] += 1
 
             # -- create shapekey in avatar
             for frame, mesh in enumerate(meshes, start=1):
@@ -48,7 +53,8 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
 
     # reset frame
     context.scene.frame_set(1)
-    np.save(blob_file, animation_buffer, allow_pickle=False)
+    if export_full_blob:
+        np.save(blob_file, animation_buffer, allow_pickle=False)
     blob_file.close()
 
 
@@ -191,6 +197,10 @@ def get_num_frames():
 def export_action_animation(context, action, animated_objects, num_verts, export_indices):
     scene = require_work_scene(context)
     HT = scene.homeomorphictools
+    if action.name not in [ea.name for ea in HT.export_animation_actions]:
+        # Possibly not a valid export action eg tpose
+        return
+
     for export in HT.export_animation_actions:
         if export.name == action.name:
             if not export.checked:
