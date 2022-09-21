@@ -27,6 +27,7 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
     armature = armatures.pop()
     for action in bpy.data.actions:
         armature.animation_data.action = action
+        export_action_animation(context, action, animated_objects, num_verts, export_indices)
         for oid, anim_obj in enumerate(animated_objects):
             meshes = get_per_frame_mesh(context, action, anim_obj)
             # -- add to blob file
@@ -185,3 +186,28 @@ def get_num_frames():
 
         result += diff
     return int(result)
+
+def export_action_animation(context, action, animated_objects, num_verts, export_indices):
+    filepath = bpy.data.filepath
+    directory = os.path.dirname(filepath)
+    blob_file = open(os.path.join(directory, f"{action.name}.npy"), 'wb')
+
+    sx, sy = action.frame_range
+    num_frames = sy - sx
+    if num_frames > 1:
+        # If more than one frame, the range is inclusive
+        num_frames += 1
+
+    animation_buffer = np.zeros((num_verts * 3, int(num_frames), len(animated_objects)), dtype=np.float32)
+    for oid, anim_obj in enumerate(animated_objects):
+        meshes = get_per_frame_mesh(context, action, anim_obj)
+        # -- add to blob file
+        for frame, mesh in enumerate(meshes):
+            count = len(mesh.vertices)
+            buff = np.empty(count * 3, dtype=np.float64)
+            mesh.vertices.foreach_get('co', buff)
+            # duplicate by gltf verts
+            buff = buff.reshape((count, 3))[export_indices]
+            animation_buffer[:,frame,oid] = buff.ravel()
+
+    np.save(blob_file, animation_buffer, allow_pickle=False)
