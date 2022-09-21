@@ -1,4 +1,3 @@
-from ast import increment_lineno
 import bpy
 import functools
 from ..properties import *
@@ -283,6 +282,14 @@ class FRAME_PT_export(frame_panel):
 			HT = scene.homeomorphictools
 			self.layout.prop(HT, "export_glb")
 			self.layout.prop(HT, "export_animation")
+			if HT.export_animation:				
+				sp = self.layout.split(factor=0.05)
+				_ = sp.column()
+				col = sp.column()
+				for ea in HT.export_animation_actions:
+					col.prop(ea, "checked", text=ea.name.title())
+
+				self.layout.prop(HT, "export_animation_actions", expand=True, text="")
 			self.layout.prop(HT, "export_atlas")
 			self.layout.prop(HT, "denoise")
 		self.layout.operator("frame.export")

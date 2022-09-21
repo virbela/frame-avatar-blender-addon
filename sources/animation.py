@@ -6,7 +6,7 @@ from typing import List
 from bpy.types import Action, Context, Object
 
 from .logging import log_writer as log
-from .helpers import require_bake_scene
+from .helpers import require_bake_scene, require_work_scene
 
 
 def generate_animation_shapekeys(context: Context, avatar: Object, animated_objects: List[Object]):
@@ -187,7 +187,16 @@ def get_num_frames():
         result += diff
     return int(result)
 
+
 def export_action_animation(context, action, animated_objects, num_verts, export_indices):
+    scene = require_work_scene(context)
+    HT = scene.homeomorphictools
+    for export in HT.export_animation_actions:
+        if export.name == action.name:
+            if not export.checked:
+                # This action is marked as do not export
+                return
+
     filepath = bpy.data.filepath
     directory = os.path.dirname(filepath)
     blob_file = open(os.path.join(directory, f"{action.name}.npy"), 'wb')

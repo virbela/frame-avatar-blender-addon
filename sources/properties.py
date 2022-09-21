@@ -365,6 +365,10 @@ class EffectProperty(frame_property_group):
 	colors: 				bpy.props.CollectionProperty(type = ColorEffect)
 
 
+class ExportAnimationProperty(frame_property_group):
+	name: 							bpy.props.StringProperty(name="", default="")
+	checked: 						bpy.props.BoolProperty(name="", default=True)
+
 class HomeomorphicProperties(frame_property_group):
 
 	### Bake targets ###
@@ -395,6 +399,7 @@ class HomeomorphicProperties(frame_property_group):
 	export_atlas: 						bpy.props.BoolProperty(name="Export Atlas", default=True)
 	export_glb: 						bpy.props.BoolProperty(name="Export GLB", default=True)
 	export_animation: 					bpy.props.BoolProperty(name="Export Animation", default=True)
+	export_animation_actions: 			bpy.props.CollectionProperty(type=ExportAnimationProperty)
 
 	### Baking options
 	baking_target_uvmap: 				bpy.props.StringProperty(name="Bake UV map", default=TARGET_UV_MAP)

@@ -36,6 +36,21 @@ def register():
 	#	Note: `bpy.app.handlers.save_pre.append(...)`  and `load_post` for after loading
 	#	labels: future-feature
 
+	def set_export_actions():
+		context = bpy.context
+		if scene := require_work_scene(context):
+			HT = scene.homeomorphictools
+
+			HT.export_animation_actions.clear()
+			for action in bpy.data.actions:
+				if action.name.lower() == 'tpose':
+					continue 
+				item = HT.export_animation_actions.add()
+				item.name = action.name
+				item.checked = True
+
+	bpy.app.timers.register(set_export_actions, first_interval=1)	
+
 
 def unregister():
 	del bpy.types.Scene.ui_state
