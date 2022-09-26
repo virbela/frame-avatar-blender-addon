@@ -65,10 +65,25 @@ def export_glb(context, ht):
 
     uvtc = uv_transformation_calculator(get_uv_map_from_mesh(obj))
 
+    valid_workmeshes = []
+    for bake_target in ht.bake_target_collection:
+        if bake_target.multi_variants:            
+            for variant in bake_target.variant_collection:
+                valid_workmeshes.append(variant.workmesh)
+        else:
+            variant = bake_target.variant_collection[0]
+            valid_workmeshes.append(variant.workmesh)
+
+
+
     bake_scene = require_bake_scene(context)
     for name, item in bake_scene.objects.items():
         if item.type != 'MESH':
             continue
+
+        if item not in valid_workmeshes:
+            continue 
+
         log.info(f'Getting transform for: {name}')
         uv_transform_map[name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
 
