@@ -1,11 +1,14 @@
-import os
+import io 
 import bpy
 import enum
 import uuid
 import bmesh
+import pstats
+import cProfile 
 import threading
 import addon_utils
 from dataclasses import dataclass
+from contextlib import contextmanager
 from .logging import log_writer as log
 from .constants import BAKE_SCENE, WORK_SCENE
 from .exceptions import InternalError, FrameException
@@ -14,6 +17,23 @@ pending_classes = list()
 
 def IMPLEMENTATION_PENDING(*p, **n):
 	raise InternalError(f'This feature is not implemented! (arguments: {p} {n})')
+
+
+@contextmanager
+def profile():
+    s = io.StringIO()
+    pr = cProfile.Profile()
+
+    pr.enable()
+    yield
+    pr.disable()
+
+    ps = pstats.Stats(pr, stream=s)
+    ps.strip_dirs()
+    ps.sort_stats('time')
+    ps.print_stats()
+
+    print(s.getvalue())
 
 
 def register_class(cls):
