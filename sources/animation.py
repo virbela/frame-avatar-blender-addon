@@ -20,8 +20,6 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
         return
 
     filepath = bpy.data.filepath
-    directory = os.path.dirname(filepath)
-    blob_file = open(os.path.join(directory, "animations.npy"), 'wb')
     export_indices = get_gltf_export_indices(avatar)
 
     num_frames = get_num_frames()
@@ -32,9 +30,9 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
     for action in bpy.data.actions:
         armature.animation_data.action = action
         export_action_animation(context, action, animated_objects, num_verts, export_indices)
-        for oid, anim_obj in enumerate(animated_objects):
-            meshes = get_per_frame_mesh(context, action, anim_obj)
-            if export_full_blob:
+        if export_full_blob:
+            for oid, anim_obj in enumerate(animated_objects):
+                meshes = get_per_frame_mesh(context, action, anim_obj)
                 # -- add to blob file
                 for mesh in meshes:
                     count = len(mesh.vertices)
@@ -44,6 +42,8 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
                     buff = buff.reshape((count, 3))[export_indices]
                     animation_buffer[:,frame_counter[anim_obj.name],oid] = buff.ravel()
                     frame_counter[anim_obj.name] += 1
+                
+                [bpy.data.meshes.remove(me) for me in meshes]
 
             # XXX Deprecated Old Shapekey animation export
             # -- create shapekey in avatar
@@ -55,8 +55,10 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
     # reset frame
     context.scene.frame_set(1)
     if export_full_blob:
+        directory = os.path.dirname(filepath)
+        blob_file = open(os.path.join(directory, "animations.npy"), 'wb')
         np.save(blob_file, animation_buffer, allow_pickle=False)
-    blob_file.close()
+        blob_file.close()
 
 
 def get_per_frame_mesh(context: Context, action: Action, object: Object):
@@ -71,17 +73,9 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object):
         bakescene.frame_set(i)
         depsgraph = bakescene.view_layers[0].depsgraph
 
-        bm = bmesh.new()
         eval_object = object.evaluated_get(depsgraph)
         me = bpy.data.meshes.new_from_object(eval_object)
         me.transform(object.matrix_world)
-        bm.from_mesh(me)
-        bpy.data.meshes.remove(me)
-        
-        me = bpy.data.meshes.new(f"fabanim.{object.name}.{action.name}#{i}")
-        bm.to_mesh(me)
-        bm.free()
-        me.calc_normals()
         meshes.append(me)
     return meshes
 
@@ -229,5 +223,7 @@ def export_action_animation(context, action, animated_objects, num_verts, export
             # duplicate by gltf verts
             buff = buff.reshape((count, 3))[export_indices]
             animation_buffer[:,frame,oid] = buff.ravel()
+
+        [bpy.data.meshes.remove(me) for me in meshes]
 
     np.save(blob_file, animation_buffer, allow_pickle=False)
