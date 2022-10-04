@@ -45,11 +45,12 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
                     animation_buffer[:,frame_counter[anim_obj.name],oid] = buff.ravel()
                     frame_counter[anim_obj.name] += 1
 
+            # XXX Deprecated Old Shapekey animation export
             # -- create shapekey in avatar
-            for frame, mesh in enumerate(meshes, start=1):
-                sk_name = f'fabanim.{anim_obj.name}.{action.name}#{frame}'
-                avatar.shape_key_add(name=sk_name, from_mix=False)
-                shape_key_from_mesh(sk_name, avatar, mesh)
+            # for frame, mesh in enumerate(meshes, start=1):
+            #     sk_name = f'fabanim.{anim_obj.name}.{action.name}#{frame}'
+            #     avatar.shape_key_add(name=sk_name, from_mix=False)
+            #     shape_key_from_mesh(sk_name, avatar, mesh)
 
     # reset frame
     context.scene.frame_set(1)
