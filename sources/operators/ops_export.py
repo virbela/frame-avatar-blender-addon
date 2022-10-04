@@ -2,7 +2,6 @@ import os
 import bpy
 import json
 import uuid
-import numpy
 import tempfile
 from pathlib import Path
 from contextlib import contextmanager
