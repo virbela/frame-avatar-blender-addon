@@ -7,8 +7,8 @@ from pathlib import Path
 from contextlib import contextmanager
 
 from ..logging import log_writer as log
-from ..helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..animation import generate_animation_shapekeys
+from ..helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
