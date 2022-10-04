@@ -31,6 +31,8 @@ class FRAME_PT_workflow(frame_panel):
 		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
 
+			self.layout.prop(HT, "avatar_object", text="Avatar Object")
+
 			#TODO - this should point to our documentation for the workflow. This could point to a document that requires the artist to be logged in to that web service (like google docs as an example).
 			#We may not want links that anyone can access since the workflow should be considered proprietary
 			introduction = self.layout.box()
@@ -235,7 +237,7 @@ class FRAME_PT_effects(frame_panel):
 	def draw(self, context):
 		ob = context.object
 		if not ob or ob.type != 'MESH':
-			return 
+			return
 
 		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
@@ -282,7 +284,9 @@ class FRAME_PT_export(frame_panel):
 			HT = scene.homeomorphictools
 			self.layout.prop(HT, "export_glb")
 			self.layout.prop(HT, "export_animation")
-			if HT.export_animation:				
+			if HT.export_animation:
+				if not HT.export_animation_actions:
+					self.layout.label(text="No actions found!", icon="ERROR")
 				sp = self.layout.split(factor=0.05)
 				_ = sp.column()
 				col = sp.column()

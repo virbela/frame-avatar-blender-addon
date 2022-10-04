@@ -372,6 +372,7 @@ class ExportAnimationProperty(frame_property_group):
 class HomeomorphicProperties(frame_property_group):
 
 	### Bake targets ###
+	avatar_object:						bpy.props.PointerProperty(name='Avatar object', type=bpy.types.Object)
 
 	#Note that we use -1 to indicate that nothing is selected for integer selections
 	effect_collection: 					bpy.props.CollectionProperty(type = EffectProperty)
