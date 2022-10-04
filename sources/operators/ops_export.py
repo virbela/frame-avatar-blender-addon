@@ -15,8 +15,26 @@ from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_t
 
 def export(operator, context, HT):
     if not validate_export(context, HT):
-        popup_message("Export validation failed! Check console for errors!", "Validation Error")
         return
+
+    # -- deselect everything in all scenes
+    selected = []
+    objects = list(require_work_scene(context).objects)
+    objects.extend(list(require_bake_scene(context).objects))
+    for o in objects:
+        if o.select_get():
+            selected.append(o)
+            o.select_set(False)
+    
+    # -- clear all active
+    active = []
+    layers = list(require_work_scene(context).view_layers)
+    layers.extend(list(require_bake_scene(context).view_layers))
+    for layer in layers:
+        if layer.objects.active:
+            active.append((layer, layer.objects.active))
+            layer.objects.active.select_set(False)
+            layer.objects.active = None
 
     try:
         if HT.export_glb:
@@ -28,21 +46,41 @@ def export(operator, context, HT):
         if HT.export_atlas:
             export_atlas(context, denoise=HT.denoise)
 
+        if HT.export_animation:
+            export_animation(context, HT)
+
     except FileExistsError:
         popup_message("Export files already exist in the current folder!") 
     except PermissionError:
         popup_message("Please save the current blend file!")
+    
+    # -- reset selection/active state
+    for o in selected:
+        o.select_set(True)
+    for layer, obj in active:
+        layer.objects.active = obj
 
 
 def validate_export(context, HT):
-    scene = require_work_scene(context)
-    if scene is None:
+    work_scene = require_work_scene(context)
+    if work_scene is None:
+        popup_message("Export validation failed! Work scene missing!", "Validation Error")
+        return False
+
+    active_scene = context.scene
+    if active_scene != work_scene:
+        popup_message("Export validation failed! Must be in main scene!", "Validation Error")
+        return False
+
+    if HT.avatar_object is None:
+        popup_message("Export validation failed! Avatar Object not selected!", "Validation Error")
         return False
 
     return True
 
+
 def export_glb(context, ht):
-    obj = context.active_object
+    obj = ht.avatar_object
     ensure_applied_rotation(obj)
 
     if not obj.data.shape_keys:
@@ -73,8 +111,6 @@ def export_glb(context, ht):
             variant = bake_target.variant_collection[0]
             valid_workmeshes.append(variant.workmesh)
 
-
-
     bake_scene = require_bake_scene(context)
     for name, item in bake_scene.objects.items():
         if item.type != 'MESH':
@@ -104,7 +140,6 @@ def export_glb(context, ht):
         return uv_transform
 
     def get_variant_channel(variant):
-        print(variant.name, variant.uv_target_channel)
         if variant.uv_target_channel == 'UV_TARGET_COLOR':
             return (0, 0, 0, 1)
         elif variant.uv_target_channel == 'UV_TARGET_R':
@@ -126,7 +161,6 @@ def export_glb(context, ht):
             continue
 
         result = None
-        print(bake_target)
         if bake_target.multi_variants:            
             variants = {'Variants': {}}
             for variant in bake_target.variant_collection:
@@ -196,11 +230,9 @@ def export_glb(context, ht):
         directory = str(Path(prefs.glb_export_dir).absolute())
     outputfile_glb = os.path.join(directory , "morphic_avatar.glb")
 
-    obj = bpy.data.objects['Avatar']
+    obj = ht.avatar_object
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
-    if ht.export_animation:
-        export_animation(context, ht)
 
     # post_process_effects(ht.effect_collection, obj)
     with clear_custom_props(obj):
@@ -215,11 +247,12 @@ def export_glb(context, ht):
             export_colors = False,
             export_animations=False,
             export_skins=False,
-            export_materials='EXPORT',
+            export_materials='NONE',
             # valid options
             use_selection=True, 
             export_extras=True, 
             export_morph=True,
+            use_active_scene=True
         )
 
         if is_dev():
@@ -237,22 +270,16 @@ def export_glb(context, ht):
                 export_colors = False,
                 export_animations=False,
                 export_skins=False,
-                export_materials='EXPORT',
+                export_materials='NONE',
                 # valid options
                 use_selection=True, 
                 export_extras=True, 
                 export_morph=True,
+                use_active_scene=True
             )
 
-    if ht.export_animation:
-        last_idx = obj.active_shape_key_index
-        # -- cleanup animation shapekeys
-        for kb in obj.data.shape_keys.key_blocks:
-            if kb.name.startswith('fabanim.'):
-                print("Post Export Removing ..", kb.name)
-                obj.shape_key_remove(kb)
-        obj.active_shape_key_index = last_idx
-
+    bpy.context.view_layer.objects.active = None
+    obj.select_set(False)
     return True
 
 
@@ -379,7 +406,7 @@ def export_atlas(context, denoise=True):
 
 def export_animation(context, ht):
 
-    avatar_obj = bpy.data.objects['Avatar']
+    avatar_obj = ht.avatar_object
     animated_objects = []
     for bake_target in ht.bake_target_collection:
         if not avatar_obj:
@@ -407,6 +434,14 @@ def export_animation(context, ht):
         animated_objects.append(obj)
     log.info(f"Animated Objects {animated_objects}")
     generate_animation_shapekeys(context, avatar_obj, animated_objects)
+
+    # -- cleanup animation shapekeys
+    last_idx = avatar_obj.active_shape_key_index
+    for kb in avatar_obj.data.shape_keys.key_blocks:
+        if kb.name.startswith('fabanim.'):
+            print("Post Export Removing ..", kb.name)
+            avatar_obj.shape_key_remove(kb)
+    avatar_obj.active_shape_key_index = last_idx
 
 
 @contextmanager
