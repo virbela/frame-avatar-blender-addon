@@ -41,15 +41,20 @@ def register():
 		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
 
-			# HT.export_animation_actions.clear()
 			eactions = [ea.name for ea in HT.export_animation_actions]
 			for action in bpy.data.actions:
-				if action.name.lower() == 'tpose' or action.name in eactions:
+				if 'tpose' in action.name.lower() or action.name in eactions:
 					continue 
 
 				item = HT.export_animation_actions.add()
 				item.name = action.name
 				item.checked = True
+			
+			for idx, eaction in enumerate(HT.export_animation_actions):
+				if eaction.name not in [a.name for a in bpy.data.actions]:
+					HT.export_animation_actions.remove(idx)
+		return 2
+
 
 	bpy.app.timers.register(set_export_actions, first_interval=1)	
 
