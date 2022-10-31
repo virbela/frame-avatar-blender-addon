@@ -37,6 +37,9 @@ def export(operator, context, HT):
             layer.objects.active = None
 
     try:
+        if HT.export_animation:
+            export_animation(context, HT)
+
         if HT.export_glb:
             success = export_glb(context, HT)
             if not success:
@@ -45,9 +48,6 @@ def export(operator, context, HT):
 
         if HT.export_atlas:
             export_atlas(context, denoise=HT.denoise)
-
-        if HT.export_animation:
-            export_animation(context, HT)
 
     except FileExistsError:
         popup_message("Export files already exist in the current folder!") 
@@ -219,8 +219,10 @@ def export_glb(context, ht):
 
     morphsets_dict = {
         "Morphs": uv_transform_extra_data,
-        "Filters": dict()
     }
+
+    if ht.avatar_type == "FULLBODY":
+        morphsets_dict['Animation'] = animation_metadata(ht)
 
 
     prefs = get_prefs()
@@ -228,7 +230,11 @@ def export_glb(context, ht):
     directory = os.path.dirname(filepath)
     if os.path.exists(prefs.glb_export_dir):
         directory = str(Path(prefs.glb_export_dir).absolute())
-    outputfile_glb = os.path.join(directory , "morphic_avatar.glb")
+
+    fname = "faba_fullbody_avatar.glb"
+    if ht.avatar_type == "FLOATER":
+        fname = "faba_floater_avatar.glb"
+    outputfile_glb = os.path.join(directory , fname)
 
     obj = ht.avatar_object
     bpy.context.view_layer.objects.active = obj
@@ -277,6 +283,14 @@ def export_glb(context, ht):
                 export_morph=True,
                 use_active_scene=True
             )
+
+    # -- cleanup animation shapekeys
+    last_idx = obj.active_shape_key_index
+    for kb in obj.data.shape_keys.key_blocks:
+        if kb.name.startswith('fabanim.'):
+            print("Post Export Removing ..", kb.name)
+            obj.shape_key_remove(kb)
+    obj.active_shape_key_index = last_idx
 
     bpy.context.view_layer.objects.active = None
     obj.select_set(False)
@@ -405,43 +419,11 @@ def export_atlas(context, denoise=True):
 
 
 def export_animation(context, ht):
-
     avatar_obj = ht.avatar_object
-    animated_objects = []
-    for bake_target in ht.bake_target_collection:
-        if not avatar_obj:
-            avatar_obj = bake_target.source_object 
-
-        if bake_target.multi_variants:
-            # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
-            log.info(f"Skipping multivariant {bake_target.name}")
-            continue
-
-        obj = bake_target.variant_collection[0].workmesh
-        if not obj:
-            # TODO(ranjian0) 
-            # Possible variants not generated yet, or some other fail condition
-            log.info(f"Skipping missing workmesh {bake_target.name}")
-            continue
-
-        has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
-        if not has_armature:
-            # Object has no armature!
-            log.info(f"Skipping missing armature {bake_target.name}")
-            continue
-
-        ensure_applied_rotation(obj)
-        animated_objects.append(obj)
+    animated_objects = get_animation_objects(ht)
+    list(map(ensure_applied_rotation, animated_objects))
     log.info(f"Animated Objects {animated_objects}")
     generate_animation_shapekeys(context, avatar_obj, animated_objects)
-
-    # -- cleanup animation shapekeys
-    last_idx = avatar_obj.active_shape_key_index
-    for kb in avatar_obj.data.shape_keys.key_blocks:
-        if kb.name.startswith('fabanim.'):
-            print("Post Export Removing ..", kb.name)
-            avatar_obj.shape_key_remove(kb)
-    avatar_obj.active_shape_key_index = last_idx
 
 
 @contextmanager
@@ -590,3 +572,39 @@ def post_process_effects(effects, object):
 
         ef.name = f"{ef.name}_effect"
         effect.effect_shapekey = ef.name
+
+
+def animation_metadata(ht):
+    result = dict()
+    animated_objects = get_animation_objects(ht)
+    result['layers'] = sorted(o.name for o in animated_objects)
+    return result
+
+
+def get_animation_objects(ht):
+    avatar_obj = ht.avatar_object
+    animated_objects = []
+    for bake_target in ht.bake_target_collection:
+        if not avatar_obj:
+            avatar_obj = bake_target.source_object 
+
+        if bake_target.multi_variants:
+            # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
+            log.info(f"Skipping multivariant {bake_target.name}")
+            continue
+
+        obj = bake_target.variant_collection[0].workmesh
+        if not obj:
+            # TODO(ranjian0) 
+            # Possible variants not generated yet, or some other fail condition
+            log.info(f"Skipping missing workmesh {bake_target.name}")
+            continue
+
+        has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
+        if not has_armature:
+            # Object has no armature!
+            log.info(f"Skipping missing armature {bake_target.name}")
+            continue
+
+        animated_objects.append(obj)
+    return animated_objects

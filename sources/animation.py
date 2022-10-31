@@ -43,14 +43,14 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
                     animation_buffer[:,frame_counter[anim_obj.name],oid] = buff.ravel()
                     frame_counter[anim_obj.name] += 1
                 
-                [bpy.data.meshes.remove(me) for me in meshes]
 
-            # XXX Deprecated Old Shapekey animation export
-            # -- create shapekey in avatar
-            # for frame, mesh in enumerate(meshes, start=1):
-            #     sk_name = f'fabanim.{anim_obj.name}.{action.name}#{frame}'
-            #     avatar.shape_key_add(name=sk_name, from_mix=False)
-            #     shape_key_from_mesh(sk_name, avatar, mesh)
+                # XXX Deprecated Old Shapekey animation export
+                # -- create shapekey in avatar
+                # for frame, mesh in enumerate(meshes, start=1):
+                #     sk_name = f'fabanim.{anim_obj.name}.{action.name}#{frame}'
+                #     avatar.shape_key_add(name=sk_name, from_mix=False)
+                #     shape_key_from_mesh(sk_name, avatar, mesh)
+                [bpy.data.meshes.remove(me) for me in meshes]
 
     # reset frame
     context.scene.frame_set(1)
@@ -213,7 +213,7 @@ def export_action_animation(context, action, animated_objects, num_verts, export
         num_frames += 1
 
     animation_buffer = np.zeros((num_verts * 3, int(num_frames), len(animated_objects)), dtype=np.float32)
-    for oid, anim_obj in enumerate(animated_objects):
+    for oid, anim_obj in enumerate(sorted(animated_objects, key=lambda o:o.name)):
         meshes = get_per_frame_mesh(context, action, anim_obj)
         # -- add to blob file
         for frame, mesh in enumerate(meshes):
@@ -225,5 +225,4 @@ def export_action_animation(context, action, animated_objects, num_verts, export
             animation_buffer[:,frame,oid] = buff.ravel()
 
         [bpy.data.meshes.remove(me) for me in meshes]
-
     np.save(blob_file, animation_buffer, allow_pickle=False)
