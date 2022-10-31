@@ -282,6 +282,7 @@ class FRAME_PT_export(frame_panel):
 	def draw(self, context):
 		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
+			self.layout.prop(HT, "avatar_type", expand=True)
 			self.layout.prop(HT, "export_glb")
 			self.layout.prop(HT, "export_animation")
 			if HT.export_animation:

@@ -120,6 +120,15 @@ EFFECT_TYPE = enum_descriptor(
 )
 
 
+AVATAR_TYPE = enum_descriptor(
+	('FLOATER',				'Floater',				'Export floater avatar',
+		'',			0),
+
+	('FULLBODY',			'Full body',			'Export full body avatar',
+		'',			1),
+
+)
+
 def update_atlas(self, context):
 	# when atlas is set, also set the uv_channel
 	if 'red' in self.intermediate_atlas.name:
@@ -396,6 +405,7 @@ class HomeomorphicProperties(frame_property_group):
 	select_by_atlas_image:				bpy.props.PointerProperty(name='Match atlas', type=bpy.types.Image)
 
 	### Export options
+	avatar_type:						bpy.props.EnumProperty(items=tuple(AVATAR_TYPE), name="Avatar Type", default=1)
 	denoise: 							bpy.props.BoolProperty(name="Denoise Atlas", default=False)
 	export_atlas: 						bpy.props.BoolProperty(name="Export Atlas", default=True)
 	export_glb: 						bpy.props.BoolProperty(name="Export GLB", default=True)
