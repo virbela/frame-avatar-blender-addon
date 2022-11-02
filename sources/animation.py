@@ -1,8 +1,10 @@
 import os
 import bpy 
+import math
 import bmesh
 import numpy as np
 from typing import List
+from mathutils import Matrix
 from bpy.types import Action, Context, Object
 
 from .logging import log_writer as log
@@ -75,7 +77,8 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object):
 
         eval_object = object.evaluated_get(depsgraph)
         me = bpy.data.meshes.new_from_object(eval_object)
-        me.transform(object.matrix_world)
+        # -- convert coordinates from +Z up to +Y up
+        me.transform(object.matrix_world @ Matrix.Rotation(math.radians(-90), 4, 'X'))
         meshes.append(me)
     return meshes
 
@@ -212,7 +215,7 @@ def export_action_animation(context, action, animated_objects, num_verts, export
         # If more than one frame, the range is inclusive
         num_frames += 1
 
-    animation_buffer = np.zeros((num_verts * 3, int(num_frames), len(animated_objects)), dtype=np.float32)
+    animation_buffer = np.zeros((num_verts * 3, int(num_frames), len(animated_objects)), dtype=np.float32, order='F')
     for oid, anim_obj in enumerate(sorted(animated_objects, key=lambda o:o.name)):
         meshes = get_per_frame_mesh(context, action, anim_obj)
         # -- add to blob file
