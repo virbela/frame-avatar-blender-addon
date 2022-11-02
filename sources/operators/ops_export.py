@@ -73,7 +73,7 @@ def validate_export(context, HT):
         return False
 
     if HT.avatar_object is None:
-        popup_message("Export validation failed! Avatar Object not selected!", "Validation Error")
+        popup_message("Export validation failed! Avatar Object not selected in workflow panel!", "Validation Error")
         return False
 
     return True
