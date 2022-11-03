@@ -17,24 +17,8 @@ def export(operator, context, HT):
     if not validate_export(context, HT):
         return
 
-    # -- deselect everything in all scenes
-    selected = []
-    objects = list(require_work_scene(context).objects)
-    objects.extend(list(require_bake_scene(context).objects))
-    for o in objects:
-        if o.select_get():
-            selected.append(o)
-            o.select_set(False)
-    
-    # -- clear all active
-    active = []
-    layers = list(require_work_scene(context).view_layers)
-    layers.extend(list(require_bake_scene(context).view_layers))
-    for layer in layers:
-        if layer.objects.active:
-            active.append((layer, layer.objects.active))
-            layer.objects.active.select_set(False)
-            layer.objects.active = None
+    active = clear_active(context)
+    selected = desellect_all(context)
 
     try:
         if HT.export_animation:
@@ -53,6 +37,8 @@ def export(operator, context, HT):
         popup_message("Export files already exist in the current folder!") 
     except PermissionError:
         popup_message("Please save the current blend file!")
+    except Exception as e:
+        raise e
     
     # -- reset selection/active state
     for o in selected:
@@ -531,7 +517,8 @@ def obj_from_shapekey(obj, keyname):
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "mesh.glb")
         # -- export to tmp dir
-        [o.select_set(False) for o in bpy.data.objects]
+        clear_active(bpy.context)
+        desellect_all(bpy.context)
 
         pending_object.select_set(True)
         bpy.context.view_layer.objects.active = pending_object
@@ -550,6 +537,7 @@ def obj_from_shapekey(obj, keyname):
             use_selection=True, 
             export_extras=False, 
             export_morph=False,
+            use_active_scene=True
         )
         bpy.data.meshes.remove(pending_object.data, do_unlink=True)
 
@@ -608,3 +596,29 @@ def get_animation_objects(ht):
 
         animated_objects.append(obj)
     return animated_objects
+
+
+def desellect_all(context):
+    # -- deselect everything in all scenes
+    selected = []
+    objects = list(require_work_scene(context).objects)
+    objects.extend(list(require_bake_scene(context).objects))
+    for o in objects:
+        if o.select_get():
+            selected.append(o)
+            o.select_set(False)
+
+    return selected
+
+def clear_active(context):
+    # -- clear all active
+    active = []
+    layers = list(require_work_scene(context).view_layers)
+    layers.extend(list(require_bake_scene(context).view_layers))
+    for layer in layers:
+        if layer.objects.active:
+            active.append((layer, layer.objects.active))
+            layer.objects.active.select_set(False)
+            layer.objects.active = None
+
+    return active
