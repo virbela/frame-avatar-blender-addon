@@ -222,6 +222,9 @@ def export_glb(context, ht):
         fname = "faba_floater_avatar.glb"
     outputfile_glb = os.path.join(directory , fname)
 
+    clear_active(context)
+    desellect_all(context)
+
     obj = ht.avatar_object
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
