@@ -91,22 +91,28 @@ class FRAME_PT_workflow(frame_panel):
 			baking = self.layout.box()
 			baking.prop(scene.ui_state, "workflow_baking_visible", text="Baking")
 			if scene.ui_state.workflow_baking_visible:
+				bake_scene = require_bake_scene(context)
+				selection = [o for o in context.selected_objects]
 				try:
-					bake_scene = require_bake_scene(context)
-					selection = [o for o in context.selected_objects]
 					col = baking.column(align=True)
 					col.prop(bake_scene.cycles, "samples", text="Bake Samples")
 					col.prop(bake_scene.render.bake, "margin", text="Bake Margin")
-					baking.row(align=True).prop(HT, 'baking_options', expand=True)
-					baking.prop_search(HT, 'baking_target_uvmap', selection[0].data, "uv_layers")
-
-					col = baking.column(align=True)
-					col.operator('frame.bake_all')
-					col.operator('frame.bake_selected_bake_target')
-					col.operator('frame.bake_selected_workmeshes')
 				except AttributeError as e:
 					log.info(e)
 					baking.label(text='Please ensure Cycles Render Engine is enabled in the addons list!', icon='ERROR')
+
+				baking.row(align=True).prop(HT, 'baking_options', expand=True)
+				if selection:
+					baking.prop_search(HT, 'baking_target_uvmap', selection[0].data, "uv_layers")
+
+				col = baking.column(align=True)
+				col.operator('frame.bake_all')
+				col.operator('frame.bake_selected_bake_target')
+				if selection:
+					col.operator('frame.bake_selected_workmeshes')
+				else:
+					baking.label(text='Please select a workmesh to bake from one!', icon='INFO')
+
 			helper_tools = self.layout.box()
 			helper_tools.prop(scene.ui_state, "workflow_helpers_visible", text="Helpers")
 			if scene.ui_state.workflow_helpers_visible:
