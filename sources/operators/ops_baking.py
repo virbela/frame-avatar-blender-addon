@@ -93,6 +93,8 @@ def run_bake(ht, invoke=True):
 	bpy.context.scene.cycles.device = 'GPU'
 	bpy.context.scene.render.engine = 'CYCLES'
 	bpy.context.scene.render.bake.use_clear = False
+	last_op = bpy.context.scene.render.bake.use_selected_to_active
+	bpy.context.scene.render.bake.use_selected_to_active = False
 	if ht.baking_options == "DIFFUSE":
 		bpy.context.scene.render.bake.use_pass_color = True
 		bpy.context.scene.render.bake.use_pass_direct = False
@@ -111,6 +113,7 @@ def run_bake(ht, invoke=True):
 	else:
 		bpy.ops.object.bake(type=ht.baking_options)
 
+	bpy.context.scene.render.bake.use_selected_to_active = last_op
 
 def ensure_color_output_node_ready(variant, tree):
 	material_nodes = tree.nodes
