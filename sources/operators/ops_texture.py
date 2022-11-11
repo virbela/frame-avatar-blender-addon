@@ -198,7 +198,8 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 		bpy.ops.uvpackmaster2.uv_pack()
 		disable_packing_box()
 	elif UVPM3_INSTALLED():
-		bpy.ops.uvpackmaster3.split_overlapping()
+		# Not working in UVPM3
+		# bpy.ops.uvpackmaster3.split_overlapping()
 		bake_scene.uvpm3_props.rotation_step = 45
 
 		if box:
@@ -211,7 +212,7 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 
 		#NOTE - if we later do downsampling when doing final bake 
 		#     - we must consider the final pixel margin and not the intermediate one!
-		#TODO - dont hardcode pixel margin! 
+		#TODO(ranjian0) - dont hardcode pixel margin! 
 		bake_scene.uvpm3_props.pixel_margin_enable = True
 		bake_scene.uvpm3_props.pixel_margin = 5
 		bpy.ops.uvpackmaster3.pack(mode_id='pack.single_tile')
