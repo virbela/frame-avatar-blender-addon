@@ -416,6 +416,10 @@ class HomeomorphicProperties(frame_property_group):
 	baking_target_uvmap: 				bpy.props.StringProperty(name="Bake UV map", default=TARGET_UV_MAP)
 	baking_options:						bpy.props.EnumProperty(items=tuple(BAKING_MODE), name="Bake Mode", default=1)
 
+	### Helpers Copy UV
+	target_object_uv:					bpy.props.PointerProperty(name="Target", type=bpy.types.Object, description="Object to copy UV layers to")
+	source_object_uv:					bpy.props.PointerProperty(name="Source", type=bpy.types.Object, description="Object to copy UV layers from")
+
 	def get_selected_effect(self):
 		if self.selected_effect:
 			return self.effect_collection[self.selected_effect]

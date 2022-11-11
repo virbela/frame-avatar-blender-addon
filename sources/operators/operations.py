@@ -24,6 +24,7 @@ from .ops_dev import (
 )
 
 from .ops_helpers import (
+    copy_uv_layers,
     update_bake_scene,
     reset_uv_transforms, 
     recalculate_normals,

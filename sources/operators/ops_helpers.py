@@ -188,3 +188,46 @@ def clean_normals(context, object_):
 	# make normals consistent
 	bpy.ops.mesh.normals_make_consistent(inside=False)
 	bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
+def copy_uv_layers(operator, context, ht):
+	last_edit_mode = bpy.context.mode
+	if last_edit_mode == 'EDIT_MESH':
+		# -- switch to object mode
+		bpy.ops.object.mode_set(mode='OBJECT')
+
+	# transfer all missing uv layers from one object to another
+	obj, ob = ht.source_object_uv, ht.target_object_uv
+	if not obj or not ob:
+		return
+	last_active = bpy.context.active_object
+	last_selection = [(o, o.select_get()) for o in bpy.data.objects]
+	# -- select the pertinent objects
+	[o.select_set(False) for o in bpy.data.objects]
+	ob.select_set(True)
+	obj.select_set(True)
+	# -- make the source active
+	bpy.context.view_layer.objects.active = obj
+
+	# -- transfer uv layers in source not in target
+	uv_layer_names = [uv.name for uv in obj.data.uv_layers]
+	if uv_layer_names:
+		if ob.type =='MESH':
+			for uv_map in uv_layer_names:
+				obj.data.uv_layers[uv_map].active = True
+				if uv_map not in ob.data.uv_layers:
+					ob.data.uv_layers.new(name=uv_map)
+					ob.data.uv_layers[uv_map].active = True
+					bpy.ops.object.join_uvs()
+
+	ob.select_set(False)
+	obj.select_set(False)
+
+	# -- restore previous selection and active state
+	if last_edit_mode == 'EDIT_MESH':
+		bpy.ops.object.mode_set(mode='EDIT')
+
+	if last_active:
+		bpy.context.view_layer.objects.active = last_active
+	if last_selection:
+		for o, state in last_selection:
+			o.select_set(state)

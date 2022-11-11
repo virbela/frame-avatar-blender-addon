@@ -117,12 +117,12 @@ class FRAME_PT_workflow(frame_panel):
 			helper_tools.prop(scene.ui_state, "workflow_helpers_visible", text="Helpers")
 			if scene.ui_state.workflow_helpers_visible:
 				col = helper_tools.column(align=True)
-				col.operator('frame.synchronize_uv_to_vertices')
-				col.operator('frame.select_objects_by_uv')
-				col.operator('frame.synchronize_visibility_to_render')
-				col.operator('frame.make_everything_visible')
 				col.operator('frame.reset_uv_transforms')
-				col.operator('frame.recalculate_normals')
+				col.separator()
+				uv_col = col.box().column()
+				uv_col.prop(HT, "source_object_uv")
+				uv_col.prop(HT, "target_object_uv")
+				uv_col.operator('frame.copy_uv_layers')
 
 			if is_dev():
 				debug = self.layout.box()

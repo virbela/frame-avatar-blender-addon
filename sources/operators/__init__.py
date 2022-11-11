@@ -246,6 +246,12 @@ class FRAME_OT_synchronize_mirrors(frame_operator):
     bl_idname = 		'frame.synchronize_mirrors'
     frame_operator = 	operations.synchronize_mirrors
 
+class FRAME_OT_copy_uv_layers(frame_operator):
+    bl_label =			"Copy UV Layers"
+    bl_description = 	'Transfer UV layers from one object to another'
+    bl_idname = 		'frame.copy_uv_layers'
+    frame_operator = 	operations.copy_uv_layers
+
 
 # Bake Targets UI List
 class FRAME_OT_add_bake_target(frame_operator):
