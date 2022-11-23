@@ -6,10 +6,11 @@ import tempfile
 from pathlib import Path
 from contextlib import contextmanager
 
+from ..weightexport import Weights
 from ..logging import log_writer as log
 from ..animation import generate_animation_shapekeys
-from ..helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
+from ..helpers import ensure_applied_rotation, get_prefs, popup_message, get_animation_objects
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
 
@@ -22,8 +23,9 @@ def export(operator, context, HT):
 
     try:
         if HT.export_animation:
-            export_animation(context, HT)
-
+            # export_animation(context, HT)
+            Weights(context, HT)
+            return
         if HT.export_glb:
             success = export_glb(context, HT)
             if not success:
@@ -572,35 +574,6 @@ def animation_metadata(ht):
     return result
 
 
-def get_animation_objects(ht):
-    avatar_obj = ht.avatar_object
-    animated_objects = []
-    for bake_target in ht.bake_target_collection:
-        if not avatar_obj:
-            avatar_obj = bake_target.source_object 
-
-        if bake_target.multi_variants:
-            # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
-            log.info(f"Skipping multivariant {bake_target.name}")
-            continue
-
-        obj = bake_target.variant_collection[0].workmesh
-        if not obj:
-            # TODO(ranjian0) 
-            # Possible variants not generated yet, or some other fail condition
-            log.info(f"Skipping missing workmesh {bake_target.name}")
-            continue
-
-        has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
-        if not has_armature:
-            # Object has no armature!
-            log.info(f"Skipping missing armature {bake_target.name}")
-            continue
-
-        animated_objects.append(obj)
-    return animated_objects
-
-
 def desellect_all(context):
     # -- deselect everything in all scenes
     selected = []
@@ -612,6 +585,7 @@ def desellect_all(context):
             o.select_set(False)
 
     return selected
+
 
 def clear_active(context):
     # -- clear all active
