@@ -74,8 +74,8 @@ class Weights:
             nww = nw[export_indices]
             weights[:] = list(nww)
         
-        for obj, group in self.weights.items():
-            for vgroup, weights in group.items():
+        for _, group in self.weights.items():
+            for _, weights in group.items():
                 if weights and len(weights) < num_verts:
                     fill_weights(weights)
                 weights_with_indices(weights)
@@ -84,9 +84,12 @@ class Weights:
         filepath = bpy.data.filepath
         directory = os.path.dirname(filepath)
         with open(os.path.join(directory, "weights.json"), 'w') as file:
-            json.dump(self.weights, file)
+            json.dump(self.weights, file, indent=4)
 
     def set_transforms(self):
+        def mat_to_list(mat):
+            return [mat[i][j] for i in range(4) for j in range(4)]
+
         for action in bpy.data.actions:
             self.transforms[action.name] = list()
             sx, sy = action.frame_range
@@ -97,14 +100,14 @@ class Weights:
 
             for i in range(int(sx), int(sy)):
                 bakescene.frame_set(i)
-                quats = [list(b.rotation_quaternion) for b in self.armature.pose.bones]
+                quats = [mat_to_list(b.matrix) for b in self.armature.pose.bones]
                 self.transforms[action.name].append(sum(quats, []))
 
     def export_transforms_json(self):
         filepath = bpy.data.filepath
         directory = os.path.dirname(filepath)
         with open(os.path.join(directory, "bone_transforms.json"), 'w') as file:
-            json.dump(self.transforms, file)
+            json.dump(self.transforms, file, indent=4)
 
     def save_weights_to_png(self):
         num_bones = len(self.weights[self.animated_objects[0].name].keys())
@@ -116,7 +119,7 @@ class Weights:
         buff = numpy.zeros((width, height), dtype=numpy.float32)
         for oi, ob in enumerate(self.weights.keys()):
             for bi, bo in enumerate(self.weights[self.animated_objects[0].name].keys()):
-                idx = bi + (oi * num_objects)
+                idx = oi * num_bones + bi
                 try: 
                     buff[:,idx] = self.weights[ob][bo]
                 except KeyError as e:
@@ -134,7 +137,7 @@ class Weights:
         img.update()
         filepath = bpy.data.filepath
         directory = os.path.dirname(filepath)
-        img.filepath = os.path.join(directory, f"weights.png")
+        img.filepath = os.path.join(directory, f"bone_weights.png")
         img.save()
 
     def save_transforms_to_png(self):
@@ -149,7 +152,7 @@ class Weights:
             buff = numpy.zeros(width * height, dtype=numpy.float32)
             buff[:] = sum(data, [])
 
-            tname = f"{action.name}_bone_qrotations"
+            tname = f"{action.name}_bone_mats"
             oldimg = bpy.data.images.get(tname)
             if oldimg:
                 bpy.data.images.remove(oldimg)
