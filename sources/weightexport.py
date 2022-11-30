@@ -5,14 +5,14 @@ import numpy
 from .properties import HomeomorphicProperties
 from .helpers import get_animation_objects, require_bake_scene, get_gltf_export_indices
 
-class Weights:
+class WeightExporter:
+    weights = dict()
+    transforms = dict()
 
     def __init__(self, context: bpy.types.Context, ht: HomeomorphicProperties):
         self.ht = ht
         self.context = context
         self.armature = None
-        self.weights = dict()
-        self.transforms = dict()
 
         sc = require_bake_scene(context)
         for ob in sc.objects:
@@ -24,14 +24,12 @@ class Weights:
 
         self.set_weights()
         self.set_transforms()
-        self.save_weights_to_png()
-        self.save_transforms_to_png()
-        self.export_weights_json()
-        self.export_transforms_json()
+        # self.save_weights_to_png()
+        # self.save_transforms_to_png()
+        # self.export_weights_json()
+        # self.export_transforms_json()
 
     def set_weights(self):
-        self.weights = dict()
-
         for obj in self.animated_objects:
             self.weights[obj.name] = dict()
             for bone_name in self.bones:

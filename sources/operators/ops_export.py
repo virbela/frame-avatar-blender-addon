@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 from contextlib import contextmanager
 
-from ..weightexport import Weights
+from ..weightexport import WeightExporter
 from ..logging import log_writer as log
 from ..animation import generate_animation_shapekeys
 from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
@@ -23,10 +23,10 @@ def export(operator, context, HT):
 
     try:
         if HT.export_animation:
-            # export_animation(context, HT)
-            Weights(context, HT)
-            return
+            export_animation(context, HT)
+
         if HT.export_glb:
+            WeightExporter(context, HT)
             success = export_glb(context, HT)
             if not success:
                 # XXX exit early if mesh export failed
@@ -211,7 +211,6 @@ def export_glb(context, ht):
 
     if ht.avatar_type == "FULLBODY":
         morphsets_dict['Animation'] = animation_metadata(ht)
-
 
     prefs = get_prefs()
     filepath = bpy.data.filepath
@@ -571,6 +570,8 @@ def animation_metadata(ht):
     result = dict()
     animated_objects = get_animation_objects(ht)
     result['layers'] = sorted(o.name for o in animated_objects)
+    result['weights'] = WeightExporter.weights
+    result['bone_transforms'] = WeightExporter.transforms
     return result
 
 
