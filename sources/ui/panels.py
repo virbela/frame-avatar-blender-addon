@@ -297,8 +297,8 @@ class FRAME_PT_export(frame_panel):
 				sp = self.layout.split(factor=0.05)
 				_ = sp.column()
 				col = sp.column()
-				for ea in HT.export_animation_actions:
-					col.prop(ea, "checked", text=ea.name.title())
+				for ea in sorted(HT.export_animation_actions, key=lambda a: a.name):
+					col.prop(ea, "checked", text=ea.name)
 
 				self.layout.prop(HT, "export_animation_actions", expand=True, text="")
 			self.layout.prop(HT, "export_atlas")
