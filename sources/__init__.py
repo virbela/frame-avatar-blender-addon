@@ -56,8 +56,6 @@ def register():
 				if eaction.name not in [a.name for a in bpy.data.actions]:
 					HT.export_animation_actions.remove(idx)
 		return 2
-
-
 	bpy.app.timers.register(set_export_actions, first_interval=1)
 
 	@persistent
