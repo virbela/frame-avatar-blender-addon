@@ -1,8 +1,9 @@
 import bpy
 from ..exceptions import BakeException
+from ..properties import HomeomorphicProperties, BakeVariant
 from ..helpers import require_bake_scene, set_scene, set_rendering, set_selection
 
-def bake_all_bake_targets(operator: bpy.types.Operator, context, ht):
+def bake_all_bake_targets(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
 
 	last_active_scene = context.scene
 	bake_scene = require_bake_scene(context)
@@ -13,14 +14,14 @@ def bake_all_bake_targets(operator: bpy.types.Operator, context, ht):
 		operator.report({'INFO'}, f"Baking target {idx} / {len(ht.bake_target_collection)}.")
 		print(f"Baking for {bake_target}")
 		for variant in bake_target.variant_collection:			
-			bake_specific_variant(ht, view_layer, bake_target, variant)
+			bake_specific_variant(ht, view_layer, variant)
 			# XXX bake cannot run as async here because of the loop, means we don't get
 			# meaningful progress indicator
 	run_bake(ht)
 	set_scene(context, last_active_scene)
 
 
-def bake_selected_bake_target(operator, context, ht):
+def bake_selected_bake_target(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
 
 	last_active_scene = context.scene
 	bake_scene = require_bake_scene(context)
@@ -29,13 +30,13 @@ def bake_selected_bake_target(operator, context, ht):
 
 	if bake_target := ht.get_selected_bake_target():
 		if variant := bake_target.variant_collection[bake_target.selected_variant]:
-			bake_specific_variant(ht, view_layer, bake_target, variant)
+			bake_specific_variant(ht, view_layer, variant)
 			run_bake(ht)
 
 	set_scene(context, last_active_scene)
 
 
-def bake_selected_workmeshes(operator, context, ht):
+def bake_selected_workmeshes(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
 	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
@@ -71,7 +72,7 @@ def bake_selected_workmeshes(operator, context, ht):
 	run_bake(ht)
 
 
-def bake_specific_variant(ht, view_layer, bake_target, variant):
+def bake_specific_variant(ht: HomeomorphicProperties, view_layer: bpy.types.ViewLayer, variant: BakeVariant):
 	workmesh = variant.workmesh
 
 	ensure_color_output_node_ready(variant, workmesh.active_material.node_tree)
@@ -89,7 +90,7 @@ def bake_specific_variant(ht, view_layer, bake_target, variant):
 	uv_layers.active = uv_layers[ht.baking_target_uvmap]
 
 
-def run_bake(ht, invoke=True):
+def run_bake(ht: HomeomorphicProperties, invoke: bool = True):
 	bpy.context.scene.cycles.device = 'GPU'
 	bpy.context.scene.render.engine = 'CYCLES'
 	bpy.context.scene.render.bake.use_clear = False
@@ -115,7 +116,7 @@ def run_bake(ht, invoke=True):
 
 	bpy.context.scene.render.bake.use_selected_to_active = last_op
 
-def ensure_color_output_node_ready(variant, tree):
+def ensure_color_output_node_ready(variant: BakeVariant, tree: bpy.types.NodeTree):
 	material_nodes = tree.nodes
 	material_links = tree.links
 

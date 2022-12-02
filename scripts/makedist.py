@@ -52,16 +52,16 @@ for item in REPO_FILES:
             )
         )
     else:
-        items = (item,)
+        items = [item,]
 
     for filename in items:
         info = git("log", "--format=%ct:%H", "-n1", "%s..%s" % (earliest, upto), "--", filename).strip()
 
         if info != b"":
-            item = zipfile.ZipInfo()
-            item.filename = os.path.join(basename, filename[8:])
-            item.external_attr = 0o100644 << 16
-            item.compress_type = zipfile.ZIP_DEFLATED
+            info = zipfile.ZipInfo()
+            info.filename = os.path.join(basename, filename[8:])
+            info.external_attr = 0o100644 << 16
+            info.compress_type = zipfile.ZIP_DEFLATED
             timestamp, commit_hash = info.split(b":")
             timestamp = int(timestamp)
             info = git("ls-tree", commit_hash, filename).strip()
@@ -69,8 +69,8 @@ for item in REPO_FILES:
         if info != b"":
             object_hash = info.split(b"\t")[0].split(b" ")[2].decode()
             object_contents = git("show", object_hash)
-            item.date_time = time.gmtime(timestamp)[:6]
-            out.writestr(item, object_contents)
+            info.date_time = time.gmtime(timestamp)[:6]
+            out.writestr(info, object_contents)
 
 out.close()
 

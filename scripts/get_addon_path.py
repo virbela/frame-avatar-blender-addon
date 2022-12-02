@@ -1,4 +1,5 @@
 import bpy
+import bpy.utils
 import sys, argparse
 from pathlib import Path
 

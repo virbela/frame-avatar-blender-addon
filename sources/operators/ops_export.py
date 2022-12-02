@@ -9,11 +9,12 @@ from contextlib import contextmanager
 from ..logging import log_writer as log
 from ..animation import generate_animation_shapekeys
 from ..helpers import ensure_applied_rotation, get_prefs, popup_message
+from ..properties import HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
 from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
 
-def export(operator, context, HT):
+def export(operator: bpy.types.Operator, context: bpy.types.Context, HT: HomeomorphicProperties):
     if not validate_export(context, HT):
         return
 
@@ -47,7 +48,7 @@ def export(operator, context, HT):
         layer.objects.active = obj
 
 
-def validate_export(context, HT):
+def validate_export(context: bpy.types.Context, HT: HomeomorphicProperties):
     work_scene = require_work_scene(context)
     if work_scene is None:
         popup_message("Export validation failed! Work scene missing!", "Validation Error")
@@ -70,7 +71,7 @@ def validate_export(context, HT):
     return True
 
 
-def export_glb(context, ht):
+def export_glb(context: bpy.types.Context, ht: HomeomorphicProperties):
     obj = ht.avatar_mesh
     ensure_applied_rotation(obj)
 
@@ -113,7 +114,7 @@ def export_glb(context, ht):
         log.info(f'Getting transform for: {name}')
         uv_transform_map[name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
 
-    def get_transform(shape_name):
+    def get_transform(shape_name: str):
         if shape_name.endswith('__None'):
             shape_name = shape_name[:-6]
 
@@ -130,7 +131,7 @@ def export_glb(context, ht):
             }
         return uv_transform
 
-    def get_variant_channel(variant):
+    def get_variant_channel(variant: BakeVariant):
         if variant.uv_target_channel == 'UV_TARGET_COLOR':
             return (0, 0, 0, 1)
         elif variant.uv_target_channel == 'UV_TARGET_R':
@@ -291,7 +292,7 @@ def export_glb(context, ht):
     return True
 
 
-def export_atlas(context, denoise=True):
+def export_atlas(context: bpy.types.Context, denoise: bool = True):
     work_scene = require_work_scene(context)
 
     work_scene.use_nodes = True
@@ -412,7 +413,7 @@ def export_atlas(context, denoise=True):
             )
 
 
-def export_animation(context, ht):
+def export_animation(context: bpy.types.Context, ht: HomeomorphicProperties):
     avatar_obj = ht.avatar_mesh
     animated_objects = get_animation_objects(ht)
     list(map(ensure_applied_rotation, animated_objects))
@@ -421,7 +422,7 @@ def export_animation(context, ht):
 
 
 @contextmanager
-def clear_custom_props(item):
+def clear_custom_props(item: bpy.types.Object | bpy.types.Scene):
     prop_keys = list(item.keys())
 
     # remove all custom props
@@ -436,7 +437,7 @@ def clear_custom_props(item):
         item[k] = v
 
 
-def calculate_effect_delta(obj, effect):
+def calculate_effect_delta(obj: bpy.types.Object, effect: PositionEffect):
     """ Return ids and final positions of all transformed verts of target shapekey relative to base shapekey 
     """
 
@@ -483,7 +484,7 @@ def calculate_effect_delta(obj, effect):
     return result
 
 
-def get_verts_or_vgroup(obj, color_effect):
+def get_verts_or_vgroup(obj: bpy.types.Object, color_effect: ColorEffect):
     data = sorted([(v.index, list(color_effect.color)[:3]) for v in obj.data.vertices], key=lambda v: v[0])
 
     if not color_effect.vert_group:
@@ -505,7 +506,7 @@ def get_verts_or_vgroup(obj, color_effect):
     return list(data_only_in_group)
 
 
-def obj_from_shapekey(obj, keyname):
+def obj_from_shapekey(obj: bpy.types.Object, keyname: str):
     pending_object = obj.copy()
     pending_object.name = f"{keyname}_effect_object_{uuid.uuid4()}"
     pending_object.data = obj.data.copy()
@@ -555,29 +556,14 @@ def obj_from_shapekey(obj, keyname):
     return pending_object
 
 
-def post_process_effects(effects, object):
-    """ Ensure effect shapekeys have an 'effect' string suffix 
-    """
-    for effect in effects:
-        if 'effect' in effect.effect_shapekey:
-            continue 
-
-        ef = object.data.shape_keys.key_blocks.get(effect.effect_shapekey)
-        if not ef:
-            continue 
-
-        ef.name = f"{ef.name}_effect"
-        effect.effect_shapekey = ef.name
-
-
-def animation_metadata(ht):
+def animation_metadata(ht: HomeomorphicProperties):
     result = dict()
     animated_objects = get_animation_objects(ht)
     result['layers'] = sorted(o.name for o in animated_objects)
     return result
 
 
-def get_animation_objects(ht):
+def get_animation_objects(ht: HomeomorphicProperties):
     avatar_obj = ht.avatar_mesh
     animated_objects = []
     for bake_target in ht.bake_target_collection:
@@ -606,7 +592,7 @@ def get_animation_objects(ht):
     return animated_objects
 
 
-def desellect_all(context):
+def desellect_all(context: bpy.types.Context):
     # -- deselect everything in all scenes
     selected = []
     objects = list(require_work_scene(context).objects)
@@ -618,7 +604,7 @@ def desellect_all(context):
 
     return selected
 
-def clear_active(context):
+def clear_active(context: bpy.types.Context):
     # -- clear all active
     active = []
     layers = list(require_work_scene(context).view_layers)
