@@ -107,7 +107,10 @@ class WeightExporter:
 
             for i in range(int(sx), int(sy)):
                 bakescene.frame_set(i)
-                quats = [get_bone_mat(self.armature, b) for b in self.armature.pose.bones]
+                depsgraph = bakescene.view_layers[0].depsgraph
+                eval_arm = self.armature.evaluated_get(depsgraph)
+
+                quats = [get_bone_mat(eval_arm, eval_arm.pose.bones[bname]) for bname in self.bones]
                 self.transforms[action.name].append(sum(quats, []))
 
     def export_transforms_json(self):
