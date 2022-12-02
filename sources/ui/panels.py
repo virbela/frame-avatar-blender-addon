@@ -31,7 +31,8 @@ class FRAME_PT_workflow(frame_panel):
 		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
 
-			self.layout.prop(HT, "avatar_object", text="Avatar Object")
+			self.layout.prop(HT, "avatar_mesh")
+			self.layout.prop(HT, "avatar_rig")
 
 			#TODO - this should point to our documentation for the workflow. This could point to a document that requires the artist to be logged in to that web service (like google docs as an example).
 			#We may not want links that anyone can access since the workflow should be considered proprietary

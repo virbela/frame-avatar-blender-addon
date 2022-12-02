@@ -59,15 +59,19 @@ def validate_export(context, HT):
     #     popup_message("Export validation failed! Must be in main scene!", "Validation Error")
     #     return False
 
-    if HT.avatar_object is None:
+    if HT.avatar_mesh is None:
         popup_message("Export validation failed! Avatar Object not selected in workflow panel!", "Validation Error")
+        return False
+
+    if HT.avatar_rig is None:
+        popup_message("Export validation failed! Avatar Rig not selected in workflow panel!", "Validation Error")
         return False
 
     return True
 
 
 def export_glb(context, ht):
-    obj = ht.avatar_object
+    obj = ht.avatar_mesh
     ensure_applied_rotation(obj)
 
     if not obj.data.shape_keys:
@@ -226,7 +230,7 @@ def export_glb(context, ht):
     clear_active(context)
     desellect_all(context)
 
-    obj = ht.avatar_object
+    obj = ht.avatar_mesh
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
 
@@ -409,7 +413,7 @@ def export_atlas(context, denoise=True):
 
 
 def export_animation(context, ht):
-    avatar_obj = ht.avatar_object
+    avatar_obj = ht.avatar_mesh
     animated_objects = get_animation_objects(ht)
     list(map(ensure_applied_rotation, animated_objects))
     log.info(f"Animated Objects {animated_objects}")
@@ -574,7 +578,7 @@ def animation_metadata(ht):
 
 
 def get_animation_objects(ht):
-    avatar_obj = ht.avatar_object
+    avatar_obj = ht.avatar_mesh
     animated_objects = []
     for bake_target in ht.bake_target_collection:
         if not avatar_obj:

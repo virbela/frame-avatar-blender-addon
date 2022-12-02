@@ -16,11 +16,6 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
     HT = scene.homeomorphictools
     export_full_blob = all([ea.checked for ea in HT.export_animation_actions])
 
-    armatures = [o for o in require_bake_scene(context).objects if o.type == 'ARMATURE']
-    if len(armatures) > 1 or len(armatures) == 0:
-        log.error("Expected a single armature in the bake scene")
-        return
-
     filepath = bpy.data.filepath
     export_indices = get_gltf_export_indices(avatar)
 
@@ -28,7 +23,7 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
     num_verts = len(export_indices)
     animation_buffer = np.zeros((num_verts * 3, num_frames, len(animated_objects)), dtype=np.float32)
     frame_counter = {o.name:0 for o in animated_objects}
-    armature = armatures.pop()
+    armature = HT.avatar_rig
     for action in bpy.data.actions:
         armature.animation_data.action = action
         export_action_animation(context, action, animated_objects, num_verts, export_indices)
