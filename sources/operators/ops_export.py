@@ -55,10 +55,11 @@ def validate_export(context, HT):
         popup_message("Export validation failed! Work scene missing!", "Validation Error")
         return False
 
-    active_scene = context.scene
-    if active_scene != work_scene:
-        popup_message("Export validation failed! Must be in main scene!", "Validation Error")
-        return False
+    # XXX Allow export from the bake scene
+    # active_scene = context.scene
+    # if active_scene != work_scene:
+    #     popup_message("Export validation failed! Must be in main scene!", "Validation Error")
+    #     return False
 
     if HT.avatar_object is None:
         popup_message("Export validation failed! Avatar Object not selected in workflow panel!", "Validation Error")

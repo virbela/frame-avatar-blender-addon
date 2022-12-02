@@ -2,7 +2,7 @@ bl_info = {
 	"name": "Homeomorphic avatar creator",
 	"description": "Homeomorphic avatar creation tools",
 	"author": "Martin Petersson, Ian Karanja",
-	"version": (0, 1, 8),
+	"version": (0, 1, 9),
 	"blender": (2, 92, 2),
 	"location": "View3D",
 	"warning": "",
@@ -16,6 +16,8 @@ bl_info = {
 #	labels: dependency
 
 import bpy
+from bpy.app.handlers import persistent
+
 from .ui import * 
 from .operators import *
 from .preferences import *
@@ -56,7 +58,13 @@ def register():
 		return 2
 
 
-	bpy.app.timers.register(set_export_actions, first_interval=1)	
+	bpy.app.timers.register(set_export_actions, first_interval=1)
+
+	@persistent
+	def refresh_timer_on_file_open(dummy):
+		if not bpy.app.timers.is_registered(set_export_actions):
+			bpy.app.timers.register(set_export_actions, first_interval=1)
+	bpy.app.handlers.load_post.append(refresh_timer_on_file_open)
 
 
 def unregister():
