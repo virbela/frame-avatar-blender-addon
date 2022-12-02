@@ -2,6 +2,7 @@ import os
 import bpy
 import json 
 import numpy
+from mathutils import Matrix
 from .properties import HomeomorphicProperties
 from .helpers import get_animation_objects, require_bake_scene, get_gltf_export_indices
 
@@ -85,7 +86,15 @@ class WeightExporter:
             json.dump(self.weights, file, indent=4)
 
     def set_transforms(self):
-        def mat_to_list(mat):
+        def get_bone_mat(arm, pose_bone):
+            # blender z-up to babylon y-up
+            axis_basis_change = Matrix(
+                ((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, -1.0, 0.0, 0.0), (0.0, 0.0, 0.0, 1.0))
+            )
+
+            # get inverse bind matrix
+            # mat = (axis_basis_change @ arm.matrix_world @ pose_bone.bone.matrix_local).inverted_safe()
+            mat = (axis_basis_change @ pose_bone.matrix).inverted_safe()
             return [mat[i][j] for i in range(4) for j in range(4)]
 
         for action in bpy.data.actions:
@@ -98,7 +107,7 @@ class WeightExporter:
 
             for i in range(int(sx), int(sy)):
                 bakescene.frame_set(i)
-                quats = [mat_to_list(b.matrix) for b in self.armature.pose.bones]
+                quats = [get_bone_mat(self.armature, b) for b in self.armature.pose.bones]
                 self.transforms[action.name].append(sum(quats, []))
 
     def export_transforms_json(self):
