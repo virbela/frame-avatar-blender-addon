@@ -69,6 +69,7 @@ def validate_export(context, HT):
 
 
 def export_glb(context, ht):
+    work_scene_viewlayer = require_work_scene(context).view_layers[0]
     obj = ht.avatar_object
     ensure_applied_rotation(obj)
 
@@ -84,7 +85,7 @@ def export_glb(context, ht):
 
     obj.hide_set(False)
     obj.hide_viewport = False 
-    obj.select_set(True)
+    obj.select_set(True, view_layer=work_scene_viewlayer)
 
     uv_transform_extra_data = dict()		
     uv_transform_map = dict()				
@@ -108,7 +109,7 @@ def export_glb(context, ht):
         if item not in valid_workmeshes:
             continue 
 
-        log.info(f'Getting transform for: {name}')
+        # log.info(f'Getting transform for: {name}')
         uv_transform_map[name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
 
     def get_transform(shape_name):
@@ -146,7 +147,7 @@ def export_glb(context, ht):
             continue
 
         if 'effect' in bake_target.shortname.lower() or bake_target.shortname.lower() in effect_names:
-            log.info("Skipping effect bake target")
+            # log.info("Skipping effect bake target")
             continue
 
         result = None
@@ -172,7 +173,7 @@ def export_glb(context, ht):
             Rk = f'{base}_L' if '_R' in bake_target.name else f'base_R'
             R = ht.bake_target_collection.get(Rk)
             if not R:
-                log.info(f'Missing mirror source for {bake_target}')
+                # log.info(f'Missing mirror source for {bake_target}')
                 continue
             uv_transform_extra_data[bake_target.shortname] = uv_transform_extra_data[R.shortname]
             uv_transform_extra_data[bake_target.shortname]['is_mirror'] = True
@@ -233,8 +234,8 @@ def export_glb(context, ht):
     desellect_all(context)
 
     obj = ht.avatar_object
-    bpy.context.view_layer.objects.active = obj
-    obj.select_set(True)
+    work_scene_viewlayer.objects.active = obj
+    obj.select_set(True, view_layer=work_scene_viewlayer)
 
     # post_process_effects(ht.effect_collection, obj)
     with clear_custom_props(obj):
@@ -288,7 +289,7 @@ def export_glb(context, ht):
             obj.shape_key_remove(kb)
     obj.active_shape_key_index = last_idx
 
-    bpy.context.view_layer.objects.active = None
+    work_scene_viewlayer.objects.active = None
     obj.select_set(False)
     return True
 
@@ -418,7 +419,6 @@ def export_animation(context, ht):
     avatar_obj = ht.avatar_object
     animated_objects = get_animation_objects(ht)
     list(map(ensure_applied_rotation, animated_objects))
-    log.info(f"Animated Objects {animated_objects}")
     generate_animation_shapekeys(context, avatar_obj, animated_objects)
 
 
