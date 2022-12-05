@@ -304,3 +304,8 @@ class FRAME_PT_export(frame_panel):
 			self.layout.prop(HT, "export_atlas")
 			self.layout.prop(HT, "denoise")
 		self.layout.operator("frame.export")
+		if is_dev():
+			debug = self.layout.box()
+			debug.label(text='Debug tools')
+			debug.prop(HT, 'debug_glb_export_dir')
+

@@ -420,6 +420,13 @@ class HomeomorphicProperties(frame_property_group):
 	target_object_uv:					bpy.props.PointerProperty(name="Target", type=bpy.types.Object, description="Object to copy UV layers to")
 	source_object_uv:					bpy.props.PointerProperty(name="Source", type=bpy.types.Object, description="Object to copy UV layers from")
 
+	# DEBUG
+	debug_glb_export_dir: 				bpy.props.StringProperty(
+											name='GLB Export Dir', 
+											description='Folder to use for glb export (default is current blendfile folder).', subtype='DIR_PATH'
+										)
+
+
 	def get_selected_effect(self):
 		if self.selected_effect:
 			return self.effect_collection[self.selected_effect]

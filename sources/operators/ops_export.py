@@ -223,6 +223,11 @@ def export_glb(context, ht):
     if ht.avatar_type == "FLOATER":
         fname = "faba_floater_avatar.glb"
     outputfile_glb = os.path.join(directory , fname)
+    if is_dev():
+        if ht.debug_glb_export_dir:
+            d = bpy.path.abspath(ht.debug_glb_export_dir)
+            if os.path.exists(d):
+                outputfile_glb = os.path.join(d, fname)
 
     clear_active(context)
     desellect_all(context)
