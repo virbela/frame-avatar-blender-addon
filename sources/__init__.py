@@ -80,4 +80,4 @@ if __name__ == '__main__':
 		unregister()
 	except:
 		pass
-	register()	
+	register()
