@@ -28,7 +28,8 @@ class frame_operator(bpy.types.Operator):
 
 				except Exception as e:
 					log.exception(f'Exception when calling operator for {self}: {e}')
-					raise #We also raise this to let blender know things went wrong
+					# raise #We also raise this to let blender know things went wrong
+					return {'CANCELLED'}
 
 				return {'FINISHED'}
 			else:
