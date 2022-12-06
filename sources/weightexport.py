@@ -2,6 +2,7 @@ import os
 import bpy
 import json 
 import numpy
+from bpy_extras.io_utils import axis_conversion
 from .properties import HomeomorphicProperties
 from .helpers import get_animation_objects, require_bake_scene, get_gltf_export_indices
 
@@ -62,8 +63,24 @@ class WeightExporter:
     def set_transforms(self):
         bakescene = require_bake_scene(self.context)
 
-        def get_bone_mat(pose_bone):
-            mat = pose_bone.matrix @ pose_bone.bone.matrix_local.inverted()
+        def get_bone_mat(pose_bone: bpy.types.PoseBone):
+            # blender z-up to babylon y-up
+            axis_basis_change = axis_conversion(
+                from_forward='Y', from_up='Z',
+                to_forward='Z', to_up='Y'
+            ).to_4x4()
+
+            inverse_bind_pose = (
+                self.armature.matrix_world @ 
+                pose_bone.bone.matrix_local
+            ).inverted_safe()
+
+            bone_matrix = (
+                self.armature.matrix_world @
+                pose_bone.matrix
+            )
+
+            mat = bone_matrix @ inverse_bind_pose  @ axis_basis_change
 
             # XXX Export Matrix in column major format
             return [round(mat[j][i], 4) for i in range(4) for j in range(4)]
