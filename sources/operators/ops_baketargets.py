@@ -1,18 +1,20 @@
 import bpy
+from bpy.types import Operator, Context, ShapeKey, Object
+
 from .common import generic_list
 from ..constants import TARGET_UV_MAP
 from ..bake_targets import validate_all
 from ..logging import log_writer as log
 from ..structures import intermediate, iter_dc
-from ..properties import HomeomorphicProperties, BakeTarget
+from ..properties import HomeomorphicProperties, BakeTarget, BakeTargetMirrorEntry
 from ..helpers import a_get, a_set, require_work_scene, set_scene, set_selection
 
 
-def validate_targets(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+def validate_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	validate_all(ht)
 
 
-def create_targets_from_selection(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+def create_targets_from_selection(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	for source_object in context.selected_objects:
 		# change the main uvmap name
 		source_uv = source_object.data.uv_layers[0]	# Assume first UV map is the source one
@@ -28,7 +30,7 @@ def create_targets_from_selection(operator: bpy.types.Operator, context: bpy.typ
 		bk.bake_mode = 'UV_BM_MIRRORED'
 
 
-def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object: bpy.types.Object, key_blocks: list[bpy.types.ShapeKey]):
+def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object: Object, key_blocks: list[ShapeKey]):
 	#Create all intermediate targets
 	targets = dict()
 	mirror_list = list()
@@ -95,7 +97,7 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
 
 		target.bake_target = new
 
-	def create_mirror(primary: int, secondary: int):
+	def create_mirror(primary: int, secondary: int) -> BakeTargetMirrorEntry:
 		new = ht.bake_target_mirror_collection.add()
 		new.primary = primary
 		new.secondary = secondary
@@ -134,34 +136,34 @@ def create_eye_variants(bk: BakeTarget):
 			variant.image = tex
 
 class bake_mirrors:
-	def set_primary(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def set_primary(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		if mirror := ht.get_selected_mirror():
 			if bake_target := ht.get_selected_bake_target():
 				mirror.primary = ht.get_bake_target_index(bake_target)
 
-	def set_secondary(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def set_secondary(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		if mirror := ht.get_selected_mirror():
 			if bake_target := ht.get_selected_bake_target():
 				mirror.secondary = ht.get_bake_target_index(bake_target)
 
-	def add(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		generic_list.add(ht.bake_target_mirror_collection, a_get(ht, 'selected_bake_target_mirror'), a_set(ht, 'selected_bake_target_mirror'))
 
-	def remove(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		generic_list.remove(ht.bake_target_mirror_collection, a_get(ht, 'selected_bake_target_mirror'), a_set(ht, 'selected_bake_target_mirror'))
 
 
 class bake_targets:
 	#BUG - currently we don't check if a target is in a mirror and therefore a mirror will point to the wrong thing if removing a reference
 
-	def add(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		generic_list.add(ht.bake_target_collection, a_get(ht, 'selected_bake_target'), a_set(ht, 'selected_bake_target'))
 
-	def remove(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		generic_list.remove(ht.bake_target_collection, a_get(ht, 'selected_bake_target'), a_set(ht, 'selected_bake_target'))
 
 	#TDB use?
-	def edit_selected(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def edit_selected(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		bake_target = ht.get_selected_bake_target()
 		if not bake_target:
 			return
@@ -182,60 +184,60 @@ class bake_targets:
 
 class bake_groups:
 
-	def add(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		generic_list.add(ht.bake_group_collection, a_get(ht, 'selected_bake_group'), a_set(ht, 'selected_bake_group'))
 
-	def remove(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		generic_list.remove(ht.bake_group_collection, a_get(ht, 'selected_bake_group'), a_set(ht, 'selected_bake_group'))
 
 
 	class members:
-		def add(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+		def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
 			if bake_group := ht.get_selected_bake_group():
 				if bake_target := ht.get_selected_bake_target():
 					new = generic_list.add(bake_group.members, a_get(bake_group, 'selected_member'), a_set(bake_group, 'selected_member'))
 					new.target = ht.get_bake_target_index(bake_target)
 
-		def remove(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+		def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
 			if bake_group := ht.get_selected_bake_group():
 				generic_list.remove(bake_group.members, a_get(bake_group, 'selected_member'), a_set(bake_group, 'selected_member'))
 
 
 class bake_variants:
 
-	def add(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		if bake_target := ht.get_selected_bake_target():
 			generic_list.add(bake_target.variant_collection, a_get(bake_target, 'selected_variant'), a_set(bake_target, 'selected_variant'))
 
-	def remove(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		if bake_target := ht.get_selected_bake_target():
 			generic_list.remove(bake_target.variant_collection, a_get(bake_target, 'selected_variant'), a_set(bake_target, 'selected_variant'))
 
 
 class effects:
 
-	def add(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		generic_list.add(ht.effect_collection, a_get(ht, 'selected_effect'), a_set(ht, 'selected_effect'))
 
-	def remove(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		generic_list.remove(ht.effect_collection, a_get(ht, 'selected_effect'), a_set(ht, 'selected_effect'))
 
-	def add_position_effect(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def add_position_effect(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		if ht.selected_effect != -1:
 			et = ht.effect_collection[ht.selected_effect]
 			pos = et.positions.add()
 
-	def remove_position_effect(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def remove_position_effect(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		if ht.selected_effect != -1:
 			et = ht.effect_collection[ht.selected_effect]
 			et.positions.remove(operator.index)
 
-	def add_color_effect(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def add_color_effect(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		if ht.selected_effect != -1:
 			et = ht.effect_collection[ht.selected_effect]
 			pos = et.colors.add()
 
-	def remove_color_effect(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def remove_color_effect(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		if ht.selected_effect != -1:
 			et = ht.effect_collection[ht.selected_effect]
 			et.colors.remove(operator.index)
