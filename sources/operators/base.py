@@ -1,12 +1,12 @@
 import bpy
-
+import typing
 from ..helpers import get_homeomorphic_tool_state, pending_classes
 from ..exceptions import BakeException, InternalError
 from ..logging import log_writer as log
 
 class frame_operator(bpy.types.Operator):
-	frame_operator = lambda context, HT: None
 	frame_poll = lambda context : True
+	frame_operator = lambda context, HT: None
 
 	#contribution note 6B
 	def __init_subclass__(cls):
@@ -16,7 +16,7 @@ class frame_operator(bpy.types.Operator):
 	def poll(cls, context: bpy.types.Context) -> bool:
 		return cls.frame_poll(context)
 
-	def execute(self, context: bpy.types.Context) -> set[str]:
+	def execute(self, context: bpy.types.Context) -> typing.Union[typing.Set[str], typing.Set[int]]:
 		if HT := get_homeomorphic_tool_state(context):	#contribution note 2
 			if self.frame_operator:
 				try:
@@ -28,7 +28,7 @@ class frame_operator(bpy.types.Operator):
 
 				except Exception as e:
 					log.exception(f'Exception when calling operator for {self}: {e}')
-					raise #We also raise this to let blender know things went wrong
+					return {'CANCELLED'}
 
 				return {'FINISHED'}
 			else:
