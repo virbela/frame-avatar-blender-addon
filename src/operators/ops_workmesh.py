@@ -4,11 +4,11 @@ import mathutils
 from bpy.types import Context, Operator, Scene
 
 from .common import set_uv_map
-from ..logging import log_writer as log
-from ..materials import setup_bake_material
-from ..constants import PAINTING_UV_MAP, TARGET_UV_MAP
-from ..properties import HomeomorphicProperties, BakeTarget
-from ..helpers import (
+from ..utils.logging import log_writer as log
+from ..utils.materials import setup_bake_material
+from ..utils.constants import PAINTING_UV_MAP, TARGET_UV_MAP
+from ..utils.properties import HomeomorphicProperties, BakeTarget
+from ..utils.helpers import (
     require_bake_scene, 
     require_work_scene,
     IMPLEMENTATION_PENDING,

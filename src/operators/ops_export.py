@@ -7,12 +7,12 @@ from pathlib import Path
 from contextlib import contextmanager
 from bpy.types import Operator, Context, Object, Scene, ViewLayer
 
-from ..logging import log_writer as log
-from ..animation import generate_animation_shapekeys
-from ..helpers import ensure_applied_rotation, get_prefs, popup_message
-from ..properties import HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
-from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
-from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
+from ..utils.logging import log_writer as log
+from ..utils.animation import generate_animation_shapekeys
+from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
+from ..utils.properties import HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
+from ..utils.uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
+from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
 
 def export(operator: Operator, context: Context, HT: HomeomorphicProperties):

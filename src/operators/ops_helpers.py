@@ -2,9 +2,9 @@ import bpy
 import bmesh 
 from bpy.types import Operator, Context, Object
 
-from ..constants import MIRROR_TYPE
-from ..helpers import require_bake_scene, set_selection
-from ..properties import BakeTarget, HomeomorphicProperties
+from ..utils.constants import MIRROR_TYPE
+from ..utils.helpers import require_bake_scene, set_selection
+from ..utils.properties import BakeTarget, HomeomorphicProperties
 from .common import set_uv_map, copy_object, copy_collection, transfer_variant
 
 def synchronize_uv_to_vertices(operator: Operator, context: Context, ht: HomeomorphicProperties):

@@ -3,8 +3,8 @@ from collections import deque
 
 from . import operations
 from .base import frame_operator
-from ..logging import log_writer as log
-from ..helpers import (
+from ..utils.logging import log_writer as log
+from ..utils.helpers import (
     set_rendering,
     set_selection,
     register_class,

@@ -2,12 +2,12 @@ import bpy
 import bmesh
 from bpy.types import Context, Operator, Object, Scene, Image
 
-from ..constants import TARGET_UV_MAP
-from ..structures import intermediate
-from ..logging import log_writer as log
-from ..properties import HomeomorphicProperties
+from ..utils.constants import TARGET_UV_MAP
+from ..utils.structures import intermediate
+from ..utils.logging import log_writer as log
+from ..utils.properties import HomeomorphicProperties
 from .common import set_uv_map, guarded_operator 
-from ..helpers import (
+from ..utils.helpers import (
     set_scene,
     set_active,
     set_selection,

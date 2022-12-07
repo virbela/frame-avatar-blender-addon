@@ -2,11 +2,11 @@ import bpy
 from bpy.types import Operator, Context, ShapeKey, Object
 
 from .common import generic_list
-from ..constants import TARGET_UV_MAP
-from ..logging import log_writer as log
-from ..structures import intermediate, iter_dc
-from ..properties import HomeomorphicProperties, BakeTarget, BakeTargetMirrorEntry
-from ..helpers import a_get, a_set, require_work_scene, set_scene, set_selection
+from ..utils.constants import TARGET_UV_MAP
+from ..utils.logging import log_writer as log
+from ..utils.structures import intermediate, iter_dc
+from ..utils.properties import HomeomorphicProperties, BakeTarget, BakeTargetMirrorEntry
+from ..utils.helpers import a_get, a_set, require_work_scene, set_scene, set_selection
 
 
 def create_targets_from_selection(operator: Operator, context: Context, ht: HomeomorphicProperties):

@@ -1,9 +1,9 @@
 import bpy
 import functools
-from ..properties import *
-from ..logging import log_writer as log
-from ..exceptions import InternalError
-from ..helpers import require_work_scene, require_bake_scene, pending_classes, is_dev
+from ..utils.properties import *
+from ..utils.logging import log_writer as log
+from ..utils.exceptions import InternalError
+from ..utils.helpers import require_work_scene, require_bake_scene, pending_classes, is_dev
 
 class frame_panel(bpy.types.Panel):
 	#contribution note 6B

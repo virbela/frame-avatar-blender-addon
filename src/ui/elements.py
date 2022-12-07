@@ -1,6 +1,6 @@
 import bpy
-from ..properties import *
-from ..helpers import pending_classes, get_homeomorphic_tool_state
+from ..utils.properties import *
+from ..utils.helpers import pending_classes, get_homeomorphic_tool_state
 
 #ISSUE: Some collections are referenced in a problematic way
 #	Currently we use indices to refer to items in collections but since items can move around (check if this is true) our indices can be wrong.
