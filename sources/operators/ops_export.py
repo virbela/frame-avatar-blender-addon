@@ -5,6 +5,7 @@ import uuid
 import tempfile
 from pathlib import Path
 from contextlib import contextmanager
+from bpy.types import Operator, Context, Object, Scene, ViewLayer
 
 from ..logging import log_writer as log
 from ..animation import generate_animation_shapekeys
@@ -14,7 +15,7 @@ from ..uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_
 from ..helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
 
-def export(operator: bpy.types.Operator, context: bpy.types.Context, HT: HomeomorphicProperties):
+def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
     if not validate_export(context, HT):
         return
 
@@ -48,7 +49,7 @@ def export(operator: bpy.types.Operator, context: bpy.types.Context, HT: Homeomo
         layer.objects.active = obj
 
 
-def validate_export(context: bpy.types.Context, HT: HomeomorphicProperties):
+def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
     work_scene = require_work_scene(context)
     if work_scene is None:
         popup_message("Export validation failed! Work scene missing!", "Validation Error")
@@ -71,7 +72,7 @@ def validate_export(context: bpy.types.Context, HT: HomeomorphicProperties):
     return True
 
 
-def export_glb(context: bpy.types.Context, ht: HomeomorphicProperties):
+def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     obj = ht.avatar_mesh
     ensure_applied_rotation(obj)
 
@@ -80,10 +81,11 @@ def export_glb(context: bpy.types.Context, ht: HomeomorphicProperties):
         popup_message("Selected object is not an Homeomorphic avatar", 'Context Error')
         return False
     
-    if obj.name != 'Avatar':
-        #XXX Probably Not the main avatar object
-        popup_message("Avatar object name invalid! Try 'Avatar'.", 'Context Error')
-        return False
+    # XXX(ranjian0) Don't depend on naming for the avatar
+    # if obj.name != 'Avatar':
+    #     #XXX Probably Not the main avatar object
+    #     popup_message("Avatar object name invalid! Try 'Avatar'.", 'Context Error')
+    #     return False
 
     obj.hide_set(False)
     obj.hide_viewport = False 
@@ -114,7 +116,7 @@ def export_glb(context: bpy.types.Context, ht: HomeomorphicProperties):
         log.info(f'Getting transform for: {name}')
         uv_transform_map[name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
 
-    def get_transform(shape_name: str):
+    def get_transform(shape_name: str) -> dict:
         if shape_name.endswith('__None'):
             shape_name = shape_name[:-6]
 
@@ -131,7 +133,7 @@ def export_glb(context: bpy.types.Context, ht: HomeomorphicProperties):
             }
         return uv_transform
 
-    def get_variant_channel(variant: BakeVariant):
+    def get_variant_channel(variant: BakeVariant) -> tuple[int]:
         if variant.uv_target_channel == 'UV_TARGET_COLOR':
             return (0, 0, 0, 1)
         elif variant.uv_target_channel == 'UV_TARGET_R':
@@ -140,8 +142,8 @@ def export_glb(context: bpy.types.Context, ht: HomeomorphicProperties):
             return (0, 1, 0, 0)
         elif variant.uv_target_channel == 'UV_TARGET_B':
             return (0, 0, 1, 0)
-        else:
-            return (0, 0, 0, 0)
+        # XXX Never get here (breaks fragment shader in the client)
+        return (0, 0, 0, 0)
 
     effect_names = [pos.effect_shapekey for e in ht.effect_collection for pos in e.positions]
     for bake_target in ht.bake_target_collection:
@@ -292,7 +294,7 @@ def export_glb(context: bpy.types.Context, ht: HomeomorphicProperties):
     return True
 
 
-def export_atlas(context: bpy.types.Context, denoise: bool = True):
+def export_atlas(context: Context, denoise: bool = True):
     work_scene = require_work_scene(context)
 
     work_scene.use_nodes = True
@@ -413,7 +415,7 @@ def export_atlas(context: bpy.types.Context, denoise: bool = True):
             )
 
 
-def export_animation(context: bpy.types.Context, ht: HomeomorphicProperties):
+def export_animation(context: Context, ht: HomeomorphicProperties):
     avatar_obj = ht.avatar_mesh
     animated_objects = get_animation_objects(ht)
     list(map(ensure_applied_rotation, animated_objects))
@@ -422,7 +424,7 @@ def export_animation(context: bpy.types.Context, ht: HomeomorphicProperties):
 
 
 @contextmanager
-def clear_custom_props(item: bpy.types.Object | bpy.types.Scene):
+def clear_custom_props(item: Object | Scene):
     prop_keys = list(item.keys())
 
     # remove all custom props
@@ -437,7 +439,7 @@ def clear_custom_props(item: bpy.types.Object | bpy.types.Scene):
         item[k] = v
 
 
-def calculate_effect_delta(obj: bpy.types.Object, effect: PositionEffect):
+def calculate_effect_delta(obj: Object, effect: PositionEffect) -> list[tuple[int, tuple[float]]]:
     """ Return ids and final positions of all transformed verts of target shapekey relative to base shapekey 
     """
 
@@ -484,7 +486,7 @@ def calculate_effect_delta(obj: bpy.types.Object, effect: PositionEffect):
     return result
 
 
-def get_verts_or_vgroup(obj: bpy.types.Object, color_effect: ColorEffect):
+def get_verts_or_vgroup(obj: Object, color_effect: ColorEffect) -> list[tuple[int, list]]:
     data = sorted([(v.index, list(color_effect.color)[:3]) for v in obj.data.vertices], key=lambda v: v[0])
 
     if not color_effect.vert_group:
@@ -506,7 +508,7 @@ def get_verts_or_vgroup(obj: bpy.types.Object, color_effect: ColorEffect):
     return list(data_only_in_group)
 
 
-def obj_from_shapekey(obj: bpy.types.Object, keyname: str):
+def obj_from_shapekey(obj: Object, keyname: str):
     pending_object = obj.copy()
     pending_object.name = f"{keyname}_effect_object_{uuid.uuid4()}"
     pending_object.data = obj.data.copy()
@@ -556,14 +558,14 @@ def obj_from_shapekey(obj: bpy.types.Object, keyname: str):
     return pending_object
 
 
-def animation_metadata(ht: HomeomorphicProperties):
+def animation_metadata(ht: HomeomorphicProperties) -> dict:
     result = dict()
     animated_objects = get_animation_objects(ht)
     result['layers'] = sorted(o.name for o in animated_objects)
     return result
 
 
-def get_animation_objects(ht: HomeomorphicProperties):
+def get_animation_objects(ht: HomeomorphicProperties) -> list[Object]:
     avatar_obj = ht.avatar_mesh
     animated_objects = []
     for bake_target in ht.bake_target_collection:
@@ -592,7 +594,7 @@ def get_animation_objects(ht: HomeomorphicProperties):
     return animated_objects
 
 
-def desellect_all(context: bpy.types.Context):
+def desellect_all(context: Context) -> list[Object]:
     # -- deselect everything in all scenes
     selected = []
     objects = list(require_work_scene(context).objects)
@@ -604,7 +606,8 @@ def desellect_all(context: bpy.types.Context):
 
     return selected
 
-def clear_active(context: bpy.types.Context):
+
+def clear_active(context: Context) -> list[tuple[ViewLayer, Object]]:
     # -- clear all active
     active = []
     layers = list(require_work_scene(context).view_layers)

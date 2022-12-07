@@ -1,10 +1,11 @@
 import bpy
 import textwrap
+from bpy.types import Operator, Context
 from ..helpers import require_bake_scene
 from ..logging import log_writer as log 
 from ..properties import HomeomorphicProperties
 
-def clear_bake_targets(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+def clear_bake_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	ht.selected_bake_target = -1
 	while len(ht.bake_target_collection):
 		ht.bake_target_collection.remove(0)
@@ -14,7 +15,7 @@ def clear_bake_targets(operator: bpy.types.Operator, context: bpy.types.Context,
 		ht.bake_target_mirror_collection.remove(0)
 
 
-def clear_bake_scene(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+def clear_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	scene = require_bake_scene(context)
 	for item in scene.objects:
 		if item.type == 'MESH':
@@ -24,7 +25,7 @@ def clear_bake_scene(operator: bpy.types.Operator, context: bpy.types.Context, h
 
 
 class devtools:
-	def get_node_links(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+	def get_node_links(operator: Operator, context: Context, ht: HomeomorphicProperties):
 		link_ref = lambda node, socket: f'{node.name}.{socket.name.replace(" ", "-")}'
 		int_tuple = lambda t: tuple(int(e) for e in t)
 
