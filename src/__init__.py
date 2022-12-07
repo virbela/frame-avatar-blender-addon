@@ -18,11 +18,12 @@ bl_info = {
 import bpy
 from bpy.app.handlers import persistent
 
+
 from .ui import * 
 from .operators import *
-from .preferences import *
-from .helpers import pending_classes
-from .properties import HomeomorphicProperties, UIStateProperty
+from .utils.preferences import *
+from .utils.helpers import pending_classes
+from .utils.properties import HomeomorphicProperties, UIStateProperty
 
 
 # Addon registration
