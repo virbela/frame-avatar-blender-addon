@@ -4,7 +4,7 @@ import math
 import bmesh
 import numpy as np
 from mathutils import Matrix
-from bpy.types import Action, Context, Object, Mesh, MeshVertex
+from bpy.types import Action, Context, Object, Mesh
 
 from .helpers import require_bake_scene, require_work_scene
 
@@ -76,15 +76,6 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list
     return meshes
 
 
-def get_vertex_data(meshes: list[Mesh]) -> list[MeshVertex]:
-    result = []
-    for me in meshes:
-        result.append([v.copy() for v in me.vertices])
-        if not me.users:
-            bpy.data.meshes.remove(me)
-    return result
-
-
 def get_object_actions(obj: bpy.types.Object) -> list[Action]:
     actions = []
     for action in bpy.data.actions:
@@ -125,7 +116,7 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
 
 
     # Get the active mesh
-    me = obj.data
+    me: Mesh = obj.data
     tex_coord_max = len(me.uv_layers)
 
     dot_fields = [('vertex_index', np.uint32)]
@@ -167,7 +158,7 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
 
 
     prim_dots = dots[prim_indices[0]]
-    prim_dots, indices = np.unique(prim_dots, return_inverse=True)
+    prim_dots, _ = np.unique(prim_dots, return_inverse=True)
     result = [d[0] for d in prim_dots]
     return result
 
