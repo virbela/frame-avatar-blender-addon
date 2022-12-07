@@ -1,9 +1,12 @@
 import bpy
 import bmesh
+from bpy.types import Context, Operator, Object, Scene, Image
+
 from ..constants import TARGET_UV_MAP
-from .common import set_uv_map, guarded_operator 
 from ..structures import intermediate
 from ..logging import log_writer as log
+from ..properties import HomeomorphicProperties
+from .common import set_uv_map, guarded_operator 
 from ..helpers import (
     set_scene,
     set_active,
@@ -18,7 +21,7 @@ UVPM2_INSTALLED = lambda: "uvpackmaster2" in dir(bpy.ops)
 UVPM3_INSTALLED = lambda: "uvpackmaster3" in dir(bpy.ops)
 UVPM_INSTALLED = lambda: UVPM2_INSTALLED() or UVPM3_INSTALLED()
 
-def auto_assign_atlas(operator, context, ht):
+def auto_assign_atlas(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	'Goes through all bake targets and assigns them to the correct intermediate atlas and UV set based on the uv_mode'
 
 	#TODO - currently we don't take into account that variants may end up on different bins which is fine but we need to store the intermediate target with the variant and not the bake target
@@ -85,7 +88,7 @@ def auto_assign_atlas(operator, context, ht):
 		(monochrome_targets, mono_bins),
 		(color_targets, color_bins),
 	]
-	def get_channel_from_bin(atlas_bin):
+	def get_channel_from_bin(atlas_bin: intermediate.packing.atlas_bin) -> str:
 		if atlas_bin.name == 'color':
 			return 'UV_TARGET_COLOR'
 		elif atlas_bin.name == 'red':
@@ -105,7 +108,7 @@ def auto_assign_atlas(operator, context, ht):
 			target_bin.allocated += uv_island.area
 
 
-def pack_uv_islands(operator, context, ht):
+def pack_uv_islands(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	last_active_scene = context.scene
 
 	bake_scene = require_bake_scene(context)
@@ -115,15 +118,15 @@ def pack_uv_islands(operator, context, ht):
 	mono_box = (0.0, 1.0, 1.0, ht.color_percentage / 100.0)
 	color_box = (0.0, 0.0, 1.0, ht.color_percentage / 100.0)
 
-	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_red'], TARGET_UV_MAP, mono_box)
-	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_green'], TARGET_UV_MAP, mono_box)
-	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_blue'], TARGET_UV_MAP, mono_box)
-	pack_intermediate_atlas(context, bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_color'], TARGET_UV_MAP, color_box)
+	pack_intermediate_atlas(bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_red'], TARGET_UV_MAP, mono_box)
+	pack_intermediate_atlas(bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_green'], TARGET_UV_MAP, mono_box)
+	pack_intermediate_atlas(bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_blue'], TARGET_UV_MAP, mono_box)
+	pack_intermediate_atlas(bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_color'], TARGET_UV_MAP, color_box)
 
 	set_scene(context, last_active_scene)
 
 
-def get_intermediate_uv_object_list(ht):
+def get_intermediate_uv_object_list(ht: HomeomorphicProperties) -> list[intermediate.packing.bake_target]:
 	uv_object_list = list()
 
 	for bake_target in ht.bake_target_collection:
@@ -143,7 +146,9 @@ def get_intermediate_uv_object_list(ht):
 	return uv_object_list
 
 
-def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_map, box=None):
+def pack_intermediate_atlas(
+	bake_scene: Scene, all_uv_object_list: list[intermediate.packing.bake_target], 
+	atlas: Image, uv_map: str, box: tuple[float] = None):
 	view_layer = bake_scene.view_layers[0]
 
 	uv_object_list = [u for u in all_uv_object_list if u.variant.intermediate_atlas == atlas]
@@ -225,7 +230,9 @@ def pack_intermediate_atlas(context, bake_scene, all_uv_object_list, atlas, uv_m
 	bpy.ops.object.mode_set(mode='OBJECT')
 
 
-def copy_and_transform_uv(source_object, source_layer, target_object, target_layer, scale_factor=1.0):
+def copy_and_transform_uv(
+	source_object: Object, source_layer: str, 
+	target_object: Object, target_layer: str, scale_factor: float = 1.0):
 
 	#TODO - investigate if we can get uv layer index without actually changing it and getting mesh.loops.layers.uv.active
 	try:
@@ -234,7 +241,8 @@ def copy_and_transform_uv(source_object, source_layer, target_object, target_lay
 		# No need, context already set
 		pass
 
-	#TODO - would be great if we made a context manager for these commands so that we could reset all changes when exiting the context (this applies to a lot of things outside this function too)
+	#TODO - would be great if we made a context manager for these commands so that we 
+	# could reset all changes when exiting the context (this applies to a lot of things outside this function too)
 	set_uv_map(source_object, source_layer)
 	set_uv_map(target_object, target_layer)
 

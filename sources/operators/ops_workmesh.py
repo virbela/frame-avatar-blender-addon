@@ -1,35 +1,38 @@
 import bpy
 import bmesh
 import mathutils
+from bpy.types import Context, Operator, Scene
+
 from .common import set_uv_map
 from ..logging import log_writer as log
-from ..constants import PAINTING_UV_MAP, TARGET_UV_MAP
 from ..materials import setup_bake_material
+from ..constants import PAINTING_UV_MAP, TARGET_UV_MAP
+from ..properties import HomeomorphicProperties, BakeTarget
 from ..helpers import (
-    ensure_applied_rotation,
     require_bake_scene, 
-    IMPLEMENTATION_PENDING,
-    get_bake_target_variant_name,
     require_work_scene,
+    IMPLEMENTATION_PENDING,
+    ensure_applied_rotation,
+    get_bake_target_variant_name,
 )
 
 update_selected_workmesh = IMPLEMENTATION_PENDING
 update_selected_workmesh_all_shapekeys = IMPLEMENTATION_PENDING
 update_selected_workmesh_active_shapekey = IMPLEMENTATION_PENDING
 
-def create_workmeshes_for_all_targets(operator, context, ht):
+def create_workmeshes_for_all_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	bake_scene = require_bake_scene(context)
 	for bake_target in ht.bake_target_collection:
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
 
-def create_workmeshes_for_selected_target(operator, context, ht):	
+def create_workmeshes_for_selected_target(operator: Operator, context: Context, ht: HomeomorphicProperties):	
 	if bake_target := ht.get_selected_bake_target():
 		bake_scene = require_bake_scene(context)
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
 
-def update_all_workmeshes(operator, context, ht):
+def update_all_workmeshes(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	bake_scene = require_bake_scene(context)
 	for bake_target in ht.bake_target_collection:
 		for variant in bake_target.variant_collection:
@@ -43,7 +46,7 @@ def update_all_workmeshes(operator, context, ht):
 				update_workmesh_materials(bake_target, variant)
 
 
-def workmesh_to_shapekey(operator, context, ht):
+def workmesh_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	work_scene = require_work_scene(context)
 	avatar_object = work_scene.objects.get('Avatar')
 	if not avatar_object:
@@ -68,7 +71,7 @@ def workmesh_to_shapekey(operator, context, ht):
 		bm.free()
 
 
-def all_workmeshes_to_shapekey(operator, context, ht):
+def all_workmeshes_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	bake_scene = require_bake_scene(context)
 	work_scene = require_work_scene(context)
 	avatar_object = work_scene.objects.get('Avatar')
@@ -97,7 +100,7 @@ def all_workmeshes_to_shapekey(operator, context, ht):
 		bm.free()
 
 
-def shapekey_to_workmesh(operator, context, ht):
+def shapekey_to_workmesh(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	work_scene = require_work_scene(context)
 	avatar_object = work_scene.objects.get('Avatar')
 	if not avatar_object:
@@ -126,7 +129,7 @@ def shapekey_to_workmesh(operator, context, ht):
 		vert.co = shapekey_data[vert.index]
 
 
-def all_shapekeys_to_workmeshes(operator, context, ht):
+def all_shapekeys_to_workmeshes(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	bake_scene = require_bake_scene(context)
 	work_scene = require_work_scene(context)
 	avatar_object = work_scene.objects.get('Avatar')
@@ -164,7 +167,7 @@ def all_shapekeys_to_workmeshes(operator, context, ht):
 				vert.co = shapekey_data[vert.index]
 
 
-def workmesh_symmetrize(operator, context, ht): 
+def workmesh_symmetrize(operator: Operator, context: Context, ht: HomeomorphicProperties): 
 	for obj in context.selected_objects:
 		mesh = obj.data
 		right_verts = [v for v in mesh.vertices if v.co.x > 0.0]
@@ -195,7 +198,7 @@ def workmesh_symmetrize(operator, context, ht):
 		mesh.update()
 
 
-def create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target):
+def create_workmeshes_for_specific_target(context: Context, ht: HomeomorphicProperties, bake_scene: Scene, bake_target: BakeTarget):
 	for variant in bake_target.variant_collection:
 
 		pending_name = get_bake_target_variant_name(bake_target, variant)
