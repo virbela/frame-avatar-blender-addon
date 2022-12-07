@@ -1,11 +1,13 @@
 import bpy
 import bmesh 
+from bpy.types import Operator, Context, Object
 
 from ..constants import MIRROR_TYPE
-from ..helpers import require_bake_scene, set_selection, require_work_scene
+from ..helpers import require_bake_scene, set_selection
+from ..properties import BakeTarget, HomeomorphicProperties
 from .common import set_uv_map, copy_object, copy_collection, transfer_variant
 
-def synchronize_uv_to_vertices(operator, context, ht):
+def synchronize_uv_to_vertices(operator: Operator, context: Context, ht: HomeomorphicProperties):
 
 	#SECURITY - the video below should be made private and shared with the right people but is currently only unlisted
 	#VIDEO-REF	- https://www.youtube.com/watch?v=yDLP2QPx3kQ
@@ -26,7 +28,7 @@ def synchronize_uv_to_vertices(operator, context, ht):
 	bmesh.update_edit_mesh(context.active_object.data)
 
 
-def select_objects_by_uv(operator, context, ht):
+def select_objects_by_uv(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	bake_scene = require_bake_scene(context)
 	to_select = list()
 	for obj in bake_scene.objects:
@@ -51,7 +53,7 @@ def select_objects_by_uv(operator, context, ht):
 	set_selection(view_layer.objects, *to_select, synchronize_active=True, make_sure_active=True)
 
 
-def synchronize_visibility_to_render(operator, context, ht):
+def synchronize_visibility_to_render(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
@@ -59,7 +61,7 @@ def synchronize_visibility_to_render(operator, context, ht):
 		item.hide_viewport = item.hide_render
 
 
-def make_everything_visible(operator, context, ht):
+def make_everything_visible(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
@@ -67,7 +69,7 @@ def make_everything_visible(operator, context, ht):
 		item.hide_viewport = False
 
 
-def recalculate_normals(operator, context, ht):
+def recalculate_normals(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
@@ -75,8 +77,8 @@ def recalculate_normals(operator, context, ht):
 		clean_normals(context, workmesh)
 
 
-def update_bake_scene(operator, context, ht):
-	work_scene, bake_scene = require_work_scene(context), require_bake_scene(context)
+def update_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties):
+	bake_scene = require_bake_scene(context)
 
 	#DECISION - should we clear the bake scene each update?
 	#Clear bake scene from meshes (this will remove the objects that own the meshes as ell)
@@ -85,7 +87,7 @@ def update_bake_scene(operator, context, ht):
 
 	#todo note 1
 	for bake_target in ht.bake_target_collection:
-		mirror, mt = bake_target.get_mirror_type(ht)
+		_, mt = bake_target.get_mirror_type(ht)
 		if mt is MIRROR_TYPE.SECONDARY:
 			continue
 
@@ -116,7 +118,7 @@ def update_bake_scene(operator, context, ht):
 						new_object.shape_key_remove(skey)
 
 
-def synchronize_mirrors(operator, context, ht):
+def synchronize_mirrors(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	for mirror in ht.bake_target_mirror_collection:
 		primary = ht.bake_target_collection[mirror.primary]
 		secondary = ht.bake_target_collection[mirror.secondary]
@@ -130,10 +132,8 @@ def synchronize_mirrors(operator, context, ht):
 			secondary.selected_variant = primary.selected_variant
 
 
-def reset_uv_transforms(operator, context, ht):
-
+def reset_uv_transforms(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	bake_scene = require_bake_scene(context)
-
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
 	to_reset = list()
@@ -145,13 +145,15 @@ def reset_uv_transforms(operator, context, ht):
 	reset_uv_transformations(to_reset)
 
 
-def reset_uv_transformations(bake_targets):
+def reset_uv_transformations(bake_targets: list[BakeTarget]):
 	for bake_target in bake_targets:
-		for variant_name, variant in bake_target.iter_variants():
+		for _, variant in bake_target.iter_variants():
 			copy_and_transform_uv(bake_target.source_object, bake_target.source_uv_map, variant.workmesh, variant.uv_map)
 
 
-def copy_and_transform_uv(source_object, source_layer, target_object, target_layer, scale_factor=1.0):
+def copy_and_transform_uv(
+	source_object: Object, source_layer: str, 
+	target_object: Object, target_layer: str, scale_factor: float = 1.0):
 
 	#TODO - investigate if we can get uv layer index without actually changing it and getting mesh.loops.layers.uv.active
 	bpy.ops.object.mode_set(mode='OBJECT')
@@ -179,7 +181,7 @@ def copy_and_transform_uv(source_object, source_layer, target_object, target_lay
 	target_mesh.free()
 
 
-def clean_normals(context, object_):
+def clean_normals(context: Context, object_: Object):
 	context.view_layer.objects.active = object_
 	bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 	bpy.ops.mesh.select_all(action='SELECT')
@@ -189,7 +191,7 @@ def clean_normals(context, object_):
 	bpy.ops.mesh.normals_make_consistent(inside=False)
 	bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
-def copy_uv_layers(operator, context, ht):
+def copy_uv_layers(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	last_edit_mode = bpy.context.mode
 	if last_edit_mode == 'EDIT_MESH':
 		# -- switch to object mode
