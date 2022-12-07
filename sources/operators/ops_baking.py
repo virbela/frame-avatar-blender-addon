@@ -1,9 +1,11 @@
 import bpy
+from bpy.types import Operator, Context, ViewLayer, NodeTree
+
 from ..exceptions import BakeException
 from ..properties import HomeomorphicProperties, BakeVariant
 from ..helpers import require_bake_scene, set_scene, set_rendering, set_selection
 
-def bake_all_bake_targets(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+def bake_all_bake_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):
 
 	last_active_scene = context.scene
 	bake_scene = require_bake_scene(context)
@@ -21,7 +23,7 @@ def bake_all_bake_targets(operator: bpy.types.Operator, context: bpy.types.Conte
 	set_scene(context, last_active_scene)
 
 
-def bake_selected_bake_target(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+def bake_selected_bake_target(operator: Operator, context: Context, ht: HomeomorphicProperties):
 
 	last_active_scene = context.scene
 	bake_scene = require_bake_scene(context)
@@ -36,7 +38,7 @@ def bake_selected_bake_target(operator: bpy.types.Operator, context: bpy.types.C
 	set_scene(context, last_active_scene)
 
 
-def bake_selected_workmeshes(operator: bpy.types.Operator, context: bpy.types.Context, ht: HomeomorphicProperties):
+def bake_selected_workmeshes(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	bake_scene = require_bake_scene(context)
 	view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
@@ -72,7 +74,7 @@ def bake_selected_workmeshes(operator: bpy.types.Operator, context: bpy.types.Co
 	run_bake(ht)
 
 
-def bake_specific_variant(ht: HomeomorphicProperties, view_layer: bpy.types.ViewLayer, variant: BakeVariant):
+def bake_specific_variant(ht: HomeomorphicProperties, view_layer: ViewLayer, variant: BakeVariant):
 	workmesh = variant.workmesh
 
 	ensure_color_output_node_ready(variant, workmesh.active_material.node_tree)
@@ -116,7 +118,7 @@ def run_bake(ht: HomeomorphicProperties, invoke: bool = True):
 
 	bpy.context.scene.render.bake.use_selected_to_active = last_op
 
-def ensure_color_output_node_ready(variant: BakeVariant, tree: bpy.types.NodeTree):
+def ensure_color_output_node_ready(variant: BakeVariant, tree: NodeTree):
 	material_nodes = tree.nodes
 	material_links = tree.links
 
