@@ -7,7 +7,6 @@ from .ops_baketargets import (
     bake_targets,
     bake_mirrors,
     bake_variants,
-    validate_targets,
     create_targets_from_selection
 )
 

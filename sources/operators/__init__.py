@@ -44,12 +44,6 @@ class FRAME_OT_create_targets_from_selection(frame_operator):
     frame_operator = 	operations.create_targets_from_selection
     frame_poll =        poll_selected_objects
 
-class FRAME_OT_validate_targets(frame_operator):
-    bl_label = 			"Validate bake targets"
-    bl_idname = 		"frame.validate_targets"
-    bl_description = 	"Verify that all bake properties are correctly set"
-    frame_operator = 	operations.validate_targets
-
 
 # Work Meshes
 class FRAME_OT_create_workmeshes_for_all_targets(frame_operator):
