@@ -10,12 +10,11 @@ sys.path.insert(0, addon_dir)
 
 import tools
 try:
-    import test_helpers
+    import test_utils
 except Exception:
     # XXX Error importing test modules.
     # Print Traceback and close blender process
     import traceback
-
     traceback.print_exc()
     sys.exit()
 
@@ -30,7 +29,7 @@ def main():
     suite = unittest.TestSuite()
 
     # add tests to the test suite
-    suite.addTests(loader.loadTestsFromModule(test_helpers))
+    suite.addTests(loader.loadTestsFromModule(test_utils))
 
     # initialize a runner, pass it your suite and run it
     runner = unittest.TextTestRunner(verbosity=3)
