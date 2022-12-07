@@ -20,7 +20,7 @@ import shutil
 import subprocess
 
 REPO_FILES = (
-    "sources/",
+    "src/",
 )
 
 

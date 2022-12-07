@@ -13,7 +13,7 @@ distribution/$(distribution_name).zip: $(wildcard sources/*.py)
 #This may look a bit odd because we are specifying two paths separated by : (colon)
 # . (dot is current path, we can then import the addon as a module by importing "sources") and tests/mocking
 addon_test:
-	$(QUIET_MODE) PYTHONPATH=.:tests/mocking /usr/bin/python3 tests/addon.py
+	$(QUIET_MODE) PYTHONPATH=.:tests/mocking python tests/addon.py
 
 test: addon_test
 
