@@ -1,9 +1,11 @@
 import bpy
+from bpy.types import Scene, Image
 from .structures import intermediate
 from .node_utils import load_node_setup_function
 from .helpers import create_named_entry, require_named_entry, get_nice_name, named_entry_action
+from .properties import BakeTarget
 
-def get_material_variants(bt, bake_scene, atlas, uv_map, recreate=False):
+def get_material_variants(bt: BakeTarget, bake_scene: Scene, atlas: Image, uv_map: str, recreate: bool = False):
 
 	#ISSUE-7: Material creation needs improvement
 	#	*	We should handle the case when multiple variants are not used (we should use a generic naming function that is discussed elsewere).
@@ -12,7 +14,7 @@ def get_material_variants(bt, bake_scene, atlas, uv_map, recreate=False):
 
 	result = dict()
 	for variant_name, variant in bt.iter_bake_scene_variants():
-		target = require_named_entry(bake_scene.objects, variant_name)
+		_ = require_named_entry(bake_scene.objects, variant_name)
 
 		if variant.image:
 			paint_image = bpy.data.images[variant.image]	#TODO - make sure this image exists
@@ -176,4 +178,3 @@ setup_rgb_channel_packing_material = load_node_setup_function('setup_rgb_channel
 
 ''')
 
-#TODO - intermediate textures should be linear float textures

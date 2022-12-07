@@ -2,16 +2,26 @@ import io
 import bpy
 import enum
 import uuid
+import types
 import bmesh
 import pstats
+import typing
 import cProfile 
 import threading
 import addon_utils
+from typing import TYPE_CHECKING
 from dataclasses import dataclass
 from contextlib import contextmanager
+from bpy.types import bpy_struct, Context, Scene, bpy_prop_collection, Object, Preferences
+
 from .logging import log_writer as log
 from .constants import BAKE_SCENE, WORK_SCENE
 from .exceptions import InternalError, FrameException
+
+# controllers.py
+
+if TYPE_CHECKING:
+    from .properties import HomeomorphicProperties, BakeTarget, BakeVariant
 
 pending_classes = list()
 
@@ -36,7 +46,7 @@ def profile():
     print(s.getvalue())
 
 
-def register_class(cls):
+def register_class(cls: bpy_struct) -> bpy_struct:
 	pending_classes.append(cls)
 	return cls
 
@@ -73,7 +83,7 @@ class frame_property_group(bpy.types.PropertyGroup):
 	def __init_subclass__(cls):
 		pending_classes.append(cls)
 
-	def get_properties_by_names(self, names, if_missing=missing_action.FAIL):
+	def get_properties_by_names(self, names: str, if_missing: missing_action = missing_action.FAIL) -> typing.Any:
 		'Takes list of names separated by space and yields the values of those members.'
 
 		if if_missing is missing_action.FAIL:
@@ -84,32 +94,32 @@ class frame_property_group(bpy.types.PropertyGroup):
 			raise ValueError(f'if_missing has unknown value')
 
 
-def require_work_scene(context):
+def require_work_scene(context: Context) -> Scene:
 	if scene := bpy.data.scenes.get(WORK_SCENE):
 		return scene
 
 	log.error(f'Work scene `{WORK_SCENE}` could not be found.')
 
 
-def require_bake_scene(context):
+def require_bake_scene(context: Context) -> Scene:
 	if scene := bpy.data.scenes.get(BAKE_SCENE):
 		return scene
 
 	return bpy.data.scenes.new(BAKE_SCENE)
 
 
-def get_homeomorphic_tool_state(context):
+def get_homeomorphic_tool_state(context: Context) -> 'HomeomorphicProperties':
 	if work_scene := require_work_scene(context):
 		return work_scene.homeomorphictools
 
 	raise InternalError("Work scene not Found.")
 
 
-def get_named_entry(collection, name):
+def get_named_entry(collection: bpy_prop_collection, name: str) -> typing.Any:
 	return collection.get(name)
 
 
-def require_named_entry(collection, name):
+def require_named_entry(collection: bpy_prop_collection, name: str):
 	if not name:
 		raise FrameException.NoNameGivenForCollectionLookup(collection)
 
@@ -119,7 +129,7 @@ def require_named_entry(collection, name):
 		raise FrameException.NamedEntryNotFound(collection, name)
 
 
-def create_named_entry(collection, name, *positional, action=named_entry_action.GET_EXISTING):
+def create_named_entry(collection: bpy_prop_collection, name: str, *positional, action: named_entry_action = named_entry_action.GET_EXISTING) -> typing.Any:
 
 	if name in collection:
 		if action == named_entry_action.RECREATE:
@@ -141,11 +151,11 @@ def create_named_entry(collection, name, *positional, action=named_entry_action.
 #	or we have to keep track of our changes that we want reverted and what changes we want to keep (like with paint assist we may actually want to change the state).
 #	labels: needs-work, needs-research
 
-def set_scene(context, scene):
+def set_scene(context: Context, scene: Scene):
 	context.window.scene = scene
 
 
-def set_selection(collection, *selected, synchronize_active=False, make_sure_active=False):
+def set_selection(collection: list, *selected, synchronize_active: bool = False, make_sure_active: bool = False):
 	new_selection = set(selected)
 
 	for item in collection:
@@ -164,19 +174,19 @@ def set_selection(collection, *selected, synchronize_active=False, make_sure_act
 		collection.active = selected[0]
 
 
-def clear_selection(collection):
+def clear_selection(collection: list):
 	set_selection(collection)
 
 
-def set_active(collection, item):
+def set_active(collection: bpy_prop_collection, item: Object):
 	collection.active = item
 
 
-def clear_active(collection):
+def clear_active(collection: bpy_prop_collection):
 	collection.active = None
 
 
-def set_rendering(collection, *selected, synchronize_active=False, make_sure_active=False):
+def set_rendering(collection: bpy_prop_collection, *selected, synchronize_active: bool = False, make_sure_active: bool = False):
 	'Replaces current rendering selection'
 	new_selection = set(selected)
 
@@ -207,7 +217,7 @@ class a_set(attribute_reference):
 		return setattr(self.target, self.attribute, value)
 
 
-def get_nice_name(collection, prefix, max_prefix_length, random_hash_length=8, max_tries=1000):
+def get_nice_name(collection: list, prefix: str, max_prefix_length: int, random_hash_length: int = 8, max_tries: int = 1000):
 
 	for v in range(max_tries):
 		tail = f'-{v:03}' if v else ''
@@ -215,10 +225,10 @@ def get_nice_name(collection, prefix, max_prefix_length, random_hash_length=8, m
 		if candidate not in collection:
 			return candidate
 
-	raise Exception('severe fail')	#TODO - proper exception
+	raise Exception(f'Failed to create name for {prefix}')
 
 
-def is_reference_valid(target):
+def is_reference_valid(target: typing.Any) -> bool:
 	try:
 		target.name
 		return True
@@ -260,13 +270,13 @@ class UUID_manager:
 						return candidate
 
 
-def get_bake_target_variant_name(bake_target, variant):
+def get_bake_target_variant_name(bake_target: 'BakeTarget', variant: 'BakeVariant'):
 	if bake_target.multi_variants:
 		return f'{bake_target.shortname}.{variant.name}'
 	return f'{bake_target.shortname}'
 
 
-def purge_object(obj):
+def purge_object(obj: Object):
 	bpy.data.objects.remove(obj)
 	for block in bpy.data.meshes:
 		if block.users == 0:
@@ -277,7 +287,7 @@ def purge_object(obj):
 			bpy.data.materials.remove(block)
 
 
-def is_dev():
+def is_dev() -> bool:
 	# if we are installed as an addon, assume this is a production dist
 	for mod in addon_utils.modules():
 		if 'frame_avatar_addon' == mod.__name__:
@@ -285,13 +295,12 @@ def is_dev():
 	return True
 
 
-def get_prefs():
+def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
 	try:
 		preferences = bpy.context.preferences.addons[__package__].preferences
 		return preferences
 	except KeyError:
 		# XXX DEV(simulate preferences)
-		import types
 		preferences = types.SimpleNamespace()
 		preferences.log_target = "devlog"
 		preferences.glb_export_dir = ""
@@ -299,14 +308,14 @@ def get_prefs():
 		return preferences
 
 
-def popup_message(message, title="Error", icon="ERROR"):
-    def oops(self, context):
+def popup_message(message: str, title: str = "Error", icon: str = "ERROR"):
+    def oops(self, context: Context):
         self.layout.label(text=message)
 
     bpy.context.window_manager.popup_menu(oops, title=title, icon=icon)
 
 
-def ensure_applied_rotation(object):
+def ensure_applied_rotation(object: Object):
 	"Ensure obj has rotation applied"
 	rot = object.rotation_euler
 	if (rot.x, rot.y, rot.z) == (0, 0, 0):

@@ -20,7 +20,7 @@ class pending_log_entry:
 
 
 class log_level_descriptor:
-	def __init__(self, log_instance, log_level, description):
+	def __init__(self, log_instance: 'log_base', log_level: log_level, description: str):
 		self.__doc__ = description
 		self.log_instance = log_instance
 		self.log_level = log_level
@@ -40,7 +40,7 @@ class log_base:
 		self.error = 	log_level_descriptor(self, log_level.ERROR,		"Errors the user should be made aware of")
 		self.fatal = 	log_level_descriptor(self, log_level.FATAL,	 	"Fatal errors are errors that we can't recover from and we don't know how to tell the user to recover from them")
 
-	def exception(self, message):
+	def exception(self, message: str):
 		tab = '\t'
 		self.fatal(f'{message}\n{textwrap.indent(traceback.format_exc().strip(), tab)}\n')
 
@@ -48,7 +48,7 @@ class log_base:
 class log_instance(log_base):
 	'Log instance'
 
-	def process_message(self, message):
+	def process_message(self, message: pending_log_entry):
 
 		#TODO - messages that are repeating in close temporal proximity should be grouped to prevent spamming
 		try:
@@ -79,7 +79,7 @@ class log_instance(log_base):
 class dummy_log_instance(log_base):
 	'Dummy log'
 
-	def process_message(self, context, message):
+	def process_message(self, message: pending_log_entry):
 		pass
 
 

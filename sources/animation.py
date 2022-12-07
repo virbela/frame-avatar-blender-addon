@@ -3,15 +3,13 @@ import bpy
 import math
 import bmesh
 import numpy as np
-from typing import List
 from mathutils import Matrix
-from bpy.types import Action, Context, Object
+from bpy.types import Action, Context, Object, Mesh, MeshVertex
 
-from .logging import log_writer as log
 from .helpers import require_bake_scene, require_work_scene
 
 
-def generate_animation_shapekeys(context: Context, avatar: Object, animated_objects: List[Object]):
+def generate_animation_shapekeys(context: Context, avatar: Object, animated_objects: list[Object]):
     scene = require_work_scene(context)
     HT = scene.homeomorphictools
     export_full_blob = all([ea.checked for ea in HT.export_animation_actions])
@@ -58,7 +56,7 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
         blob_file.close()
 
 
-def get_per_frame_mesh(context: Context, action: Action, object: Object):
+def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list[Mesh]:
     meshes = []
     sx, sy = action.frame_range
     bakescene = require_bake_scene(context)
@@ -78,7 +76,7 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object):
     return meshes
 
 
-def get_vertex_data(meshes):
+def get_vertex_data(meshes: list[Mesh]) -> list[MeshVertex]:
     result = []
     for me in meshes:
         result.append([v.copy() for v in me.vertices])
@@ -87,7 +85,7 @@ def get_vertex_data(meshes):
     return result
 
 
-def get_object_actions(obj: bpy.types.Object):
+def get_object_actions(obj: bpy.types.Object) -> list[Action]:
     actions = []
     for action in bpy.data.actions:
         if obj.user_of_id(action) > 0:
@@ -95,7 +93,7 @@ def get_object_actions(obj: bpy.types.Object):
     return actions
 
 
-def shape_key_from_mesh(name, avatar, mesh):
+def shape_key_from_mesh(name: str, avatar: Object, mesh: Mesh):
     print('Generating animation shapekey..', name)
     bm = bmesh.new()
     bm.from_mesh(avatar.data)
@@ -111,7 +109,7 @@ def shape_key_from_mesh(name, avatar, mesh):
         bpy.data.meshes.remove(mesh)
 
 
-def get_gltf_export_indices(obj):
+def get_gltf_export_indices(obj: Object) -> list[int]:
     def __get_uvs(blender_mesh, uv_i):
         layer = blender_mesh.uv_layers[uv_i]
         uvs = np.empty(len(blender_mesh.loops) * 2, dtype=np.float32)
@@ -174,7 +172,7 @@ def get_gltf_export_indices(obj):
     return result
 
 
-def get_num_frames():
+def get_num_frames() -> int:
     result = 0
     for action in bpy.data.actions:
         sx, sy = action.frame_range
@@ -187,7 +185,7 @@ def get_num_frames():
     return int(result)
 
 
-def export_action_animation(context, action, animated_objects, num_verts, export_indices):
+def export_action_animation(context: Context, action: Action, animated_objects: list[Object], num_verts: int, export_indices: list[int]):
     scene = require_work_scene(context)
     HT = scene.homeomorphictools
     if action.name not in [ea.name for ea in HT.export_animation_actions]:

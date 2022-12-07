@@ -1,4 +1,5 @@
 import bpy
+from bpy.types import Context
 from .helpers import pending_classes, register_class
 
 @register_class	#contribution note 6A
@@ -15,7 +16,7 @@ class FrameAddonPreferences(bpy.types.AddonPreferences):
 										description='Folder to use for atlas export (default is current blendfile folder).', subtype='DIR_PATH'
 									)
 
-	def draw(self, context):
+	def draw(self, context: Context):
 		layout = self.layout
 		layout.prop(self, 'log_target')
 		layout.prop(self, 'glb_export_dir')

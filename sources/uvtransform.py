@@ -1,4 +1,5 @@
 import bmesh
+from bpy.types import Object
 from mathutils import Vector
 from dataclasses import dataclass
 from .logging import log_writer as log
@@ -11,7 +12,7 @@ class UVTransform:
 	scale: float
 	rotation: float
 
-def get_uv_map_from_mesh(obj):
+def get_uv_map_from_mesh(obj: Object) -> dict[int, Vector]:
 	'If uv_layer is ACTIVE_LAYER, the active UV layer will be used, otherwise, uv_layer is considered to be the index of the wanted UV layer.'
 
 	if obj.mode == 'EDIT':
@@ -32,7 +33,7 @@ def get_uv_map_from_mesh(obj):
 	return uv_map
 
 class uv_transformation_calculator:
-	def __init__(self, reference_uv_map):
+	def __init__(self, reference_uv_map: dict[int, Vector]):
 
 		#Find two furthest points in UV map
 		max_len = None
@@ -49,7 +50,7 @@ class uv_transformation_calculator:
 
 		log.info(f"UV endpoints {self.ep1}:{reference_uv_map[self.ep1]} - {self.ep2}:{reference_uv_map[self.ep2]}")
 
-	def get_centroid(self, uv_map):
+	def get_centroid(self, uv_map: dict[int, Vector]) -> Vector:
 		vecs = list(uv_map.values())
 		sorted_x = sorted(vecs, key = lambda v:v.x)
 		sorted_y = sorted(vecs, key = lambda v:v.y)
@@ -57,7 +58,7 @@ class uv_transformation_calculator:
 		min_y, max_y = sorted_y[0].y, sorted_y[-1].y
 		return Vector(((min_x + max_x) / 2, (min_y + max_y) / 2))
 
-	def calculate_transform(self, target_uv_map):
+	def calculate_transform(self, target_uv_map: dict[int, Vector]) -> UVTransform:
 		#Get reference and target endpoints as vectors
 		R1, R2 = self.reference_uv_map[self.ep1], self.reference_uv_map[self.ep2]
 		T1, T2 = target_uv_map[self.ep1], target_uv_map[self.ep2]

@@ -1,4 +1,6 @@
 import bpy
+import typing
+from bpy.types import Context, Object, Image
 from .helpers import (
 	popup_message, 
 	enum_descriptor, 
@@ -129,7 +131,8 @@ AVATAR_TYPE = enum_descriptor(
 
 )
 
-def update_atlas(self, context):
+
+def update_atlas(self: 'BakeVariant', context: Context):
 	# when atlas is set, also set the uv_channel
 	if 'red' in self.intermediate_atlas.name:
 		self.uv_target_channel = 'UV_TARGET_R'
@@ -143,11 +146,11 @@ def update_atlas(self, context):
 		self.uv_target_channel = 'UV_TARGET_NIL'
 
 
-def get_bakevariant_name(self):
+def get_bakevariant_name(self: 'BakeVariant'):
 	return self.get("name", 'Untitled variant')
 
 
-def set_bakevariant_name(self, value):
+def set_bakevariant_name(self: 'BakeVariant', value: str):
 	if not self.workmesh:
 		self['name'] = value 
 		return 
@@ -156,7 +159,7 @@ def set_bakevariant_name(self, value):
 	# -- update workmesh name
 	workmeshname = self.workmesh.name
 	if '.' in workmeshname:
-		target, variant = workmeshname.split('.')
+		target, _ = workmeshname.split('.')
 		self.workmesh.name = f"{target}.{value}"
 
 	self['name'] = value
@@ -174,11 +177,11 @@ class BakeVariant(frame_property_group):
 	intermediate_atlas:				bpy.props.PointerProperty(name='Intermediate atlas', type=bpy.types.Image, update=update_atlas)
 
 
-def get_baketarget_name(self):
+def get_baketarget_name(self: 'BakeTarget'):
 	return self.get("name", 'Untitled bake target')
 
 
-def set_baketarget_name(self, value):
+def set_baketarget_name(self: 'BakeTarget', value: str):
 	if not self.source_object:
 		# Initial name set from the create bake targets operator
 		self['name'] = value 
@@ -251,20 +254,20 @@ class BakeTarget(frame_property_group):
 	# Flag export
 	export:							bpy.props.BoolProperty(name="Export Bake Target", default=True)
 
-	def get_object(self):
+	def get_object(self) -> Object:
 		return get_named_entry(bpy.data.objects, self.object_name)
 
-	def require_object(self):
+	def require_object(self) -> Object:
 		return require_named_entry(bpy.data.objects, self.object_name)
 
-	def get_atlas(self):
+	def get_atlas(self) -> Image:
 		return get_named_entry(bpy.data.images, self.atlas)
 
-	def require_atlas(self):
+	def require_atlas(self) -> Image:
 		return require_named_entry(bpy.data.images, self.atlas)
 
 	@property
-	def shortname(self):
+	def shortname(self) -> str:
 		if self.object_name:
 			if self.shape_key_name:
 				return self.shape_key_name
@@ -273,7 +276,7 @@ class BakeTarget(frame_property_group):
 		return 'untitled'
 
 
-	def get_mirror_type(self, ht):
+	def get_mirror_type(self, ht: 'HomeomorphicProperties') -> tuple['BakeTargetMirrorEntry', MIRROR_TYPE]:
 		find_id = ht.get_bake_target_index(self)
 		for mirror in ht.bake_target_mirror_collection:
 			if find_id == mirror.primary:
@@ -290,7 +293,7 @@ class BakeTarget(frame_property_group):
 
 	#NOTE we should probably deprecate this in favor of iter_variants
 	# this doesn't yield anything if there are no variants
-	def iter_bake_scene_variants(self):
+	def iter_bake_scene_variants(self) -> typing.Generator[tuple[str, BakeVariant], None, None]:
 		prefix = self.name # self.get_bake_scene_name()
 		if self.multi_variants:
 			for variant in self.variant_collection:
@@ -298,7 +301,7 @@ class BakeTarget(frame_property_group):
 
 
 	#TODO - use a helper function for creating names
-	def iter_variants(self):
+	def iter_variants(self) -> typing.Generator[tuple[str, BakeVariant], None, None]:
 		prefix = self.name # self.get_bake_scene_name()
 		for variant in self.variant_collection:
 			if self.multi_variants:
@@ -307,7 +310,7 @@ class BakeTarget(frame_property_group):
 				yield f'{prefix}', variant
 
 
-	def iter_bake_scene_variant_names(self):
+	def iter_bake_scene_variant_names(self) -> typing.Generator[str, None, None]:
 		prefix = self.name # self.get_bake_scene_name()
 		if self.multi_variants:
 			for variant in self.variant_collection:
@@ -332,7 +335,7 @@ class BakeTargetMirrorEntry(frame_property_group):
 	secondary: 				bpy.props.IntProperty(name='Secondary bake target identifier', default=-1)
 
 
-def update_atlas_size(self, context):
+def update_atlas_size(self, context: Context):
 	atlas_images = [im for im in bpy.data.images if 'atlas_intermediate' in im.name]
 	if atlas_images:
 		ats = self.atlas_size
@@ -353,6 +356,7 @@ class PositionEffect(frame_property_group):
 								name="Effect Shapekey",
 								description="Shape key with the final effect"
 							)
+
 
 class ColorEffect(frame_property_group):
 	shape: 					bpy.props.StringProperty(name="Target Shapekey")
@@ -377,6 +381,7 @@ class EffectProperty(frame_property_group):
 class ExportAnimationProperty(frame_property_group):
 	name: 							bpy.props.StringProperty(name="", default="")
 	checked: 						bpy.props.BoolProperty(name="", default=True)
+
 
 class HomeomorphicProperties(frame_property_group):
 
@@ -421,52 +426,39 @@ class HomeomorphicProperties(frame_property_group):
 	target_object_uv:					bpy.props.PointerProperty(name="Target", type=bpy.types.Object, description="Object to copy UV layers to")
 	source_object_uv:					bpy.props.PointerProperty(name="Source", type=bpy.types.Object, description="Object to copy UV layers from")
 
-	def get_selected_effect(self):
+	def get_selected_effect(self) -> EffectProperty:
 		if self.selected_effect:
 			return self.effect_collection[self.selected_effect]
 
-	def get_selected_bake_target(self):
+	def get_selected_bake_target(self) -> BakeTarget:
 		if self.selected_bake_target != -1:
 			return self.bake_target_collection[self.selected_bake_target]
 
-	def get_selected_bake_group(self):
+	def get_selected_bake_group(self) -> BakeGroup:
 		if self.selected_bake_group != -1:
 			return self.bake_group_collection[self.selected_bake_group]
 
-	def require_selected_bake_target(self):
+	def require_selected_bake_target(self) -> BakeTarget:
 		if candidate := self.get_selected_bake_target():
 			return candidate
 		else:
 			raise Exception()	#TODO - proper exception
 
-	def get_selected_mirror(self):
+	def get_selected_mirror(self) -> BakeTargetMirrorEntry:
 		if self.selected_bake_target_mirror != -1:
 			return self.bake_target_mirror_collection[self.selected_bake_target_mirror]
 
-	def require_selected_mirror(self):
+	def require_selected_mirror(self) -> BakeTargetMirrorEntry:
 		if candidate := self.get_selected_mirror():
 			return candidate
 		else:
 			raise Exception()	#TODO - proper exception
 
-	def get_bake_target_index(self, target):
+	def get_bake_target_index(self, target: BakeTarget) -> int:
 		for index, bt in enumerate(self.bake_target_collection):
 			if bt == target:	# note: We can't use identity comparison due to internal deferring in blender
 				return index
-
 		return -1
-
-	def get_bake_target_by_identifier(self, identifier):
-		for bt in self.bake_target_collection:
-			if bt.identifier == identifier:
-				return bt
-
-	def require_bake_target_by_identifier(self, identifier):
-		if candidate := self.get_bake_target_by_identifier(identifier):
-			return candidate
-		else:
-			#TODO - proper exception
-			raise Exception()
 
 
 class UIStateProperty(frame_property_group):
