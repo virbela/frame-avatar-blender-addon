@@ -63,6 +63,9 @@ def main():
 
         for filename in items:
             info = git("log", "--format=%ct:%H", "-n1", "%s..%s" % (earliest, upto), "--", filename).strip()
+            if info == b"":
+                continue
+
             _, commit_hash = info.split(b":")
             info = git("ls-tree", commit_hash, filename).strip()
 
@@ -80,10 +83,13 @@ def main():
                 with open(zip_path, 'wb') as file:
                     file.write(object_contents)
 
-
-    shutil.make_archive(foldername, 'zip', base_dir=str(zip_folder))
-    shutil.rmtree(str(zip_folder))
-    sys.stdout.write("created archive: %s\n" % outfilename)
+    if len(list(zip_folder.glob("**/*.py"))):
+        shutil.make_archive(foldername, 'zip', base_dir=str(zip_folder))
+        shutil.rmtree(str(zip_folder))
+        sys.stdout.write("created archive: %s\n" % outfilename)
+    else:
+        shutil.rmtree(str(zip_folder))
+        sys.stdout.write(f"Error: No files at tagged at {upto}")
 
 if __name__ == '__main__':
     main()
