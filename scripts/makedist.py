@@ -12,13 +12,12 @@
 # will make an archive for the commit tagged “v1.0” (assuming it exists).
 # This tag name will also be included in the created archive name.
 
-import getopt
 import os
-import subprocess
 import sys
-import time
-import zipfile
+import getopt
 import pathlib
+import shutil
+import subprocess
 
 REPO_FILES = (
     "sources/",
@@ -29,49 +28,62 @@ def git(*args):
     # convenience routine for simplifying git command calls.
     return subprocess.check_output(("git",) + args)
 
+def main():
+    _, args = getopt.getopt(sys.argv[1:], "", [])
+    if len(args) != 1:
+        raise getopt.GetoptError("expecting exactly one arg, the tag to build a release for")
 
-opts, args = getopt.getopt(sys.argv[1:], "", [])
-if len(args) != 1:
-    raise getopt.GetoptError("expecting exactly one arg, the tag to build a release for")
+    upto = args[0]
+    earliest = git("rev-list", "--reverse", upto).split(b"\n")[0].strip().decode()
 
-upto = args[0]
-earliest = git("rev-list", "--reverse", upto).split(b"\n")[0].strip().decode()
+    basename = "frame_avatar_addon"
+    foldername = f"{basename}_{upto}"
+    outfilename = f"{foldername}.zip"
+    if pathlib.Path(outfilename).exists():
+        os.remove(outfilename)
 
-basename = "frame_avatar_addon"
-outfilename = f"{basename}_{upto}.zip"
-if pathlib.Path(outfilename).exists():
-    os.remove(outfilename)
-out = zipfile.ZipFile(outfilename, "x")
-for item in REPO_FILES:
-    if item.endswith("/"):
-        items = sorted(
-            set(
-                line.rsplit("\t", 1)[1]
-                for line in git("log", "--raw", item).decode().split("\n")
-                if line.startswith(":")
+    # -- create zip dir
+    zip_folder = (pathlib.Path() / foldername)
+    if zip_folder.exists():
+        shutil.rmtree(str(zip_folder))
+    zip_folder.mkdir()
+
+    # -- get files
+    for item in REPO_FILES:
+        if item.endswith("/"):
+            items = sorted(
+                set(
+                    line.rsplit("\t", 1)[1]
+                    for line in git("log", "--raw", item).decode().split("\n")
+                    if line.startswith(":")
+                )
             )
-        )
-    else:
-        items = [item,]
+        else:
+            items = [item,]
 
-    for filename in items:
-        info = git("log", "--format=%ct:%H", "-n1", "%s..%s" % (earliest, upto), "--", filename).strip()
-
-        if info != b"":
-            info = zipfile.ZipInfo()
-            info.filename = os.path.join(basename, filename[8:])
-            info.external_attr = 0o100644 << 16
-            info.compress_type = zipfile.ZIP_DEFLATED
-            timestamp, commit_hash = info.split(b":")
-            timestamp = int(timestamp)
+        for filename in items:
+            info = git("log", "--format=%ct:%H", "-n1", "%s..%s" % (earliest, upto), "--", filename).strip()
+            _, commit_hash = info.split(b":")
             info = git("ls-tree", commit_hash, filename).strip()
 
-        if info != b"":
-            object_hash = info.split(b"\t")[0].split(b" ")[2].decode()
-            object_contents = git("show", object_hash)
-            info.date_time = time.gmtime(timestamp)[:6]
-            out.writestr(info, object_contents)
+            if info != b"":
+                object_hash = info.split(b"\t")[0].split(b" ")[2].decode()
+                object_contents = git("show", object_hash)
 
-out.close()
+                relative_filename = pathlib.Path(filename).parts[1:]
+                zip_path = zip_folder.joinpath(*relative_filename)
 
-sys.stdout.write("created archive: %s\n" % outfilename)
+                # -- create subfolders if missing
+                if not zip_path.parent.exists():
+                    zip_path.parent.mkdir()
+
+                with open(zip_path, 'wb') as file:
+                    file.write(object_contents)
+
+
+    shutil.make_archive(foldername, 'zip', base_dir=str(zip_folder))
+    shutil.rmtree(str(zip_folder))
+    sys.stdout.write("created archive: %s\n" % outfilename)
+
+if __name__ == '__main__':
+    main()
