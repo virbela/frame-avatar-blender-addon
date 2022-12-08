@@ -20,7 +20,7 @@ from bpy.app.handlers import persistent
 
 
 from .ui import * 
-from .operators import *
+from .ops import *
 from .utils.preferences import *
 from .utils.helpers import pending_classes
 from .utils.properties import HomeomorphicProperties, UIStateProperty
