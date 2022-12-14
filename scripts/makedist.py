@@ -84,7 +84,7 @@ def main():
                     file.write(object_contents)
 
     if len(list(zip_folder.glob("**/*.py"))):
-        shutil.make_archive(foldername, 'zip', base_dir=str(zip_folder))
+        shutil.make_archive(outfilename, 'zip', base_dir=str(zip_folder))
         shutil.rmtree(str(zip_folder))
         sys.stdout.write("created archive: %s\n" % outfilename)
     else:
