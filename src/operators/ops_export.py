@@ -23,7 +23,7 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
     selected = desellect_all(context)
 
     try:
-        if HT.export_animation:
+        if HT.avatar_type == "FULLBODY" and HT.export_animation:
             export_animation(context, HT)
 
         if HT.export_glb:
@@ -65,7 +65,7 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
         popup_message("Export validation failed! Avatar Object not selected in workflow panel!", "Validation Error")
         return False
 
-    if HT.avatar_rig is None:
+    if HT.avatar_type == "FULLBODY" and HT.avatar_rig is None:
         popup_message("Export validation failed! Avatar Rig not selected in workflow panel!", "Validation Error")
         return False
 
