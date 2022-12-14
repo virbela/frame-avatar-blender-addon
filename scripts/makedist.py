@@ -43,7 +43,7 @@ def main():
         os.remove(outfilename)
 
     # -- create zip dir
-    zip_folder = (pathlib.Path() / foldername)
+    zip_folder = (pathlib.Path() / basename)
     if zip_folder.exists():
         shutil.rmtree(str(zip_folder))
     zip_folder.mkdir()
@@ -84,7 +84,7 @@ def main():
                     file.write(object_contents)
 
     if len(list(zip_folder.glob("**/*.py"))):
-        shutil.make_archive(outfilename, 'zip', base_dir=str(zip_folder))
+        shutil.make_archive(foldername, 'zip', base_dir=str(zip_folder))
         shutil.rmtree(str(zip_folder))
         sys.stdout.write("created archive: %s\n" % outfilename)
     else:
