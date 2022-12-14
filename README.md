@@ -21,3 +21,8 @@ make test
 ## Local dev
 
 Install [ScriptWatcher](https://github.com/wisaac407/blender-script-watcher) and point it to the `__init__.py` file in the source directory. Your changes will be automatically reloaded in blender when you save a file in the addon.
+
+## Debugging
+
+Edit the file `scripts/debug.py` to call the addon operator that needs inspection, set a breakpoint and in VScode, start the debugger  by pressing 
+`F5`. 
