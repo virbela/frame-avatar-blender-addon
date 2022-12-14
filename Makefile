@@ -5,3 +5,8 @@ test:
 
 release:
 	@python scripts/makedist.py $(TAG)
+
+clean:
+	@find . -type f -name "*.blend1" -delete
+	@find . -type f -name "*.py[co]" -delete
+	@find . -type d -name "__pycache__" -delete
