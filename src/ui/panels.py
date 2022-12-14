@@ -291,8 +291,11 @@ class FRAME_PT_export(frame_panel):
 			HT = scene.homeomorphictools
 			self.layout.prop(HT, "avatar_type", expand=True)
 			self.layout.prop(HT, "export_glb")
-			self.layout.prop(HT, "export_animation")
-			if HT.export_animation:
+
+			anim = self.layout.row()
+			anim.enabled = HT.avatar_type == "FULLBODY"
+			anim.prop(HT, "export_animation")
+			if HT.avatar_type == "FULLBODY" and HT.export_animation:
 				if not HT.export_animation_actions:
 					self.layout.label(text="No actions found!", icon="ERROR")
 				sp = self.layout.split(factor=0.05)
@@ -303,5 +306,9 @@ class FRAME_PT_export(frame_panel):
 
 				self.layout.prop(HT, "export_animation_actions", expand=True, text="")
 			self.layout.prop(HT, "export_atlas")
-			self.layout.prop(HT, "denoise")
+			if HT.export_atlas:
+				sp = self.layout.split(factor=0.05)
+				_ = sp.column()
+				col = sp.column()
+				col.prop(HT, "denoise")
 		self.layout.operator("frame.export")
