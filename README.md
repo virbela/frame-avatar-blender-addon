@@ -3,7 +3,7 @@ Blender Addon Providing Frame Avatar Tooling
 
 # Installation
 Go into Edit > Preferences > Addons > install
-Then select `distribution/frame-avatar-blender-addon.zip`
+Then select `frame-avatar-blender-addon.zip`
 
 # Developing
 >Ensure you have [python](https://www.python.org/downloads/) and the [bpy](https://pypi.org/project/bpy/) package installed.
