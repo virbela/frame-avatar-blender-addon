@@ -187,8 +187,8 @@ def set_baketarget_name(self: 'BakeTarget', value: str):
 		self['name'] = value 
 		return
 	
-	# This is manual user name editing
-	newname = value.strip(f"{self.source_object.name}_")
+	# This is manual user name editing (remove leading 'Avatar_')
+	newname = value.lstrip(f"{self.source_object.name}_")
 
 	# -- rename shapekey
 	keys = self.source_object.data.shape_keys.key_blocks
