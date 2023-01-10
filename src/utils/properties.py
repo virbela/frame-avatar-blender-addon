@@ -206,7 +206,8 @@ def set_baketarget_name(self: 'BakeTarget', value: str):
 		variantname = newname
 		if self.multi_variants:
 			variantname = f"{newname}.{variant.name}"
-		variant.workmesh.name = variantname
+		if variant.workmesh:
+			variant.workmesh.name = variantname
 
 	self['name'] = value
 	log.info(f"Renaming baketarget to {value} ... ")
