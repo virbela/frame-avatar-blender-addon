@@ -2,8 +2,6 @@ import bpy
 import enum, time, traceback, textwrap
 from dataclasses import dataclass
 
-#TODO - currently we don't care about log level but we should later have a place for accessing logs and filtering logs
-
 class log_level(enum.IntEnum):
 	DEBUG = 1
 	INFO = 2
@@ -49,8 +47,6 @@ class log_instance(log_base):
 	'Log instance'
 
 	def process_message(self, message: pending_log_entry):
-
-		#TODO - messages that are repeating in close temporal proximity should be grouped to prevent spamming
 		try:
 			preferences = bpy.context.preferences.addons[__package__].preferences
 		except KeyError:
@@ -61,8 +57,6 @@ class log_instance(log_base):
 
 		#Get or create text target based on addon preference `log_target´
 		text = bpy.data.texts.get(preferences.log_target) or bpy.data.texts.new(preferences.log_target)
-
-		#TODO - here it would be nice to make sure that the text object is visible in the text pane but have not figured out how to do that yet
 
 		t = time.strftime('%X', message.timestamp)
 		line = f'{t} {message.log_level.name}: {message.message}'
