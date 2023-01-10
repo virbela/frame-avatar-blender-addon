@@ -131,6 +131,7 @@ EXPECTED_SHAPEKEYS_FULLBODY = [
     'Formal_Jacket',
     'Informal_Jacket'
 ]
+
 EXPECTED_SHAPEKEYS_FULLBODY.extend(
     EXPECTED_SHAPEKEYS_FLOATER
 )
