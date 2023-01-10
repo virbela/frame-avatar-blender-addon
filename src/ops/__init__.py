@@ -10,7 +10,7 @@ from ..utils.helpers import (
     register_class,
     pending_classes,
     require_bake_scene,
-    get_homeomorphic_tool_state 
+    get_homeomorphic_tool_state
 )
 
 from .common import (
@@ -28,7 +28,7 @@ class FRAME_OT_setup_bake_scene(frame_operator):
     bl_description = 	"Create bake scene"
     frame_operator = 	operations.setup_bake_scene
 
-# Export 
+# Export
 class FRAME_OT_export(frame_operator):
     bl_label = 			"Export GLTF"
     bl_idname = 		"frame.export"
@@ -400,7 +400,7 @@ class FRAME_OT_clear_bake_targets(frame_operator):
 
 class BakeTask:
     def __init__(self, id, view_layer, bake_target, variant):
-        self.id = id 
+        self.id = id
         self.view_layer = view_layer
         self.bake_target = bake_target
         self.variant = variant
@@ -477,11 +477,11 @@ class FRANE_OT_modal_bake_all_targets(bpy.types.Operator):
 
         # create the tasks
         for idx, bake_target in enumerate(HT.bake_target_collection, start=1):
-            for variant in bake_target.variant_collection:	
+            for variant in bake_target.variant_collection:
                 self._bake_queue.append(BakeTask(idx, view_layer, bake_target, variant))
 
 
-        self._bake_task = self._bake_queue.popleft()        
+        self._bake_task = self._bake_queue.popleft()
         result = self._bake_task.run()
         if result != {'RUNNING_MODAL'}:
             self.report({'WARNING'}, "Failed to start baking")
@@ -500,5 +500,5 @@ class FRANE_OT_modal_bake_all_targets(bpy.types.Operator):
         wm.event_timer_remove(self._timer)
         self.report({'INFO'}, "Baking map completed")
         #save_image() # <--- Call the function after baking
-    
+
 

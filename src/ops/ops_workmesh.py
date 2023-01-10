@@ -9,7 +9,7 @@ from ..utils.materials import setup_bake_material
 from ..utils.constants import PAINTING_UV_MAP, TARGET_UV_MAP
 from ..utils.properties import HomeomorphicProperties, BakeTarget
 from ..utils.helpers import (
-    require_bake_scene, 
+    require_bake_scene,
     require_work_scene,
     IMPLEMENTATION_PENDING,
     ensure_applied_rotation,
@@ -26,7 +26,7 @@ def create_workmeshes_for_all_targets(operator: Operator, context: Context, ht: 
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
 
-def create_workmeshes_for_selected_target(operator: Operator, context: Context, ht: HomeomorphicProperties):	
+def create_workmeshes_for_selected_target(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	if bake_target := ht.get_selected_bake_target():
 		bake_scene = require_bake_scene(context)
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
@@ -51,15 +51,15 @@ def workmesh_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicP
 	avatar_object = work_scene.objects.get('Avatar')
 	if not avatar_object:
 		return
-	
+
 	for object in  context.selected_objects:
 		shape_name = object.name
-		# Handle multiple variant names 
+		# Handle multiple variant names
 		if '.' in shape_name:
 			shape_name = shape_name.split('.')[0]
 
 		workmesh = object.data
-		# -- set corresponding shapekey 
+		# -- set corresponding shapekey
 		bm = bmesh.new()
 		bm.from_mesh(avatar_object.data)
 		shape = bm.verts.layers.shape[shape_name]
@@ -81,17 +81,17 @@ def all_workmeshes_to_shapekey(operator: Operator, context: Context, ht: Homeomo
 	workmeshes = [m for m in bake_scene.objects if m.type == "MESH"]
 	for object in  workmeshes:
 		shape_name = object.name
-		# Handle multiple variant names 
+		# Handle multiple variant names
 		if '.' in shape_name and 'offset' not in shape_name.lower():
 			shape_name = shape_name.split('.')[0]
 
 		workmesh = object.data
-		# -- set corresponding shapekey 
+		# -- set corresponding shapekey
 		bm = bmesh.new()
 		bm.from_mesh(avatar_object.data)
 		if shape_name not in bm.verts.layers.shape:
 			continue
- 
+
 		shape = bm.verts.layers.shape[shape_name]
 		for vert in bm.verts:
 			vert[shape] = workmesh.vertices[vert.index].co.copy()
@@ -124,7 +124,7 @@ def shapekey_to_workmesh(operator: Operator, context: Context, ht: HomeomorphicP
 	if not workmesh:
 		print("Missing workmesh!")
 		return
-	
+
 	for vert in workmesh.data.vertices:
 		vert.co = shapekey_data[vert.index]
 
@@ -157,7 +157,7 @@ def all_shapekeys_to_workmeshes(operator: Operator, context: Context, ht: Homeom
 			else:
 				log.info(f"Missing workmesh for {key.name}!")
 				continue
-		
+
 		if isinstance(workmesh, list):
 			for wm in workmesh:
 				for vert in wm.data.vertices:
@@ -167,7 +167,7 @@ def all_shapekeys_to_workmeshes(operator: Operator, context: Context, ht: Homeom
 				vert.co = shapekey_data[vert.index]
 
 
-def workmesh_symmetrize(operator: Operator, context: Context, ht: HomeomorphicProperties): 
+def workmesh_symmetrize(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	for obj in context.selected_objects:
 		mesh = obj.data
 		right_verts = [v for v in mesh.vertices if v.co.x > 0.0]
@@ -203,9 +203,9 @@ def create_workmeshes_for_specific_target(context: Context, ht: HomeomorphicProp
 
 		pending_name = get_bake_target_variant_name(bake_target, variant)
 
-		# if the workmesh was previously created in the bake scene, skip 
+		# if the workmesh was previously created in the bake scene, skip
 		if pending_name in bake_scene.objects:
-			# NOTE(ranjian0) since artists may have performed actions on the workmeshs, 
+			# NOTE(ranjian0) since artists may have performed actions on the workmeshs,
 			# we choose to skip regeneration.
 			log.warning(f'Skipping existing workmesh ...')
 			pending_object = bake_scene.objects.get(pending_name)

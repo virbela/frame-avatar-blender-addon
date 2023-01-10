@@ -1,4 +1,4 @@
-import bpy 
+import bpy
 from contextlib import contextmanager
 
 from .helpers import is_reference_valid
@@ -11,7 +11,7 @@ def scene(name: str):
     new_scene = bpy.data.scenes.get(name) or bpy.data.scenes.new(name)
     bpy.context.window.scene = new_scene
 
-    yield 
+    yield
 
     # -- restore previous active scene
     bpy.context.window.scene = active_scene

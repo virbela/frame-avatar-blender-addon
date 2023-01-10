@@ -6,10 +6,10 @@ from ..utils.logging import log_writer as log
 from ..utils.materials import setup_bake_material, get_material_variants
 from ..utils.properties import HomeomorphicProperties, BakeTarget, BakeVariant
 from ..utils.helpers import (
-	set_scene, 
+	set_scene,
 	set_selection,
-	require_bake_scene, 
-	require_named_entry, 
+	require_bake_scene,
+	require_named_entry,
 	get_bake_target_variant_name
 )
 
@@ -60,7 +60,7 @@ def update_workmesh_materials(context: Context, ht: HomeomorphicProperties,  bak
 	if bake_material_name in bpy.data.materials:
 		# Remove existing
 		bpy.data.materials.remove(bpy.data.materials[bake_material_name])
-	
+
 	bake_material = bpy.data.materials.new(bake_material_name)
 	bake_material.use_nodes = True	#contribution note 9
 	#TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?

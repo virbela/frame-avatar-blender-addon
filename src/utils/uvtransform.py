@@ -72,14 +72,14 @@ class uv_transformation_calculator:
 		target_vector = (T2 - T1).normalized()
 		rotation = reference_vector.angle_signed(target_vector)
 
-		
+
 		#Calculate translation
 		reference_centroid = self.get_centroid(self.reference_uv_map)
 		target_centroid = self.get_centroid(target_uv_map)
 		translation = target_centroid - reference_centroid
 
 		transform = UVTransform(
-			centroid=reference_centroid, 
+			centroid=reference_centroid,
 			translation=translation,
 			scale=scale,
 			rotation=rotation

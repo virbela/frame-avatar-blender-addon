@@ -1,5 +1,5 @@
 import os
-import bpy 
+import bpy
 import math
 import bmesh
 import numpy as np
@@ -37,7 +37,7 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
                     buff = buff.reshape((count, 3))[export_indices]
                     animation_buffer[:,frame_counter[anim_obj.name],oid] = buff.ravel()
                     frame_counter[anim_obj.name] += 1
-                
+
 
                 # XXX Deprecated Old Shapekey animation export
                 # -- create shapekey in avatar

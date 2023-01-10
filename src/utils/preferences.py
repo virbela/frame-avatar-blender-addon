@@ -8,11 +8,11 @@ class FrameAddonPreferences(bpy.types.AddonPreferences):
 
 	log_target: 					bpy.props.StringProperty(name='Log File Name', subtype='FILE_NAME', default="fabalog")
 	glb_export_dir: 				bpy.props.StringProperty(
-										name='GLB Export Dir', 
+										name='GLB Export Dir',
 										description='Folder to use for glb export (default is current blendfile folder).', subtype='DIR_PATH'
 									)
 	atlas_export_dir: 				bpy.props.StringProperty(
-										name='Atlas Export Dir', 
+										name='Atlas Export Dir',
 										description='Folder to use for atlas export (default is current blendfile folder).', subtype='DIR_PATH'
 									)
 

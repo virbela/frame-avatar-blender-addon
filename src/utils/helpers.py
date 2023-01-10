@@ -1,4 +1,4 @@
-import io 
+import io
 import bpy
 import enum
 import uuid
@@ -6,7 +6,7 @@ import types
 import bmesh
 import pstats
 import typing
-import cProfile 
+import cProfile
 import threading
 import addon_utils
 from typing import TYPE_CHECKING
@@ -281,7 +281,7 @@ def purge_object(obj: Object):
     for block in bpy.data.meshes:
         if block.users == 0:
             bpy.data.meshes.remove(block)
-    
+
     for block in bpy.data.materials:
         if block.users == 0:
             bpy.data.materials.remove(block)

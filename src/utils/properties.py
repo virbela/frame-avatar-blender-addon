@@ -2,11 +2,11 @@ import bpy
 import typing
 from bpy.types import Context, Object, Image
 from .helpers import (
-	popup_message, 
-	enum_descriptor, 
+	popup_message,
+	enum_descriptor,
 	get_named_entry,
-	require_named_entry, 
-	frame_property_group, 
+	require_named_entry,
+	frame_property_group,
 )
 from .logging import log_writer as log
 from .constants import MIRROR_TYPE, TARGET_UV_MAP
@@ -152,8 +152,8 @@ def get_bakevariant_name(self: 'BakeVariant'):
 
 def set_bakevariant_name(self: 'BakeVariant', value: str):
 	if not self.workmesh:
-		self['name'] = value 
-		return 
+		self['name'] = value
+		return
 
 	# XXX THIS should only happen for multi variants
 	# -- update workmesh name
@@ -184,16 +184,16 @@ def get_baketarget_name(self: 'BakeTarget'):
 def set_baketarget_name(self: 'BakeTarget', value: str):
 	if not self.source_object:
 		# Initial name set from the create bake targets operator
-		self['name'] = value 
+		self['name'] = value
 		return
-	
+
 	# This is manual user name editing (remove leading 'Avatar_')
 	newname = value.lstrip(f"{self.source_object.name}_")
 
 	# -- rename shapekey
 	keys = self.source_object.data.shape_keys.key_blocks
 	shapekey = keys.get(self.shape_key_name)
-	if not shapekey: 
+	if not shapekey:
 		# -- error shapekey was not found
 		popup_message(f"Shapekey {self.shape_key_name} was not found!", "ShapekeyError")
 		return

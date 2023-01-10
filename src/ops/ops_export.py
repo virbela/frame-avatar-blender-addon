@@ -583,5 +583,5 @@ def get_effects_metadata(ht: HomeomorphicProperties, obj: Object) -> dict:
                     "data": [v[1] for v in effect_verts]
                 }
                 effects_medatata[col.shape][effect.name.lower().strip(' ')] = data
-    
+
     return effects_medatata

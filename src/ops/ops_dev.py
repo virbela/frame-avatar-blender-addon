@@ -2,7 +2,7 @@ import bpy
 import textwrap
 from bpy.types import Operator, Context
 from ..utils.helpers import require_bake_scene
-from ..utils.logging import log_writer as log 
+from ..utils.logging import log_writer as log
 from ..utils.properties import HomeomorphicProperties
 
 def clear_bake_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):

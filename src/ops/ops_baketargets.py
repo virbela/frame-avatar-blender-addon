@@ -73,13 +73,13 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
 	#Create bake targets
 	for target in targets.values():
 		if 'basis' in  target.name.lower():
-			continue 
+			continue
 
 		if target.name in [bt.name for bt in ht.bake_target_collection]:
 			log.info("Skip existing bake target")
 			continue
 
-		
+
 		new = ht.bake_target_collection.add()
 		new.variant_collection.add()	# add default variant
 		for key, value in iter_dc(target):
@@ -88,7 +88,7 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
 		if "eye_l" in new.name.lower():
 			new.multi_variants = True
 			new.uv_mode = "UV_IM_COLOR"
-			create_eye_variants(new) 
+			create_eye_variants(new)
 
 		target.bake_target = new
 
@@ -120,13 +120,13 @@ def create_eye_variants(bk: BakeTarget):
 	for name in eye_names:
 		variant = bk.variant_collection.add()
 		variant.name = name
-		tex = None 
+		tex = None
 		for img in bpy.data.images:
 			if 'eye_' not in img.name:
 				continue
 			if name in img.name:
 				tex = img
-				break 
+				break
 		if tex:
 			variant.image = tex
 

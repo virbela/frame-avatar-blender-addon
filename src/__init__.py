@@ -19,7 +19,7 @@ import bpy
 from bpy.app.handlers import persistent
 
 
-from .ui import * 
+from .ui import *
 from .ops import *
 from .utils.preferences import *
 from .utils.helpers import pending_classes
@@ -47,12 +47,12 @@ def register():
 			eactions = [ea.name for ea in HT.export_animation_actions]
 			for action in bpy.data.actions:
 				if 'tpose' in action.name.lower() or action.name in eactions:
-					continue 
+					continue
 
 				item = HT.export_animation_actions.add()
 				item.name = action.name
 				item.checked = True
-			
+
 			for idx, eaction in enumerate(HT.export_animation_actions):
 				if eaction.name not in [a.name for a in bpy.data.actions]:
 					HT.export_animation_actions.remove(idx)
@@ -83,4 +83,4 @@ if __name__ == '__main__':
 		unregister()
 	except:
 		pass
-	register()	
+	register()

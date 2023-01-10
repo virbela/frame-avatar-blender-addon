@@ -1,5 +1,5 @@
 import bpy
-import bmesh 
+import bmesh
 from bpy.types import Operator, Context, Object
 
 from ..utils.constants import MIRROR_TYPE
@@ -152,7 +152,7 @@ def reset_uv_transformations(bake_targets: list[BakeTarget]):
 
 
 def copy_and_transform_uv(
-	source_object: Object, source_layer: str, 
+	source_object: Object, source_layer: str,
 	target_object: Object, target_layer: str, scale_factor: float = 1.0):
 
 	#TODO - investigate if we can get uv layer index without actually changing it and getting mesh.loops.layers.uv.active

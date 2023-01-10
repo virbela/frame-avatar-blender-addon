@@ -15,7 +15,7 @@ def bake_all_bake_targets(operator: Operator, context: Context, ht: Homeomorphic
 	for idx, bake_target in enumerate(ht.bake_target_collection, start=1):
 		operator.report({'INFO'}, f"Baking target {idx} / {len(ht.bake_target_collection)}.")
 		print(f"Baking for {bake_target}")
-		for variant in bake_target.variant_collection:			
+		for variant in bake_target.variant_collection:
 			bake_specific_variant(ht, view_layer, variant)
 			# XXX bake cannot run as async here because of the loop, means we don't get
 			# meaningful progress indicator
@@ -123,7 +123,7 @@ def ensure_color_output_node_ready(variant: BakeVariant, tree: NodeTree):
 	material_links = tree.links
 
 	# ensure the texture output goes through diffusebsdf
-	texnode = None 
+	texnode = None
 	for node in material_nodes:
 		if isinstance(node, bpy.types.ShaderNodeTexImage):
 			if node.image == variant.image:
@@ -144,4 +144,4 @@ def ensure_color_output_node_ready(variant: BakeVariant, tree: NodeTree):
 	# rebuild the links
 	tree.links.new(texnode.outputs[0], diffusenode.inputs[0])
 	tree.links.new(diffusenode.outputs[0], outputnode.inputs[0])
-	
+
