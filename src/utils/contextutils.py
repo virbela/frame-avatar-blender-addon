@@ -1,6 +1,8 @@
 import bpy 
 from contextlib import contextmanager
 
+from .helpers import is_reference_valid
+
 @contextmanager
 def scene(name: str):
     active_scene = bpy.context.scene
@@ -33,11 +35,13 @@ def selection(objects: list[bpy.types.Object] = None):
     # -- clear new selection state
     if objects:
         for obj in objects:
-            obj.select_set(False)
+            if is_reference_valid(obj):
+                obj.select_set(False)
 
     # -- restore old selection state
     for obj in selected:
-        obj.select_set(True)
+        if is_reference_valid(obj):
+            obj.select_set(True)
 
 @contextmanager
 def active_object(object: bpy.types.Object = None):
