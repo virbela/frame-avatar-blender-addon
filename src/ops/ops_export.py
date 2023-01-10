@@ -81,12 +81,6 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
         popup_message("Selected object is not an Homeomorphic avatar", 'Context Error')
         return False
     
-    # XXX(ranjian0) Don't depend on naming for the avatar
-    # if obj.name != 'Avatar':
-    #     #XXX Probably Not the main avatar object
-    #     popup_message("Avatar object name invalid! Try 'Avatar'.", 'Context Error')
-    #     return False
-
     obj.hide_set(False)
     obj.hide_viewport = False 
     obj.select_set(True)
@@ -143,6 +137,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
         elif variant.uv_target_channel == 'UV_TARGET_B':
             return (0, 0, 1, 0)
         # XXX Never get here (breaks fragment shader in the client)
+        log.error(f"Invalid UV Channel for {variant}")
         return (0, 0, 0, 0)
 
     effect_names = [pos.effect_shapekey for e in ht.effect_collection for pos in e.positions]
