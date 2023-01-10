@@ -218,7 +218,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     outputfile_glb = os.path.join(directory , fname)
 
     obj = ht.avatar_mesh
-    with selection(obj), active_object(obj):
+    with selection([obj]), active_object(obj):
         with clear_custom_props(obj):
             obj['MorphSets_Avatar'] = morphsets_dict
 
@@ -507,7 +507,7 @@ def obj_from_shapekey(obj: Object, keyname: str):
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "mesh.glb")
         
-        with selection(pending_object), active_object(pending_object):
+        with selection([pending_object]), active_object(pending_object):
 
             bpy.ops.export_scene.gltf(
                 filepath=filepath, 
