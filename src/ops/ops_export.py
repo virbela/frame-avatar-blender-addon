@@ -11,7 +11,7 @@ from ..utils.logging import log_writer as log
 from ..utils.contextutils import active_object, selection
 from ..utils.animation import generate_animation_shapekeys
 from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
-from ..utils.properties import HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
+from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
 from ..utils.uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
@@ -119,7 +119,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
             }
         return uv_transform
 
-    def get_variant_channel(variant: BakeVariant) -> tuple[int]:
+    def get_variant_channel(bk: BakeTarget,variant: BakeVariant) -> tuple[int]:
         if variant.uv_target_channel == 'UV_TARGET_COLOR':
             return (0, 0, 0, 1)
         elif variant.uv_target_channel == 'UV_TARGET_R':
@@ -128,8 +128,10 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
             return (0, 1, 0, 0)
         elif variant.uv_target_channel == 'UV_TARGET_B':
             return (0, 0, 1, 0)
-        # XXX Never get here (breaks fragment shader in the client)
-        log.error(f"Invalid UV Channel for {variant}")
+        # XXX Get here only for variants with NIL uv islands i.e items with `__None` suffix
+        if bk.uv_mode != "UV_IM_NIL":
+            log.fatal(f"Invalid UV channel for {bk.name}")
+        log.info(f"NIL UV Channel for {bk.name}")
         return (0, 0, 0, 0)
 
     effect_names = [pos.effect_shapekey for e in ht.effect_collection for pos in e.positions]
@@ -147,13 +149,13 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
             for variant in bake_target.variant_collection:
                 shape_name = get_bake_target_variant_name(bake_target, variant)
                 variants['Variants'][variant.name] = get_transform(shape_name)
-                variants['Variants'][variant.name]['UVChannel'] = get_variant_channel(variant)
+                variants['Variants'][variant.name]['UVChannel'] = get_variant_channel(bake_target, variant)
             result = variants
         else:
             variant = bake_target.variant_collection[0]
             shape_name = get_bake_target_variant_name(bake_target, variant)
             result = get_transform(shape_name)
-            result['UVChannel'] = get_variant_channel(variant)
+            result['UVChannel'] = get_variant_channel(bake_target, variant)
                 
         uv_transform_extra_data[bake_target.shortname] = result
 
