@@ -149,7 +149,7 @@ class template_expandable_section:
 
 
 def draw_variant(layout, variant, bake_scene):
-	col = layout.column(align=True)
+	col = layout # .column(align=True)
 
 	col.prop(variant, 'image')
 	col.prop_search(variant, 'workmesh', bake_scene, 'objects')
@@ -194,40 +194,33 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 				et = HT.bake_target_collection[HT.selected_bake_target]
 				col.prop(et, "export", toggle=True, text="", icon="EXPORT")
 
-				self.layout.prop_search(et, "source_object", scene, "objects")
-
-				if obj := et.source_object:
+				if obj := HT.avatar_mesh:
 					if obj.data.shape_keys:
 						self.layout.prop_search(et, "shape_key_name", obj.data.shape_keys, "key_blocks")
 
-				self.layout.prop(et, 'bake_mode')
+				self.layout.prop(et, 'bake_mode', expand=True)
 				if et.bake_mode == 'UV_BM_REGULAR':
-					self.layout.prop(et, 'uv_area_weight', slider=True)
-
-					variants = self.layout.box()
-					variants.prop(et, 'multi_variants')
-
-					if et.multi_variants:
-						variants.template_list('FRAME_UL_bake_variants', '', et, 'variant_collection', et, 'selected_variant')
-
-						variant_actions = variants.row(align=True)
-						variant_actions.operator('frame.add_bake_target_variant')
-						variant_actions.operator('frame.remove_bake_target_variant')
-
-						if et.selected_variant != -1:
-							var = et.variant_collection[et.selected_variant]
-							draw_variant(variants, var, bake_scene)
-
-					else:	# draw the first entry only
-						if len(et.variant_collection) == 0:
-							variants.label(text='Please revalidate bake target')
-						else:
-							var = et.variant_collection[0]
-							draw_variant(variants, var, bake_scene)
-
 					self.layout.prop(et, 'uv_mode')
+					if et.uv_mode == "UV_IM_NIL":
+						return
+					variant = et.variant_collection[0]
+					if variant.workmesh:
+						self.layout.prop_search(variant, 'uv_map', variant.workmesh.data, 'uv_layers')
+					else:
+						self.layout.label(text='Select work mesh to choose UV map')
+
+					# TODO(ranjian0) Is this used for UV packing really?
+					# self.layout.prop(et, 'uv_area_weight', text="UV Area")
+
+					self.layout.prop_search(variant, 'workmesh', bake_scene, 'objects')
+					self.layout.prop(variant, 'image')
+
 					if et.uv_mode == 'UV_IM_FROZEN':
 						self.layout.prop(et, 'atlas')
+					#TODO - this should perhaps not be visible?
+					self.layout.prop(variant, "intermediate_atlas")
+					if variant.intermediate_atlas is None:
+						self.layout.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
 
 				elif et.bake_mode == 'UV_BM_MIRRORED':
 					pass	#TODO
