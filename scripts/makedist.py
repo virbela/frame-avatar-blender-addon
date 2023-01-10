@@ -9,7 +9,7 @@
 #
 #     ./make-dist v1.0
 #
-# will make an archive for the commit tagged “v1.0” (assuming it exists).
+# will make an archive for the commit tagged v1.0 (assuming it exists).
 # This tag name will also be included in the created archive name.
 
 import os
