@@ -1,4 +1,3 @@
-
 EXPECTED_SHAPEKEYS_FLOATER = [
     'Basis',
 
@@ -7,6 +6,7 @@ EXPECTED_SHAPEKEYS_FLOATER = [
     'FacialHairs_Long_open_effect',
     'Face_Human_Mouth_Open_effect',
     'FacialHairs_Goatee_open_effect',
+    'Face_Human_female_Mouth_Open_effect',
 
     # -- android
     'Eyes_Android',
@@ -15,10 +15,12 @@ EXPECTED_SHAPEKEYS_FLOATER = [
 
     # -- face
     'Face_Human',
-    'Eye_L',
-    'Eye_R',
-    'Eye_Border_L',
-    'Eye_Border_R',
+    'Face_Human_female',
+    'Eye_Ball',
+    'Eye_Pupil',
+    'Eye_Lid',
+    'Eye_Lid_Liner',
+    'Eye_Lid_Liner_Close',
     'Eyebrows__None',
     'FacialHairs_Mustache',
     'FacialHairs_Goatee',
@@ -103,6 +105,10 @@ EXPECTED_SHAPEKEYS_FLOATER = [
 
     # -- UNUSED (DEPRECATE)
     'Hand',
+    'Eye_L',
+    'Eye_R',
+    'Eye_Border_L',
+    'Eye_Border_R',
 ]
 
 EXPECTED_SHAPEKEYS_FULLBODY = [
