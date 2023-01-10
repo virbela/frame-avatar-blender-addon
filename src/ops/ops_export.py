@@ -5,9 +5,10 @@ import uuid
 import tempfile
 from pathlib import Path
 from contextlib import contextmanager
-from bpy.types import Operator, Context, Object, Scene, ViewLayer
+from bpy.types import Operator, Context, Object, Scene
 
 from ..utils.logging import log_writer as log
+from ..utils.contextutils import active_object, selection
 from ..utils.animation import generate_animation_shapekeys
 from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..utils.properties import HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
@@ -19,35 +20,26 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
     if not validate_export(context, HT):
         return
 
-    active = clear_active(context)
-    selected = desellect_all(context)
+    with selection(None), active_object(None):
+        try:
+            if HT.avatar_type == "FULLBODY" and HT.export_animation:
+                export_animation(context, HT)
 
-    try:
-        if HT.avatar_type == "FULLBODY" and HT.export_animation:
-            export_animation(context, HT)
+            if HT.export_glb:
+                success = export_glb(context, HT)
+                if not success:
+                    # XXX exit early if mesh export failed
+                    return
 
-        if HT.export_glb:
-            success = export_glb(context, HT)
-            if not success:
-                # XXX exit early if mesh export failed
-                return
+            if HT.export_atlas:
+                export_atlas(context, denoise=HT.denoise)
 
-        if HT.export_atlas:
-            export_atlas(context, denoise=HT.denoise)
-
-    except FileExistsError:
-        popup_message("Export files already exist in the current folder!") 
-    except PermissionError:
-        popup_message("Please save the current blend file!")
-    except Exception as e:
-        raise e
-    
-    # -- reset selection/active state
-    for o in selected:
-        o.select_set(True)
-    for layer, obj in active:
-        layer.objects.active = obj
-
+        except FileExistsError:
+            popup_message("Export files already exist in the current folder!") 
+        except PermissionError:
+            popup_message("Please save the current blend file!")
+        except Exception as e:
+            raise e
 
 def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
     work_scene = require_work_scene(context)
@@ -225,43 +217,14 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
         fname = "faba_floater_avatar.glb"
     outputfile_glb = os.path.join(directory , fname)
 
-    clear_active(context)
-    desellect_all(context)
-
     obj = ht.avatar_mesh
-    bpy.context.view_layer.objects.active = obj
-    obj.select_set(True)
+    with selection(obj), active_object(obj):
+        with clear_custom_props(obj):
+            obj['MorphSets_Avatar'] = morphsets_dict
 
-    # post_process_effects(ht.effect_collection, obj)
-    with clear_custom_props(obj):
-        obj['MorphSets_Avatar'] = morphsets_dict
-
-        bpy.ops.export_scene.gltf(
-            filepath=outputfile_glb, 
-            export_format='GLB', 
-            # disable all default options
-            export_texcoords = True,
-            export_normals = False,
-            export_colors = False,
-            export_animations=False,
-            export_skins=False,
-            export_materials='NONE',
-            # valid options
-            use_selection=True, 
-            export_extras=True, 
-            export_morph=True,
-            use_active_scene=True
-        )
-
-        if is_dev():
-            export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
-            with open(os.path.join(directory, 'morphs.json'), 'w') as f:
-                print(export_json, file=f)
-
-            # Check gltf export
             bpy.ops.export_scene.gltf(
-                filepath=os.path.join(directory , "morphic_avatar.gltf"), 
-                export_format='GLTF_EMBEDDED', 
+                filepath=outputfile_glb, 
+                export_format='GLB', 
                 # disable all default options
                 export_texcoords = True,
                 export_normals = False,
@@ -276,16 +239,37 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
                 use_active_scene=True
             )
 
+            if is_dev():
+                export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
+                with open(os.path.join(directory, 'morphs.json'), 'w') as f:
+                    print(export_json, file=f)
+
+                # Check gltf export
+                bpy.ops.export_scene.gltf(
+                    filepath=os.path.join(directory , "morphic_avatar.gltf"), 
+                    export_format='GLTF_EMBEDDED', 
+                    # disable all default options
+                    export_texcoords = True,
+                    export_normals = False,
+                    export_colors = False,
+                    export_animations=False,
+                    export_skins=False,
+                    export_materials='NONE',
+                    # valid options
+                    use_selection=True, 
+                    export_extras=True, 
+                    export_morph=True,
+                    use_active_scene=True
+                )
+
     # -- cleanup animation shapekeys
     last_idx = obj.active_shape_key_index
     for kb in obj.data.shape_keys.key_blocks:
         if kb.name.startswith('fabanim.'):
-            print("Post Export Removing ..", kb.name)
+            log.info(f"Post Export Removing .. {kb.name}")
             obj.shape_key_remove(kb)
     obj.active_shape_key_index = last_idx
 
-    bpy.context.view_layer.objects.active = None
-    obj.select_set(False)
     return True
 
 
@@ -522,33 +506,29 @@ def obj_from_shapekey(obj: Object, keyname: str):
 
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "mesh.glb")
-        # -- export to tmp dir
-        clear_active(bpy.context)
-        desellect_all(bpy.context)
+        
+        with selection(pending_object), active_object(pending_object):
 
-        pending_object.select_set(True)
-        bpy.context.view_layer.objects.active = pending_object
+            bpy.ops.export_scene.gltf(
+                filepath=filepath, 
+                export_format='GLB', 
+                # disable all default options
+                export_texcoords = True,
+                export_normals = False,
+                export_colors = False,
+                export_animations=False,
+                export_skins=False,
+                export_materials='NONE',
+                # valid options
+                use_selection=True, 
+                export_extras=False, 
+                export_morph=False,
+                use_active_scene=True
+            )
+            bpy.data.meshes.remove(pending_object.data, do_unlink=True)
 
-        bpy.ops.export_scene.gltf(
-            filepath=filepath, 
-            export_format='GLB', 
-            # disable all default options
-            export_texcoords = True,
-            export_normals = False,
-            export_colors = False,
-            export_animations=False,
-            export_skins=False,
-            export_materials='NONE',
-            # valid options
-            use_selection=True, 
-            export_extras=False, 
-            export_morph=False,
-            use_active_scene=True
-        )
-        bpy.data.meshes.remove(pending_object.data, do_unlink=True)
-
-        bpy.ops.import_scene.gltf(filepath=filepath)
-        pending_object = bpy.context.object
+            bpy.ops.import_scene.gltf(filepath=filepath)
+            pending_object = bpy.context.object
 
     return pending_object
 
@@ -587,30 +567,3 @@ def get_animation_objects(ht: HomeomorphicProperties) -> list[Object]:
 
         animated_objects.append(obj)
     return animated_objects
-
-
-def desellect_all(context: Context) -> list[Object]:
-    # -- deselect everything in all scenes
-    selected = []
-    objects = list(require_work_scene(context).objects)
-    objects.extend(list(require_bake_scene(context).objects))
-    for o in objects:
-        if o.select_get():
-            selected.append(o)
-            o.select_set(False)
-
-    return selected
-
-
-def clear_active(context: Context) -> list[tuple[ViewLayer, Object]]:
-    # -- clear all active
-    active = []
-    layers = list(require_work_scene(context).view_layers)
-    layers.extend(list(require_bake_scene(context).view_layers))
-    for layer in layers:
-        if layer.objects.active:
-            active.append((layer, layer.objects.active))
-            layer.objects.active.select_set(False)
-            layer.objects.active = None
-
-    return active
