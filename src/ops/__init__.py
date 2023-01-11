@@ -171,14 +171,12 @@ class FRAME_OT_select_by_atlas(frame_operator):
 
 # Baking
 class FRAME_OT_bake_selected_bake_target(frame_operator):
-    #TODO - if we support multiple targets in selection we should change to plural here
     bl_label = 			"Bake selected target"
     bl_idname = 		"frame.bake_selected_bake_target"
     bl_description = 	"Bake textures for the selected bake target"
     frame_operator = 	operations.bake_selected_bake_target
 
 class FRAME_OT_bake_selected_workmeshes(frame_operator):
-    #TODO - if we support multiple targets in selection we should change to plural here
     bl_label = 			"Bake selected work meshes"
     bl_idname = 		"frame.bake_selected_workmeshes"
     bl_description = 	"Bake textures for selected work meshes"

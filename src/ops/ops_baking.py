@@ -51,7 +51,6 @@ def bake_selected_workmeshes(operator: Operator, context: Context, ht: Homeomorp
 
 		raise BakeException.MissingBakeTargetVariant(workmesh)
 
-	#TODO - make helper function for this
 	selection = list()
 	for workmesh in view_layer.objects:
 		if workmesh.select_get(view_layer=view_layer):
@@ -79,7 +78,6 @@ def bake_specific_variant(ht: HomeomorphicProperties, view_layer: ViewLayer, var
 
 	ensure_color_output_node_ready(variant, workmesh.active_material.node_tree)
 
-	#TODO - we should take into account bake groups - maybe also move this out to a more generic function
 	set_rendering(view_layer.objects, workmesh)
 	set_selection(view_layer.objects, workmesh, synchronize_active=True, make_sure_active=True)
 
