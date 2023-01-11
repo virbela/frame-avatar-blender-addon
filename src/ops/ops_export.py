@@ -11,6 +11,7 @@ from bpy.types import Operator, Context, Object, Scene
 from ..utils.logging import log_writer as log
 from ..utils.contextutils import active_object, selection
 from ..utils.animation import generate_animation_shapekeys
+from ..utils.bake_targets import validate_bake_target_setup
 from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..utils.morph_spec import validate_floater_morphs, validate_fullbody_morphs
 from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
@@ -70,7 +71,7 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
     elif HT.avatar_type == "FLOATER":
         return validate_floater_morphs(HT.avatar_mesh)
 
-    return True
+    return validate_bake_target_setup(HT)
 
 
 def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
