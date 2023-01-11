@@ -1,4 +1,10 @@
-EXPECTED_SHAPEKEYS_FLOATER = [
+from pprint import pformat
+from bpy.types import Object, Mesh
+
+from .helpers import popup_message
+from .logging import log_writer as log
+
+EXPECTED_SHAPEKEYS_COMMON = [
     'Basis',
 
     # -- mouth animation effects
@@ -94,15 +100,6 @@ EXPECTED_SHAPEKEYS_FLOATER = [
     # -- body
     'Body_Human',
 
-    # -- jackets
-    'Jacket_SkiJacket',
-    'Jacket_Cardigan',
-    'Jacket_Blazer',
-    'Jacket_Insulated',
-    'Jacket_Bolero__Jacket_Cardigan',
-    'Jacket_Vest',
-    'Jacket_Poncho',
-
     # -- UNUSED (DEPRECATE)
     'Hand',
     'Eye_L',
@@ -110,6 +107,20 @@ EXPECTED_SHAPEKEYS_FLOATER = [
     'Eye_Border_L',
     'Eye_Border_R',
 ]
+
+EXPECTED_SHAPEKEYS_FLOATER = [
+    'Jacket_SkiJacket',
+    'Jacket_Cardigan',
+    'Jacket_Blazer',
+    'Jacket_Insulated',
+    'Jacket_Bolero__Jacket_Cardigan',
+    'Jacket_Vest',
+    'Jacket_Poncho',
+]
+
+EXPECTED_SHAPEKEYS_FLOATER.extend(
+    EXPECTED_SHAPEKEYS_COMMON
+)
 
 EXPECTED_SHAPEKEYS_FULLBODY = [
     'Arm_L',
@@ -133,5 +144,55 @@ EXPECTED_SHAPEKEYS_FULLBODY = [
 ]
 
 EXPECTED_SHAPEKEYS_FULLBODY.extend(
-    EXPECTED_SHAPEKEYS_FLOATER
+    EXPECTED_SHAPEKEYS_COMMON
 )
+
+DEPRECATED_SHAPEKEYS = [
+    'Hand',
+    'Eye_L',
+    'Eye_R',
+    'Eye_Border_L',
+    'Eye_Border_R',
+]
+
+def validate_fullbody_morphs(avatar_obj: Object) -> bool:
+    me: Mesh = avatar_obj.data
+    keys_names = [k.name for k in me.shape_keys.key_blocks]
+
+    names_diff_missing = set(EXPECTED_SHAPEKEYS_FULLBODY) - set(keys_names)
+    missing = list(names_diff_missing - set(DEPRECATED_SHAPEKEYS))
+
+    if missing:
+        log.error("The following shapekeys are required in the fullbody, but were not found!")
+        log.error('--\n' + pformat(sorted(missing)))
+
+        error_str = ", ".join(missing)
+        popup_message(error_str, "Missing Shapekeys!")
+        return False 
+
+    # XXX Additional shapekeys can be remove during the export step
+    # names_diff_additional = set(keys_names) - set(EXPECTED_SHAPEKEYS_FULLBODY)
+    # log.info("The following shapekeys were found in the full body avatar, but are not required")
+    # log.info(names_diff_additional)
+    return True
+
+def validate_floater_morphs(avatar_obj: Object) -> bool:
+    me: Mesh = avatar_obj.data
+    keys_names = [k.name for k in me.shape_keys.key_blocks]
+
+    names_diff_missing = set(EXPECTED_SHAPEKEYS_FLOATER) - set(keys_names)
+    missing = list(names_diff_missing - set(DEPRECATED_SHAPEKEYS))
+
+    if missing:
+        log.error("The following shapekeys are required in the floater, but were not found!")
+        log.error('--\n' + pformat(sorted(missing)))
+
+        error_str = ", ".join(missing)
+        popup_message(error_str, "Missing Shapekeys!")
+        return False 
+
+    # XXX Additional shapekeys can be remove during the export step
+    # names_diff_additional = set(keys_names) - set(EXPECTED_SHAPEKEYS_FLOATER)
+    # log.info("The following shapekeys were found in the floater avatar, but are not required")
+    # log.info(names_diff_additional)
+    return True

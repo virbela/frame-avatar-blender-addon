@@ -12,6 +12,7 @@ from ..utils.logging import log_writer as log
 from ..utils.contextutils import active_object, selection
 from ..utils.animation import generate_animation_shapekeys
 from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
+from ..utils.morph_spec import validate_floater_morphs, validate_fullbody_morphs
 from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
 from ..utils.uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
@@ -62,6 +63,12 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
     if HT.avatar_type == "FULLBODY" and HT.avatar_rig is None:
         popup_message("Export validation failed! Avatar Rig not selected in workflow panel!", "Validation Error")
         return False
+
+    # check that the avatar shapekeys match the expected morph_spec
+    if HT.avatar_type == "FULLBODY":
+        return validate_fullbody_morphs(HT.avatar_mesh)
+    elif HT.avatar_type == "FLOATER":
+        return validate_floater_morphs(HT.avatar_mesh)
 
     return True
 
