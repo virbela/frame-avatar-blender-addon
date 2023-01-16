@@ -1,5 +1,6 @@
 import io
 import bpy
+import json
 import enum
 import uuid
 import types
@@ -9,6 +10,7 @@ import typing
 import cProfile
 import threading
 import addon_utils
+from pathlib import Path
 from typing import TYPE_CHECKING
 from dataclasses import dataclass
 from contextlib import contextmanager
@@ -305,6 +307,19 @@ def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
         preferences.glb_export_dir = ""
         preferences.atlas_export_dir = ""
         preferences.custom_frame_validation = True
+        # -- check for .env.json to load dev frame dirs
+        env_file = Path(__file__).parent.parent.parent.joinpath(".env.json").absolute()
+        if env_file.exists():
+            with open(env_file, 'r') as file:
+                data = json.load(file)
+                glb_folder = data['frame_glb_folder']
+                if Path(glb_folder).exists():
+                    preferences.glb_export_dir = glb_folder
+                    log.info(f"GLB Export dir set to {glb_folder}")
+                atlas_folder = data['frame_atlas_folder']
+                if Path(atlas_folder).exists():
+                    preferences.atlas_export_dir = atlas_folder
+                    log.info(f"Atlas Export dir set to {atlas_folder}")
     return preferences
 
 
