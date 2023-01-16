@@ -298,14 +298,14 @@ def is_dev() -> bool:
 def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
     try:
         preferences = bpy.context.preferences.addons[__package__].preferences
-        return preferences
     except KeyError:
         # XXX DEV(simulate preferences)
         preferences = types.SimpleNamespace()
         preferences.log_target = "devlog"
         preferences.glb_export_dir = ""
         preferences.atlas_export_dir = ""
-        return preferences
+        preferences.custom_frame_validation = True
+    return preferences
 
 
 def popup_message(message: str, title: str = "Error", icon: str = "ERROR"):

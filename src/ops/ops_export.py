@@ -65,13 +65,19 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
         popup_message("Export validation failed! Avatar Rig not selected in workflow panel!", "Validation Error")
         return False
 
-    # check that the avatar shapekeys match the expected morph_spec
-    if HT.avatar_type == "FULLBODY":
-        return validate_fullbody_morphs(HT.avatar_mesh)
-    elif HT.avatar_type == "FLOATER":
-        return validate_floater_morphs(HT.avatar_mesh)
+    prefs = get_prefs()
+    if prefs.custom_frame_validation:
+        # check that the avatar shapekeys match the expected morph_spec
+        if HT.avatar_type == "FULLBODY":
+            if not validate_fullbody_morphs(HT.avatar_mesh):
+                return False
+        elif HT.avatar_type == "FLOATER":
+            if not validate_floater_morphs(HT.avatar_mesh):
+                return False
 
-    return validate_bake_target_setup(HT)
+        if not validate_bake_target_setup(HT):
+            return False
+    return True
 
 
 def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
