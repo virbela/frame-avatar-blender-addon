@@ -39,11 +39,11 @@ class TestUtilsHelpers(unittest.TestCase):
             not_implemented_func()
 
     def test_register_class(self):
-        self.assertEqual(len(helpers.pending_classes), 79)
+        self.assertEqual(len(helpers.pending_classes), 80)
         class DummyTestOperator(bpy.types.Operator):
             pass
         helpers.register_class(DummyTestOperator)
-        self.assertEqual(len(helpers.pending_classes), 80)
+        self.assertEqual(len(helpers.pending_classes), 81)
 
     def test_require_scenes(self):
         b_sc = helpers.require_bake_scene(bpy.context)
