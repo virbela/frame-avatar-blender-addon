@@ -23,8 +23,8 @@ class log_level_descriptor:
 		self.log_instance = log_instance
 		self.log_level = log_level
 
-	def __call__(self, message):
-		self.log_instance.process_message(pending_log_entry(time.localtime(), self.log_level, message))
+	def __call__(self, message, print_console=True):
+		self.log_instance.process_message(pending_log_entry(time.localtime(), self.log_level, message), print_console)
 
 
 class log_base:
@@ -46,7 +46,7 @@ class log_base:
 class log_instance(log_base):
 	'Log instance'
 
-	def process_message(self, message: pending_log_entry):
+	def process_message(self, message: pending_log_entry, print_console: bool):
 		try:
 			preferences = bpy.context.preferences.addons[__package__].preferences
 		except KeyError:
@@ -61,9 +61,8 @@ class log_instance(log_base):
 		t = time.strftime('%X', message.timestamp)
 		line = f'{t} {message.log_level.name}: {message.message}'
 		text.write(f'{line}\n')
-		print(line)	#TODO - make this optional
-		#TODO - make sure things scroll down
-
+		if print_console:
+			print(line)
 		self.history.append(message)
 
 		if len(self.history) > self.MAX_HISTORY:

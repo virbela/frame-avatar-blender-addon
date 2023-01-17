@@ -111,7 +111,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     }
 
 
-    if ht.avatar_type == "FULLBODY":
+    if ht.avatar_type == "FULLBODY" and ht.export_animation:
         morphsets_dict['Animation'] = animation_metadata(ht)
 
 
@@ -418,7 +418,7 @@ def obj_from_shapekey(obj: Object, keyname: str):
         filepath = os.path.join(tmpdir, "mesh.glb")
 
         with selection([pending_object]), active_object(pending_object):
-
+            log.info(f"Exporing effect object {pending_object.name}")
             bpy.ops.export_scene.gltf(
                 filepath=filepath,
                 export_format='GLB',
@@ -436,7 +436,7 @@ def obj_from_shapekey(obj: Object, keyname: str):
                 use_active_scene=True
             )
             bpy.data.meshes.remove(pending_object.data, do_unlink=True)
-
+            log.info(f"Reimporting effect ...")
             bpy.ops.import_scene.gltf(filepath=filepath)
             pending_object = bpy.context.object
 
@@ -459,20 +459,20 @@ def get_animation_objects(ht: HomeomorphicProperties) -> list[Object]:
 
         if bake_target.multi_variants:
             # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
-            log.info(f"Skipping multivariant {bake_target.name}")
+            log.info(f"Skipping multivariant {bake_target.name}", print_console=False)
             continue
 
         obj = bake_target.variant_collection[0].workmesh
         if not obj:
             # TODO(ranjian0)
             # Possible variants not generated yet, or some other fail condition
-            log.info(f"Skipping missing workmesh {bake_target.name}")
+            log.info(f"Skipping missing workmesh {bake_target.name}", print_console=False)
             continue
 
         has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
         if not has_armature:
             # Object has no armature!
-            log.info(f"Skipping missing armature {bake_target.name}")
+            log.info(f"Skipping missing armature {bake_target.name}", print_console=False)
             continue
 
         animated_objects.append(obj)
@@ -502,7 +502,6 @@ def get_uvtransform_metadata(context: Context, ht: HomeomorphicProperties, obj: 
         if item not in valid_workmeshes:
             continue
 
-        log.info(f'Getting transform for: {name}')
         uv_transform_map[name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
 
     def get_transform(shape_name: str) -> dict:
@@ -569,7 +568,7 @@ def get_uvtransform_metadata(context: Context, ht: HomeomorphicProperties, obj: 
             Rk = f'{base}_L' if '_R' in bake_target.name else f'base_R'
             R = ht.bake_target_collection.get(Rk)
             if not R:
-                log.info(f'Missing mirror source for {bake_target}')
+                log.info(f'Missing mirror source for {bake_target.shortname}')
                 continue
             uv_transform_extra_data[bake_target.shortname] = uv_transform_extra_data[R.shortname]
             uv_transform_extra_data[bake_target.shortname]['is_mirror'] = True
@@ -578,6 +577,7 @@ def get_uvtransform_metadata(context: Context, ht: HomeomorphicProperties, obj: 
 
 
 def get_effects_metadata(ht: HomeomorphicProperties, obj: Object) -> dict:
+    log.info("Generating effects ...")
     effects_medatata = defaultdict(dict)
     for effect in ht.effect_collection:
         if effect.type == "POSITION":
