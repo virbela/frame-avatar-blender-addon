@@ -15,7 +15,7 @@ from ..utils.helpers import (
 
 def update_all_materials(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	for bake_target in ht.bake_target_collection:
-		for variant_name, variant in bake_target.iter_variants():
+		for _, variant in bake_target.iter_variants():
 			update_workmesh_materials(context, ht, bake_target, variant)
 
 
@@ -23,6 +23,15 @@ def update_selected_material(operator: Operator, context: Context, ht: Homeomorp
 	if bake_target := ht.get_selected_bake_target():
 		if variant := bake_target.variant_collection[bake_target.selected_variant]:
 			update_workmesh_materials(context, ht, bake_target, variant)
+
+
+def set_selected_objects_atlas(operator: Operator, context: Context, ht: HomeomorphicProperties):
+	selected_objects = context.selected_objects
+	for bake_target in ht.bake_target_collection:
+		for _, variant in bake_target.iter_variants():
+			if variant.workmesh in selected_objects:
+				variant.intermediate_atlas = ht.select_by_atlas_image
+				update_workmesh_materials(context, ht, bake_target, variant)
 
 
 def switch_to_bake_material(operator: Operator, context: Context, ht: HomeomorphicProperties):
@@ -36,7 +45,7 @@ def switch_to_preview_material(operator: Operator, context: Context, ht: Homeomo
 def select_by_atlas(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	selection = list()
 	for bake_target in ht.bake_target_collection:
-		for variant_name, variant in bake_target.iter_variants():
+		for _, variant in bake_target.iter_variants():
 			if variant.intermediate_atlas == ht.select_by_atlas_image:
 				selection.append(variant.workmesh)
 

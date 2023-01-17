@@ -44,6 +44,7 @@ from .ops_workmaterial import (
     update_all_materials,
     switch_to_bake_material,
     update_selected_material,
+    set_selected_objects_atlas,
     switch_to_preview_material
 )
 

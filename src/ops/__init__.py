@@ -168,6 +168,12 @@ class FRAME_OT_select_by_atlas(frame_operator):
     bl_description = 	"Select all work meshes in `Match atlas`"
     frame_operator = 	operations.select_by_atlas
 
+class FRAME_OT_set_selected_workmesh_atlas(frame_operator):
+    bl_label = 			"Set work mesh atlas"
+    bl_idname = 		"frame.set_selected_workmesh_atlas"
+    bl_description = 	"Set the intermediate atlas for all selected workmeshes to `Match atlas`"
+    frame_operator = 	operations.set_selected_objects_atlas
+
 
 # Baking
 class FRAME_OT_bake_selected_bake_target(frame_operator):

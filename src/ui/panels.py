@@ -86,7 +86,9 @@ class FRAME_PT_workflow(frame_panel):
 				col.operator('frame.update_selected_material')
 
 				work_materials.separator()
-				work_materials.operator('frame.select_by_atlas')
+				col = work_materials.column(align=True)
+				col.operator('frame.select_by_atlas')
+				col.operator('frame.set_selected_workmesh_atlas')
 				work_materials.prop(HT, 'select_by_atlas_image')
 
 			baking = self.layout.box()
