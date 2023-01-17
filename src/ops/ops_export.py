@@ -149,6 +149,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
             )
 
             if is_dev():
+                directory = os.path.dirname(filepath)
                 export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
                 with open(os.path.join(directory, 'morphs.json'), 'w') as f:
                     print(export_json, file=f)
