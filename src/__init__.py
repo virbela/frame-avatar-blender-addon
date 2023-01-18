@@ -17,19 +17,21 @@ bl_info = {
 
 import bpy
 from bpy.app.handlers import persistent
+from src.utils.helpers import require_work_scene
 
-
-from .ui import *
-from .ops import *
-from .utils.preferences import *
-from .utils.helpers import pending_classes
-from .utils.properties import HomeomorphicProperties, UIStateProperty
+from .ui import register_ui, unregister_ui
+from .ops import register_ops, unregister_ops
+from .utils.preferences import register_prefs, unregister_prefs
+from .utils.properties import HomeomorphicProperties, UIStateProperty, register_props, unregister_props
 
 
 # Addon registration
 def register():
-	for cls in pending_classes:
-		bpy.utils.register_class(cls)
+	# XXX Order Matters
+	register_prefs()
+	register_props()
+	register_ops()
+	register_ui()
 
 	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
 	bpy.types.Scene.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
@@ -71,8 +73,11 @@ def register():
 def unregister():
 	del bpy.types.Scene.ui_state
 	del bpy.types.Scene.homeomorphictools
-	for cls in pending_classes:
-		bpy.utils.unregister_class(cls)
+
+	unregister_ui()
+	unregister_ops()
+	unregister_prefs()
+	unregister_props()
 
 
 if __name__ == '__main__':

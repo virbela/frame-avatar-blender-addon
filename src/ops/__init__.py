@@ -1,18 +1,7 @@
 import bpy
-from collections import deque
 
 from . import operations
 from .base import frame_operator
-from ..utils.logging import log_writer as log
-from ..utils.helpers import (
-    set_rendering,
-    set_selection,
-    register_class,
-    pending_classes,
-    require_bake_scene,
-    get_homeomorphic_tool_state
-)
-
 from .common import (
     poll_bake_scene,
     poll_work_scene,
@@ -397,3 +386,65 @@ class FRAME_OT_clear_bake_targets(frame_operator):
     bl_idname = 		"frame.clear_bake_targets"
     bl_description =	"Remove all the bake targets"
     frame_operator =	operations.clear_bake_targets
+
+
+classes = (
+    FRAME_OT_setup_bake_scene,
+    FRAME_OT_export,
+    FRAME_OT_create_targets_from_selection,
+    FRAME_OT_create_workmeshes_for_all_targets,
+    FRAME_OT_create_workmeshes_for_selected_target,
+    FRAME_OT_update_selected_workmesh_all_shapekeys,
+    FRAME_OT_update_selected_workmesh_active_shapekey,
+    FRAME_OT_update_selected_workmesh,
+    FRAME_OT_update_all_workmeshes,
+    FRAME_OT_workmesh_to_shapekey,
+    FRAME_OT_all_workmeshes_to_shapekeys,
+    FRAME_OT_shapekey_to_workmesh,
+    FRAME_OT_all_shapekey_to_workmesh,
+    FRAME_OT_workmesh_symmetrize,
+    FRAME_OT_auto_assign_atlas,
+    FRAME_OT_pack_uv_islands,
+    FRAME_OT_update_selected_material,
+    FRAME_OT_update_all_materials,
+    FRAME_OT_switch_to_bake_material,
+    FRAME_OT_switch_to_preview_material,
+    FRAME_OT_select_by_atlas,
+    FRAME_OT_set_selected_workmesh_atlas,
+    FRAME_OT_bake_selected_bake_target,
+    FRAME_OT_bake_selected_workmeshes,
+    FRAME_OT_bake_all,
+    FRAME_OT_synchronize_uv_to_vertices,
+    FRAME_OT_select_objects_by_uv,
+    FRAME_OT_synchronize_visibility_to_render,
+    FRAME_OT_make_everything_visible,
+    FRAME_OT_reset_uv_transforms,
+    FRAME_OT_recalculate_normals,
+    FRAME_OT_update_baking_scene,
+    FRAME_OT_synchronize_mirrors,
+    FRAME_OT_copy_uv_layers,
+    FRAME_OT_add_bake_target,
+    FRAME_OT_show_selected_bt,
+    FRAME_OT_remove_bake_target,
+    FRAME_OT_add_bake_target_variant,
+    FRAME_OT_remove_bake_target_variant,
+    FRAME_OT_set_bake_mirror_primary,
+    FRAME_OT_set_bake_mirror_secondary,
+    FRAME_OT_add_bake_target_mirror,
+    FRAME_OT_remove_bake_target_mirror,
+    FRAME_OT_add_bake_group,
+    FRAME_OT_remove_bake_group,
+    FRAME_OT_add_bake_group_member,
+    FRAME_OT_remove_bake_group_member,
+    FRAME_OT_remove_effect,
+    FRAME_OT_add_effect,
+    FRAME_OT_remove_position_effect,
+    FRAME_OT_add_position_effect,
+    FRAME_OT_remove_color_effect,
+    FRAME_OT_add_color_effect,
+    FRAME_OT_node_get_links,
+    FRAME_OT_clear_bake_scene,
+    FRAME_OT_clear_bake_targets
+)
+
+register_ops, unregister_ops = bpy.utils.register_classes_factory(classes)

@@ -3,25 +3,20 @@ import functools
 from ..utils.properties import *
 from ..utils.logging import log_writer as log
 from ..utils.exceptions import InternalError
-from ..utils.helpers import require_work_scene, require_bake_scene, pending_classes, is_dev
-
-class frame_panel(bpy.types.Panel):
-	#contribution note 6B
-	def __init_subclass__(cls):
-		pending_classes.append(cls)
+from ..utils.helpers import require_work_scene, require_bake_scene, is_dev
 
 
-if is_dev():
-	class FRAME_PT_node_dev_tools(frame_panel):
-		bl_label = "Avatar Development Tools"
-		bl_space_type = 'NODE_EDITOR'
-		bl_region_type = 'UI'
-		bl_category = "Avatar"
+class FRAME_PT_node_dev_tools(bpy.types.Panel):
+	bl_label = "Avatar Development Tools"
+	bl_space_type = 'NODE_EDITOR'
+	bl_region_type = 'UI'
+	bl_category = "Avatar"
 
-		def draw(self, context):
-			self.layout.operator('frame.create_node_script')
+	def draw(self, context):
+		self.layout.operator('frame.create_node_script')
 
-class FRAME_PT_workflow(frame_panel):
+
+class FRAME_PT_workflow(bpy.types.Panel):
 	bl_label = "Workflow"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
@@ -166,7 +161,7 @@ def draw_variant(layout, variant, bake_scene):
 		col.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
 
 
-class FRAME_PT_batch_bake_targets(frame_panel):
+class FRAME_PT_batch_bake_targets(bpy.types.Panel):
 	bl_label = "Bake targets"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
@@ -230,7 +225,7 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 					raise InternalError(f'et.bake_mode set to unsupported value {et.bake_mode}')
 
 
-class FRAME_PT_effects(frame_panel):
+class FRAME_PT_effects(bpy.types.Panel):
 	bl_label = "Effects"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
@@ -275,7 +270,7 @@ class FRAME_PT_effects(frame_panel):
 					self.layout.operator("frame.add_color_effect")
 
 
-class FRAME_PT_export(frame_panel):
+class FRAME_PT_export(bpy.types.Panel):
 	bl_label = "Export"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'

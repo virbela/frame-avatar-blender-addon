@@ -25,7 +25,6 @@ from .exceptions import InternalError, FrameException
 if TYPE_CHECKING:
     from .properties import HomeomorphicProperties, BakeTarget, BakeVariant
 
-pending_classes = list()
 
 def IMPLEMENTATION_PENDING(*p, **n):
     raise InternalError(f'This feature is not implemented! (arguments: {p} {n})')
@@ -47,10 +46,6 @@ def profile():
 
     print(s.getvalue())
 
-
-def register_class(cls: bpy_struct) -> bpy_struct:
-    pending_classes.append(cls)
-    return cls
 
 class missing_action(enum.Enum):
     FAIL = object()
@@ -78,22 +73,6 @@ class enum_descriptor:
     def __iter__(self):
         for member in self.members.values():
             yield (member.identifier, member.name, member.description, member.icon, member.number)
-
-
-class frame_property_group(bpy.types.PropertyGroup):
-    #contribution note 6B
-    def __init_subclass__(cls):
-        pending_classes.append(cls)
-
-    def get_properties_by_names(self, names: str, if_missing: missing_action = missing_action.FAIL) -> typing.Any:
-        'Takes list of names separated by space and yields the values of those members.'
-
-        if if_missing is missing_action.FAIL:
-            return (getattr(self, member) for member in names.split())
-        elif if_missing is missing_action.RETURN_NONE:
-            return (getattr(self, member, None) for member in names.split())
-        else:
-            raise ValueError(f'if_missing has unknown value')
 
 
 def require_work_scene(context: Context) -> Scene:

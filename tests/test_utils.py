@@ -38,13 +38,6 @@ class TestUtilsHelpers(unittest.TestCase):
         with self.assertRaises(helpers.InternalError):
             not_implemented_func()
 
-    def test_register_class(self):
-        self.assertEqual(len(helpers.pending_classes), 80)
-        class DummyTestOperator(bpy.types.Operator):
-            pass
-        helpers.register_class(DummyTestOperator)
-        self.assertEqual(len(helpers.pending_classes), 81)
-
     def test_require_scenes(self):
         b_sc = helpers.require_bake_scene(bpy.context)
         m_sc = helpers.require_work_scene(bpy.context)

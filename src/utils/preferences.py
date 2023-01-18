@@ -1,8 +1,7 @@
 import bpy
 from bpy.types import Context
-from .helpers import pending_classes, register_class
 
-@register_class	#contribution note 6A
+
 class FrameAddonPreferences(bpy.types.AddonPreferences):
 	bl_idname = __package__
 
@@ -27,3 +26,9 @@ class FrameAddonPreferences(bpy.types.AddonPreferences):
 		layout.prop(self, 'glb_export_dir')
 		layout.prop(self, 'atlas_export_dir')
 		layout.prop(self, 'custom_frame_validation')
+
+classes = (
+	FrameAddonPreferences,
+)
+
+register_prefs, unregister_prefs = bpy.utils.register_classes_factory(classes)

@@ -1,6 +1,6 @@
 import bpy
 from ..utils.properties import *
-from ..utils.helpers import pending_classes, get_homeomorphic_tool_state
+from ..utils.helpers import get_homeomorphic_tool_state
 
 #ISSUE: Some collections are referenced in a problematic way
 #	Currently we use indices to refer to items in collections but since items can move around (check if this is true) our indices can be wrong.
@@ -9,12 +9,7 @@ from ..utils.helpers import pending_classes, get_homeomorphic_tool_state
 
 #TODO - use a similar pattern for the draw call as we use for operators (see contribution note 3)
 
-class frame_ui_list(bpy.types.UIList):
-	#contribution note 6B
-	def __init_subclass__(cls):
-		pending_classes.append(cls)
-
-class FRAME_UL_bake_variants(frame_ui_list):
+class FRAME_UL_bake_variants(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 		#layout.label(text=item.name, icon='FILE_BLANK')
 
@@ -24,7 +19,7 @@ class FRAME_UL_bake_variants(frame_ui_list):
 			layout.prop(item, 'name', icon='UNLINKED', text='', emboss=False, translate=False)
 
 
-class FRAME_UL_bake_targets(frame_ui_list):
+class FRAME_UL_bake_targets(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 		if item.bake_mode == 'UV_BM_MIRRORED':
 			if target_item := data.bake_target_collection[item.mirror_source]:
@@ -35,11 +30,11 @@ class FRAME_UL_bake_targets(frame_ui_list):
 		layout.prop(item, 'name', icon=UV_ISLAND_MODES.members[item.uv_mode].icon, text='', emboss=False, translate=False)
 
 
-class FRAME_UL_bake_groups(frame_ui_list):
+class FRAME_UL_bake_groups(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 		layout.prop(item, 'name', icon='UNLINKED', text='', emboss=False, translate=False)
 
-class FRAME_UL_bake_group_members(frame_ui_list):
+class FRAME_UL_bake_group_members(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 		if ht := get_homeomorphic_tool_state(context):	#contibution note 2
 			if item.target < len(ht.bake_target_collection):
@@ -51,7 +46,7 @@ class FRAME_UL_bake_group_members(frame_ui_list):
 				layout.label(icon='UNLINKED', text='No target')
 
 
-class FRAME_UL_bake_target_mirrors(frame_ui_list):
+class FRAME_UL_bake_target_mirrors(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 
 		if ht := get_homeomorphic_tool_state(context):	#contribution note 2
@@ -83,6 +78,6 @@ class FRAME_UL_bake_target_mirrors(frame_ui_list):
 				row.label(text=na(item.secondary))
 
 
-class FRAME_UL_effects(frame_ui_list):
+class FRAME_UL_effects(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 		layout.prop(item, 'name', icon="FORCE_TURBULENCE", text='', emboss=False, translate=False)
