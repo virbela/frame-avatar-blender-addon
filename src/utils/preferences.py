@@ -14,6 +14,10 @@ class FrameAddonPreferences(bpy.types.AddonPreferences):
 										name='Atlas Export Dir',
 										description='Folder to use for atlas export (default is current blendfile folder).', subtype='DIR_PATH'
 									)
+	npy_export_dir: 				bpy.props.StringProperty(
+										name='Npy Export Dir',
+										description='Folder to use for animation (.npy) export (default is current blendfile folder).', subtype='DIR_PATH'
+									)
 	custom_frame_validation:		bpy.props.BoolProperty(
 										default=False,
 										name='Frame Validation',

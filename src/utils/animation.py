@@ -3,10 +3,12 @@ import bpy
 import math
 import bmesh
 import numpy as np
+from pathlib import Path
 from mathutils import Matrix
 from bpy.types import Action, Context, Object, Mesh
 
-from .helpers import require_bake_scene, require_work_scene
+from .logging import log_writer as log
+from .helpers import require_bake_scene, require_work_scene, get_prefs
 
 
 def generate_animation_shapekeys(context: Context, avatar: Object, animated_objects: list[Object]):
@@ -16,6 +18,9 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
 
     filepath = bpy.data.filepath
     export_indices = get_gltf_export_indices(avatar)
+    # XXX Hard check
+    if len(export_indices) != 441:
+        log.error("Invalid vert count for animations")
 
     num_frames = get_num_frames()
     num_verts = len(export_indices)
@@ -85,7 +90,7 @@ def get_object_actions(obj: bpy.types.Object) -> list[Action]:
 
 
 def shape_key_from_mesh(name: str, avatar: Object, mesh: Mesh):
-    print('Generating animation shapekey..', name)
+    log.info(f'Generating animation shapekey.. {name}')
     bm = bmesh.new()
     bm.from_mesh(avatar.data)
     shape = bm.verts.layers.shape[name]
@@ -189,8 +194,11 @@ def export_action_animation(context: Context, action: Action, animated_objects: 
                 # This action is marked as do not export
                 return
 
+    prefs = get_prefs()
     filepath = bpy.data.filepath
     directory = os.path.dirname(filepath)
+    if os.path.exists(prefs.npy_export_dir):
+        directory = str(Path(prefs.npy_export_dir).absolute())
     blob_file = open(os.path.join(directory, f"{action.name}.npy"), 'wb')
 
     sx, sy = action.frame_range

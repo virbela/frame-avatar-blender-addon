@@ -283,6 +283,7 @@ def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
         # XXX DEV(simulate preferences)
         preferences = types.SimpleNamespace()
         preferences.log_target = "devlog"
+        preferences.npy_export_dir = ""
         preferences.glb_export_dir = ""
         preferences.atlas_export_dir = ""
         preferences.custom_frame_validation = True
@@ -299,6 +300,11 @@ def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
                 if Path(atlas_folder).exists():
                     preferences.atlas_export_dir = atlas_folder
                     log.info(f"Atlas Export dir set to {atlas_folder}")
+                npy_folder = data['frame_npy_folder']
+                if Path(npy_folder).exists():
+                    preferences.npy_export_dir = npy_folder
+                    log.info(f"Atlas Export dir set to {npy_folder}")
+
     return preferences
 
 
