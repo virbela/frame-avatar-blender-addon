@@ -111,7 +111,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     }
 
 
-    if ht.avatar_type == "FULLBODY" and ht.export_animation:
+    if ht.avatar_type == "FULLBODY":
         morphsets_dict['Animation'] = animation_metadata(ht)
 
 
