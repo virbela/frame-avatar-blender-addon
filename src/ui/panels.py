@@ -301,4 +301,4 @@ class FRAME_PT_export(bpy.types.Panel):
 				_ = sp.column()
 				col = sp.column()
 				col.prop(HT, "denoise")
-		self.layout.operator("frame.export")
+		self.layout.operator("frame.export", text="Export")
