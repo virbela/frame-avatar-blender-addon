@@ -16,3 +16,5 @@ BAKE_MATERIAL = 'BakeMaterial'
 
 TARGET_UV_MAP = 'TargetMap'
 PAINTING_UV_MAP = 'PaintingMap'
+
+GLB_VERT_COUNT = 441

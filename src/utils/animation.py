@@ -7,8 +7,9 @@ from pathlib import Path
 from mathutils import Matrix
 from bpy.types import Action, Context, Object, Mesh
 
+from .constants import GLB_VERT_COUNT
 from .logging import log_writer as log
-from .helpers import require_bake_scene, require_work_scene, get_prefs
+from .helpers import popup_message, require_bake_scene, require_work_scene, get_prefs
 
 
 def generate_animation_shapekeys(context: Context, avatar: Object, animated_objects: list[Object]):
@@ -119,7 +120,6 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
 
         return uvs
 
-
     # Get the active mesh
     me: Mesh = obj.data
     tex_coord_max = len(me.uv_layers)
@@ -221,3 +221,12 @@ def export_action_animation(context: Context, action: Action, animated_objects: 
 
         [bpy.data.meshes.remove(me) for me in meshes]
     np.save(blob_file, animation_buffer, allow_pickle=False)
+
+
+def validate_animation_export_verts(avatar):
+    export_indices = get_gltf_export_indices(avatar)
+    if len(export_indices) == GLB_VERT_COUNT:
+        log.error(f"Invalid GLB vert count. \nExpected {GLB_VERT_COUNT} got {len(export_indices)}. Ensure base avatar mesh has no materials and only 2 uv layers")
+        popup_message(f"Invalid GLB vert count. See console for more details", "Export Error")
+        return False
+    return True

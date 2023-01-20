@@ -10,10 +10,10 @@ from bpy.types import Operator, Context, Object, Scene
 
 from ..utils.logging import log_writer as log
 from ..utils.contextutils import active_object, selection
-from ..utils.animation import generate_animation_shapekeys
 from ..utils.bake_targets import validate_bake_target_setup
 from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..utils.morph_spec import validate_floater_morphs, validate_fullbody_morphs
+from ..utils.animation import generate_animation_shapekeys, validate_animation_export_verts
 from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
 from ..utils.uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
@@ -76,6 +76,9 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
                 return False
 
         if not validate_bake_target_setup(HT):
+            return False
+        
+        if not validate_animation_export_verts(HT.avatar_mesh):
             return False
     return True
 
