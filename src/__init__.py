@@ -16,19 +16,49 @@ bl_info = {
 #	labels: dependency
 
 import bpy
+from bpy.types import Context
 from bpy.app.handlers import persistent
 
 from .ui import register_ui, unregister_ui
 from .ops import register_ops, unregister_ops
 from .utils.helpers import require_work_scene
-from .utils.preferences import register_prefs, unregister_prefs
 from .utils.properties import HomeomorphicProperties, UIStateProperty, register_props, unregister_props
+
+class FrameAddonPreferences(bpy.types.AddonPreferences):
+	bl_idname = __package__
+
+	log_target: 					bpy.props.StringProperty(name='Log File Name', subtype='FILE_NAME', default="fabalog")
+	glb_export_dir: 				bpy.props.StringProperty(
+										name='GLB Export Dir',
+										description='Folder to use for glb export (default is current blendfile folder).', subtype='DIR_PATH'
+									)
+	atlas_export_dir: 				bpy.props.StringProperty(
+										name='Atlas Export Dir',
+										description='Folder to use for atlas export (default is current blendfile folder).', subtype='DIR_PATH'
+									)
+	npy_export_dir: 				bpy.props.StringProperty(
+										name='Npy Export Dir',
+										description='Folder to use for animation (.npy) export (default is current blendfile folder).', subtype='DIR_PATH'
+									)
+	custom_frame_validation:		bpy.props.BoolProperty(
+										default=False,
+										name='Frame Validation',
+										description='Enable validation for the frame avatars. (For Frame artists only!)'
+									)
+
+	def draw(self, context: Context):
+		layout = self.layout
+		layout.prop(self, 'log_target')
+		layout.prop(self, 'glb_export_dir')
+		layout.prop(self, 'atlas_export_dir')
+		layout.prop(self, 'custom_frame_validation')
+
 
 
 # Addon registration
 def register():
 	# XXX Order Matters
-	register_prefs()
+	bpy.utils.register_class(FrameAddonPreferences)
 	register_props()
 	register_ops()
 	register_ui()
@@ -76,8 +106,8 @@ def unregister():
 
 	unregister_ui()
 	unregister_ops()
-	unregister_prefs()
 	unregister_props()
+	bpy.utils.unregister_class(FrameAddonPreferences)
 
 
 if __name__ == '__main__':
