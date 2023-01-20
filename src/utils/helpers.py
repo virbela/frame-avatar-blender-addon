@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from dataclasses import dataclass
 from contextlib import contextmanager
-from bpy.types import bpy_struct, Context, Scene, bpy_prop_collection, Object, Preferences
+from bpy.types import Context, Scene, bpy_prop_collection, Object, Preferences
 
 from .logging import log_writer as log
 from .constants import BAKE_SCENE, WORK_SCENE
@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 def IMPLEMENTATION_PENDING(*p, **n):
     raise InternalError(f'This feature is not implemented! (arguments: {p} {n})')
 
+PREFS_LOG = True
 
 @contextmanager
 def profile():
@@ -277,6 +278,8 @@ def is_dev() -> bool:
 
 
 def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
+    global PREFS_LOG
+
     try:
         preferences = bpy.context.preferences.addons[__package__].preferences
     except KeyError:
@@ -295,16 +298,20 @@ def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
                 glb_folder = data['frame_glb_folder']
                 if Path(glb_folder).exists():
                     preferences.glb_export_dir = glb_folder
-                    log.info(f"GLB Export dir set to {glb_folder}")
+                    if PREFS_LOG:
+                        log.info(f"GLB Export dir set to {glb_folder}")
                 atlas_folder = data['frame_atlas_folder']
                 if Path(atlas_folder).exists():
                     preferences.atlas_export_dir = atlas_folder
-                    log.info(f"Atlas Export dir set to {atlas_folder}")
+                    if PREFS_LOG:
+                        log.info(f"Atlas Export dir set to {atlas_folder}")
                 npy_folder = data['frame_npy_folder']
                 if Path(npy_folder).exists():
                     preferences.npy_export_dir = npy_folder
-                    log.info(f"Atlas Export dir set to {npy_folder}")
+                    if PREFS_LOG:
+                        log.info(f"Atlas Export dir set to {npy_folder}")
 
+    PREFS_LOG = False
     return preferences
 
 
