@@ -43,7 +43,7 @@ class FrameAddonPreferences(bpy.types.AddonPreferences):
 	custom_frame_validation:		bpy.props.BoolProperty(
 										default=False,
 										name='Frame Validation',
-										description='Enable validation for the frame avatars. (For Frame artists only!)'
+										description='Enable validation for the frame avatars. (Frame artists only!)'
 									)
 
 	def draw(self, context: Context):
