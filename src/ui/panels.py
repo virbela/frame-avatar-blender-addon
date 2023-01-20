@@ -1,6 +1,4 @@
 import bpy
-import functools
-from ..utils.properties import *
 from ..utils.logging import log_writer as log
 from ..utils.exceptions import InternalError
 from ..utils.helpers import require_work_scene, require_bake_scene, is_dev
@@ -126,39 +124,6 @@ class FRAME_PT_workflow(bpy.types.Panel):
 				debug = self.layout.box()
 				debug.label(text='Debug tools')
 				debug.operator('frame.clear_bake_scene')
-
-
-
-class template_expandable_section:
-	_EXPANDED_ICON = 'TRIA_DOWN'
-	_COLLAPSED_ICON = 'TRIA_RIGHT'
-
-	def __init__(self, layout, data, title, expanded_property):
-		self._layout = layout.box()
-		self._state = getattr(data, expanded_property)
-		self._layout.prop(data, expanded_property, text=title, icon=self._EXPANDED_ICON if self._state else self._COLLAPSED_ICON)
-
-	def __getattr__(self, key):
-		if self._state:
-			return functools.partial(getattr(self._layout, key))
-		else:
-			return lambda *a, **n: None	#This is a dummy function so when this template is hidden nothing is displayed
-
-
-def draw_variant(layout, variant, bake_scene):
-	col = layout # .column(align=True)
-
-	col.prop(variant, 'image')
-	col.prop_search(variant, 'workmesh', bake_scene, 'objects')
-	if variant.workmesh:
-		col.prop_search(variant, 'uv_map', variant.workmesh.data, 'uv_layers')
-	else:
-		col.label(text='Select work mesh to choose UV map')
-
-	#TODO - this should perhaps not be visible?
-	col.prop(variant, "intermediate_atlas")
-	if variant.intermediate_atlas is None:
-		col.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
 
 
 class FRAME_PT_batch_bake_targets(bpy.types.Panel):
