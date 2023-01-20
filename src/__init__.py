@@ -17,10 +17,10 @@ bl_info = {
 
 import bpy
 from bpy.app.handlers import persistent
-from src.utils.helpers import require_work_scene
 
 from .ui import register_ui, unregister_ui
 from .ops import register_ops, unregister_ops
+from .utils.helpers import require_work_scene
 from .utils.preferences import register_prefs, unregister_prefs
 from .utils.properties import HomeomorphicProperties, UIStateProperty, register_props, unregister_props
 
