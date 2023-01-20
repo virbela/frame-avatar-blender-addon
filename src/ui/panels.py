@@ -1,4 +1,6 @@
 import bpy
+
+from src.utils.properties import HomeomorphicProperties
 from ..utils.logging import log_writer as log
 from ..utils.exceptions import InternalError
 from ..utils.helpers import require_work_scene, require_bake_scene, is_dev
@@ -185,7 +187,7 @@ class FRAME_PT_batch_bake_targets(bpy.types.Panel):
 						self.layout.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
 
 				elif et.bake_mode == 'UV_BM_MIRRORED':
-					pass	#TODO
+					pass	#TODO(ranjian0) Show opposite mirror for the current target
 				else:
 					raise InternalError(f'et.bake_mode set to unsupported value {et.bake_mode}')
 
@@ -197,12 +199,9 @@ class FRAME_PT_effects(bpy.types.Panel):
 	bl_category = "Avatar"
 
 	def draw(self, context):
-		ob = context.object
-		if not ob or ob.type != 'MESH':
-			return
-
 		if scene := require_work_scene(context):
 			HT = scene.homeomorphictools
+			ob = HT.avatar_mesh
 			self.layout.template_list('FRAME_UL_effects', '', HT, 'effect_collection', HT, 'selected_effect')
 			effect_actions = self.layout.row(align=True)
 			effect_actions.operator('frame.add_effect')
