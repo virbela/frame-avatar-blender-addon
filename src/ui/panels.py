@@ -1,8 +1,7 @@
 import bpy
 
-from src.utils.properties import HomeomorphicProperties
-from ..utils.logging import log_writer as log
 from ..utils.exceptions import InternalError
+from ..utils.logging import log_writer as log
 from ..utils.helpers import require_work_scene, require_bake_scene, is_dev
 
 
