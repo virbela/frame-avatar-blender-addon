@@ -51,6 +51,7 @@ class FrameAddonPreferences(bpy.types.AddonPreferences):
 		layout.prop(self, 'log_target')
 		layout.prop(self, 'glb_export_dir')
 		layout.prop(self, 'atlas_export_dir')
+		layout.prop(self, 'npy_export_dir')
 		layout.prop(self, 'custom_frame_validation')
 
 
