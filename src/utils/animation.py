@@ -225,7 +225,7 @@ def export_action_animation(context: Context, action: Action, animated_objects: 
 
 def validate_animation_export_verts(avatar):
     export_indices = get_gltf_export_indices(avatar)
-    if len(export_indices) == GLB_VERT_COUNT:
+    if len(export_indices) != GLB_VERT_COUNT:
         log.error(f"Invalid GLB vert count. \nExpected {GLB_VERT_COUNT} got {len(export_indices)}. Ensure base avatar mesh has no materials and only 2 uv layers")
         popup_message(f"Invalid GLB vert count. See console for more details", "Export Error")
         return False
