@@ -13,7 +13,7 @@ from ..utils.contextutils import active_object, selection
 from ..utils.bake_targets import validate_bake_target_setup
 from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..utils.morph_spec import validate_floater_morphs, validate_fullbody_morphs
-from ..utils.animation import generate_animation_shapekeys, validate_animation_export_verts
+from ..utils.animation import generate_animation_blob, validate_animation_export_verts
 from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
 from ..utils.uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
@@ -312,7 +312,7 @@ def export_animation(context: Context, ht: HomeomorphicProperties):
     animated_objects = get_animation_objects(ht)
     list(map(ensure_applied_rotation, animated_objects))
     log.info(f"Animated Objects {animated_objects}")
-    generate_animation_shapekeys(context, avatar_obj, animated_objects)
+    generate_animation_blob(context, avatar_obj, animated_objects)
 
 
 @contextmanager

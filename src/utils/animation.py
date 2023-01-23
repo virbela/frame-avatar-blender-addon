@@ -12,7 +12,7 @@ from .logging import log_writer as log
 from .helpers import popup_message, require_bake_scene, require_work_scene, get_prefs
 
 
-def generate_animation_shapekeys(context: Context, avatar: Object, animated_objects: list[Object]):
+def generate_animation_blob(context: Context, avatar: Object, animated_objects: list[Object]):
     scene = require_work_scene(context)
     HT = scene.homeomorphictools
     export_full_blob = all([ea.checked for ea in HT.export_animation_actions])
