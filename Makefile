@@ -1,6 +1,9 @@
 TAG := $(shell git describe --tags --abbrev=0)
 
 test:
+	@blender -b -P tests/__main__.py
+
+testpy:
 	@python tests/__main__.py
 
 release:
