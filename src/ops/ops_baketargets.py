@@ -5,7 +5,7 @@ from .common import generic_list
 from ..utils.constants import TARGET_UV_MAP
 from ..utils.logging import log_writer as log
 from ..utils.structures import intermediate, iter_dc
-from ..utils.properties import HomeomorphicProperties, BakeTarget, BakeTargetMirrorEntry
+from ..utils.properties import HomeomorphicProperties, BakeTargetMirrorEntry
 from ..utils.helpers import a_get, a_set, require_work_scene, set_scene, set_selection
 
 
@@ -62,7 +62,7 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
 			if R:
 				mirror_list.append(intermediate.mirror(target, R))
 			else:
-				log.error(f"Could not create mirror for {key} since there was no such object `{Rk}´")
+				log.error(f"Could not create mirror for {key} since there was no such object `{Rk}`")
 
 		elif key.endswith('_R'):
 			pass
