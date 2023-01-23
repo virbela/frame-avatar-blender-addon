@@ -82,14 +82,6 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list
     return meshes
 
 
-def get_object_actions(obj: bpy.types.Object) -> list[Action]:
-    actions = []
-    for action in bpy.data.actions:
-        if obj.user_of_id(action) > 0:
-            actions.append(action)
-    return actions
-
-
 def shape_key_from_mesh(name: str, avatar: Object, mesh: Mesh):
     log.info(f'Generating animation shapekey.. {name}')
     bm = bmesh.new()

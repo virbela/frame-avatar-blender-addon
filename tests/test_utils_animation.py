@@ -37,9 +37,4 @@ class TestUtilsAnimation(unittest.TestCase):
         indices = animation.get_gltf_export_indices(obj)
         self.assertEqual(len(indices), 14)
 
-    def test_get_object_actions(self):
-        obj = bpy.data.objects['Cube']
-        actions = animation.get_object_actions(obj)
-        self.assertEqual(len(actions), 0)
-
 
