@@ -1,5 +1,5 @@
 import bpy
-from ..utils.properties import *
+from ..utils.properties import UV_ISLAND_MODES
 from ..utils.helpers import get_homeomorphic_tool_state
 
 #ISSUE: Some collections are referenced in a problematic way
