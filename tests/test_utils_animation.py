@@ -4,6 +4,19 @@ import unittest
 from src.utils import animation
 
 class TestUtilsAnimation(unittest.TestCase):
+    def test_get_per_frame_mesh(self):
+        obj = bpy.data.objects['Cube']
+
+        # single frame action
+        obj.keyframe_insert("location", frame=1)
+        meshes = animation.get_per_frame_mesh(bpy.context, obj.animation_data.action, obj)
+        self.assertEqual(len(meshes), 1)
+
+        # multi frame action
+        obj.keyframe_insert("location", frame=100)
+        meshes = animation.get_per_frame_mesh(bpy.context, obj.animation_data.action, obj)
+        self.assertEqual(len(meshes), 100)
+
     def test_get_num_frames(self):
         self.assertEqual(animation.get_num_frames(), 0)
 
