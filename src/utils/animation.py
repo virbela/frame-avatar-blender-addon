@@ -82,22 +82,6 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list
     return meshes
 
 
-def shape_key_from_mesh(name: str, avatar: Object, mesh: Mesh):
-    log.info(f'Generating animation shapekey.. {name}')
-    bm = bmesh.new()
-    bm.from_mesh(avatar.data)
-    shape = bm.verts.layers.shape[name]
-
-    for vert in bm.verts:
-        vert[shape] = mesh.vertices[vert.index].co.copy()
-
-    bm.to_mesh(avatar.data)
-    bm.free()
-
-    if not mesh.users:
-        bpy.data.meshes.remove(mesh)
-
-
 def get_gltf_export_indices(obj: Object) -> list[int]:
     def __get_uvs(blender_mesh, uv_i):
         layer = blender_mesh.uv_layers[uv_i]
