@@ -19,7 +19,7 @@ def generate_animation_blob(context: Context, avatar: Object, animated_objects: 
     filepath = bpy.data.filepath
     export_indices = get_gltf_export_indices(avatar)
     # XXX Hard check
-    if len(export_indices) != 441:
+    if len(export_indices) != GLB_VERT_COUNT:
         log.error("Invalid vert count for animations")
 
     num_frames = get_num_frames()
