@@ -95,8 +95,6 @@ setup_bake_material = load_node_setup_function('setup_bake_material', '''
 
 	clear_selection()
 	set_active(tex_target)
-
-
 ''')
 
 
@@ -124,7 +122,6 @@ setup_bake_preview_material = load_node_setup_function('setup_bake_preview_mater
 
 	clear_selection()
 	clear_active()
-
 ''')
 
 
