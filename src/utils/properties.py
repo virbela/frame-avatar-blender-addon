@@ -41,24 +41,6 @@ UV_ISLAND_MODES = enum_descriptor(
 )
 
 
-UV_MIRROR_AXIS = enum_descriptor(
-
-	#Tuple layout - see https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
-	#(identifier, 			name, 				description,
-	#	icon, 				number),
-
-	#NOTE - Suspecting the number is not needed, also since we use our own object to represent these values we could have the long column last and get a more
-	#compact and nice table.
-
-	('UV_MA_U',				'U',				'U (X) Axis',
-		'EVENT_U',			0),
-
-	('UV_MA_V',				'V',				'V (Y) Axis',
-		'EVENT_V',			1),
-
-)
-
-
 UV_BAKE_MODE = enum_descriptor(
 
 	#Tuple layout - see https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
@@ -234,10 +216,7 @@ class BakeTarget(bpy.types.PropertyGroup):
 
 	bake_mode:						bpy.props.EnumProperty(items=tuple(UV_BAKE_MODE), name="UV bake mode", default=0)
 
-	uv_mirror_axis:					bpy.props.EnumProperty(items=tuple(UV_MIRROR_AXIS), name="UV mirror axis", default=0)
-
 	mirror_source:					bpy.props.IntProperty(name='Bake target used for mirror')
-	uv_mirror_options_expanded:		bpy.props.BoolProperty(name="UV mirror options expanded", default=True)
 
 	uv_mode:						bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
 	atlas:							bpy.props.PointerProperty(name="Atlas image", type=bpy.types.Image)
@@ -287,11 +266,6 @@ class BakeTarget(bpy.types.PropertyGroup):
 
 		return None, None
 
-
-	#TBD should we use the name here or the identifier?
-	# def get_bake_scene_name(self):
-	# 	return self.identifier
-
 	#NOTE we should probably deprecate this in favor of iter_variants
 	# this doesn't yield anything if there are no variants
 	def iter_bake_scene_variants(self) -> typing.Generator[tuple[str, BakeVariant], None, None]:
@@ -331,7 +305,6 @@ class BakeGroup(bpy.types.PropertyGroup):
 
 
 class BakeTargetMirrorEntry(bpy.types.PropertyGroup):
-	#Here I wanted to use PointerProperty but they don't really act as the name implies. See contribution note 7 for more details.
 	primary: 				bpy.props.IntProperty(name='Primary bake target identifier', default=-1)
 	secondary: 				bpy.props.IntProperty(name='Secondary bake target identifier', default=-1)
 
@@ -365,7 +338,7 @@ class ColorEffect(bpy.types.PropertyGroup):
 								size = 4,
 								min = 0.0,
 								max = 1.0,
-								default = (1.0,1.0,1.0,1.0)
+								default = (1.0, 1.0, 1.0, 1.0)
 							)
 	vert_group: 			bpy.props.StringProperty(name="Vertex Group")
 
