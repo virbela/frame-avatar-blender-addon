@@ -1,8 +1,7 @@
 import enum
+from pathlib import Path
 
-from .helpers import get_asset_dir
-
-ASSET_DIR = get_asset_dir()
+ASSET_DIR = Path(__file__).parent.parent.joinpath("assets").absolute()
 
 class COLORS(enum.Enum):
 	BLACK = (0.0, 0.0, 0.0, 1.0)

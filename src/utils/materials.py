@@ -1,9 +1,11 @@
 import bpy
-from bpy.types import Scene, Image
+from bpy.types import Scene, Image, Material, ShaderNodeTree
+
+from .constants import Assets
+from .properties import BakeTarget
 from .structures import intermediate
 from .node_utils import load_node_setup_function
 from .helpers import create_named_entry, require_named_entry, get_nice_name, named_entry_action
-from .properties import BakeTarget
 
 def get_material_variants(bt: BakeTarget, bake_scene: Scene, atlas: Image, uv_map: str, recreate: bool = False):
 
@@ -26,11 +28,11 @@ def get_material_variants(bt: BakeTarget, bake_scene: Scene, atlas: Image, uv_ma
 
 			bake_material = create_named_entry(bpy.data.materials, bake_material_name, action=named_entry_action.RECREATE if recreate else named_entry_action.GET_EXISTING)
 			bake_material.use_nodes = True	#contribution note 9
-			setup_bake_material(bake_material.node_tree, atlas, uv_map, paint_image, paint_uv)
+			setup_bake_material(bake_material, atlas, uv_map, paint_image, paint_uv)
 
 			preview_material = create_named_entry(bpy.data.materials, preview_material_name, action=named_entry_action.RECREATE if recreate else named_entry_action.GET_EXISTING)
 			preview_material.use_nodes = True	#contribution note 9
-			setup_bake_preview_material(preview_material.node_tree, atlas, uv_map)
+			setup_bake_preview_material(preview_material, atlas, uv_map)
 
 
 		else:
@@ -45,12 +47,59 @@ def get_material_variants(bt: BakeTarget, bake_scene: Scene, atlas: Image, uv_ma
 	return result
 
 
+def setup_bake_material(
+		material: Material, 
+		atlas: Image, uv_map: str ='UVMap', 
+		diffuse_image: Image = None, diffuse_uv_map: Image = None) -> None:
+	template =  bpy.data.materials[Assets.Materials.BakeAO.name]
+	if diffuse_image and diffuse_uv_map:
+		template =  bpy.data.materials[Assets.Materials.BakeDiffuse.name]
 
-#TO-DOC		How this works is not yet documented, it is an experimental feature meant to make it much easier to define materials programatically for use in automation
-# Brief documentation has been create in docs/node-dsl
+	copy_nodetree(template.node_tree, material.node_tree)
+
+	nodes = material.node_tree.nodes
+	nodes['tex_target'].image = atlas
+	nodes['uvm_target'].uv_map = uv_map
+	if diffuse_image and diffuse_uv_map:
+		nodes['tex_diffuse'].image = diffuse_image
+		nodes['uvm_diffuse'].uv_map = diffuse_uv_map
+	
+
+def setup_bake_preview_material(
+		material: Material, 
+		atlas: Image, uv_map: str ='UVMap') -> None:
+	
+	template =  bpy.data.materials[Assets.Materials.BakePreview.name]
+	copy_nodetree(template.node_tree, material.node_tree)
+
+	nodes = material.node_tree.nodes
+	nodes['tex_target'].image = atlas
+	nodes['uvm_target'].uv_map = uv_map
 
 
-setup_bake_material = load_node_setup_function('setup_bake_material', '''
+def copy_nodetree(tree_from: ShaderNodeTree, tree_to: ShaderNodeTree) -> None:
+	tree_to.nodes.clear()
+	tree_to.links.clear()
+
+	# -- copy nodes
+	for node in tree_from.nodes:
+		new = tree_to.nodes.new(node.bl_idname)
+		new.location = node.location
+		new.name = node.name
+
+	# -- copy links
+	for node in tree_from.nodes:
+		to_node = tree_to.nodes[node.name]
+		for i, input in enumerate(node.inputs):
+			for link in input.links:
+				connected_node = tree_to.nodes[link.from_node.name]
+				tree_to.links.new(
+					connected_node.outputs[link.from_socket.name],
+			    	to_node.inputs[i]
+				)
+
+
+setup_bake_material_old = load_node_setup_function('setup_bake_material', '''
 
 	arguments: atlas, uv_map='UVMap', diffuse_image=None, diffuse_uv_map=None
 

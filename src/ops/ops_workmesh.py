@@ -6,9 +6,10 @@ from bpy.types import Context, Operator, Scene
 from .common import set_uv_map
 from ..utils.logging import log_writer as log
 from ..utils.materials import setup_bake_material
-from ..utils.constants import PAINTING_UV_MAP, TARGET_UV_MAP
 from ..utils.properties import HomeomorphicProperties, BakeTarget
+from ..utils.constants import PAINTING_UV_MAP, TARGET_UV_MAP, Assets
 from ..utils.helpers import (
+    create_named_entry,
     require_bake_scene,
     require_work_scene,
     IMPLEMENTATION_PENDING,
@@ -244,11 +245,12 @@ def create_workmeshes_for_specific_target(context: Context, ht: HomeomorphicProp
 		variant.workmesh = pending_object
 		variant.uv_map = local_uv.name
 		bake_target.uv_map = bake_uv.name
-
 		update_workmesh_materials(bake_target, variant)
 
 
 def update_workmesh_materials(bake_target, variant):
+	load_material_templates()
+
 	#TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
 	if not variant.uv_map:
 		variant.workmesh.active_material = None
@@ -256,8 +258,24 @@ def update_workmesh_materials(bake_target, variant):
 		return
 
 	bake_material_name =f'bake-{get_bake_target_variant_name(bake_target, variant)}'
-	bake_material = bpy.data.materials.new(bake_material_name)
+	bake_material = create_named_entry(bpy.data.materials, bake_material_name)
 	bake_material.use_nodes = True	#contribution note 9
 	#TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?
-	setup_bake_material(bake_material.node_tree, variant.intermediate_atlas, bake_target.source_uv_map, variant.image, variant.uv_map)
+	setup_bake_material(bake_material, variant.intermediate_atlas, bake_target.source_uv_map, variant.image, variant.uv_map)
 	variant.workmesh.active_material = bake_material
+
+
+def load_material_templates():
+	asset_mat_names = (
+		Assets.Materials.BakeAO.name, 
+		Assets.Materials.BakeDiffuse.name, 
+		Assets.Materials.BakePreview.name
+	)
+	
+	# -- if we have not already loaded the template materials, load them
+	if not all(template_material in bpy.data.materials for template_material in asset_mat_names):
+		with bpy.data.libraries.load(str(Assets.Materials.url), link=False) as (data_from, data_to):
+			data_to.materials = [name for name in data_from.materials if name in asset_mat_names]
+		for mat in data_to.materials:
+			if mat:
+				mat.use_fake_user = True
