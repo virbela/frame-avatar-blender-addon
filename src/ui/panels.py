@@ -127,7 +127,7 @@ class FRAME_PT_workflow(bpy.types.Panel):
 				debug.operator('frame.clear_bake_scene')
 
 
-class FRAME_PT_batch_bake_targets(bpy.types.Panel):
+class FRAME_PT_bake_targets(bpy.types.Panel):
 	bl_label = "Bake targets"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'

@@ -6,7 +6,7 @@ from .panels import (
     FRAME_PT_effects,
     FRAME_PT_workflow,
     FRAME_PT_node_dev_tools,
-    FRAME_PT_batch_bake_targets
+    FRAME_PT_bake_targets
 )
 from .elements import (
     FRAME_UL_effects,
@@ -25,10 +25,11 @@ classes = (
     FRAME_UL_bake_group_members,
     FRAME_UL_bake_target_mirrors,
 
-    FRAME_PT_export,
-    FRAME_PT_effects,
+    # XXX Order matters. This is the order in which the panels show up
     FRAME_PT_workflow,
-    FRAME_PT_batch_bake_targets
+    FRAME_PT_bake_targets,
+    FRAME_PT_effects,
+    FRAME_PT_export,
 )
 
 if is_dev():
