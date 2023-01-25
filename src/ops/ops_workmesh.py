@@ -251,7 +251,9 @@ def create_workmeshes_for_specific_target(context: Context, ht: HomeomorphicProp
 def update_workmesh_materials(bake_target, variant):
 	load_material_templates()
 
-	#TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
+	#TBD - should we disconnect the material if we fail to create one? 
+	# This might be good in order to prevent accidentally getting unintended materials activated
+	# TODO(ranjian0) Should mirrored baketarget workmeshes have a material
 	if not variant.uv_map:
 		variant.workmesh.active_material = None
 		log.error(f"No uv found for variant {variant}")
