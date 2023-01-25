@@ -1,7 +1,6 @@
 import os
 import bpy
 import math
-import bmesh
 import numpy as np
 from pathlib import Path
 from mathutils import Matrix
