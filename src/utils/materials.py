@@ -85,6 +85,7 @@ def copy_nodetree(tree_from: ShaderNodeTree, tree_to: ShaderNodeTree) -> None:
 		new = tree_to.nodes.new(node.bl_idname)
 		new.location = node.location
 		new.name = node.name
+		new.select = False
 
 	# -- copy links
 	for node in tree_from.nodes:
