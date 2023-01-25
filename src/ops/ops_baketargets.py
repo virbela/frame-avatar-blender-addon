@@ -6,19 +6,19 @@ from ..utils.constants import TARGET_UV_MAP
 from ..utils.logging import log_writer as log
 from ..utils.structures import intermediate, iter_dc
 from ..utils.properties import HomeomorphicProperties, BakeTargetMirrorEntry
-from ..utils.helpers import a_get, a_set, require_work_scene, set_scene, set_selection
+from ..utils.helpers import a_get, a_set, popup_message, require_work_scene, set_scene, set_selection
 
 
 def create_targets_from_selection(operator: Operator, context: Context, ht: HomeomorphicProperties):
-	for source_object in context.selected_objects:
-		# change the main uvmap name
-		source_uv = source_object.data.uv_layers[0]	# Assume first UV map is the source one
-		source_uv.name = TARGET_UV_MAP
+	source_object = ht.avatar_mesh
+	source_uv = source_object.data.uv_layers[0]	# Assume first UV map is the source one
+	source_uv.name = TARGET_UV_MAP
 
-		if shape_keys := source_object.data.shape_keys:
-			create_baketarget_from_key_blocks(ht, source_object, shape_keys.key_blocks)
-		else:
-			create_baketarget_from_key_blocks(ht, source_object, None)
+	if shape_keys := source_object.data.shape_keys:
+		create_baketarget_from_key_blocks(ht, source_object, shape_keys.key_blocks)
+	else:
+		popup_message("Avatar mesh has no shape keys!", "Mesh Error")
+		return
 
 	for mirror in ht.bake_target_mirror_collection:
 		bk = ht.bake_target_collection[mirror.secondary]
@@ -30,27 +30,16 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
 	targets = dict()
 	mirror_list = list()
 
-	if key_blocks is None:
-		targets[None] = intermediate.pending.bake_target(
-			name = source_object.name,
+	for sk in key_blocks:
+		key = sk.name
+		targets[key] = intermediate.pending.bake_target(
+			name = f'{source_object.name}_{key}',
 			object_name = source_object.name,
 			source_object = source_object,
 			bake_target = source_object,
-			shape_key_name = None,
+			shape_key_name = key,
 			uv_mode = 'UV_IM_MONOCHROME',
 		)
-
-	else:
-		for sk in key_blocks:
-			key = sk.name
-			targets[key] = intermediate.pending.bake_target(
-				name = f'{source_object.name}_{key}',
-				object_name = source_object.name,
-				source_object = source_object,
-				bake_target = source_object,
-				shape_key_name = key,
-				uv_mode = 'UV_IM_MONOCHROME',
-			)
 
 	#Configure targets and mirrors
 	for key, target in targets.items():
