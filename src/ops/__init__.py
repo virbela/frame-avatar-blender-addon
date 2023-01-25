@@ -369,11 +369,6 @@ class FRAME_OT_add_color_effect(frame_operator):
     frame_operator =	operations.effects.add_color_effect
 
 # DEVMODE
-class FRAME_OT_node_get_links(frame_operator):
-    bl_label = 			"Copy links"
-    bl_idname = 		"frame.create_node_script"
-    bl_description =	"Enumerate links to stdout for programmtic replication"
-    frame_operator = 	operations.devtools.get_node_links
 
 class FRAME_OT_clear_bake_scene(frame_operator):
     bl_label = 			"Remove everything from bake scene"
@@ -442,7 +437,6 @@ classes = (
     FRAME_OT_add_position_effect,
     FRAME_OT_remove_color_effect,
     FRAME_OT_add_color_effect,
-    FRAME_OT_node_get_links,
     FRAME_OT_clear_bake_scene,
     FRAME_OT_clear_bake_targets
 )
