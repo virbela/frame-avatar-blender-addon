@@ -4,7 +4,6 @@ from bpy.types import Scene, Image, Material, ShaderNodeTree
 from .constants import Assets
 from .properties import BakeTarget
 from .structures import intermediate
-from .node_utils import load_node_setup_function
 from .helpers import create_named_entry, require_named_entry, get_nice_name, named_entry_action
 
 def get_material_variants(bt: BakeTarget, bake_scene: Scene, atlas: Image, uv_map: str, recreate: bool = False):
@@ -97,78 +96,3 @@ def copy_nodetree(tree_from: ShaderNodeTree, tree_to: ShaderNodeTree) -> None:
 					connected_node.outputs[link.from_socket.name],
 			    	to_node.inputs[i]
 				)
-
-
-setup_bake_material_old = load_node_setup_function('setup_bake_material', '''
-
-	arguments: atlas, uv_map='UVMap', diffuse_image=None, diffuse_uv_map=None
-
-	#Node definitions
-	ShaderNodeUVMap				uvm_target
-	ShaderNodeAmbientOcclusion	ao
-	ShaderNodeBsdfPrincipled	nbp_ao
-	ShaderNodeOutputMaterial	out
-	ShaderNodeTexImage			tex_target
-
-	#Node locations
-	uvm_target.location = 		(-1130, 171)
-	ao.location = 				(-450, 40)
-	nbp_ao.location = 			(-200, 40)
-	out.location = 				(95, 37)
-	tex_target.location = 		(-873, 301)
-
-	#Node links
-	uvm_target.UV 		--> 	tex_target.Vector
-	ao.Color 			--> 	nbp_ao.Base-Color
-	nbp_ao.BSDF 		--> 	out.Surface
-
-	#Settings
-	tex_target.image = atlas
-	uvm_target.uv_map = uv_map
-
-
-	#For diffuse source
-	if diffuse_image and diffuse_uv_map:
-
-		ShaderNodeUVMap				uvm_diffuse
-		ShaderNodeTexImage			tex_diffuse
-
-		uvm_diffuse.location = 		(-1121, -177)
-		tex_diffuse.location = 		(-869, -31)
-
-		uvm_diffuse.UV 		--> 	tex_diffuse.Vector
-		tex_diffuse.Color 	--> 	nbp_ao.Base-Color
-
-		tex_diffuse.image = diffuse_image
-		uvm_diffuse.uv_map = diffuse_uv_map
-
-	clear_selection()
-	set_active(tex_target)
-''')
-
-
-setup_bake_preview_material = load_node_setup_function('setup_bake_preview_material', '''
-
-	arguments: atlas, uv_map='UVMap'
-
-	#Node definitions
-	ShaderNodeUVMap				uvm_target
-	ShaderNodeOutputMaterial	out
-	ShaderNodeTexImage			tex_target
-
-	#Node locations
-	uvm_target.location = 		(-1130, 171)
-	out.location = 				(95, 37)
-	tex_target.location = 		(-873, 301)
-
-	#Node links
-	uvm_target.UV 		--> 	tex_target.Vector
-	tex_target.Color	--> 	out.Surface
-
-	#Settings
-	tex_target.image = atlas
-	uvm_target.uv_map = uv_map
-
-	clear_selection()
-	clear_active()
-''')
