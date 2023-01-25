@@ -8,19 +8,21 @@ from bpy.types import Action, Context, Object, Mesh
 
 from .constants import GLB_VERT_COUNT
 from .logging import log_writer as log
-from .helpers import popup_message, require_bake_scene, require_work_scene, get_prefs
+from .helpers import get_homeomorphic_tool_state, popup_message, require_bake_scene, get_prefs
 
 
 def generate_animation_blob(context: Context, avatar: Object, animated_objects: list[Object]):
-    scene = require_work_scene(context)
-    HT = scene.homeomorphictools
+    HT = get_homeomorphic_tool_state()
     export_full_blob = all([ea.checked for ea in HT.export_animation_actions])
 
     filepath = bpy.data.filepath
     export_indices = get_gltf_export_indices(avatar)
-    # XXX Hard check
-    if len(export_indices) != GLB_VERT_COUNT:
-        log.error("Invalid vert count for animations")
+    
+    prefs = get_prefs()
+    if prefs.custom_frame_validation:
+        # XXX Hard check for frame vert coung
+        if len(export_indices) != GLB_VERT_COUNT:
+            log.error("Invalid vert count for animations")
 
     num_frames = get_num_frames()
     num_verts = len(export_indices)
@@ -157,8 +159,7 @@ def get_num_frames() -> int:
 
 
 def export_action_animation(context: Context, action: Action, animated_objects: list[Object], num_verts: int, export_indices: list[int]):
-    scene = require_work_scene(context)
-    HT = scene.homeomorphictools
+    HT = get_homeomorphic_tool_state()
     if action.name not in [ea.name for ea in HT.export_animation_actions]:
         # Possibly not a valid export action eg tpose
         return
