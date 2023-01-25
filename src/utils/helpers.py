@@ -340,3 +340,7 @@ def ensure_applied_rotation(object: Object):
     bm.to_mesh(object.data)
     bm.free()
     object.rotation_euler = (0, 0, 0)
+
+
+def get_asset_dir() -> Path:
+    return Path(__file__).parent.parent.joinpath("assets").absolute()
