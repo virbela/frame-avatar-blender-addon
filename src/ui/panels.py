@@ -5,16 +5,6 @@ from ..utils.logging import log_writer as log
 from ..utils.helpers import require_work_scene, require_bake_scene, is_dev
 
 
-class FRAME_PT_node_dev_tools(bpy.types.Panel):
-	bl_label = "Avatar Development Tools"
-	bl_space_type = 'NODE_EDITOR'
-	bl_region_type = 'UI'
-	bl_category = "Avatar"
-
-	def draw(self, context):
-		self.layout.operator('frame.create_node_script')
-
-
 class FRAME_PT_workflow(bpy.types.Panel):
 	bl_label = "Workflow"
 	bl_space_type = 'VIEW_3D'

@@ -1,11 +1,9 @@
 import bpy
-from ..utils.helpers import is_dev 
 
 from .panels import (
     FRAME_PT_export,
     FRAME_PT_effects,
     FRAME_PT_workflow,
-    FRAME_PT_node_dev_tools,
     FRAME_PT_bake_targets
 )
 from .elements import (
@@ -31,8 +29,5 @@ classes = (
     FRAME_PT_effects,
     FRAME_PT_export,
 )
-
-if is_dev():
-    classes += (FRAME_PT_node_dev_tools,)
 
 register_ui, unregister_ui = bpy.utils.register_classes_factory(classes)
