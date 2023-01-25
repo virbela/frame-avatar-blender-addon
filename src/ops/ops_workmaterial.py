@@ -72,7 +72,7 @@ def update_workmesh_materials(context: Context, ht: HomeomorphicProperties,  bak
 	bake_material = bpy.data.materials.new(bake_material_name)
 	bake_material.use_nodes = True	#contribution note 9
 	#TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?
-	setup_bake_material(bake_material.node_tree, variant.intermediate_atlas, bake_target.source_uv_map, variant.image, variant.uv_map)
+	setup_bake_material(bake_material, variant.intermediate_atlas, bake_target.source_uv_map, variant.image, variant.uv_map)
 	variant.workmesh.active_material = bake_material
 
 
