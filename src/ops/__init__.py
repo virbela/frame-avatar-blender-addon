@@ -3,10 +3,10 @@ import bpy
 from . import operations
 from .base import frame_operator
 from .common import (
+    poll_avatar_mesh,
     poll_bake_scene,
     poll_work_scene,
     poll_baketargets,
-    poll_selected_objects
 )
 
 
@@ -26,12 +26,12 @@ class FRAME_OT_export(frame_operator):
 
 
 # Bake Targets
-class FRAME_OT_create_targets_from_selection(frame_operator):
-    bl_label = 			"New bake targets from selected objects"
-    bl_idname = 		"frame.create_targets_from_selection"
-    bl_description = 	"Create shape key targets from all selected objects"
-    frame_operator = 	operations.create_targets_from_selection
-    frame_poll =        poll_selected_objects
+class FRAME_OT_create_targets_from_avatar(frame_operator):
+    bl_label = 			"New bake targets from avatar mesh"
+    bl_idname = 		"frame.create_targets_from_avatar_object"
+    bl_description = 	"Create shape key targets from avatar mesh"
+    frame_operator = 	operations.create_targets_from_avatar_object
+    frame_poll =        poll_avatar_mesh
 
 
 # Work Meshes
@@ -386,7 +386,7 @@ class FRAME_OT_clear_bake_targets(frame_operator):
 classes = (
     FRAME_OT_setup_bake_scene,
     FRAME_OT_export,
-    FRAME_OT_create_targets_from_selection,
+    FRAME_OT_create_targets_from_avatar,
     FRAME_OT_create_workmeshes_for_all_targets,
     FRAME_OT_create_workmeshes_for_selected_target,
     FRAME_OT_update_selected_workmesh_all_shapekeys,

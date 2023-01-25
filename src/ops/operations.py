@@ -7,7 +7,7 @@ from .ops_baketargets import (
     bake_targets,
     bake_mirrors,
     bake_variants,
-    create_targets_from_selection
+    create_targets_from_avatar_object
 )
 
 from .ops_baking import (

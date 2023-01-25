@@ -9,7 +9,7 @@ from ..utils.properties import HomeomorphicProperties, BakeTargetMirrorEntry
 from ..utils.helpers import a_get, a_set, popup_message, require_work_scene, set_scene, set_selection
 
 
-def create_targets_from_selection(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def create_targets_from_avatar_object(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	source_object = ht.avatar_mesh
 	source_uv = source_object.data.uv_layers[0]	# Assume first UV map is the source one
 	source_uv.name = TARGET_UV_MAP
