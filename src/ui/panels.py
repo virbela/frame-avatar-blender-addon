@@ -2,7 +2,7 @@ import bpy
 
 from ..utils.exceptions import InternalError
 from ..utils.logging import log_writer as log
-from ..utils.helpers import require_work_scene, require_bake_scene, is_dev
+from ..utils.helpers import get_homeomorphic_tool_state, require_work_scene, require_bake_scene, is_dev
 
 
 class FRAME_PT_workflow(bpy.types.Panel):
@@ -124,13 +124,8 @@ class FRAME_PT_bake_targets(bpy.types.Panel):
 	bl_category = "Avatar"
 
 	def draw(self, context):
-
-		if scene := require_work_scene(context):
-			HT = scene.homeomorphictools
-			bake_scene = require_bake_scene(context)
-
+		if HT := get_homeomorphic_tool_state(context):
 			row = self.layout.row()
-
 			rows = 3
 			if HT.selected_bake_target != -1:
 				rows = 5
@@ -156,24 +151,27 @@ class FRAME_PT_bake_targets(bpy.types.Panel):
 					self.layout.prop(et, 'uv_mode')
 					if et.uv_mode == "UV_IM_NIL":
 						return
-					variant = et.variant_collection[0]
-					if variant.workmesh:
-						self.layout.prop_search(variant, 'uv_map', variant.workmesh.data, 'uv_layers')
-					else:
-						self.layout.label(text='Select work mesh to choose UV map')
+					if len(et.variant_collection):
+						variant = et.variant_collection[0]
+						if variant.workmesh:
+							self.layout.prop_search(variant, 'uv_map', variant.workmesh.data, 'uv_layers')
+						else:
+							self.layout.label(text='Select work mesh to choose UV map', icon="ERROR")
 
-					# TODO(ranjian0) Is this used for UV packing really?
-					# self.layout.prop(et, 'uv_area_weight', text="UV Area")
+						# TODO(ranjian0) Is this used for UV packing really?
+						# self.layout.prop(et, 'uv_area_weight', text="UV Area")
+						if bake_scene := require_bake_scene(context):
+							self.layout.prop_search(variant, 'workmesh', bake_scene, 'objects')
+						else:
+							self.layout.label("Missing bake scene!", icon="ERROR")
+						self.layout.prop(variant, 'image')
 
-					self.layout.prop_search(variant, 'workmesh', bake_scene, 'objects')
-					self.layout.prop(variant, 'image')
-
-					if et.uv_mode == 'UV_IM_FROZEN':
-						self.layout.prop(et, 'atlas')
-					#TODO - this should perhaps not be visible?
-					self.layout.prop(variant, "intermediate_atlas")
-					if variant.intermediate_atlas is None:
-						self.layout.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
+						if et.uv_mode == 'UV_IM_FROZEN':
+							self.layout.prop(et, 'atlas')
+						#TODO - this should perhaps not be visible?
+						self.layout.prop(variant, "intermediate_atlas")
+						if variant.intermediate_atlas is None:
+							self.layout.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
 
 				elif et.bake_mode == 'UV_BM_MIRRORED':
 					pass	#TODO(ranjian0) Show opposite mirror for the current target
@@ -188,8 +186,7 @@ class FRAME_PT_effects(bpy.types.Panel):
 	bl_category = "Avatar"
 
 	def draw(self, context):
-		if scene := require_work_scene(context):
-			HT = scene.homeomorphictools
+		if HT := get_homeomorphic_tool_state(context):
 			ob = HT.avatar_mesh
 			self.layout.template_list('FRAME_UL_effects', '', HT, 'effect_collection', HT, 'selected_effect')
 			effect_actions = self.layout.row(align=True)
@@ -230,8 +227,7 @@ class FRAME_PT_export(bpy.types.Panel):
 	bl_category = "Avatar"
 
 	def draw(self, context):
-		if scene := require_work_scene(context):
-			HT = scene.homeomorphictools
+		if HT := get_homeomorphic_tool_state(context):
 			self.layout.prop(HT, "avatar_type", expand=True)
 			self.layout.prop(HT, "export_glb")
 
