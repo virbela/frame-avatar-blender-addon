@@ -24,7 +24,7 @@ from .ops import register_ops, unregister_ops
 from .utils.helpers import require_work_scene
 from .utils.properties import HomeomorphicProperties, UIStateProperty, register_props, unregister_props
 
-class FrameAddonPreferences(bpy.types.AddonPreferences):
+class FrameAvatarAddonPreferences(bpy.types.AddonPreferences):
 	bl_idname = __package__
 
 	log_target: 					bpy.props.StringProperty(name='Log File Name', subtype='FILE_NAME', default="fabalog")
@@ -59,7 +59,7 @@ class FrameAddonPreferences(bpy.types.AddonPreferences):
 # Addon registration
 def register():
 	# XXX Order Matters
-	bpy.utils.register_class(FrameAddonPreferences)
+	bpy.utils.register_class(FrameAvatarAddonPreferences)
 	register_props()
 	register_ops()
 	register_ui()
@@ -108,7 +108,7 @@ def unregister():
 	unregister_ui()
 	unregister_ops()
 	unregister_props()
-	bpy.utils.unregister_class(FrameAddonPreferences)
+	bpy.utils.unregister_class(FrameAvatarAddonPreferences)
 
 
 if __name__ == '__main__':
