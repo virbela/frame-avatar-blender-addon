@@ -309,7 +309,7 @@ def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
                 if Path(npy_folder).exists():
                     preferences.npy_export_dir = npy_folder
                     if PREFS_LOG:
-                        log.info(f"Atlas Export dir set to {npy_folder}")
+                        log.info(f"Npy Export dir set to {npy_folder}")
 
     PREFS_LOG = False
     return preferences
