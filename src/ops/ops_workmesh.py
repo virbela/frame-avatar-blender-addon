@@ -6,10 +6,11 @@ from bpy.types import Context, Operator, Scene
 from .common import set_uv_map
 from ..utils.logging import log_writer as log
 from ..utils.materials import setup_bake_material
-from ..utils.constants import PAINTING_UV_MAP, TARGET_UV_MAP
 from ..utils.properties import HomeomorphicProperties, BakeTarget
+from ..utils.constants import PAINTING_UV_MAP, TARGET_UV_MAP, Assets
 from ..utils.helpers import (
-    require_bake_scene, 
+    create_named_entry,
+    require_bake_scene,
     require_work_scene,
     IMPLEMENTATION_PENDING,
     ensure_applied_rotation,
@@ -26,7 +27,7 @@ def create_workmeshes_for_all_targets(operator: Operator, context: Context, ht: 
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
 
-def create_workmeshes_for_selected_target(operator: Operator, context: Context, ht: HomeomorphicProperties):	
+def create_workmeshes_for_selected_target(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	if bake_target := ht.get_selected_bake_target():
 		bake_scene = require_bake_scene(context)
 		create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
@@ -51,15 +52,15 @@ def workmesh_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicP
 	avatar_object = work_scene.objects.get('Avatar')
 	if not avatar_object:
 		return
-	
+
 	for object in  context.selected_objects:
 		shape_name = object.name
-		# Handle multiple variant names 
+		# Handle multiple variant names
 		if '.' in shape_name:
 			shape_name = shape_name.split('.')[0]
 
 		workmesh = object.data
-		# -- set corresponding shapekey 
+		# -- set corresponding shapekey
 		bm = bmesh.new()
 		bm.from_mesh(avatar_object.data)
 		shape = bm.verts.layers.shape[shape_name]
@@ -81,17 +82,17 @@ def all_workmeshes_to_shapekey(operator: Operator, context: Context, ht: Homeomo
 	workmeshes = [m for m in bake_scene.objects if m.type == "MESH"]
 	for object in  workmeshes:
 		shape_name = object.name
-		# Handle multiple variant names 
+		# Handle multiple variant names
 		if '.' in shape_name and 'offset' not in shape_name.lower():
 			shape_name = shape_name.split('.')[0]
 
 		workmesh = object.data
-		# -- set corresponding shapekey 
+		# -- set corresponding shapekey
 		bm = bmesh.new()
 		bm.from_mesh(avatar_object.data)
 		if shape_name not in bm.verts.layers.shape:
 			continue
- 
+
 		shape = bm.verts.layers.shape[shape_name]
 		for vert in bm.verts:
 			vert[shape] = workmesh.vertices[vert.index].co.copy()
@@ -124,7 +125,7 @@ def shapekey_to_workmesh(operator: Operator, context: Context, ht: HomeomorphicP
 	if not workmesh:
 		print("Missing workmesh!")
 		return
-	
+
 	for vert in workmesh.data.vertices:
 		vert.co = shapekey_data[vert.index]
 
@@ -157,7 +158,7 @@ def all_shapekeys_to_workmeshes(operator: Operator, context: Context, ht: Homeom
 			else:
 				log.info(f"Missing workmesh for {key.name}!")
 				continue
-		
+
 		if isinstance(workmesh, list):
 			for wm in workmesh:
 				for vert in wm.data.vertices:
@@ -167,7 +168,7 @@ def all_shapekeys_to_workmeshes(operator: Operator, context: Context, ht: Homeom
 				vert.co = shapekey_data[vert.index]
 
 
-def workmesh_symmetrize(operator: Operator, context: Context, ht: HomeomorphicProperties): 
+def workmesh_symmetrize(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	for obj in context.selected_objects:
 		mesh = obj.data
 		right_verts = [v for v in mesh.vertices if v.co.x > 0.0]
@@ -203,9 +204,9 @@ def create_workmeshes_for_specific_target(context: Context, ht: HomeomorphicProp
 
 		pending_name = get_bake_target_variant_name(bake_target, variant)
 
-		# if the workmesh was previously created in the bake scene, skip 
+		# if the workmesh was previously created in the bake scene, skip
 		if pending_name in bake_scene.objects:
-			# NOTE(ranjian0) since artists may have performed actions on the workmeshs, 
+			# NOTE(ranjian0) since artists may have performed actions on the workmeshs,
 			# we choose to skip regeneration.
 			log.warning(f'Skipping existing workmesh ...')
 			pending_object = bake_scene.objects.get(pending_name)
@@ -244,20 +245,39 @@ def create_workmeshes_for_specific_target(context: Context, ht: HomeomorphicProp
 		variant.workmesh = pending_object
 		variant.uv_map = local_uv.name
 		bake_target.uv_map = bake_uv.name
-
 		update_workmesh_materials(bake_target, variant)
 
 
 def update_workmesh_materials(bake_target, variant):
-	#TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
+	load_material_templates()
+
+	#TBD - should we disconnect the material if we fail to create one? 
+	# This might be good in order to prevent accidentally getting unintended materials activated
+	# TODO(ranjian0) Should mirrored baketarget workmeshes have a material
 	if not variant.uv_map:
 		variant.workmesh.active_material = None
 		log.error(f"No uv found for variant {variant}")
 		return
 
 	bake_material_name =f'bake-{get_bake_target_variant_name(bake_target, variant)}'
-	bake_material = bpy.data.materials.new(bake_material_name)
+	bake_material = create_named_entry(bpy.data.materials, bake_material_name)
 	bake_material.use_nodes = True	#contribution note 9
 	#TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?
-	setup_bake_material(bake_material.node_tree, variant.intermediate_atlas, bake_target.source_uv_map, variant.image, variant.uv_map)
+	setup_bake_material(bake_material, variant.intermediate_atlas, bake_target.source_uv_map, variant.image, variant.uv_map)
 	variant.workmesh.active_material = bake_material
+
+
+def load_material_templates():
+	asset_mat_names = (
+		Assets.Materials.BakeAO.name, 
+		Assets.Materials.BakeDiffuse.name, 
+		Assets.Materials.BakePreview.name
+	)
+	
+	# -- if we have not already loaded the template materials, load them
+	if not all(template_material in bpy.data.materials for template_material in asset_mat_names):
+		with bpy.data.libraries.load(str(Assets.Materials.url), link=False) as (data_from, data_to):
+			data_to.materials = [name for name in data_from.materials if name in asset_mat_names]
+		for mat in data_to.materials:
+			if mat:
+				mat.use_fake_user = True

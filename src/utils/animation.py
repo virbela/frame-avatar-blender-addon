@@ -1,21 +1,28 @@
 import os
-import bpy 
+import bpy
 import math
-import bmesh
 import numpy as np
+from pathlib import Path
 from mathutils import Matrix
 from bpy.types import Action, Context, Object, Mesh
 
-from .helpers import require_bake_scene, require_work_scene
+from .constants import GLB_VERT_COUNT
+from .logging import log_writer as log
+from .helpers import get_homeomorphic_tool_state, popup_message, require_bake_scene, get_prefs
 
 
-def generate_animation_shapekeys(context: Context, avatar: Object, animated_objects: list[Object]):
-    scene = require_work_scene(context)
-    HT = scene.homeomorphictools
+def generate_animation_blob(context: Context, avatar: Object, animated_objects: list[Object]):
+    HT = get_homeomorphic_tool_state()
     export_full_blob = all([ea.checked for ea in HT.export_animation_actions])
 
     filepath = bpy.data.filepath
     export_indices = get_gltf_export_indices(avatar)
+    
+    prefs = get_prefs()
+    if prefs.custom_frame_validation:
+        # XXX Hard check for frame vert coung
+        if len(export_indices) != GLB_VERT_COUNT:
+            log.error("Invalid vert count for animations")
 
     num_frames = get_num_frames()
     num_verts = len(export_indices)
@@ -37,7 +44,7 @@ def generate_animation_shapekeys(context: Context, avatar: Object, animated_obje
                     buff = buff.reshape((count, 3))[export_indices]
                     animation_buffer[:,frame_counter[anim_obj.name],oid] = buff.ravel()
                     frame_counter[anim_obj.name] += 1
-                
+
 
                 # XXX Deprecated Old Shapekey animation export
                 # -- create shapekey in avatar
@@ -76,30 +83,6 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list
     return meshes
 
 
-def get_object_actions(obj: bpy.types.Object) -> list[Action]:
-    actions = []
-    for action in bpy.data.actions:
-        if obj.user_of_id(action) > 0:
-            actions.append(action)
-    return actions
-
-
-def shape_key_from_mesh(name: str, avatar: Object, mesh: Mesh):
-    print('Generating animation shapekey..', name)
-    bm = bmesh.new()
-    bm.from_mesh(avatar.data)
-    shape = bm.verts.layers.shape[name]
-
-    for vert in bm.verts:
-        vert[shape] = mesh.vertices[vert.index].co.copy()
-
-    bm.to_mesh(avatar.data)
-    bm.free()
-
-    if not mesh.users:
-        bpy.data.meshes.remove(mesh)
-
-
 def get_gltf_export_indices(obj: Object) -> list[int]:
     def __get_uvs(blender_mesh, uv_i):
         layer = blender_mesh.uv_layers[uv_i]
@@ -113,7 +96,6 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
         uvs[:, 1] += 1
 
         return uvs
-
 
     # Get the active mesh
     me: Mesh = obj.data
@@ -177,8 +159,7 @@ def get_num_frames() -> int:
 
 
 def export_action_animation(context: Context, action: Action, animated_objects: list[Object], num_verts: int, export_indices: list[int]):
-    scene = require_work_scene(context)
-    HT = scene.homeomorphictools
+    HT = get_homeomorphic_tool_state()
     if action.name not in [ea.name for ea in HT.export_animation_actions]:
         # Possibly not a valid export action eg tpose
         return
@@ -189,8 +170,11 @@ def export_action_animation(context: Context, action: Action, animated_objects: 
                 # This action is marked as do not export
                 return
 
+    prefs = get_prefs()
     filepath = bpy.data.filepath
     directory = os.path.dirname(filepath)
+    if os.path.exists(prefs.npy_export_dir):
+        directory = str(Path(prefs.npy_export_dir).absolute())
     blob_file = open(os.path.join(directory, f"{action.name}.npy"), 'wb')
 
     sx, sy = action.frame_range
@@ -213,3 +197,12 @@ def export_action_animation(context: Context, action: Action, animated_objects: 
 
         [bpy.data.meshes.remove(me) for me in meshes]
     np.save(blob_file, animation_buffer, allow_pickle=False)
+
+
+def validate_animation_export_verts(avatar):
+    export_indices = get_gltf_export_indices(avatar)
+    if len(export_indices) != GLB_VERT_COUNT:
+        log.error(f"Invalid GLB vert count. \nExpected {GLB_VERT_COUNT} got {len(export_indices)}. Ensure base avatar mesh has no materials and only 2 uv layers")
+        popup_message(f"Invalid GLB vert count. See console for more details", "Export Error")
+        return False
+    return True

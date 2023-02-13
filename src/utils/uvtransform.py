@@ -48,7 +48,7 @@ class uv_transformation_calculator:
 		self.reference_distance = max_len
 		self.reference_uv_map = reference_uv_map
 
-		log.info(f"UV endpoints {self.ep1}:{reference_uv_map[self.ep1]} - {self.ep2}:{reference_uv_map[self.ep2]}")
+		log.info(f"UV endpoints {self.ep1}:{reference_uv_map[self.ep1]} - {self.ep2}:{reference_uv_map[self.ep2]}", print_console=False)
 
 	def get_centroid(self, uv_map: dict[int, Vector]) -> Vector:
 		vecs = list(uv_map.values())
@@ -72,17 +72,17 @@ class uv_transformation_calculator:
 		target_vector = (T2 - T1).normalized()
 		rotation = reference_vector.angle_signed(target_vector)
 
-		
+
 		#Calculate translation
 		reference_centroid = self.get_centroid(self.reference_uv_map)
 		target_centroid = self.get_centroid(target_uv_map)
 		translation = target_centroid - reference_centroid
 
 		transform = UVTransform(
-			centroid=reference_centroid, 
+			centroid=reference_centroid,
 			translation=translation,
 			scale=scale,
 			rotation=rotation
 		)
-		log.info(f"UV Transform: {transform}")
+		log.info(f"UV Transform: {transform}", print_console=False)
 		return transform

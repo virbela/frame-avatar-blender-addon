@@ -2,7 +2,7 @@ bl_info = {
 	"name": "Homeomorphic avatar creator",
 	"description": "Homeomorphic avatar creation tools",
 	"author": "Martin Petersson, Ian Karanja",
-	"version": (0, 2, 0),
+	"version": (0, 2, 1),
 	"blender": (2, 92, 2),
 	"location": "View3D",
 	"warning": "",
@@ -16,20 +16,53 @@ bl_info = {
 #	labels: dependency
 
 import bpy
+from bpy.types import Context
 from bpy.app.handlers import persistent
 
+from .ui import register_ui, unregister_ui
+from .ops import register_ops, unregister_ops
+from .utils.helpers import require_work_scene
+from .utils.properties import HomeomorphicProperties, UIStateProperty, register_props, unregister_props
 
-from .ui import * 
-from .ops import *
-from .utils.preferences import *
-from .utils.helpers import pending_classes
-from .utils.properties import HomeomorphicProperties, UIStateProperty
+class FrameAvatarAddonPreferences(bpy.types.AddonPreferences):
+	bl_idname = __package__
+
+	log_target: 					bpy.props.StringProperty(name='Log File Name', subtype='FILE_NAME', default="fabalog")
+	glb_export_dir: 				bpy.props.StringProperty(
+										name='GLB Export Dir',
+										description='Folder to use for glb export (default is current blendfile folder).', subtype='DIR_PATH'
+									)
+	atlas_export_dir: 				bpy.props.StringProperty(
+										name='Atlas Export Dir',
+										description='Folder to use for atlas export (default is current blendfile folder).', subtype='DIR_PATH'
+									)
+	npy_export_dir: 				bpy.props.StringProperty(
+										name='Npy Export Dir',
+										description='Folder to use for animation (.npy) export (default is current blendfile folder).', subtype='DIR_PATH'
+									)
+	custom_frame_validation:		bpy.props.BoolProperty(
+										default=False,
+										name='Frame Validation',
+										description='Enable validation for the frame avatars. (Frame artists only!)'
+									)
+
+	def draw(self, context: Context):
+		layout = self.layout
+		layout.prop(self, 'log_target')
+		layout.prop(self, 'glb_export_dir')
+		layout.prop(self, 'atlas_export_dir')
+		layout.prop(self, 'npy_export_dir')
+		layout.prop(self, 'custom_frame_validation')
+
 
 
 # Addon registration
 def register():
-	for cls in pending_classes:
-		bpy.utils.register_class(cls)
+	# XXX Order Matters
+	bpy.utils.register_class(FrameAvatarAddonPreferences)
+	register_props()
+	register_ops()
+	register_ui()
 
 	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
 	bpy.types.Scene.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
@@ -47,12 +80,12 @@ def register():
 			eactions = [ea.name for ea in HT.export_animation_actions]
 			for action in bpy.data.actions:
 				if 'tpose' in action.name.lower() or action.name in eactions:
-					continue 
+					continue
 
 				item = HT.export_animation_actions.add()
 				item.name = action.name
 				item.checked = True
-			
+
 			for idx, eaction in enumerate(HT.export_animation_actions):
 				if eaction.name not in [a.name for a in bpy.data.actions]:
 					HT.export_animation_actions.remove(idx)
@@ -71,8 +104,11 @@ def register():
 def unregister():
 	del bpy.types.Scene.ui_state
 	del bpy.types.Scene.homeomorphictools
-	for cls in pending_classes:
-		bpy.utils.unregister_class(cls)
+
+	unregister_ui()
+	unregister_ops()
+	unregister_props()
+	bpy.utils.unregister_class(FrameAvatarAddonPreferences)
 
 
 if __name__ == '__main__':
@@ -83,4 +119,4 @@ if __name__ == '__main__':
 		unregister()
 	except:
 		pass
-	register()	
+	register()

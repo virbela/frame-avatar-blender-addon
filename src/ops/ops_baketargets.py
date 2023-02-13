@@ -5,20 +5,20 @@ from .common import generic_list
 from ..utils.constants import TARGET_UV_MAP
 from ..utils.logging import log_writer as log
 from ..utils.structures import intermediate, iter_dc
-from ..utils.properties import HomeomorphicProperties, BakeTarget, BakeTargetMirrorEntry
-from ..utils.helpers import a_get, a_set, require_work_scene, set_scene, set_selection
+from ..utils.properties import HomeomorphicProperties, BakeTargetMirrorEntry
+from ..utils.helpers import a_get, a_set, popup_message, require_work_scene, set_scene, set_selection
 
 
-def create_targets_from_selection(operator: Operator, context: Context, ht: HomeomorphicProperties):
-	for source_object in context.selected_objects:
-		# change the main uvmap name
-		source_uv = source_object.data.uv_layers[0]	# Assume first UV map is the source one
-		source_uv.name = TARGET_UV_MAP
+def create_targets_from_avatar_object(operator: Operator, context: Context, ht: HomeomorphicProperties):
+	source_object = ht.avatar_mesh
+	source_uv = source_object.data.uv_layers[0]	# Assume first UV map is the source one
+	source_uv.name = TARGET_UV_MAP
 
-		if shape_keys := source_object.data.shape_keys:
-			create_baketarget_from_key_blocks(ht, source_object, shape_keys.key_blocks)
-		else:
-			create_baketarget_from_key_blocks(ht, source_object, None)
+	if shape_keys := source_object.data.shape_keys:
+		create_baketarget_from_key_blocks(ht, source_object, shape_keys.key_blocks)
+	else:
+		popup_message("Avatar mesh has no shape keys!", "Mesh Error")
+		return
 
 	for mirror in ht.bake_target_mirror_collection:
 		bk = ht.bake_target_collection[mirror.secondary]
@@ -30,27 +30,16 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
 	targets = dict()
 	mirror_list = list()
 
-	if key_blocks is None:
-		targets[None] = intermediate.pending.bake_target(
-			name = source_object.name,
+	for sk in key_blocks:
+		key = sk.name
+		targets[key] = intermediate.pending.bake_target(
+			name = f'{source_object.name}_{key}',
 			object_name = source_object.name,
 			source_object = source_object,
 			bake_target = source_object,
-			shape_key_name = None,
+			shape_key_name = key,
 			uv_mode = 'UV_IM_MONOCHROME',
 		)
-
-	else:
-		for sk in key_blocks:
-			key = sk.name
-			targets[key] = intermediate.pending.bake_target(
-				name = f'{source_object.name}_{key}',
-				object_name = source_object.name,
-				source_object = source_object,
-				bake_target = source_object,
-				shape_key_name = key,
-				uv_mode = 'UV_IM_MONOCHROME',
-			)
 
 	#Configure targets and mirrors
 	for key, target in targets.items():
@@ -62,7 +51,7 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
 			if R:
 				mirror_list.append(intermediate.mirror(target, R))
 			else:
-				log.error(f"Could not create mirror for {key} since there was no such object `{Rk}´")
+				log.error(f"Could not create mirror for {key} since there was no such object `{Rk}`")
 
 		elif key.endswith('_R'):
 			pass
@@ -73,22 +62,17 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
 	#Create bake targets
 	for target in targets.values():
 		if 'basis' in  target.name.lower():
-			continue 
+			continue
 
 		if target.name in [bt.name for bt in ht.bake_target_collection]:
 			log.info("Skip existing bake target")
 			continue
 
-		
+
 		new = ht.bake_target_collection.add()
 		new.variant_collection.add()	# add default variant
 		for key, value in iter_dc(target):
 			setattr(new, key, value)
-
-		if "eye_l" in new.name.lower():
-			new.multi_variants = True
-			new.uv_mode = "UV_IM_COLOR"
-			create_eye_variants(new) 
 
 		target.bake_target = new
 
@@ -100,35 +84,6 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
 
 	for mirror in mirror_list:
 		create_mirror(ht.get_bake_target_index(mirror.primary.bake_target), ht.get_bake_target_index(mirror.secondary.bake_target))
-
-
-def create_eye_variants(bk: BakeTarget):
-	eye_names = [
-		"blue",
-		"grey",
-		"green",
-		"hazel",
-		"amethyst"
-	]
-
-	# default variant
-	dv = bk.variant_collection[0]
-	dv.name = "brown"
-	if bpy.data.images.get('eye_texture.png'):
-		dv.image = bpy.data.images['eye_texture.png']
-
-	for name in eye_names:
-		variant = bk.variant_collection.add()
-		variant.name = name
-		tex = None 
-		for img in bpy.data.images:
-			if 'eye_' not in img.name:
-				continue
-			if name in img.name:
-				tex = img
-				break 
-		if tex:
-			variant.image = tex
 
 class bake_mirrors:
 	def set_primary(operator: Operator, context: Context, ht: HomeomorphicProperties):

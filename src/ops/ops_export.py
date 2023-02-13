@@ -4,13 +4,17 @@ import json
 import uuid
 import tempfile
 from pathlib import Path
+from collections import defaultdict
 from contextlib import contextmanager
-from bpy.types import Operator, Context, Object, Scene, ViewLayer
+from bpy.types import Operator, Context, Object, Scene
 
 from ..utils.logging import log_writer as log
-from ..utils.animation import generate_animation_shapekeys
+from ..utils.contextutils import active_object, selection
+from ..utils.bake_targets import validate_bake_target_setup
 from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
-from ..utils.properties import HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
+from ..utils.morph_spec import validate_floater_morphs, validate_fullbody_morphs
+from ..utils.animation import generate_animation_blob, validate_animation_export_verts
+from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
 from ..utils.uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 
@@ -19,34 +23,26 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
     if not validate_export(context, HT):
         return
 
-    active = clear_active(context)
-    selected = desellect_all(context)
+    with selection(None), active_object(None):
+        try:
+            if HT.avatar_type == "FULLBODY" and HT.export_animation:
+                export_animation(context, HT)
 
-    try:
-        if HT.avatar_type == "FULLBODY" and HT.export_animation:
-            export_animation(context, HT)
+            if HT.export_glb:
+                success = export_glb(context, HT)
+                if not success:
+                    # XXX exit early if mesh export failed
+                    return
 
-        if HT.export_glb:
-            success = export_glb(context, HT)
-            if not success:
-                # XXX exit early if mesh export failed
-                return
+            if HT.export_atlas:
+                export_atlas(context, denoise=HT.denoise)
 
-        if HT.export_atlas:
-            export_atlas(context, denoise=HT.denoise)
-
-    except FileExistsError:
-        popup_message("Export files already exist in the current folder!") 
-    except PermissionError:
-        popup_message("Please save the current blend file!")
-    except Exception as e:
-        raise e
-    
-    # -- reset selection/active state
-    for o in selected:
-        o.select_set(True)
-    for layer, obj in active:
-        layer.objects.active = obj
+        except FileExistsError:
+            popup_message("Export files already exist in the current folder!")
+        except PermissionError:
+            popup_message("Please save the current blend file!")
+        except Exception as e:
+            raise e
 
 
 def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
@@ -69,6 +65,21 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
         popup_message("Export validation failed! Avatar Rig not selected in workflow panel!", "Validation Error")
         return False
 
+    prefs = get_prefs()
+    if prefs.custom_frame_validation:
+        # check that the avatar shapekeys match the expected morph_spec
+        if HT.avatar_type == "FULLBODY":
+            if not validate_fullbody_morphs(HT.avatar_mesh):
+                return False
+        elif HT.avatar_type == "FLOATER":
+            if not validate_floater_morphs(HT.avatar_mesh):
+                return False
+
+        if not validate_bake_target_setup(HT):
+            return False
+        
+        if not validate_animation_export_verts(HT.avatar_mesh):
+            return False
     return True
 
 
@@ -80,140 +91,28 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
         #XXX Probably Not the main avatar object
         popup_message("Selected object is not an Homeomorphic avatar", 'Context Error')
         return False
-    
-    # XXX(ranjian0) Don't depend on naming for the avatar
-    # if obj.name != 'Avatar':
-    #     #XXX Probably Not the main avatar object
-    #     popup_message("Avatar object name invalid! Try 'Avatar'.", 'Context Error')
-    #     return False
 
     obj.hide_set(False)
-    obj.hide_viewport = False 
+    obj.hide_viewport = False
     obj.select_set(True)
 
-    uv_transform_extra_data = dict()		
-    uv_transform_map = dict()				
+    uv_transform_metadata = get_uvtransform_metadata(context, ht, obj)
+    effects_metadata = get_effects_metadata(ht, obj)
 
-    uvtc = uv_transformation_calculator(get_uv_map_from_mesh(obj))
+    # -- merge the metadata
+    for morph_name, effect_data in effects_metadata.items():
+        if morph_name in uv_transform_metadata.keys():
+            data = uv_transform_metadata[morph_name]
+            if 'effects' not in data.keys():
+                data['effects'] = dict()
 
-    valid_workmeshes = []
-    for bake_target in ht.bake_target_collection:
-        if bake_target.multi_variants:            
-            for variant in bake_target.variant_collection:
-                valid_workmeshes.append(variant.workmesh)
-        else:
-            variant = bake_target.variant_collection[0]
-            valid_workmeshes.append(variant.workmesh)
-
-    bake_scene = require_bake_scene(context)
-    for name, item in bake_scene.objects.items():
-        if item.type != 'MESH':
-            continue
-
-        if item not in valid_workmeshes:
-            continue 
-
-        log.info(f'Getting transform for: {name}')
-        uv_transform_map[name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
-
-    def get_transform(shape_name: str) -> dict:
-        if shape_name.endswith('__None'):
-            shape_name = shape_name[:-6]
-
-        trans: UVTransform = uv_transform_map.get(shape_name)
-        uv_transform = dict(UVTransform = None)
-        if trans:
-            uv_transform = {
-                "UVTransform" : {
-                    "scale": trans.scale,
-                    "rotation": trans.rotation,
-                    "centroid": list(trans.centroid),
-                    "translation" : list(trans.translation)
-                }
-            }
-        return uv_transform
-
-    def get_variant_channel(variant: BakeVariant) -> tuple[int]:
-        if variant.uv_target_channel == 'UV_TARGET_COLOR':
-            return (0, 0, 0, 1)
-        elif variant.uv_target_channel == 'UV_TARGET_R':
-            return (1, 0, 0, 0)
-        elif variant.uv_target_channel == 'UV_TARGET_G':
-            return (0, 1, 0, 0)
-        elif variant.uv_target_channel == 'UV_TARGET_B':
-            return (0, 0, 1, 0)
-        # XXX Never get here (breaks fragment shader in the client)
-        return (0, 0, 0, 0)
-
-    effect_names = [pos.effect_shapekey for e in ht.effect_collection for pos in e.positions]
-    for bake_target in ht.bake_target_collection:
-        if not bake_target.export:
-            continue
-
-        if 'effect' in bake_target.shortname.lower() or bake_target.shortname.lower() in effect_names:
-            log.info("Skipping effect bake target")
-            continue
-
-        result = None
-        if bake_target.multi_variants:            
-            variants = {'Variants': {}}
-            for variant in bake_target.variant_collection:
-                shape_name = get_bake_target_variant_name(bake_target, variant)
-                variants['Variants'][variant.name] = get_transform(shape_name)
-                variants['Variants'][variant.name]['UVChannel'] = get_variant_channel(variant)
-            result = variants
-        else:
-            variant = bake_target.variant_collection[0]
-            shape_name = get_bake_target_variant_name(bake_target, variant)
-            result = get_transform(shape_name)
-            result['UVChannel'] = get_variant_channel(variant)
-                
-        uv_transform_extra_data[bake_target.shortname] = result
-
-    for bake_target in ht.bake_target_collection:
-        if bake_target.bake_mode == 'UV_BM_MIRRORED':
-            # -- set the uv transform to opposite mirror
-            base = bake_target.name[:-2]
-            Rk = f'{base}_L' if '_R' in bake_target.name else f'base_R'
-            R = ht.bake_target_collection.get(Rk)
-            if not R:
-                log.info(f'Missing mirror source for {bake_target}')
-                continue
-            uv_transform_extra_data[bake_target.shortname] = uv_transform_extra_data[R.shortname]
-            uv_transform_extra_data[bake_target.shortname]['is_mirror'] = True
-
-    # build effects
-    for effect in ht.effect_collection:
-        if effect.type == "POSITION":
-            for pos in effect.positions:
-                effect_verts = calculate_effect_delta(obj, pos)
-                data = {
-                    "type": 'POSITION',
-                    "ids": [v[0] for v in effect_verts],
-                    "data": [v[1] for v in effect_verts]
-                }
-                morph = uv_transform_extra_data[pos.parent_shapekey]
-                if 'effects' not in morph.keys():
-                    morph['effects'] = dict()
-
-                morph['effects'][effect.name.lower().strip(' ')] = data
-        elif effect.type == "COLOR":
-            for col in effect.colors:
-                effect_verts = get_verts_or_vgroup(obj, col)
-                data = {
-                    "type": "COLOR",
-                    "ids": [v[0] for v in effect_verts],
-                    "data": [v[1] for v in effect_verts]
-                }
-                morph = uv_transform_extra_data[col.shape]
-                if 'effects' not in morph.keys():
-                    morph['effects'] = dict()
-
-                morph['effects'][effect.name.lower().strip(' ')] = data
+            for effect_name, effect_props in effect_data.items():
+                data['effects'][effect_name] = effect_props
 
     morphsets_dict = {
-        "Morphs": uv_transform_extra_data,
+        "Morphs": uv_transform_metadata,
     }
+
 
     if ht.avatar_type == "FULLBODY":
         morphsets_dict['Animation'] = animation_metadata(ht)
@@ -230,43 +129,14 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
         fname = "faba_floater_avatar.glb"
     outputfile_glb = os.path.join(directory , fname)
 
-    clear_active(context)
-    desellect_all(context)
-
     obj = ht.avatar_mesh
-    bpy.context.view_layer.objects.active = obj
-    obj.select_set(True)
+    with selection([obj]), active_object(obj):
+        with clear_custom_props(obj):
+            obj['MorphSets_Avatar'] = morphsets_dict
 
-    # post_process_effects(ht.effect_collection, obj)
-    with clear_custom_props(obj):
-        obj['MorphSets_Avatar'] = morphsets_dict
-
-        bpy.ops.export_scene.gltf(
-            filepath=outputfile_glb, 
-            export_format='GLB', 
-            # disable all default options
-            export_texcoords = True,
-            export_normals = False,
-            export_colors = False,
-            export_animations=False,
-            export_skins=False,
-            export_materials='NONE',
-            # valid options
-            use_selection=True, 
-            export_extras=True, 
-            export_morph=True,
-            use_active_scene=True
-        )
-
-        if is_dev():
-            export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
-            with open(os.path.join(directory, 'morphs.json'), 'w') as f:
-                print(export_json, file=f)
-
-            # Check gltf export
             bpy.ops.export_scene.gltf(
-                filepath=os.path.join(directory , "morphic_avatar.gltf"), 
-                export_format='GLTF_EMBEDDED', 
+                filepath=outputfile_glb,
+                export_format='GLB',
                 # disable all default options
                 export_texcoords = True,
                 export_normals = False,
@@ -275,22 +145,44 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
                 export_skins=False,
                 export_materials='NONE',
                 # valid options
-                use_selection=True, 
-                export_extras=True, 
+                use_selection=True,
+                export_extras=True,
                 export_morph=True,
                 use_active_scene=True
             )
+
+            if is_dev():
+                directory = os.path.dirname(filepath)
+                export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
+                with open(os.path.join(directory, 'morphs.json'), 'w') as f:
+                    print(export_json, file=f)
+
+                # Check gltf export
+                bpy.ops.export_scene.gltf(
+                    filepath=os.path.join(directory , "morphic_avatar.gltf"),
+                    export_format='GLTF_EMBEDDED',
+                    # disable all default options
+                    export_texcoords = True,
+                    export_normals = False,
+                    export_colors = False,
+                    export_animations=False,
+                    export_skins=False,
+                    export_materials='NONE',
+                    # valid options
+                    use_selection=True,
+                    export_extras=True,
+                    export_morph=True,
+                    use_active_scene=True
+                )
 
     # -- cleanup animation shapekeys
     last_idx = obj.active_shape_key_index
     for kb in obj.data.shape_keys.key_blocks:
         if kb.name.startswith('fabanim.'):
-            print("Post Export Removing ..", kb.name)
+            log.info(f"Post Export Removing .. {kb.name}")
             obj.shape_key_remove(kb)
     obj.active_shape_key_index = last_idx
 
-    bpy.context.view_layer.objects.active = None
-    obj.select_set(False)
     return True
 
 
@@ -305,9 +197,9 @@ def export_atlas(context: Context, denoise: bool = True):
         tree.nodes.remove(node)
 
     atlases = (
-        'atlas_intermediate_red', 
-        'atlas_intermediate_green', 
-        'atlas_intermediate_blue', 
+        'atlas_intermediate_red',
+        'atlas_intermediate_green',
+        'atlas_intermediate_blue',
         'atlas_intermediate_color'
     )
     missing = []
@@ -327,8 +219,8 @@ def export_atlas(context: Context, denoise: bool = True):
     image_node_r.location = 0,0
 
     image_node_r_denoise = tree.nodes.new(type='CompositorNodeDenoise')
-    image_node_r_denoise.location = 200, 150 
-    image_node_r_denoise.use_hdr = False 
+    image_node_r_denoise.location = 200, 150
+    image_node_r_denoise.use_hdr = False
     image_node_r_denoise.prefilter = "NONE"
 
     image_node_g = tree.nodes.new(type='CompositorNodeImage')
@@ -336,8 +228,8 @@ def export_atlas(context: Context, denoise: bool = True):
     image_node_g.location = 150,-150
 
     image_node_g_denoise = tree.nodes.new(type='CompositorNodeDenoise')
-    image_node_g_denoise.location = 350, 0 
-    image_node_g_denoise.use_hdr = False 
+    image_node_g_denoise.location = 350, 0
+    image_node_g_denoise.use_hdr = False
     image_node_g_denoise.prefilter = "NONE"
 
     image_node_b = tree.nodes.new(type='CompositorNodeImage')
@@ -345,8 +237,8 @@ def export_atlas(context: Context, denoise: bool = True):
     image_node_b.location = 300,-300
 
     image_node_b_denoise = tree.nodes.new(type='CompositorNodeDenoise')
-    image_node_b_denoise.location = 500, -150 
-    image_node_b_denoise.use_hdr = False 
+    image_node_b_denoise.location = 500, -150
+    image_node_b_denoise.use_hdr = False
     image_node_b_denoise.prefilter = "NONE"
 
     image_node_color = tree.nodes.new(type='CompositorNodeImage')
@@ -354,12 +246,12 @@ def export_atlas(context: Context, denoise: bool = True):
     image_node_color.location = 450,-450
 
     image_node_color_denoise = tree.nodes.new(type='CompositorNodeDenoise')
-    image_node_color_denoise.location = 650, -300 
-    image_node_color_denoise.use_hdr = False 
+    image_node_color_denoise.location = 650, -300
+    image_node_color_denoise.use_hdr = False
     image_node_color_denoise.prefilter = "NONE"
 
     # create combine rgba node
-    comb_node = tree.nodes.new('CompositorNodeCombRGBA')   
+    comb_node = tree.nodes.new('CompositorNodeCombRGBA')
     comb_node.location = 700,0
 
     mult_node = tree.nodes.new('CompositorNodeMixRGB')
@@ -372,7 +264,7 @@ def export_atlas(context: Context, denoise: bool = True):
     if os.path.exists(prefs.atlas_export_dir):
         directory = str(Path(prefs.atlas_export_dir).absolute())
 
-    file_node = tree.nodes.new('CompositorNodeOutputFile')   
+    file_node = tree.nodes.new('CompositorNodeOutputFile')
     file_node.location = 1100,0
     file_node.format.file_format = 'PNG'
     file_node.format.quality = 100
@@ -390,7 +282,7 @@ def export_atlas(context: Context, denoise: bool = True):
 
         links.new(image_node_b.outputs[0], image_node_b_denoise.inputs[0])
         links.new(image_node_b_denoise.outputs[0], comb_node.inputs[2])
-        
+
         links.new(comb_node.outputs[0], mult_node.inputs[1])
         links.new(image_node_color.outputs[0], image_node_color_denoise.inputs[0])
         links.new(image_node_color_denoise.outputs[0], mult_node.inputs[2])
@@ -402,7 +294,7 @@ def export_atlas(context: Context, denoise: bool = True):
         links.new(image_node_b.outputs[0], comb_node.inputs[2])
         links.new(comb_node.outputs[0], mult_node.inputs[1])
         links.new(image_node_color.outputs[0], mult_node.inputs[2])
-        links.new(mult_node.outputs[0], file_node.inputs[0])        
+        links.new(mult_node.outputs[0], file_node.inputs[0])
 
     bpy.ops.render.render(use_viewport=True)
 
@@ -420,7 +312,7 @@ def export_animation(context: Context, ht: HomeomorphicProperties):
     animated_objects = get_animation_objects(ht)
     list(map(ensure_applied_rotation, animated_objects))
     log.info(f"Animated Objects {animated_objects}")
-    generate_animation_shapekeys(context, avatar_obj, animated_objects)
+    generate_animation_blob(context, avatar_obj, animated_objects)
 
 
 @contextmanager
@@ -440,7 +332,7 @@ def clear_custom_props(item: Object | Scene):
 
 
 def calculate_effect_delta(obj: Object, effect: PositionEffect) -> list[tuple[int, tuple[float]]]:
-    """ Return ids and final positions of all transformed verts of target shapekey relative to base shapekey 
+    """ Return ids and final positions of all transformed verts of target shapekey relative to base shapekey
     """
 
     base = obj.data.shape_keys.key_blocks.get(effect.parent_shapekey)
@@ -527,33 +419,29 @@ def obj_from_shapekey(obj: Object, keyname: str):
 
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "mesh.glb")
-        # -- export to tmp dir
-        clear_active(bpy.context)
-        desellect_all(bpy.context)
 
-        pending_object.select_set(True)
-        bpy.context.view_layer.objects.active = pending_object
-
-        bpy.ops.export_scene.gltf(
-            filepath=filepath, 
-            export_format='GLB', 
-            # disable all default options
-            export_texcoords = True,
-            export_normals = False,
-            export_colors = False,
-            export_animations=False,
-            export_skins=False,
-            export_materials='NONE',
-            # valid options
-            use_selection=True, 
-            export_extras=False, 
-            export_morph=False,
-            use_active_scene=True
-        )
-        bpy.data.meshes.remove(pending_object.data, do_unlink=True)
-
-        bpy.ops.import_scene.gltf(filepath=filepath)
-        pending_object = bpy.context.object
+        with selection([pending_object]), active_object(pending_object):
+            log.info(f"Exporing effect object {pending_object.name}")
+            bpy.ops.export_scene.gltf(
+                filepath=filepath,
+                export_format='GLB',
+                # disable all default options
+                export_texcoords = True,
+                export_normals = False,
+                export_colors = False,
+                export_animations=False,
+                export_skins=False,
+                export_materials='NONE',
+                # valid options
+                use_selection=True,
+                export_extras=False,
+                export_morph=False,
+                use_active_scene=True
+            )
+            bpy.data.meshes.remove(pending_object.data, do_unlink=True)
+            log.info(f"Reimporting effect ...")
+            bpy.ops.import_scene.gltf(filepath=filepath)
+            pending_object = bpy.context.object
 
     return pending_object
 
@@ -570,52 +458,148 @@ def get_animation_objects(ht: HomeomorphicProperties) -> list[Object]:
     animated_objects = []
     for bake_target in ht.bake_target_collection:
         if not avatar_obj:
-            avatar_obj = bake_target.source_object 
+            avatar_obj = bake_target.source_object
 
         if bake_target.multi_variants:
             # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
-            log.info(f"Skipping multivariant {bake_target.name}")
+            log.info(f"Skipping multivariant {bake_target.name}", print_console=False)
             continue
 
         obj = bake_target.variant_collection[0].workmesh
         if not obj:
-            # TODO(ranjian0) 
+            # TODO(ranjian0)
             # Possible variants not generated yet, or some other fail condition
-            log.info(f"Skipping missing workmesh {bake_target.name}")
+            log.info(f"Skipping missing workmesh {bake_target.name}", print_console=False)
             continue
 
         has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
         if not has_armature:
             # Object has no armature!
-            log.info(f"Skipping missing armature {bake_target.name}")
+            log.info(f"Skipping missing armature {bake_target.name}", print_console=False)
             continue
 
         animated_objects.append(obj)
     return animated_objects
 
 
-def desellect_all(context: Context) -> list[Object]:
-    # -- deselect everything in all scenes
-    selected = []
-    objects = list(require_work_scene(context).objects)
-    objects.extend(list(require_bake_scene(context).objects))
-    for o in objects:
-        if o.select_get():
-            selected.append(o)
-            o.select_set(False)
+def get_uvtransform_metadata(context: Context, ht: HomeomorphicProperties, obj: Object) -> dict:
+    uv_transform_map = dict()
+    uv_transform_extra_data = dict()
 
-    return selected
+    uvtc = uv_transformation_calculator(get_uv_map_from_mesh(obj))
+
+    valid_workmeshes = []
+    for bake_target in ht.bake_target_collection:
+        if bake_target.multi_variants:
+            for variant in bake_target.variant_collection:
+                valid_workmeshes.append(variant.workmesh)
+        else:
+            variant = bake_target.variant_collection[0]
+            valid_workmeshes.append(variant.workmesh)
+
+    bake_scene = require_bake_scene(context)
+    for name, item in bake_scene.objects.items():
+        if item.type != 'MESH':
+            continue
+
+        if item not in valid_workmeshes:
+            continue
+
+        uv_transform_map[name] = uvtc.calculate_transform(get_uv_map_from_mesh(item))
+
+    def get_transform(shape_name: str) -> dict:
+        if shape_name.endswith('__None'):
+            shape_name = shape_name[:-6]
+
+        trans: UVTransform = uv_transform_map.get(shape_name)
+        uv_transform = dict(UVTransform = None)
+        if trans:
+            uv_transform = {
+                "UVTransform" : {
+                    "scale": trans.scale,
+                    "rotation": trans.rotation,
+                    "centroid": list(trans.centroid),
+                    "translation" : list(trans.translation)
+                }
+            }
+        return uv_transform
+
+    def get_variant_channel(bk: BakeTarget,variant: BakeVariant) -> tuple[int]:
+        if variant.uv_target_channel == 'UV_TARGET_COLOR':
+            return (0, 0, 0, 1)
+        elif variant.uv_target_channel == 'UV_TARGET_R':
+            return (1, 0, 0, 0)
+        elif variant.uv_target_channel == 'UV_TARGET_G':
+            return (0, 1, 0, 0)
+        elif variant.uv_target_channel == 'UV_TARGET_B':
+            return (0, 0, 1, 0)
+        # XXX Get here only for variants with NIL uv islands i.e items with `__None` suffix
+        if bk.uv_mode != "UV_IM_NIL":
+            log.fatal(f"Invalid UV channel for {bk.name}")
+        log.info(f"NIL UV Channel for {bk.name}")
+        return (0, 0, 0, 0)
+
+    effect_names = [pos.effect_shapekey for e in ht.effect_collection for pos in e.positions]
+    for bake_target in ht.bake_target_collection:
+        if not bake_target.export:
+            continue
+
+        if 'effect' in bake_target.shortname.lower() or bake_target.shortname.lower() in effect_names:
+            log.info("Skipping effect bake target")
+            continue
+
+        result = None
+        if bake_target.multi_variants:
+            variants = {'Variants': {}}
+            for variant in bake_target.variant_collection:
+                shape_name = get_bake_target_variant_name(bake_target, variant)
+                variants['Variants'][variant.name] = get_transform(shape_name)
+                variants['Variants'][variant.name]['UVChannel'] = get_variant_channel(bake_target, variant)
+            result = variants
+        else:
+            variant = bake_target.variant_collection[0]
+            shape_name = get_bake_target_variant_name(bake_target, variant)
+            result = get_transform(shape_name)
+            result['UVChannel'] = get_variant_channel(bake_target, variant)
+
+        uv_transform_extra_data[bake_target.shortname] = result
+
+    for bake_target in ht.bake_target_collection:
+        if bake_target.bake_mode == 'UV_BM_MIRRORED':
+            # -- set the uv transform to opposite mirror
+            base = bake_target.name[:-2]
+            Rk = f'{base}_L' if '_R' in bake_target.name else f'base_R'
+            R = ht.bake_target_collection.get(Rk)
+            if not R:
+                log.info(f'Missing mirror source for {bake_target.shortname}')
+                continue
+            uv_transform_extra_data[bake_target.shortname] = uv_transform_extra_data[R.shortname]
+            uv_transform_extra_data[bake_target.shortname]['is_mirror'] = True
+
+    return uv_transform_extra_data
 
 
-def clear_active(context: Context) -> list[tuple[ViewLayer, Object]]:
-    # -- clear all active
-    active = []
-    layers = list(require_work_scene(context).view_layers)
-    layers.extend(list(require_bake_scene(context).view_layers))
-    for layer in layers:
-        if layer.objects.active:
-            active.append((layer, layer.objects.active))
-            layer.objects.active.select_set(False)
-            layer.objects.active = None
+def get_effects_metadata(ht: HomeomorphicProperties, obj: Object) -> dict:
+    log.info("Generating effects ...")
+    effects_medatata = defaultdict(dict)
+    for effect in ht.effect_collection:
+        if effect.type == "POSITION":
+            for pos in effect.positions:
+                effect_verts = calculate_effect_delta(obj, pos)
+                data = {
+                    "type": 'POSITION',
+                    "ids": [v[0] for v in effect_verts],
+                    "data": [v[1] for v in effect_verts]
+                }
+                effects_medatata[pos.parent_shapekey][effect.name.lower().strip(' ')] = data
+        elif effect.type == "COLOR":
+            for col in effect.colors:
+                effect_verts = get_verts_or_vgroup(obj, col)
+                data = {
+                    "type": "COLOR",
+                    "ids": [v[0] for v in effect_verts],
+                    "data": [v[1] for v in effect_verts]
+                }
+                effects_medatata[col.shape][effect.name.lower().strip(' ')] = data
 
-    return active
+    return effects_medatata

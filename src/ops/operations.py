@@ -7,25 +7,24 @@ from .ops_baketargets import (
     bake_targets,
     bake_mirrors,
     bake_variants,
-    create_targets_from_selection
+    create_targets_from_avatar_object
 )
 
 from .ops_baking import (
-    bake_all_bake_targets, 
+    bake_all_bake_targets,
     bake_selected_workmeshes,
     bake_selected_bake_target
 )
 
 from .ops_dev import (
-    devtools, 
-    clear_bake_scene, 
+    clear_bake_scene,
     clear_bake_targets
 )
 
 from .ops_helpers import (
     copy_uv_layers,
     update_bake_scene,
-    reset_uv_transforms, 
+    reset_uv_transforms,
     recalculate_normals,
     synchronize_mirrors,
     select_objects_by_uv,
@@ -44,6 +43,7 @@ from .ops_workmaterial import (
     update_all_materials,
     switch_to_bake_material,
     update_selected_material,
+    set_selected_objects_atlas,
     switch_to_preview_material
 )
 
@@ -55,7 +55,7 @@ from .ops_workmesh import (
     update_selected_workmesh,
     all_workmeshes_to_shapekey,
     all_shapekeys_to_workmeshes,
-    create_workmeshes_for_all_targets, 
+    create_workmeshes_for_all_targets,
     create_workmeshes_for_selected_target,
     update_selected_workmesh_all_shapekeys,
     update_selected_workmesh_active_shapekey

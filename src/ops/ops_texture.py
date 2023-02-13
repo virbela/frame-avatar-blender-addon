@@ -6,14 +6,14 @@ from ..utils.constants import TARGET_UV_MAP
 from ..utils.structures import intermediate
 from ..utils.logging import log_writer as log
 from ..utils.properties import HomeomorphicProperties
-from .common import set_uv_map, guarded_operator 
+from .common import set_uv_map, guarded_operator
 from ..utils.helpers import (
     set_scene,
     set_active,
     set_selection,
     clear_selection,
 	named_entry_action,
-    create_named_entry, 
+    create_named_entry,
     require_bake_scene
 )
 
@@ -133,7 +133,7 @@ def get_intermediate_uv_object_list(ht: HomeomorphicProperties) -> list[intermed
 		if bake_target.bake_mode == 'UV_BM_REGULAR':
 
 			for variant_name, variant in bake_target.iter_variants():
-				if not variant.workmesh: 
+				if not variant.workmesh:
 					continue
 
 				mesh = bmesh.new()
@@ -147,7 +147,7 @@ def get_intermediate_uv_object_list(ht: HomeomorphicProperties) -> list[intermed
 
 
 def pack_intermediate_atlas(
-	bake_scene: Scene, all_uv_object_list: list[intermediate.packing.bake_target], 
+	bake_scene: Scene, all_uv_object_list: list[intermediate.packing.bake_target],
 	atlas: Image, uv_map: str, box: tuple[float] = None):
 	view_layer = bake_scene.view_layers[0]
 
@@ -160,8 +160,8 @@ def pack_intermediate_atlas(
 	for uv_island in uv_object_list:
 		scale_factor = uv_island.area * uv_island.bake_target.uv_area_weight
 		copy_and_transform_uv(
-			uv_island.bake_target.source_object, 
-			uv_island.bake_target.source_uv_map, 
+			uv_island.bake_target.source_object,
+			uv_island.bake_target.source_uv_map,
 			uv_island.variant.workmesh, uv_map, scale_factor
 		)
 	# ensure meshes are not hidden
@@ -215,9 +215,9 @@ def pack_intermediate_atlas(
 				bake_scene.uvpm3_props.custom_target_box.p2_y ) = box
 
 
-		#NOTE - if we later do downsampling when doing final bake 
+		#NOTE - if we later do downsampling when doing final bake
 		#     - we must consider the final pixel margin and not the intermediate one!
-		#TODO(ranjian0) - dont hardcode pixel margin! 
+		#TODO(ranjian0) - dont hardcode pixel margin!
 		bake_scene.uvpm3_props.pixel_margin_enable = True
 		bake_scene.uvpm3_props.pixel_margin = 5
 		bpy.ops.uvpackmaster3.pack(mode_id='pack.single_tile')
@@ -231,7 +231,7 @@ def pack_intermediate_atlas(
 
 
 def copy_and_transform_uv(
-	source_object: Object, source_layer: str, 
+	source_object: Object, source_layer: str,
 	target_object: Object, target_layer: str, scale_factor: float = 1.0):
 
 	#TODO - investigate if we can get uv layer index without actually changing it and getting mesh.loops.layers.uv.active
@@ -241,7 +241,7 @@ def copy_and_transform_uv(
 		# No need, context already set
 		pass
 
-	#TODO - would be great if we made a context manager for these commands so that we 
+	#TODO - would be great if we made a context manager for these commands so that we
 	# could reset all changes when exiting the context (this applies to a lot of things outside this function too)
 	set_uv_map(source_object, source_layer)
 	set_uv_map(target_object, target_layer)

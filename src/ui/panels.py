@@ -1,27 +1,11 @@
 import bpy
-import functools
-from ..utils.properties import *
-from ..utils.logging import log_writer as log
+
 from ..utils.exceptions import InternalError
-from ..utils.helpers import require_work_scene, require_bake_scene, pending_classes, is_dev
-
-class frame_panel(bpy.types.Panel):
-	#contribution note 6B
-	def __init_subclass__(cls):
-		pending_classes.append(cls)
+from ..utils.logging import log_writer as log
+from ..utils.helpers import get_homeomorphic_tool_state, require_work_scene, require_bake_scene, is_dev
 
 
-if is_dev():
-	class FRAME_PT_node_dev_tools(frame_panel):
-		bl_label = "Avatar Development Tools"
-		bl_space_type = 'NODE_EDITOR'
-		bl_region_type = 'UI'
-		bl_category = "Avatar"
-
-		def draw(self, context):
-			self.layout.operator('frame.create_node_script')
-
-class FRAME_PT_workflow(frame_panel):
+class FRAME_PT_workflow(bpy.types.Panel):
 	bl_label = "Workflow"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
@@ -47,7 +31,7 @@ class FRAME_PT_workflow(frame_panel):
 			bake_targets = self.layout.box()
 			bake_targets.prop(scene.ui_state, "workflow_bake_targets_visible", text="Bake Targets")
 			if scene.ui_state.workflow_bake_targets_visible:
-				bake_targets.operator('frame.create_targets_from_selection')
+				bake_targets.operator('frame.create_targets_from_avatar_object')
 				bake_targets.operator('frame.clear_bake_targets')
 
 
@@ -86,7 +70,9 @@ class FRAME_PT_workflow(frame_panel):
 				col.operator('frame.update_selected_material')
 
 				work_materials.separator()
-				work_materials.operator('frame.select_by_atlas')
+				col = work_materials.column(align=True)
+				col.operator('frame.select_by_atlas')
+				col.operator('frame.set_selected_workmesh_atlas')
 				work_materials.prop(HT, 'select_by_atlas_image')
 
 			baking = self.layout.box()
@@ -131,53 +117,15 @@ class FRAME_PT_workflow(frame_panel):
 				debug.operator('frame.clear_bake_scene')
 
 
-
-class template_expandable_section:
-	_EXPANDED_ICON = 'TRIA_DOWN'
-	_COLLAPSED_ICON = 'TRIA_RIGHT'
-
-	def __init__(self, layout, data, title, expanded_property):
-		self._layout = layout.box()
-		self._state = getattr(data, expanded_property)
-		self._layout.prop(data, expanded_property, text=title, icon=self._EXPANDED_ICON if self._state else self._COLLAPSED_ICON)
-
-	def __getattr__(self, key):
-		if self._state:
-			return functools.partial(getattr(self._layout, key))
-		else:
-			return lambda *a, **n: None	#This is a dummy function so when this template is hidden nothing is displayed
-
-
-def draw_variant(layout, variant, bake_scene):
-	col = layout.column(align=True)
-
-	col.prop(variant, 'image')
-	col.prop_search(variant, 'workmesh', bake_scene, 'objects')
-	if variant.workmesh:
-		col.prop_search(variant, 'uv_map', variant.workmesh.data, 'uv_layers')
-	else:
-		col.label(text='Select work mesh to choose UV map')
-
-	#TODO - this should perhaps not be visible?
-	col.prop(variant, "intermediate_atlas")
-	if variant.intermediate_atlas is None:
-		col.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
-
-
-class FRAME_PT_batch_bake_targets(frame_panel):
+class FRAME_PT_bake_targets(bpy.types.Panel):
 	bl_label = "Bake targets"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
 	bl_category = "Avatar"
 
 	def draw(self, context):
-
-		if scene := require_work_scene(context):
-			HT = scene.homeomorphictools
-			bake_scene = require_bake_scene(context)
-
+		if HT := get_homeomorphic_tool_state(context):
 			row = self.layout.row()
-
 			rows = 3
 			if HT.selected_bake_target != -1:
 				rows = 5
@@ -194,60 +142,52 @@ class FRAME_PT_batch_bake_targets(frame_panel):
 				et = HT.bake_target_collection[HT.selected_bake_target]
 				col.prop(et, "export", toggle=True, text="", icon="EXPORT")
 
-				self.layout.prop_search(et, "source_object", scene, "objects")
-
-				if obj := et.source_object:
+				if obj := HT.avatar_mesh:
 					if obj.data.shape_keys:
 						self.layout.prop_search(et, "shape_key_name", obj.data.shape_keys, "key_blocks")
 
-				self.layout.prop(et, 'bake_mode')
+				self.layout.prop(et, 'bake_mode', expand=True)
 				if et.bake_mode == 'UV_BM_REGULAR':
-					self.layout.prop(et, 'uv_area_weight', slider=True)
-
-					variants = self.layout.box()
-					variants.prop(et, 'multi_variants')
-
-					if et.multi_variants:
-						variants.template_list('FRAME_UL_bake_variants', '', et, 'variant_collection', et, 'selected_variant')
-
-						variant_actions = variants.row(align=True)
-						variant_actions.operator('frame.add_bake_target_variant')
-						variant_actions.operator('frame.remove_bake_target_variant')
-
-						if et.selected_variant != -1:
-							var = et.variant_collection[et.selected_variant]
-							draw_variant(variants, var, bake_scene)
-
-					else:	# draw the first entry only
-						if len(et.variant_collection) == 0:
-							variants.label(text='Please revalidate bake target')
-						else:
-							var = et.variant_collection[0]
-							draw_variant(variants, var, bake_scene)
-
 					self.layout.prop(et, 'uv_mode')
-					if et.uv_mode == 'UV_IM_FROZEN':
-						self.layout.prop(et, 'atlas')
+					if et.uv_mode == "UV_IM_NIL":
+						return
+					if len(et.variant_collection):
+						variant = et.variant_collection[0]
+						if variant.workmesh:
+							self.layout.prop_search(variant, 'uv_map', variant.workmesh.data, 'uv_layers')
+						else:
+							self.layout.label(text='Select work mesh to choose UV map', icon="ERROR")
+
+						# TODO(ranjian0) Is this used for UV packing really?
+						# self.layout.prop(et, 'uv_area_weight', text="UV Area")
+						if bake_scene := require_bake_scene(context):
+							self.layout.prop_search(variant, 'workmesh', bake_scene, 'objects')
+						else:
+							self.layout.label("Missing bake scene!", icon="ERROR")
+						self.layout.prop(variant, 'image')
+
+						if et.uv_mode == 'UV_IM_FROZEN':
+							self.layout.prop(et, 'atlas')
+						#TODO - this should perhaps not be visible?
+						self.layout.prop(variant, "intermediate_atlas")
+						if variant.intermediate_atlas is None:
+							self.layout.label(text=f"Intermediate atlas: (not assigned)", icon='UNLINKED')
 
 				elif et.bake_mode == 'UV_BM_MIRRORED':
-					pass	#TODO
+					pass	#TODO(ranjian0) Show opposite mirror for the current target
 				else:
 					raise InternalError(f'et.bake_mode set to unsupported value {et.bake_mode}')
 
 
-class FRAME_PT_effects(frame_panel):
+class FRAME_PT_effects(bpy.types.Panel):
 	bl_label = "Effects"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
 	bl_category = "Avatar"
 
 	def draw(self, context):
-		ob = context.object
-		if not ob or ob.type != 'MESH':
-			return
-
-		if scene := require_work_scene(context):
-			HT = scene.homeomorphictools
+		if HT := get_homeomorphic_tool_state(context):
+			ob = HT.avatar_mesh
 			self.layout.template_list('FRAME_UL_effects', '', HT, 'effect_collection', HT, 'selected_effect')
 			effect_actions = self.layout.row(align=True)
 			effect_actions.operator('frame.add_effect')
@@ -280,15 +220,14 @@ class FRAME_PT_effects(frame_panel):
 					self.layout.operator("frame.add_color_effect")
 
 
-class FRAME_PT_export(frame_panel):
+class FRAME_PT_export(bpy.types.Panel):
 	bl_label = "Export"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
 	bl_category = "Avatar"
 
 	def draw(self, context):
-		if scene := require_work_scene(context):
-			HT = scene.homeomorphictools
+		if HT := get_homeomorphic_tool_state(context):
 			self.layout.prop(HT, "avatar_type", expand=True)
 			self.layout.prop(HT, "export_glb")
 
@@ -311,4 +250,4 @@ class FRAME_PT_export(frame_panel):
 				_ = sp.column()
 				col = sp.column()
 				col.prop(HT, "denoise")
-		self.layout.operator("frame.export")
+		self.layout.operator("frame.export", text="Export")

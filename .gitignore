@@ -1,2 +1,4 @@
 __pycache__
 *.blend1
+*.env.json
+.venv

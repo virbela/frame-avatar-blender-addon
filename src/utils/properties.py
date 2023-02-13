@@ -2,12 +2,12 @@ import bpy
 import typing
 from bpy.types import Context, Object, Image
 from .helpers import (
-	popup_message, 
-	enum_descriptor, 
+	popup_message,
+	enum_descriptor,
 	get_named_entry,
-	require_named_entry, 
-	frame_property_group, 
+	require_named_entry,
 )
+
 from .logging import log_writer as log
 from .constants import MIRROR_TYPE, TARGET_UV_MAP
 
@@ -38,24 +38,6 @@ UV_ISLAND_MODES = enum_descriptor(
 
 	('UV_IM_FROZEN',		'Frozen',			'This UV island will not be modified by the packer',
 		'FREEZE',			3),
-)
-
-
-UV_MIRROR_AXIS = enum_descriptor(
-
-	#Tuple layout - see https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
-	#(identifier, 			name, 				description,
-	#	icon, 				number),
-
-	#NOTE - Suspecting the number is not needed, also since we use our own object to represent these values we could have the long column last and get a more
-	#compact and nice table.
-
-	('UV_MA_U',				'U',				'U (X) Axis',
-		'EVENT_U',			0),
-
-	('UV_MA_V',				'V',				'V (Y) Axis',
-		'EVENT_V',			1),
-
 )
 
 
@@ -152,8 +134,8 @@ def get_bakevariant_name(self: 'BakeVariant'):
 
 def set_bakevariant_name(self: 'BakeVariant', value: str):
 	if not self.workmesh:
-		self['name'] = value 
-		return 
+		self['name'] = value
+		return
 
 	# XXX THIS should only happen for multi variants
 	# -- update workmesh name
@@ -165,7 +147,7 @@ def set_bakevariant_name(self: 'BakeVariant', value: str):
 	self['name'] = value
 
 
-class BakeVariant(frame_property_group):
+class BakeVariant(bpy.types.PropertyGroup):
 	name: 					bpy.props.StringProperty(name="Variant name", default='Untitled variant', get=get_bakevariant_name, set=set_bakevariant_name)
 	image:					bpy.props.PointerProperty(name="Image texture", type=bpy.types.Image)
 	uv_map:					bpy.props.StringProperty(name="UV Map")
@@ -184,16 +166,16 @@ def get_baketarget_name(self: 'BakeTarget'):
 def set_baketarget_name(self: 'BakeTarget', value: str):
 	if not self.source_object:
 		# Initial name set from the create bake targets operator
-		self['name'] = value 
+		self['name'] = value
 		return
-	
-	# This is manual user name editing
-	newname = value.strip(f"{self.source_object.name}_")
+
+	# This is manual user name editing (remove leading 'Avatar_')
+	newname = value.lstrip(f"{self.source_object.name}_")
 
 	# -- rename shapekey
 	keys = self.source_object.data.shape_keys.key_blocks
 	shapekey = keys.get(self.shape_key_name)
-	if not shapekey: 
+	if not shapekey:
 		# -- error shapekey was not found
 		popup_message(f"Shapekey {self.shape_key_name} was not found!", "ShapekeyError")
 		return
@@ -206,13 +188,14 @@ def set_baketarget_name(self: 'BakeTarget', value: str):
 		variantname = newname
 		if self.multi_variants:
 			variantname = f"{newname}.{variant.name}"
-		variant.workmesh.name = variantname
+		if variant.workmesh:
+			variant.workmesh.name = variantname
 
 	self['name'] = value
 	log.info(f"Renaming baketarget to {value} ... ")
 
 #FUTURE - we may want to use work meshes as the container for each bake target in the future so that we can easier deal with selections but now we want to just get the current structure working all the way
-class BakeTarget(frame_property_group):
+class BakeTarget(bpy.types.PropertyGroup):
 
 	name: 					bpy.props.StringProperty(name = "Bake target name", default='Untitled bake target', get=get_baketarget_name, set=set_baketarget_name)
 
@@ -233,10 +216,7 @@ class BakeTarget(frame_property_group):
 
 	bake_mode:						bpy.props.EnumProperty(items=tuple(UV_BAKE_MODE), name="UV bake mode", default=0)
 
-	uv_mirror_axis:					bpy.props.EnumProperty(items=tuple(UV_MIRROR_AXIS), name="UV mirror axis", default=0)
-
 	mirror_source:					bpy.props.IntProperty(name='Bake target used for mirror')
-	uv_mirror_options_expanded:		bpy.props.BoolProperty(name="UV mirror options expanded", default=True)
 
 	uv_mode:						bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
 	atlas:							bpy.props.PointerProperty(name="Atlas image", type=bpy.types.Image)
@@ -286,11 +266,6 @@ class BakeTarget(frame_property_group):
 
 		return None, None
 
-
-	#TBD should we use the name here or the identifier?
-	# def get_bake_scene_name(self):
-	# 	return self.identifier
-
 	#NOTE we should probably deprecate this in favor of iter_variants
 	# this doesn't yield anything if there are no variants
 	def iter_bake_scene_variants(self) -> typing.Generator[tuple[str, BakeVariant], None, None]:
@@ -319,18 +294,17 @@ class BakeTarget(frame_property_group):
 			yield prefix
 
 
-class BakeTargetReference(frame_property_group):
+class BakeTargetReference(bpy.types.PropertyGroup):
 	target:					bpy.props.IntProperty(name='Bake target identifier', default=-1)
 
 
-class BakeGroup(frame_property_group):
+class BakeGroup(bpy.types.PropertyGroup):
 	name: 					bpy.props.StringProperty(name="Group name", default='Untitled group')
 	members:				bpy.props.CollectionProperty(type = BakeTargetReference)
 	selected_member:		bpy.props.IntProperty(name = "Selected bake target", default = -1)
 
 
-class BakeTargetMirrorEntry(frame_property_group):
-	#Here I wanted to use PointerProperty but they don't really act as the name implies. See contribution note 7 for more details.
+class BakeTargetMirrorEntry(bpy.types.PropertyGroup):
 	primary: 				bpy.props.IntProperty(name='Primary bake target identifier', default=-1)
 	secondary: 				bpy.props.IntProperty(name='Secondary bake target identifier', default=-1)
 
@@ -347,7 +321,7 @@ def update_atlas_size(self, context: Context):
 				at.update()
 
 
-class PositionEffect(frame_property_group):
+class PositionEffect(bpy.types.PropertyGroup):
 	parent_shapekey: 		bpy.props.StringProperty(
 								name="Parent Shapekey",
 								description="Shape key used as the relative key for this effect"
@@ -358,18 +332,18 @@ class PositionEffect(frame_property_group):
 							)
 
 
-class ColorEffect(frame_property_group):
+class ColorEffect(bpy.types.PropertyGroup):
 	shape: 					bpy.props.StringProperty(name="Target Shapekey")
 	color: 					bpy.props.FloatVectorProperty(name="Color", subtype='COLOR',
 								size = 4,
 								min = 0.0,
 								max = 1.0,
-								default = (1.0,1.0,1.0,1.0)
+								default = (1.0, 1.0, 1.0, 1.0)
 							)
 	vert_group: 			bpy.props.StringProperty(name="Vertex Group")
 
 
-class EffectProperty(frame_property_group):
+class EffectProperty(bpy.types.PropertyGroup):
 	name: 					bpy.props.StringProperty(name="Effect Name", default='Untitled Effect')
 	type: 					bpy.props.EnumProperty(items=tuple(EFFECT_TYPE), name="Effect Type")
 	target:					bpy.props.IntProperty(name='Effect identifier', default=-1)
@@ -378,12 +352,12 @@ class EffectProperty(frame_property_group):
 	colors: 				bpy.props.CollectionProperty(type = ColorEffect)
 
 
-class ExportAnimationProperty(frame_property_group):
+class ExportAnimationProperty(bpy.types.PropertyGroup):
 	name: 							bpy.props.StringProperty(name="", default="")
 	checked: 						bpy.props.BoolProperty(name="", default=True)
 
 
-class HomeomorphicProperties(frame_property_group):
+class HomeomorphicProperties(bpy.types.PropertyGroup):
 
 	### Bake targets ###
 	avatar_rig:							bpy.props.PointerProperty(name='Avatar Rig', type=bpy.types.Object)
@@ -461,7 +435,7 @@ class HomeomorphicProperties(frame_property_group):
 		return -1
 
 
-class UIStateProperty(frame_property_group):
+class UIStateProperty(bpy.types.PropertyGroup):
 	workflow_introduction_visible: 			bpy.props.BoolProperty(default=True)
 	workflow_bake_targets_visible: 			bpy.props.BoolProperty(default=True)
 	workflow_work_meshes_visible: 			bpy.props.BoolProperty(default=False)
@@ -469,3 +443,23 @@ class UIStateProperty(frame_property_group):
 	workflow_work_materials_visible: 		bpy.props.BoolProperty(default=False)
 	workflow_baking_visible: 				bpy.props.BoolProperty(default=False)
 	workflow_helpers_visible: 				bpy.props.BoolProperty(default=False)
+
+
+classes = (
+	BakeTargetReference,
+	BakeGroup,
+
+	BakeTargetMirrorEntry,
+	BakeVariant,
+	BakeTarget,
+
+	ColorEffect,
+	PositionEffect,
+	EffectProperty,
+
+	UIStateProperty,
+	ExportAnimationProperty,
+	HomeomorphicProperties,
+)
+
+register_props, unregister_props = bpy.utils.register_classes_factory(classes)

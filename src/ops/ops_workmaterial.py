@@ -6,16 +6,16 @@ from ..utils.logging import log_writer as log
 from ..utils.materials import setup_bake_material, get_material_variants
 from ..utils.properties import HomeomorphicProperties, BakeTarget, BakeVariant
 from ..utils.helpers import (
-	set_scene, 
+	set_scene,
 	set_selection,
-	require_bake_scene, 
-	require_named_entry, 
+	require_bake_scene,
+	require_named_entry,
 	get_bake_target_variant_name
 )
 
 def update_all_materials(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	for bake_target in ht.bake_target_collection:
-		for variant_name, variant in bake_target.iter_variants():
+		for _, variant in bake_target.iter_variants():
 			update_workmesh_materials(context, ht, bake_target, variant)
 
 
@@ -23,6 +23,15 @@ def update_selected_material(operator: Operator, context: Context, ht: Homeomorp
 	if bake_target := ht.get_selected_bake_target():
 		if variant := bake_target.variant_collection[bake_target.selected_variant]:
 			update_workmesh_materials(context, ht, bake_target, variant)
+
+
+def set_selected_objects_atlas(operator: Operator, context: Context, ht: HomeomorphicProperties):
+	selected_objects = context.selected_objects
+	for bake_target in ht.bake_target_collection:
+		for _, variant in bake_target.iter_variants():
+			if variant.workmesh in selected_objects:
+				variant.intermediate_atlas = ht.select_by_atlas_image
+				update_workmesh_materials(context, ht, bake_target, variant)
 
 
 def switch_to_bake_material(operator: Operator, context: Context, ht: HomeomorphicProperties):
@@ -36,7 +45,7 @@ def switch_to_preview_material(operator: Operator, context: Context, ht: Homeomo
 def select_by_atlas(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	selection = list()
 	for bake_target in ht.bake_target_collection:
-		for variant_name, variant in bake_target.iter_variants():
+		for _, variant in bake_target.iter_variants():
 			if variant.intermediate_atlas == ht.select_by_atlas_image:
 				selection.append(variant.workmesh)
 
@@ -48,8 +57,7 @@ def select_by_atlas(operator: Operator, context: Context, ht: HomeomorphicProper
 
 
 def update_workmesh_materials(context: Context, ht: HomeomorphicProperties,  bake_target: BakeTarget, variant: BakeVariant):
-	#TODO - create all materials
-
+	#TODO Handle mirror bake targets properly i.e this fails when no uv map is found
 	#TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
 	if not variant.uv_map:
 		variant.workmesh.active_material = None
@@ -60,11 +68,11 @@ def update_workmesh_materials(context: Context, ht: HomeomorphicProperties,  bak
 	if bake_material_name in bpy.data.materials:
 		# Remove existing
 		bpy.data.materials.remove(bpy.data.materials[bake_material_name])
-	
+
 	bake_material = bpy.data.materials.new(bake_material_name)
 	bake_material.use_nodes = True	#contribution note 9
 	#TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?
-	setup_bake_material(bake_material.node_tree, variant.intermediate_atlas, bake_target.source_uv_map, variant.image, variant.uv_map)
+	setup_bake_material(bake_material, variant.intermediate_atlas, bake_target.source_uv_map, variant.image, variant.uv_map)
 	variant.workmesh.active_material = bake_material
 
 

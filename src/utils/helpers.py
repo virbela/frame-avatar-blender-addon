@@ -1,18 +1,20 @@
-import io 
+import io
 import bpy
+import json
 import enum
 import uuid
 import types
 import bmesh
 import pstats
 import typing
-import cProfile 
+import cProfile
 import threading
 import addon_utils
+from pathlib import Path
 from typing import TYPE_CHECKING
 from dataclasses import dataclass
 from contextlib import contextmanager
-from bpy.types import bpy_struct, Context, Scene, bpy_prop_collection, Object, Preferences
+from bpy.types import Context, Scene, bpy_prop_collection, Object, Preferences
 
 from .logging import log_writer as log
 from .constants import BAKE_SCENE, WORK_SCENE
@@ -23,11 +25,11 @@ from .exceptions import InternalError, FrameException
 if TYPE_CHECKING:
     from .properties import HomeomorphicProperties, BakeTarget, BakeVariant
 
-pending_classes = list()
 
 def IMPLEMENTATION_PENDING(*p, **n):
     raise InternalError(f'This feature is not implemented! (arguments: {p} {n})')
 
+PREFS_LOG = True
 
 @contextmanager
 def profile():
@@ -45,10 +47,6 @@ def profile():
 
     print(s.getvalue())
 
-
-def register_class(cls: bpy_struct) -> bpy_struct:
-    pending_classes.append(cls)
-    return cls
 
 class missing_action(enum.Enum):
     FAIL = object()
@@ -76,22 +74,6 @@ class enum_descriptor:
     def __iter__(self):
         for member in self.members.values():
             yield (member.identifier, member.name, member.description, member.icon, member.number)
-
-
-class frame_property_group(bpy.types.PropertyGroup):
-    #contribution note 6B
-    def __init_subclass__(cls):
-        pending_classes.append(cls)
-
-    def get_properties_by_names(self, names: str, if_missing: missing_action = missing_action.FAIL) -> typing.Any:
-        'Takes list of names separated by space and yields the values of those members.'
-
-        if if_missing is missing_action.FAIL:
-            return (getattr(self, member) for member in names.split())
-        elif if_missing is missing_action.RETURN_NONE:
-            return (getattr(self, member, None) for member in names.split())
-        else:
-            raise ValueError(f'if_missing has unknown value')
 
 
 def require_work_scene(context: Context) -> Scene:
@@ -281,7 +263,7 @@ def purge_object(obj: Object):
     for block in bpy.data.meshes:
         if block.users == 0:
             bpy.data.meshes.remove(block)
-    
+
     for block in bpy.data.materials:
         if block.users == 0:
             bpy.data.materials.remove(block)
@@ -296,16 +278,41 @@ def is_dev() -> bool:
 
 
 def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
+    global PREFS_LOG
+
     try:
         preferences = bpy.context.preferences.addons[__package__].preferences
-        return preferences
     except KeyError:
         # XXX DEV(simulate preferences)
         preferences = types.SimpleNamespace()
         preferences.log_target = "devlog"
+        preferences.npy_export_dir = ""
         preferences.glb_export_dir = ""
         preferences.atlas_export_dir = ""
-        return preferences
+        preferences.custom_frame_validation = True
+        # -- check for .env.json to load dev frame dirs
+        env_file = Path(__file__).parent.parent.parent.joinpath(".env.json").absolute()
+        if env_file.exists():
+            with open(env_file, 'r') as file:
+                data = json.load(file)
+                glb_folder = data['frame_glb_folder']
+                if Path(glb_folder).exists():
+                    preferences.glb_export_dir = glb_folder
+                    if PREFS_LOG:
+                        log.info(f"GLB Export dir set to {glb_folder}")
+                atlas_folder = data['frame_atlas_folder']
+                if Path(atlas_folder).exists():
+                    preferences.atlas_export_dir = atlas_folder
+                    if PREFS_LOG:
+                        log.info(f"Atlas Export dir set to {atlas_folder}")
+                npy_folder = data['frame_npy_folder']
+                if Path(npy_folder).exists():
+                    preferences.npy_export_dir = npy_folder
+                    if PREFS_LOG:
+                        log.info(f"Npy Export dir set to {npy_folder}")
+
+    PREFS_LOG = False
+    return preferences
 
 
 def popup_message(message: str, title: str = "Error", icon: str = "ERROR"):
