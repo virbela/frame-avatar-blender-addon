@@ -7,7 +7,7 @@ from mathutils import Matrix
 from bpy_extras.io_utils import axis_conversion
 
 from .properties import HomeomorphicProperties
-from .helpers import get_action_frame_range, get_animation_objects, get_num_frames_single_actions, require_bake_scene, get_gltf_export_indices
+from .helpers import get_action_frame_range, get_animation_objects, require_bake_scene, get_gltf_export_indices
 
 class BoneAnimationExporter:
     weights = dict()

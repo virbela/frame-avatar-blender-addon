@@ -8,8 +8,16 @@ from bpy.types import Action, Context, Object, Mesh
 
 from .constants import GLB_VERT_COUNT
 from .logging import log_writer as log
-from .helpers import get_action_frame_range, get_homeomorphic_tool_state, get_num_frames_all_actions, get_num_frames_single_action, popup_message, require_bake_scene, get_prefs, get_gltf_export_indices
-
+from .helpers import (
+    get_prefs, 
+    popup_message, 
+    require_bake_scene, 
+    get_action_frame_range, 
+    get_gltf_export_indices,
+    get_num_frames_all_actions, 
+    get_homeomorphic_tool_state, 
+    get_num_frames_single_action, 
+)
 
 def generate_animation_blob(context: Context, avatar: Object, animated_objects: list[Object]):
     HT = get_homeomorphic_tool_state()
