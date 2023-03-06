@@ -49,6 +49,7 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
 
 
 def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
+    log.info("Validating Export state...")
     work_scene = require_work_scene(context)
     if work_scene is None:
         popup_message("Export validation failed! Work scene missing!", "Validation Error")

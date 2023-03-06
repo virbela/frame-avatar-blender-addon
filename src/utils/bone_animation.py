@@ -6,6 +6,7 @@ import numpy
 from mathutils import Matrix
 from bpy_extras.io_utils import axis_conversion
 
+from .logging import log_writer as log
 from .properties import HomeomorphicProperties
 from .helpers import get_action_frame_range, get_animation_objects, require_bake_scene, get_gltf_export_indices
 
@@ -14,6 +15,7 @@ class BoneAnimationExporter:
     transforms = dict()
 
     def __init__(self, context: bpy.types.Context, ht: HomeomorphicProperties):
+        log.info("Bone animation export started ...")
         self.ht = ht
         self.context = context
         self.armature = None
@@ -22,6 +24,9 @@ class BoneAnimationExporter:
         for ob in sc.objects:
             if ob.type == 'ARMATURE':
                 self.armature = ob
+        
+        if not self.armature:
+            self.armature = self.ht.avatar_rig
 
         self.bones = [b.name for b in self.armature.data.bones]
         self.animated_objects = get_animation_objects(ht)
@@ -30,7 +35,8 @@ class BoneAnimationExporter:
         self.set_transforms()
 
     def set_weights(self):
-        export_indices = get_gltf_export_indices(self.ht.avatar_object)
+        log.info("\tCalculating vertex weights...")
+        export_indices = get_gltf_export_indices(self.ht.avatar_mesh)
 
         for obj in self.animated_objects:
             self.weights[obj.name] = dict()
@@ -64,6 +70,7 @@ class BoneAnimationExporter:
             json.dump(self.weights, file, indent=4)
 
     def set_transforms(self):
+        log.info("\tGetting bone transforms...")
         bakescene = require_bake_scene(self.context)
         # blender z-up to babylon y-up
         R1 = Matrix.Rotation(math.radians(180), 4, 'Y')
@@ -97,9 +104,14 @@ class BoneAnimationExporter:
             return [round(mat[j][i], 4) for i in range(4) for j in range(4)]
 
         for action in bpy.data.actions:
-            # TODO(ranjian0) Do we ever want to skip actions that are not marked for export
-            # if action.name == 'tpose':
-            #     continue
+            if action.name not in [ea.name for ea in self.ht.export_animation_actions]:
+                # Possibly not a valid export action eg tpose
+                continue
+
+            action_enabled = {e.name: e.checked for e in self.ht.export_animation_actions}.get(action.name, False)
+            if not action_enabled:
+                # Current action is not marked for export
+                continue
 
             self.armature.animation_data.action = action
             self.transforms[action.name] = list()
