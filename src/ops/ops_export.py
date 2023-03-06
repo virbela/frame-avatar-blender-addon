@@ -27,10 +27,11 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
     with selection(None), active_object(None):
         try:
             if HT.avatar_type == "FULLBODY" and HT.export_animation:
-                export_vertex_animation(context, HT)
+                BoneAnimationExporter(context, HT)
+            # XXX Mark Disabled in favour of bone animation export
+            #     export_vertex_animation(context, HT)
 
             if HT.export_glb:
-                BoneAnimationExporter(context, HT)
                 success = export_glb(context, HT)
                 if not success:
                     # XXX exit early if mesh export failed
