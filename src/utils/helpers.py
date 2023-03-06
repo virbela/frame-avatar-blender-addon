@@ -404,7 +404,7 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
     return result
 
 
-def get_animation_objects(ht: HomeomorphicProperties) -> list[Object]:
+def get_animation_objects(ht: 'HomeomorphicProperties') -> list[Object]:
     avatar_obj = ht.avatar_mesh
     animated_objects = []
     for bake_target in ht.bake_target_collection:
