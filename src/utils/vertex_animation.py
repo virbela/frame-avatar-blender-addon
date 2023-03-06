@@ -8,7 +8,7 @@ from bpy.types import Action, Context, Object, Mesh
 
 from .constants import GLB_VERT_COUNT
 from .logging import log_writer as log
-from .helpers import get_homeomorphic_tool_state, popup_message, require_bake_scene, get_prefs, get_gltf_export_indices
+from .helpers import get_action_frame_range, get_homeomorphic_tool_state, get_num_frames_all_actions, get_num_frames_single_action, popup_message, require_bake_scene, get_prefs, get_gltf_export_indices
 
 
 def generate_animation_blob(context: Context, avatar: Object, animated_objects: list[Object]):
@@ -24,7 +24,7 @@ def generate_animation_blob(context: Context, avatar: Object, animated_objects: 
         if len(export_indices) != GLB_VERT_COUNT:
             log.error("Invalid vert count for animations")
 
-    num_frames = get_num_frames()
+    num_frames = get_num_frames_all_actions()
     num_verts = len(export_indices)
     animation_buffer = np.zeros((num_verts * 3, num_frames, len(animated_objects)), dtype=np.float32)
     frame_counter = {o.name:0 for o in animated_objects}
@@ -65,13 +65,8 @@ def generate_animation_blob(context: Context, avatar: Object, animated_objects: 
 
 def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list[Mesh]:
     meshes = []
-    sx, sy = action.frame_range
     bakescene = require_bake_scene(context)
-    if (sy - sx) > 1:
-        # range stop is exclusive, so add one if animation has more than one frame
-        sy += 1
-
-    for i in range(int(sx), int(sy)):
+    for i in range(*get_action_frame_range(action)):
         bakescene.frame_set(i)
         depsgraph = bakescene.view_layers[0].depsgraph
 
@@ -81,19 +76,6 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list
         me.transform(object.matrix_world @ Matrix.Rotation(math.radians(-90), 4, 'X'))
         meshes.append(me)
     return meshes
-
-
-def get_num_frames() -> int:
-    result = 0
-    for action in bpy.data.actions:
-        sx, sy = action.frame_range
-        diff = sy - sx
-        if diff > 1:
-            # If more than one frame, the range is inclusive
-            diff += 1
-
-        result += diff
-    return int(result)
 
 
 def export_action_animation(context: Context, action: Action, animated_objects: list[Object], num_verts: int, export_indices: list[int]):
@@ -115,12 +97,7 @@ def export_action_animation(context: Context, action: Action, animated_objects: 
         directory = str(Path(prefs.npy_export_dir).absolute())
     blob_file = open(os.path.join(directory, f"{action.name}.npy"), 'wb')
 
-    sx, sy = action.frame_range
-    num_frames = sy - sx
-    if num_frames > 1:
-        # If more than one frame, the range is inclusive
-        num_frames += 1
-
+    num_frames = get_num_frames_single_action(action)
     animation_buffer = np.zeros((num_verts * 3, int(num_frames), len(animated_objects)), dtype=np.float32, order='F')
     for oid, anim_obj in enumerate(sorted(animated_objects, key=lambda o:o.name)):
         meshes = get_per_frame_mesh(context, action, anim_obj)

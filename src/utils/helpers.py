@@ -12,10 +12,10 @@ import threading
 import addon_utils
 import numpy as np
 from pathlib import Path
-from typing import TYPE_CHECKING
 from dataclasses import dataclass
 from contextlib import contextmanager
-from bpy.types import Context, Scene, bpy_prop_collection, Object, Preferences, Mesh
+from typing import TYPE_CHECKING, Tuple
+from bpy.types import Context, Scene, bpy_prop_collection, Object, Preferences, Mesh, Action
 
 from .logging import log_writer as log
 from .constants import BAKE_SCENE, WORK_SCENE
@@ -432,3 +432,23 @@ def get_animation_objects(ht: 'HomeomorphicProperties') -> list[Object]:
         animated_objects.append(obj)
     return animated_objects
 
+
+def get_action_frame_range(action: Action) -> Tuple[int, int]:
+    sx, sy = action.frame_range
+    if (sy - sx) > 1:
+        # range stop is exclusive, so add one if animation has more than one frame
+        sy += 1
+    return int(sx), int(sy)
+
+
+def get_num_frames_all_actions() -> int:
+    result = 0
+    for action in bpy.data.actions:
+        sx, sy = get_action_frame_range(action)
+        result += (sy - sx)
+    return result
+
+
+def get_num_frames_single_action(action: Action) -> int:
+    sx, sy = get_action_frame_range(action)
+    return sy - sx

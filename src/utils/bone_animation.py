@@ -7,7 +7,7 @@ from mathutils import Matrix
 from bpy_extras.io_utils import axis_conversion
 
 from .properties import HomeomorphicProperties
-from .helpers import get_animation_objects, require_bake_scene, get_gltf_export_indices
+from .helpers import get_action_frame_range, get_animation_objects, get_num_frames_single_actions, require_bake_scene, get_gltf_export_indices
 
 class BoneAnimationExporter:
     weights = dict()
@@ -97,17 +97,13 @@ class BoneAnimationExporter:
             return [round(mat[j][i], 4) for i in range(4) for j in range(4)]
 
         for action in bpy.data.actions:
+            # TODO(ranjian0) Do we ever want to skip actions that are not marked for export
             # if action.name == 'tpose':
             #     continue
 
             self.armature.animation_data.action = action
             self.transforms[action.name] = list()
-            sx, sy = action.frame_range
-            if (sy - sx) > 1:
-                # range stop is exclusive, so add one if animation has more than one frame
-                sy += 1
-
-            for i in range(int(sx), int(sy)):
+            for i in range(*get_action_frame_range(action)):
                 bakescene.frame_set(i)
                 self.context.view_layer.update()
                 mats = [get_bone_mat(self.armature.pose.bones[bname]) for bname in self.bones]
