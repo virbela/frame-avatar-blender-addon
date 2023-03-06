@@ -28,7 +28,7 @@ class BoneAnimationExporter:
         if not self.armature:
             self.armature = self.ht.avatar_rig
 
-        self.bones = [b.name for b in self.armature.data.bones]
+        self.bones = [b.name for b in self.armature.data.bones if b.use_deform]
         self.animated_objects = get_animation_objects(ht)
 
         self.set_weights()
