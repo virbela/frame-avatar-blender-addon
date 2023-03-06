@@ -10,17 +10,17 @@ import typing
 import cProfile
 import threading
 import addon_utils
+import numpy as np
 from pathlib import Path
 from typing import TYPE_CHECKING
 from dataclasses import dataclass
 from contextlib import contextmanager
-from bpy.types import Context, Scene, bpy_prop_collection, Object, Preferences
+from bpy.types import Context, Scene, bpy_prop_collection, Object, Preferences, Mesh
 
 from .logging import log_writer as log
 from .constants import BAKE_SCENE, WORK_SCENE
 from .exceptions import InternalError, FrameException
 
-# controllers.py
 
 if TYPE_CHECKING:
     from .properties import HomeomorphicProperties, BakeTarget, BakeVariant
@@ -340,3 +340,95 @@ def ensure_applied_rotation(object: Object):
     bm.to_mesh(object.data)
     bm.free()
     object.rotation_euler = (0, 0, 0)
+
+
+def get_gltf_export_indices(obj: Object) -> list[int]:
+    def __get_uvs(blender_mesh, uv_i):
+        layer = blender_mesh.uv_layers[uv_i]
+        uvs = np.empty(len(blender_mesh.loops) * 2, dtype=np.float32)
+        layer.data.foreach_get('uv', uvs)
+        uvs = uvs.reshape(len(blender_mesh.loops), 2)
+
+        # Blender UV space -> glTF UV space
+        # u,v -> u,1-v
+        uvs[:, 1] *= -1
+        uvs[:, 1] += 1
+
+        return uvs
+
+    # Get the active mesh
+    me: Mesh = obj.data
+    tex_coord_max = len(me.uv_layers)
+
+    dot_fields = [('vertex_index', np.uint32)]
+    for uv_i in range(tex_coord_max):
+        dot_fields += [('uv%dx' % uv_i, np.float32), ('uv%dy' % uv_i, np.float32)]
+
+
+    dots = np.empty(len(me.loops), dtype=np.dtype(dot_fields))
+    vidxs = np.empty(len(me.loops))
+    me.loops.foreach_get('vertex_index', vidxs)
+    dots['vertex_index'] = vidxs
+    del vidxs
+
+    for uv_i in range(tex_coord_max):
+        uvs = __get_uvs(me, uv_i)
+        dots['uv%dx' % uv_i] = uvs[:, 0]
+        dots['uv%dy' % uv_i] = uvs[:, 1]
+        del uvs
+
+
+    # Calculate triangles and sort them into primitives.
+
+    me.calc_loop_triangles()
+    loop_indices = np.empty(len(me.loop_triangles) * 3, dtype=np.uint32)
+    me.loop_triangles.foreach_get('loops', loop_indices)
+
+    prim_indices = {}  # maps material index to TRIANGLES-style indices into dots
+
+    # Bucket by material index.
+
+    tri_material_idxs = np.empty(len(me.loop_triangles), dtype=np.uint32)
+    me.loop_triangles.foreach_get('material_index', tri_material_idxs)
+    loop_material_idxs = np.repeat(tri_material_idxs, 3)  # material index for every loop
+    unique_material_idxs = np.unique(tri_material_idxs)
+    del tri_material_idxs
+
+    for material_idx in unique_material_idxs:
+        prim_indices[material_idx] = loop_indices[loop_material_idxs == material_idx]
+
+
+    prim_dots = dots[prim_indices[0]]
+    prim_dots, _ = np.unique(prim_dots, return_inverse=True)
+    result = [d[0] for d in prim_dots]
+    return result
+
+
+def get_animation_objects(ht: HomeomorphicProperties) -> list[Object]:
+    avatar_obj = ht.avatar_mesh
+    animated_objects = []
+    for bake_target in ht.bake_target_collection:
+        if not avatar_obj:
+            avatar_obj = bake_target.source_object
+
+        if bake_target.multi_variants:
+            # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
+            log.info(f"Skipping multivariant {bake_target.name}", print_console=False)
+            continue
+
+        obj = bake_target.variant_collection[0].workmesh
+        if not obj:
+            # TODO(ranjian0)
+            # Possible variants not generated yet, or some other fail condition
+            log.info(f"Skipping missing workmesh {bake_target.name}", print_console=False)
+            continue
+
+        has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
+        if not has_armature:
+            # Object has no armature!
+            log.info(f"Skipping missing armature {bake_target.name}", print_console=False)
+            continue
+
+        animated_objects.append(obj)
+    return animated_objects
+

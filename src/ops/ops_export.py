@@ -15,8 +15,8 @@ from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..utils.morph_spec import validate_floater_morphs, validate_fullbody_morphs
 from ..utils.vertex_animation import generate_animation_blob, validate_animation_export_verts
 from ..utils.uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
-from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
 from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
+from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name, get_animation_objects
 
 
 def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
@@ -452,35 +452,6 @@ def animation_metadata(ht: HomeomorphicProperties) -> dict:
     animated_objects = get_animation_objects(ht)
     result['layers'] = sorted(o.name for o in animated_objects)
     return result
-
-
-def get_animation_objects(ht: HomeomorphicProperties) -> list[Object]:
-    avatar_obj = ht.avatar_mesh
-    animated_objects = []
-    for bake_target in ht.bake_target_collection:
-        if not avatar_obj:
-            avatar_obj = bake_target.source_object
-
-        if bake_target.multi_variants:
-            # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
-            log.info(f"Skipping multivariant {bake_target.name}", print_console=False)
-            continue
-
-        obj = bake_target.variant_collection[0].workmesh
-        if not obj:
-            # TODO(ranjian0)
-            # Possible variants not generated yet, or some other fail condition
-            log.info(f"Skipping missing workmesh {bake_target.name}", print_console=False)
-            continue
-
-        has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
-        if not has_armature:
-            # Object has no armature!
-            log.info(f"Skipping missing armature {bake_target.name}", print_console=False)
-            continue
-
-        animated_objects.append(obj)
-    return animated_objects
 
 
 def get_uvtransform_metadata(context: Context, ht: HomeomorphicProperties, obj: Object) -> dict:

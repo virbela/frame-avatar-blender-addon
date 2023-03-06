@@ -8,7 +8,7 @@ from bpy.types import Action, Context, Object, Mesh
 
 from .constants import GLB_VERT_COUNT
 from .logging import log_writer as log
-from .helpers import get_homeomorphic_tool_state, popup_message, require_bake_scene, get_prefs
+from .helpers import get_homeomorphic_tool_state, popup_message, require_bake_scene, get_prefs, get_gltf_export_indices
 
 
 def generate_animation_blob(context: Context, avatar: Object, animated_objects: list[Object]):
@@ -81,68 +81,6 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list
         me.transform(object.matrix_world @ Matrix.Rotation(math.radians(-90), 4, 'X'))
         meshes.append(me)
     return meshes
-
-
-def get_gltf_export_indices(obj: Object) -> list[int]:
-    def __get_uvs(blender_mesh, uv_i):
-        layer = blender_mesh.uv_layers[uv_i]
-        uvs = np.empty(len(blender_mesh.loops) * 2, dtype=np.float32)
-        layer.data.foreach_get('uv', uvs)
-        uvs = uvs.reshape(len(blender_mesh.loops), 2)
-
-        # Blender UV space -> glTF UV space
-        # u,v -> u,1-v
-        uvs[:, 1] *= -1
-        uvs[:, 1] += 1
-
-        return uvs
-
-    # Get the active mesh
-    me: Mesh = obj.data
-    tex_coord_max = len(me.uv_layers)
-
-    dot_fields = [('vertex_index', np.uint32)]
-    for uv_i in range(tex_coord_max):
-        dot_fields += [('uv%dx' % uv_i, np.float32), ('uv%dy' % uv_i, np.float32)]
-
-
-    dots = np.empty(len(me.loops), dtype=np.dtype(dot_fields))
-    vidxs = np.empty(len(me.loops))
-    me.loops.foreach_get('vertex_index', vidxs)
-    dots['vertex_index'] = vidxs
-    del vidxs
-
-    for uv_i in range(tex_coord_max):
-        uvs = __get_uvs(me, uv_i)
-        dots['uv%dx' % uv_i] = uvs[:, 0]
-        dots['uv%dy' % uv_i] = uvs[:, 1]
-        del uvs
-
-
-    # Calculate triangles and sort them into primitives.
-
-    me.calc_loop_triangles()
-    loop_indices = np.empty(len(me.loop_triangles) * 3, dtype=np.uint32)
-    me.loop_triangles.foreach_get('loops', loop_indices)
-
-    prim_indices = {}  # maps material index to TRIANGLES-style indices into dots
-
-    # Bucket by material index.
-
-    tri_material_idxs = np.empty(len(me.loop_triangles), dtype=np.uint32)
-    me.loop_triangles.foreach_get('material_index', tri_material_idxs)
-    loop_material_idxs = np.repeat(tri_material_idxs, 3)  # material index for every loop
-    unique_material_idxs = np.unique(tri_material_idxs)
-    del tri_material_idxs
-
-    for material_idx in unique_material_idxs:
-        prim_indices[material_idx] = loop_indices[loop_material_idxs == material_idx]
-
-
-    prim_dots = dots[prim_indices[0]]
-    prim_dots, _ = np.unique(prim_dots, return_inverse=True)
-    result = [d[0] for d in prim_dots]
-    return result
 
 
 def get_num_frames() -> int:
