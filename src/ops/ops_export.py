@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from bpy.types import Operator, Context, Object, Scene
 
 from ..utils.logging import log_writer as log
+from ..utils.bone_animation import BoneAnimationExporter
 from ..utils.contextutils import active_object, selection
 from ..utils.bake_targets import validate_bake_target_setup
 from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
@@ -29,6 +30,7 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
                 export_vertex_animation(context, HT)
 
             if HT.export_glb:
+                BoneAnimationExporter(context, HT)
                 success = export_glb(context, HT)
                 if not success:
                     # XXX exit early if mesh export failed
@@ -451,6 +453,8 @@ def animation_metadata(ht: HomeomorphicProperties) -> dict:
     result = dict()
     animated_objects = get_animation_objects(ht)
     result['layers'] = sorted(o.name for o in animated_objects)
+    result['weights'] = BoneAnimationExporter.weights
+    result['bone_transforms'] = BoneAnimationExporter.transforms
     return result
 
 

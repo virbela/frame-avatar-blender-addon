@@ -9,7 +9,7 @@ from bpy_extras.io_utils import axis_conversion
 from .properties import HomeomorphicProperties
 from .helpers import get_animation_objects, require_bake_scene, get_gltf_export_indices
 
-class WeightExporter:
+class BoneAnimationExporter:
     weights = dict()
     transforms = dict()
 
