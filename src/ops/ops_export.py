@@ -13,10 +13,10 @@ from ..utils.contextutils import active_object, selection
 from ..utils.bake_targets import validate_bake_target_setup
 from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..utils.morph_spec import validate_floater_morphs, validate_fullbody_morphs
-from ..utils.animation import generate_animation_blob, validate_animation_export_verts
-from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
+from ..utils.vertex_animation import generate_animation_blob, validate_animation_export_verts
 from ..utils.uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
+from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
 
 
 def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
@@ -26,7 +26,7 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
     with selection(None), active_object(None):
         try:
             if HT.avatar_type == "FULLBODY" and HT.export_animation:
-                export_animation(context, HT)
+                export_vertex_animation(context, HT)
 
             if HT.export_glb:
                 success = export_glb(context, HT)
@@ -308,7 +308,7 @@ def export_atlas(context: Context, denoise: bool = True):
             )
 
 
-def export_animation(context: Context, ht: HomeomorphicProperties):
+def export_vertex_animation(context: Context, ht: HomeomorphicProperties):
     avatar_obj = ht.avatar_mesh
     animated_objects = get_animation_objects(ht)
     list(map(ensure_applied_rotation, animated_objects))
