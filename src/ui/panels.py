@@ -89,7 +89,7 @@ class FRAME_PT_workflow(bpy.types.Panel):
 					baking.label(text='Please ensure Cycles Render Engine is enabled in the addons list!', icon='ERROR')
 
 				baking.row(align=True).prop(HT, 'baking_options', expand=True)
-				if selection:
+				if selection and selection[0].type == 'MESH':
 					baking.prop_search(HT, 'baking_target_uvmap', selection[0].data, "uv_layers")
 
 				col = baking.column(align=True)
