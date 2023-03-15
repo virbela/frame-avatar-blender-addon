@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from .helpers import is_reference_valid
 
 @contextmanager
-def scene(name: str):
+def active_scene(name: str):
     active_scene = bpy.context.scene
 
     # -- set new active scene
@@ -18,17 +18,17 @@ def scene(name: str):
 
 
 @contextmanager
-def selection(objects: list[bpy.types.Object] = None):
+def selection(objects: list[bpy.types.Object] = None, view_layer: bpy.types.ViewLayer = None):
     selected = [o for o in bpy.data.objects if o.select_get()]
 
     # -- clear old selection state
     for obj in selected:
-        obj.select_set(False)
+        obj.select_set(False, view_layer=view_layer)
 
     # -- set new selection state
     if objects:
         for obj in objects:
-            obj.select_set(True)
+            obj.select_set(True, view_layer=view_layer)
 
     yield
 
@@ -36,21 +36,21 @@ def selection(objects: list[bpy.types.Object] = None):
     if objects:
         for obj in objects:
             if is_reference_valid(obj):
-                obj.select_set(False)
+                obj.select_set(False, view_layer=view_layer)
 
     # -- restore old selection state
     for obj in selected:
         if is_reference_valid(obj):
-            obj.select_set(True)
+            obj.select_set(True, view_layer=view_layer)
 
 @contextmanager
-def active_object(object: bpy.types.Object = None):
-    active = bpy.context.view_layer.objects.active
+def active_object(object: bpy.types.Object = None, view_layer: bpy.types.ViewLayer = None):
+    active = view_layer.objects.active
 
     # -- set current active
-    bpy.context.view_layer.objects.active = object
+    view_layer.objects.active = object
 
     yield
 
     # -- restore old active
-    bpy.context.view_layer.objects.active = active
+    view_layer.objects.active = active
