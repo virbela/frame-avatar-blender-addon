@@ -23,7 +23,7 @@ def selection(objects: list[bpy.types.Object] = None, view_layer: bpy.types.View
 
     # -- clear old selection state
     for obj in selected:
-        obj.select_set(False, view_layer=view_layer)
+        obj.select_set(False)
 
     # -- set new selection state
     if objects:
