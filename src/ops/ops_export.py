@@ -449,9 +449,9 @@ def obj_from_shapekey(obj: Object, keyname: str):
                 use_selection=True,
                 export_extras=False,
                 export_morph=False,
-                # use_active_scene=True
             )
             bpy.data.meshes.remove(pending_object.data, do_unlink=True)
+
             log.info(f"Reimporting effect ...")
             with active_scene(scene.name):
                 bpy.ops.import_scene.gltf(filepath=filepath)
