@@ -33,10 +33,11 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
             #     export_vertex_animation(context, HT)
 
             if HT.export_glb:
-                success = export_glb(context, HT)
-                if not success:
-                    # XXX exit early if mesh export failed
-                    return
+                with active_scene(require_work_scene(context).name):
+                    success = export_glb(context, HT)
+                    if not success:
+                        # XXX exit early if mesh export failed
+                        return
 
             if HT.export_atlas:
                 export_atlas(context, denoise=HT.denoise)
@@ -136,14 +137,37 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     outputfile_glb = os.path.join(directory , fname)
 
     obj = ht.avatar_mesh
-    with active_scene(require_work_scene(context).name):
-        with selection([obj], view_layer=view_layer), active_object(obj, view_layer=view_layer):
-            with clear_custom_props(obj):
-                obj['MorphSets_Avatar'] = morphsets_dict
+    with selection([obj], view_layer=view_layer), active_object(obj, view_layer=view_layer):
+        with clear_custom_props(obj):
+            obj['MorphSets_Avatar'] = morphsets_dict
 
+            bpy.ops.export_scene.gltf(
+                filepath=outputfile_glb,
+                export_format='GLB',
+                # disable all default options
+                export_texcoords = True,
+                export_normals = False,
+                export_colors = False,
+                export_animations=False,
+                export_skins=False,
+                export_materials='NONE',
+                # valid options
+                use_selection=True,
+                export_extras=True,
+                export_morph=True,
+                use_active_scene=True
+            )
+
+            if is_dev():
+                directory = os.path.dirname(filepath)
+                export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
+                with open(os.path.join(directory, 'morphs.json'), 'w') as f:
+                    print(export_json, file=f)
+
+                # Check gltf export
                 bpy.ops.export_scene.gltf(
-                    filepath=outputfile_glb,
-                    export_format='GLB',
+                    filepath=os.path.join(directory , "morphic_avatar.gltf"),
+                    export_format='GLTF_EMBEDDED',
                     # disable all default options
                     export_texcoords = True,
                     export_normals = False,
@@ -157,30 +181,6 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
                     export_morph=True,
                     use_active_scene=True
                 )
-
-                if is_dev():
-                    directory = os.path.dirname(filepath)
-                    export_json = json.dumps(morphsets_dict, sort_keys=False, indent=2)
-                    with open(os.path.join(directory, 'morphs.json'), 'w') as f:
-                        print(export_json, file=f)
-
-                    # Check gltf export
-                    bpy.ops.export_scene.gltf(
-                        filepath=os.path.join(directory , "morphic_avatar.gltf"),
-                        export_format='GLTF_EMBEDDED',
-                        # disable all default options
-                        export_texcoords = True,
-                        export_normals = False,
-                        export_colors = False,
-                        export_animations=False,
-                        export_skins=False,
-                        export_materials='NONE',
-                        # valid options
-                        use_selection=True,
-                        export_extras=True,
-                        export_morph=True,
-                        use_active_scene=True
-                    )
 
     # TODO(ranjian0) 
     # DEPRECATED should remove
