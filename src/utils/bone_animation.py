@@ -36,17 +36,24 @@ class BoneAnimationExporter:
 
     def set_weights(self):
         log.info("\tCalculating vertex weights...")
+        max_weights_per_vert = 10
         export_indices = get_gltf_export_indices(self.ht.avatar_mesh)
+
+        def el(val, count):
+            # create empty list filled with `val` `count`` times
+            return [val] * count
 
         for obj in self.animated_objects:
             self.weights[obj.name] = dict()
 
             tmp_map = dict()
             for v in obj.data.vertices:
-                groups = sorted(v.groups, key=lambda x: -x.weight)[:4]
+                weights_per_vert = min(max_weights_per_vert, len(v.groups))
+
+                groups = sorted(v.groups, key=lambda x: -x.weight)[:weights_per_vert]
                 total_weight = sum((x.weight for x in groups), 0.0) or 1.0
-                bones = ([x.group for x in groups] + [0, 0, 0, 0])[:4]
-                weights = ([x.weight / total_weight for x in groups] + [0.0, 0.0, 0.0, 0.0])[:4]
+                bones = ([x.group for x in groups] + el(0, weights_per_vert))[:weights_per_vert]
+                weights = ([x.weight / total_weight for x in groups] + el(0.0, weights_per_vert))[:weights_per_vert]
                 
                 all_weights = [0.0] * len(self.bones)
                 for idx, bname in enumerate(self.bones):
