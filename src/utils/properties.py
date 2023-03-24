@@ -114,6 +114,16 @@ AVATAR_TYPE = enum_descriptor(
 )
 
 
+ANIMATION_TYPE = enum_descriptor(
+	('VERTEX',				'Vertex',				'Export vertex animations (npy blobs)',
+		'',			0),
+
+	('BONE',				'Bone',					'Export bone animation.',
+		'',			1),
+
+)
+
+
 def update_atlas(self: 'BakeVariant', context: Context):
 	# when atlas is set, also set the uv_channel
 	if 'red' in self.intermediate_atlas.name:
