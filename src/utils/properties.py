@@ -396,6 +396,7 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
 
 	### Export options
 	avatar_type:						bpy.props.EnumProperty(items=tuple(AVATAR_TYPE), name="Avatar Type", default=1)
+	animation_type:						bpy.props.EnumProperty(items=tuple(ANIMATION_TYPE), name="Animation Type", default=1)
 	denoise: 							bpy.props.BoolProperty(name="Denoise Atlas", default=False)
 	export_atlas: 						bpy.props.BoolProperty(name="Export Atlas", default=True)
 	export_glb: 						bpy.props.BoolProperty(name="Export GLB", default=True)
