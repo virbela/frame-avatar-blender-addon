@@ -9,30 +9,36 @@ from contextlib import contextmanager
 from bpy.types import Operator, Context, Object, Scene
 
 from ..utils.logging import log_writer as log
-from ..utils.contextutils import active_object, selection
+from ..utils.bone_animation import BoneAnimationExporter
 from ..utils.bake_targets import validate_bake_target_setup
+from ..utils.contextutils import active_object, selection, active_scene
 from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..utils.morph_spec import validate_floater_morphs, validate_fullbody_morphs
-from ..utils.animation import generate_animation_blob, validate_animation_export_verts
-from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
+from ..utils.vertex_animation import generate_animation_blob, validate_animation_export_verts
 from ..utils.uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
-from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name
+from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
+from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name, get_animation_objects
 
 
 def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
+    view_layer = require_work_scene(context).view_layers[0]
+
     if not validate_export(context, HT):
         return
-
-    with selection(None), active_object(None):
+    with selection(None, view_layer), active_object(None, view_layer):
         try:
             if HT.avatar_type == "FULLBODY" and HT.export_animation:
-                export_animation(context, HT)
+                if HT.animation_type == "BONE":
+                    BoneAnimationExporter(context, HT)
+                else:
+                    export_vertex_animation(context, HT)
 
             if HT.export_glb:
-                success = export_glb(context, HT)
-                if not success:
-                    # XXX exit early if mesh export failed
-                    return
+                with active_scene(require_work_scene(context).name):
+                    success = export_glb(context, HT)
+                    if not success:
+                        # XXX exit early if mesh export failed
+                        return
 
             if HT.export_atlas:
                 export_atlas(context, denoise=HT.denoise)
@@ -46,6 +52,7 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
 
 
 def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
+    log.info("Validating Export state...")
     work_scene = require_work_scene(context)
     if work_scene is None:
         popup_message("Export validation failed! Work scene missing!", "Validation Error")
@@ -85,6 +92,7 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
 
 def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     obj = ht.avatar_mesh
+    view_layer = require_work_scene(context).view_layers[0]
     ensure_applied_rotation(obj)
 
     if not obj.data.shape_keys:
@@ -94,7 +102,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
 
     obj.hide_set(False)
     obj.hide_viewport = False
-    obj.select_set(True)
+    obj.select_set(True, view_layer=view_layer)
 
     uv_transform_metadata = get_uvtransform_metadata(context, ht, obj)
     effects_metadata = get_effects_metadata(ht, obj)
@@ -130,7 +138,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     outputfile_glb = os.path.join(directory , fname)
 
     obj = ht.avatar_mesh
-    with selection([obj]), active_object(obj):
+    with selection([obj], view_layer=view_layer), active_object(obj, view_layer=view_layer):
         with clear_custom_props(obj):
             obj['MorphSets_Avatar'] = morphsets_dict
 
@@ -175,6 +183,8 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
                     use_active_scene=True
                 )
 
+    # TODO(ranjian0) 
+    # DEPRECATED should remove
     # -- cleanup animation shapekeys
     last_idx = obj.active_shape_key_index
     for kb in obj.data.shape_keys.key_blocks:
@@ -308,7 +318,7 @@ def export_atlas(context: Context, denoise: bool = True):
             )
 
 
-def export_animation(context: Context, ht: HomeomorphicProperties):
+def export_vertex_animation(context: Context, ht: HomeomorphicProperties):
     avatar_obj = ht.avatar_mesh
     animated_objects = get_animation_objects(ht)
     list(map(ensure_applied_rotation, animated_objects))
@@ -402,6 +412,9 @@ def get_verts_or_vgroup(obj: Object, color_effect: ColorEffect) -> list[tuple[in
 
 
 def obj_from_shapekey(obj: Object, keyname: str):
+    scene = require_work_scene(bpy.context)
+    view_layer = scene.view_layers[0]
+
     pending_object = obj.copy()
     pending_object.name = f"{keyname}_effect_object_{uuid.uuid4()}"
     pending_object.data = obj.data.copy()
@@ -416,12 +429,12 @@ def obj_from_shapekey(obj: Object, keyname: str):
     for key in pending_object.data.shape_keys.key_blocks:
         pending_object.shape_key_remove(key)
 
-    bpy.context.scene.collection.objects.link(pending_object)
+    scene.collection.objects.link(pending_object)
 
     with tempfile.TemporaryDirectory() as tmpdir:
         filepath = os.path.join(tmpdir, "mesh.glb")
 
-        with selection([pending_object]), active_object(pending_object):
+        with selection([pending_object], view_layer), active_object(pending_object, view_layer):
             log.info(f"Exporing effect object {pending_object.name}")
             bpy.ops.export_scene.gltf(
                 filepath=filepath,
@@ -437,12 +450,13 @@ def obj_from_shapekey(obj: Object, keyname: str):
                 use_selection=True,
                 export_extras=False,
                 export_morph=False,
-                use_active_scene=True
             )
             bpy.data.meshes.remove(pending_object.data, do_unlink=True)
+
             log.info(f"Reimporting effect ...")
-            bpy.ops.import_scene.gltf(filepath=filepath)
-            pending_object = bpy.context.object
+            with active_scene(scene.name):
+                bpy.ops.import_scene.gltf(filepath=filepath)
+                pending_object = bpy.context.object
 
     return pending_object
 
@@ -451,36 +465,10 @@ def animation_metadata(ht: HomeomorphicProperties) -> dict:
     result = dict()
     animated_objects = get_animation_objects(ht)
     result['layers'] = sorted(o.name for o in animated_objects)
+    if ht.animation_type == "BONE":
+        result['weights'] = BoneAnimationExporter.weights
+        result['bone_transforms'] = BoneAnimationExporter.transforms
     return result
-
-
-def get_animation_objects(ht: HomeomorphicProperties) -> list[Object]:
-    avatar_obj = ht.avatar_mesh
-    animated_objects = []
-    for bake_target in ht.bake_target_collection:
-        if not avatar_obj:
-            avatar_obj = bake_target.source_object
-
-        if bake_target.multi_variants:
-            # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
-            log.info(f"Skipping multivariant {bake_target.name}", print_console=False)
-            continue
-
-        obj = bake_target.variant_collection[0].workmesh
-        if not obj:
-            # TODO(ranjian0)
-            # Possible variants not generated yet, or some other fail condition
-            log.info(f"Skipping missing workmesh {bake_target.name}", print_console=False)
-            continue
-
-        has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
-        if not has_armature:
-            # Object has no armature!
-            log.info(f"Skipping missing armature {bake_target.name}", print_console=False)
-            continue
-
-        animated_objects.append(obj)
-    return animated_objects
 
 
 def get_uvtransform_metadata(context: Context, ht: HomeomorphicProperties, obj: Object) -> dict:

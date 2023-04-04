@@ -8,8 +8,16 @@ from bpy.types import Action, Context, Object, Mesh
 
 from .constants import GLB_VERT_COUNT
 from .logging import log_writer as log
-from .helpers import get_homeomorphic_tool_state, popup_message, require_bake_scene, get_prefs
-
+from .helpers import (
+    get_prefs, 
+    popup_message, 
+    require_bake_scene, 
+    get_action_frame_range, 
+    get_gltf_export_indices,
+    get_num_frames_all_actions, 
+    get_homeomorphic_tool_state, 
+    get_num_frames_single_action, 
+)
 
 def generate_animation_blob(context: Context, avatar: Object, animated_objects: list[Object]):
     HT = get_homeomorphic_tool_state()
@@ -24,7 +32,7 @@ def generate_animation_blob(context: Context, avatar: Object, animated_objects: 
         if len(export_indices) != GLB_VERT_COUNT:
             log.error("Invalid vert count for animations")
 
-    num_frames = get_num_frames()
+    num_frames = get_num_frames_all_actions()
     num_verts = len(export_indices)
     animation_buffer = np.zeros((num_verts * 3, num_frames, len(animated_objects)), dtype=np.float32)
     frame_counter = {o.name:0 for o in animated_objects}
@@ -65,13 +73,8 @@ def generate_animation_blob(context: Context, avatar: Object, animated_objects: 
 
 def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list[Mesh]:
     meshes = []
-    sx, sy = action.frame_range
     bakescene = require_bake_scene(context)
-    if (sy - sx) > 1:
-        # range stop is exclusive, so add one if animation has more than one frame
-        sy += 1
-
-    for i in range(int(sx), int(sy)):
+    for i in range(*get_action_frame_range(action)):
         bakescene.frame_set(i)
         depsgraph = bakescene.view_layers[0].depsgraph
 
@@ -81,81 +84,6 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list
         me.transform(object.matrix_world @ Matrix.Rotation(math.radians(-90), 4, 'X'))
         meshes.append(me)
     return meshes
-
-
-def get_gltf_export_indices(obj: Object) -> list[int]:
-    def __get_uvs(blender_mesh, uv_i):
-        layer = blender_mesh.uv_layers[uv_i]
-        uvs = np.empty(len(blender_mesh.loops) * 2, dtype=np.float32)
-        layer.data.foreach_get('uv', uvs)
-        uvs = uvs.reshape(len(blender_mesh.loops), 2)
-
-        # Blender UV space -> glTF UV space
-        # u,v -> u,1-v
-        uvs[:, 1] *= -1
-        uvs[:, 1] += 1
-
-        return uvs
-
-    # Get the active mesh
-    me: Mesh = obj.data
-    tex_coord_max = len(me.uv_layers)
-
-    dot_fields = [('vertex_index', np.uint32)]
-    for uv_i in range(tex_coord_max):
-        dot_fields += [('uv%dx' % uv_i, np.float32), ('uv%dy' % uv_i, np.float32)]
-
-
-    dots = np.empty(len(me.loops), dtype=np.dtype(dot_fields))
-    vidxs = np.empty(len(me.loops))
-    me.loops.foreach_get('vertex_index', vidxs)
-    dots['vertex_index'] = vidxs
-    del vidxs
-
-    for uv_i in range(tex_coord_max):
-        uvs = __get_uvs(me, uv_i)
-        dots['uv%dx' % uv_i] = uvs[:, 0]
-        dots['uv%dy' % uv_i] = uvs[:, 1]
-        del uvs
-
-
-    # Calculate triangles and sort them into primitives.
-
-    me.calc_loop_triangles()
-    loop_indices = np.empty(len(me.loop_triangles) * 3, dtype=np.uint32)
-    me.loop_triangles.foreach_get('loops', loop_indices)
-
-    prim_indices = {}  # maps material index to TRIANGLES-style indices into dots
-
-    # Bucket by material index.
-
-    tri_material_idxs = np.empty(len(me.loop_triangles), dtype=np.uint32)
-    me.loop_triangles.foreach_get('material_index', tri_material_idxs)
-    loop_material_idxs = np.repeat(tri_material_idxs, 3)  # material index for every loop
-    unique_material_idxs = np.unique(tri_material_idxs)
-    del tri_material_idxs
-
-    for material_idx in unique_material_idxs:
-        prim_indices[material_idx] = loop_indices[loop_material_idxs == material_idx]
-
-
-    prim_dots = dots[prim_indices[0]]
-    prim_dots, _ = np.unique(prim_dots, return_inverse=True)
-    result = [d[0] for d in prim_dots]
-    return result
-
-
-def get_num_frames() -> int:
-    result = 0
-    for action in bpy.data.actions:
-        sx, sy = action.frame_range
-        diff = sy - sx
-        if diff > 1:
-            # If more than one frame, the range is inclusive
-            diff += 1
-
-        result += diff
-    return int(result)
 
 
 def export_action_animation(context: Context, action: Action, animated_objects: list[Object], num_verts: int, export_indices: list[int]):
@@ -177,12 +105,7 @@ def export_action_animation(context: Context, action: Action, animated_objects: 
         directory = str(Path(prefs.npy_export_dir).absolute())
     blob_file = open(os.path.join(directory, f"{action.name}.npy"), 'wb')
 
-    sx, sy = action.frame_range
-    num_frames = sy - sx
-    if num_frames > 1:
-        # If more than one frame, the range is inclusive
-        num_frames += 1
-
+    num_frames = get_num_frames_single_action(action)
     animation_buffer = np.zeros((num_verts * 3, int(num_frames), len(animated_objects)), dtype=np.float32, order='F')
     for oid, anim_obj in enumerate(sorted(animated_objects, key=lambda o:o.name)):
         meshes = get_per_frame_mesh(context, action, anim_obj)

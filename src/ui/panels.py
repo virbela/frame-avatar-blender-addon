@@ -89,7 +89,7 @@ class FRAME_PT_workflow(bpy.types.Panel):
 					baking.label(text='Please ensure Cycles Render Engine is enabled in the addons list!', icon='ERROR')
 
 				baking.row(align=True).prop(HT, 'baking_options', expand=True)
-				if selection:
+				if selection and selection[0].type == 'MESH':
 					baking.prop_search(HT, 'baking_target_uvmap', selection[0].data, "uv_layers")
 
 				col = baking.column(align=True)
@@ -230,11 +230,19 @@ class FRAME_PT_export(bpy.types.Panel):
 		if HT := get_homeomorphic_tool_state(context):
 			self.layout.prop(HT, "avatar_type", expand=True)
 			self.layout.prop(HT, "export_glb")
+			self.layout.prop(HT, "export_atlas")
+			if HT.export_atlas:
+				sp = self.layout.split(factor=0.05)
+				_ = sp.column()
+				col = sp.column()
+				col.prop(HT, "denoise")
+
 
 			anim = self.layout.row()
 			anim.enabled = HT.avatar_type == "FULLBODY"
 			anim.prop(HT, "export_animation")
 			if HT.avatar_type == "FULLBODY" and HT.export_animation:
+				self.layout.prop(HT, "animation_type", expand=True)
 				if not HT.export_animation_actions:
 					self.layout.label(text="No actions found!", icon="ERROR")
 				sp = self.layout.split(factor=0.05)
@@ -244,10 +252,4 @@ class FRAME_PT_export(bpy.types.Panel):
 					col.prop(ea, "checked", text=ea.name)
 
 				self.layout.prop(HT, "export_animation_actions", expand=True, text="")
-			self.layout.prop(HT, "export_atlas")
-			if HT.export_atlas:
-				sp = self.layout.split(factor=0.05)
-				_ = sp.column()
-				col = sp.column()
-				col.prop(HT, "denoise")
 		self.layout.operator("frame.export", text="Export")
