@@ -28,9 +28,10 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
     with selection(None, view_layer), active_object(None, view_layer):
         try:
             if HT.avatar_type == "FULLBODY" and HT.export_animation:
-                BoneAnimationExporter(context, HT)
-            # XXX Mark Disabled in favour of bone animation export
-            #     export_vertex_animation(context, HT)
+                if HT.animation_type == "BONE":
+                    BoneAnimationExporter(context, HT)
+                else:
+                    export_vertex_animation(context, HT)
 
             if HT.export_glb:
                 with active_scene(require_work_scene(context).name):
@@ -464,8 +465,9 @@ def animation_metadata(ht: HomeomorphicProperties) -> dict:
     result = dict()
     animated_objects = get_animation_objects(ht)
     result['layers'] = sorted(o.name for o in animated_objects)
-    result['weights'] = BoneAnimationExporter.weights
-    result['bone_transforms'] = BoneAnimationExporter.transforms
+    if ht.animation_type == "BONE":
+        result['weights'] = BoneAnimationExporter.weights
+        result['bone_transforms'] = BoneAnimationExporter.transforms
     return result
 
 
