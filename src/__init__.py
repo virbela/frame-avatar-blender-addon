@@ -120,3 +120,6 @@ if __name__ == '__main__':
 	except:
 		pass
 	register()
+
+	from .utils.bone_animation_viewer import view_animation
+	view_animation(animation="stand-clap", shapekey_name="Arm_L")
