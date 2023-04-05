@@ -20,7 +20,7 @@ from .helpers import (
 )
 
 def generate_animation_blob(context: Context, avatar: Object, animated_objects: list[Object]):
-    HT = get_homeomorphic_tool_state()
+    HT = get_homeomorphic_tool_state(context)
     export_full_blob = all([ea.checked for ea in HT.export_animation_actions])
 
     filepath = bpy.data.filepath
@@ -87,7 +87,7 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list
 
 
 def export_action_animation(context: Context, action: Action, animated_objects: list[Object], num_verts: int, export_indices: list[int]):
-    HT = get_homeomorphic_tool_state()
+    HT = get_homeomorphic_tool_state(context)
     if action.name not in [ea.name for ea in HT.export_animation_actions]:
         # Possibly not a valid export action eg tpose
         return
