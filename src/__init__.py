@@ -21,9 +21,13 @@ from bpy.app.handlers import persistent
 
 from .ui import register_ui, unregister_ui
 from .ops import register_ops, unregister_ops
-from .utils.helpers import require_work_scene
-from .utils.properties import HomeomorphicProperties, UIStateProperty, register_props, unregister_props
-
+from .utils.properties import register_props, unregister_props
+from .utils.helpers import (
+	require_work_scene,
+    get_homeomorphic_tool_state, 
+    purge_faba_props_from_scene,
+    migrate_faba_props_from_scene_to_windowmanager, 
+)
 class FrameAvatarAddonPreferences(bpy.types.AddonPreferences):
 	bl_idname = __package__
 
@@ -64,32 +68,33 @@ def register():
 	register_ops()
 	register_ui()
 
-	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
-	bpy.types.Scene.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
-	#ISSUE-5: We should have a save handler that makes sure that images and other large resources are saved the way we want.
-	#	The reasoning here is that if multiple artists need to send a blender file back and forth and the textures are unlikely to change we could rely on a version managing tool for synchronization.
-	#	Currently the artists are not using such a tool and this feature will therefore be labelled as future-feature.
-	#	Note: `bpy.app.handlers.save_pre.append(...)`  and `load_post` for after loading
-	#	labels: future-feature
-
 	def set_export_actions():
+		HT = get_homeomorphic_tool_state(bpy.context)
+
+		eactions = [ea.name for ea in HT.export_animation_actions]
+		for action in bpy.data.actions:
+			if 'tpose' in action.name.lower() or action.name in eactions:
+				continue
+
+			item = HT.export_animation_actions.add()
+			item.name = action.name
+			item.checked = True
+
+		for idx, eaction in enumerate(HT.export_animation_actions):
+			if eaction.name not in [a.name for a in bpy.data.actions]:
+				HT.export_animation_actions.remove(idx)
+		return 2 # run every 2 seconds
+	
+	def fix_property_regression(dummy):
+		""" Moving from registering props in Scene to WindowManager
+		Ensure we migrate any old props that may be in scene
+		"""
+		print(dummy)
 		context = bpy.context
-		if scene := require_work_scene(context):
-			HT = scene.homeomorphictools
+		scene = require_work_scene(context)
+		migrate_faba_props_from_scene_to_windowmanager(scene, context.window_manager)
+		purge_faba_props_from_scene()
 
-			eactions = [ea.name for ea in HT.export_animation_actions]
-			for action in bpy.data.actions:
-				if 'tpose' in action.name.lower() or action.name in eactions:
-					continue
-
-				item = HT.export_animation_actions.add()
-				item.name = action.name
-				item.checked = True
-
-			for idx, eaction in enumerate(HT.export_animation_actions):
-				if eaction.name not in [a.name for a in bpy.data.actions]:
-					HT.export_animation_actions.remove(idx)
-		return 2
 
 
 	bpy.app.timers.register(set_export_actions, first_interval=1)
@@ -99,6 +104,7 @@ def register():
 		if not bpy.app.timers.is_registered(set_export_actions):
 			bpy.app.timers.register(set_export_actions, first_interval=1)
 	bpy.app.handlers.load_post.append(refresh_timer_on_file_open)
+	bpy.app.handlers.load_post.append(fix_property_regression)
 
 
 def unregister():

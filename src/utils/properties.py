@@ -474,4 +474,26 @@ classes = (
 	HomeomorphicProperties,
 )
 
-register_props, unregister_props = bpy.utils.register_classes_factory(classes)
+register, unregister = bpy.utils.register_classes_factory(classes)
+
+
+def register_props():
+	register()
+
+	bpy.types.WindowManager.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
+	bpy.types.WindowManager.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
+
+	# -- handle file regressions
+	bpy.types.Scene.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
+	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
+
+
+def unregister_props():
+	del bpy.types.WindowManager.ui_state
+	del bpy.types.WindowManager.homeomorphictools
+
+	# -- handle file regressions
+	del bpy.types.Scene.ui_state
+	del bpy.types.Scene.homeomorphictools
+
+	unregister()

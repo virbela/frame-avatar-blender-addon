@@ -15,7 +15,7 @@ from pathlib import Path
 from dataclasses import dataclass
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Tuple
-from bpy.types import Context, Scene, bpy_prop_collection, Object, Preferences, Mesh, Action
+from bpy.types import Context, Scene, bpy_prop_collection, Object, Preferences, Mesh, Action, WindowManager
 
 from .logging import log_writer as log
 from .constants import BAKE_SCENE, WORK_SCENE
@@ -91,10 +91,7 @@ def require_bake_scene(context: Context) -> Scene:
 
 
 def get_homeomorphic_tool_state(context: Context) -> 'HomeomorphicProperties':
-    if work_scene := require_work_scene(context):
-        return work_scene.homeomorphictools
-
-    raise InternalError("Work scene not Found.")
+    return context.window_manager.homeomorphictools
 
 
 def get_named_entry(collection: bpy_prop_collection, name: str) -> typing.Any:
@@ -452,3 +449,64 @@ def get_num_frames_all_actions() -> int:
 def get_num_frames_single_action(action: Action) -> int:
     sx, sy = get_action_frame_range(action)
     return sy - sx
+
+
+def migrate_faba_props_from_scene_to_windowmanager(scene: Scene, windowmanager: WindowManager):
+    # Migrate UI state
+    oldui = scene.ui_state
+    newui = windowmanager.ui_state
+    newui.workflow_introduction_visible = oldui.workflow_introduction_visible
+    newui.workflow_bake_targets_visible = oldui.workflow_bake_targets_visible
+    newui.workflow_work_meshes_visible = oldui.workflow_work_meshes_visible
+    newui.workflow_texture_atlas_visible = oldui.workflow_texture_atlas_visible
+    newui.workflow_work_materials_visible = oldui.workflow_work_materials_visible
+    newui.workflow_baking_visible = oldui.workflow_baking_visible
+    newui.workflow_helpers_visible = oldui.workflow_helpers_visible
+
+    # Migrate Homeomorphic tools
+    oldht = scene.homeomorphictools
+    newht = windowmanager.homeomorphictools
+    newht.avatar_rig = oldht.avatar_rig
+    newht.avatar_mesh = oldht.avatar_mesh
+    newht.source_object = oldht.source_object
+    # newht.atlas_size = oldht.atlas_size
+    newht.color_percentage = oldht.color_percentage
+    newht.painting_size = oldht.painting_size
+    newht.select_by_atlas_image = oldht.select_by_atlas_image
+    newht.animation_type = oldht.animation_type
+    newht.denoise = oldht.denoise
+    newht.export_atlas = oldht.export_atlas
+    newht.export_animation = oldht.export_animation
+    newht.baking_target_uvmap = oldht.baking_target_uvmap
+    newht.baking_options = oldht.baking_options
+    newht.target_object_uv = oldht.target_object_uv
+    newht.source_object_uv = oldht.source_object_uv
+
+    # -- animation actions
+    # TODO(ranjian0) is this even necessary because it is dynamic?
+    # for oldaction in oldht.export_animation_actions:
+    #     newaction = newht.export_animation_actions.add()
+    #     newaction.name = oldaction.name
+    #     newaction.checked = oldaction.checked
+
+    # -- effects
+    for oldeffect in oldht.effect_collection:
+        neweffect = newht.effect_collection.add()
+        neweffect.name = oldeffect.name
+        neweffect.type = oldeffect.type
+        neweffect.target = oldeffect.target
+
+        for oldpos in oldeffect.positions:
+            newpos = neweffect.positions.add()
+            newpos.parent_shapekey = oldpos.parent_shapekey
+            newpos.effect_shapekey = oldpos.effect_shapekey
+
+        for oldcolor in oldeffect.colors:
+            newcolor = neweffect.colors.add()
+            newcolor.shape = oldcolor.shape
+            newcolor.color = oldcolor.color
+            newcolor.vert_group = oldcolor.vert_group
+
+def purge_faba_props_from_scene():
+    del bpy.types.Scene.homeomorphictools
+    del bpy.types.Scene.ui_state
