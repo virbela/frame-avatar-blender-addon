@@ -327,8 +327,9 @@ def update_atlas_size(self, context: Context):
 			at.generated_color = (1.0, 1.0, 1.0, 1.0)
 			if tuple(at.size) != (ats, ats):
 				log.info(f"Resizing '{at.name}' from {tuple(at.size)} to {(ats, ats)}")
-				at.scale(ats, ats)
-				at.update()
+				if at.has_data:
+					at.scale(ats, ats)
+					at.update()
 
 
 class PositionEffect(bpy.types.PropertyGroup):
