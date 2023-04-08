@@ -2,6 +2,7 @@ import bpy
 from bpy.types import Operator, Context
 from ..utils.helpers import require_bake_scene
 from ..utils.properties import HomeomorphicProperties
+from ..utils.bone_animation_viewer import view_animation
 
 def clear_bake_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):
 	ht.selected_bake_target = -1
@@ -20,3 +21,7 @@ def clear_bake_scene(operator: Operator, context: Context, ht: HomeomorphicPrope
 			bpy.data.meshes.remove(item.data, do_unlink=True)
 		elif item.type == 'ARMATURE':
 			bpy.data.armatures.remove(item.data, do_unlink=True)
+
+
+def debug_bone_animation(operator: Operator, context: Context, ht: HomeomorphicProperties):
+	view_animation(animation="stand-clap", shapekey_name="Arm_L")

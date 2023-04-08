@@ -18,7 +18,8 @@ from .ops_baking import (
 
 from .ops_dev import (
     clear_bake_scene,
-    clear_bake_targets
+    clear_bake_targets,
+    debug_bone_animation
 )
 
 from .ops_helpers import (

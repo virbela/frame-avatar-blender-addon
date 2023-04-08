@@ -115,6 +115,8 @@ class FRAME_PT_workflow(bpy.types.Panel):
 			debug = self.layout.box()
 			debug.label(text='Debug tools')
 			debug.operator('frame.clear_bake_scene')
+			debug.label(text="Bone Animation")
+			debug.operator('frame.debug_bone_animation')
 
 
 class FRAME_PT_bake_targets(bpy.types.Panel):

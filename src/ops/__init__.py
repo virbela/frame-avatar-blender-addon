@@ -382,6 +382,13 @@ class FRAME_OT_clear_bake_targets(frame_operator):
     bl_description =	"Remove all the bake targets"
     frame_operator =	operations.clear_bake_targets
 
+class FRAME_OT_show_bone_debug(frame_operator):
+    bl_label = 			"Show bone animation debug"
+    bl_idname = 		"frame.debug_bone_animation"
+    bl_description =	"This is for internal development purposes and should not be seen in distribution"
+    frame_operator = 	operations.debug_bone_animation
+
+
 
 classes = (
     FRAME_OT_setup_bake_scene,
@@ -438,7 +445,8 @@ classes = (
     FRAME_OT_remove_color_effect,
     FRAME_OT_add_color_effect,
     FRAME_OT_clear_bake_scene,
-    FRAME_OT_clear_bake_targets
+    FRAME_OT_clear_bake_targets,
+    FRAME_OT_show_bone_debug
 )
 
 register_ops, unregister_ops = bpy.utils.register_classes_factory(classes)
