@@ -24,4 +24,6 @@ def clear_bake_scene(operator: Operator, context: Context, ht: HomeomorphicPrope
 
 
 def debug_bone_animation(operator: Operator, context: Context, ht: HomeomorphicProperties):
-	view_animation(animation="stand-clap", shapekey_name="Arm_L")
+	if ht.debug_animation_name:
+		ht.debug_animation_show = not ht.debug_animation_show
+		view_animation(animation=ht.debug_animation_name, show=ht.debug_animation_show)

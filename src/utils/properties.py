@@ -414,6 +414,10 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
 	target_object_uv:					bpy.props.PointerProperty(name="Target", type=bpy.types.Object, description="Object to copy UV layers to")
 	source_object_uv:					bpy.props.PointerProperty(name="Source", type=bpy.types.Object, description="Object to copy UV layers from")
 
+	### Debug bone animation
+	debug_animation_show:				bpy.props.BoolProperty(name="Show Debug Vis", default=False)
+	debug_animation_name:				bpy.props.StringProperty(name="Action", default="")
+
 	def get_selected_effect(self) -> EffectProperty:
 		if self.selected_effect:
 			return self.effect_collection[self.selected_effect]

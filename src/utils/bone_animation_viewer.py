@@ -1,32 +1,40 @@
 import bpy
 import gpu
 import numpy as np
-from random import random
 from gpu_extras.batch import batch_for_shader
 
+from .helpers import get_homeomorphic_tool_state
 from .bone_animation import BoneAnimationExporter
 
 context = bpy.context
 
-def view_animation(
-        animation: str,
-        shapekey_name: str):
+def view_animation(animation: str, show: bool):
+    ht = get_homeomorphic_tool_state(bpy.context)
 
     dns = bpy.app.driver_namespace
     if not dns.get('sd'):
-        dns["sd"] = ShaderDrawer()
+        dns["sd"] = ShaderDrawer(ht)
 
     sd = dns.get('sd')
     sd.remove()
-    sd.update()
+    if show:
+        sd.update()
+    Update3DViewPorts()
 
+
+def Update3DViewPorts():
+    for area in bpy.context.window.screen.areas:
+        if area.type == 'VIEW_3D':
+            area.tag_redraw()
 
 class ShaderDrawer:
-    def __init__(self):
+    def __init__(self, ht):
         self.handle = None
+        self.ht = ht
+        self.animation_data = BoneAnimationExporter(bpy.context, ht)
 
     def update(self):
-        mesh = bpy.context.active_object.data
+        mesh = self.ht.avatar_mesh.data
         mesh.calc_loop_triangles()
 
         vertices = np.empty((len(mesh.vertices), 3), 'f')

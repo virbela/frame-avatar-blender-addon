@@ -115,8 +115,11 @@ class FRAME_PT_workflow(bpy.types.Panel):
 			debug = self.layout.box()
 			debug.label(text='Debug tools')
 			debug.operator('frame.clear_bake_scene')
-			debug.label(text="Bone Animation")
-			debug.operator('frame.debug_bone_animation')
+			debug.label(text="Bone Animation Viz")
+			col = debug.column(align=True)
+			col.prop_search(HT, "debug_animation_name", bpy.data, "actions", text="Action")
+			op_text = "Stop Animation" if HT.debug_animation_show else "Show Animation"
+			debug.operator('frame.debug_bone_animation', text=op_text)
 
 
 class FRAME_PT_bake_targets(bpy.types.Panel):
