@@ -126,16 +126,17 @@ ANIMATION_TYPE = enum_descriptor(
 
 def update_atlas(self: 'BakeVariant', context: Context):
 	# when atlas is set, also set the uv_channel
-	if 'red' in self.intermediate_atlas.name:
-		self.uv_target_channel = 'UV_TARGET_R'
-	elif 'green' in self.intermediate_atlas.name:
-		self.uv_target_channel = 'UV_TARGET_G'
-	elif 'blue' in self.intermediate_atlas.name:
-		self.uv_target_channel = 'UV_TARGET_B'
-	elif 'color' in self.intermediate_atlas.name:
-		self.uv_target_channel = 'UV_TARGET_COLOR'
-	else:
-		self.uv_target_channel = 'UV_TARGET_NIL'
+	if self.intermediate_atlas:
+		if 'red' in self.intermediate_atlas.name:
+			self.uv_target_channel = 'UV_TARGET_R'
+		elif 'green' in self.intermediate_atlas.name:
+			self.uv_target_channel = 'UV_TARGET_G'
+		elif 'blue' in self.intermediate_atlas.name:
+			self.uv_target_channel = 'UV_TARGET_B'
+		elif 'color' in self.intermediate_atlas.name:
+			self.uv_target_channel = 'UV_TARGET_COLOR'
+		else:
+			self.uv_target_channel = 'UV_TARGET_NIL'
 
 
 def get_bakevariant_name(self: 'BakeVariant'):
