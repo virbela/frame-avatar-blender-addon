@@ -1,5 +1,6 @@
 import bpy
 import typing
+from contextlib import contextmanager
 from bpy.types import Context, Object, Image
 from .helpers import (
 	popup_message,
@@ -477,6 +478,16 @@ classes = (
 
 register, unregister = bpy.utils.register_classes_factory(classes)
 
+@contextmanager
+def register_scene_props():
+    bpy.types.Scene.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
+    bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
+
+    yield 
+
+    del bpy.types.Scene.homeomorphictools
+    del bpy.types.Scene.ui_state
+
 
 def register_props():
 	register()
@@ -484,17 +495,10 @@ def register_props():
 	bpy.types.WindowManager.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
 	bpy.types.WindowManager.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
 
-	# -- handle file regressions
-	bpy.types.Scene.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
-	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
 
 
 def unregister_props():
 	del bpy.types.WindowManager.ui_state
 	del bpy.types.WindowManager.homeomorphictools
-
-	# -- handle file regressions
-	del bpy.types.Scene.ui_state
-	del bpy.types.Scene.homeomorphictools
 
 	unregister()
