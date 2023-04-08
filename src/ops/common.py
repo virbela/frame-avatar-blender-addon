@@ -66,7 +66,7 @@ def poll_selected_objects(context: Context) -> bool:
 	return context.selected_objects
 
 def poll_baketargets(context: Context) -> bool:
-	return  len(context.scene.homeomorphictools.bake_target_collection)
+	return  len(context.window_manager.homeomorphictools.bake_target_collection)
 
 def poll_avatar_mesh(context: Context):
-	return context.scene.homeomorphictools.avatar_mesh
+	return context.window_manager.homeomorphictools.avatar_mesh
