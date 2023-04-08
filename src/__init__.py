@@ -101,6 +101,11 @@ def onload_handler_migrate_props(dummy):
 		except KeyError:
 			pass
 
+	# -- save the blendfile
+	# TODO(ranjian0) should we really do this
+	# if bpy.data.is_saved and bpy.data.is_dirty:
+	# 	bpy.ops.wm.save_mainfile(filepath=bpy.data.filepath)
+
 
 @persistent
 def refresh_timer_on_file_open(dummy):
@@ -119,7 +124,9 @@ def register():
 	bpy.app.timers.register(timer_update_export_actions, first_interval=1)
 	bpy.app.handlers.load_post.append(refresh_timer_on_file_open)
 	bpy.app.handlers.load_post.append(onload_handler_migrate_props)
-	onload_handler_migrate_props(None)
+	if bpy.data.is_saved:
+		# if we are being registered in a blend file
+		onload_handler_migrate_props(None)
 
 
 def unregister():
