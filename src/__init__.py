@@ -21,11 +21,10 @@ from bpy.app.handlers import persistent
 
 from .ui import register_ui, unregister_ui
 from .ops import register_ops, unregister_ops
-from .utils.properties import register_props, unregister_props
+from .utils.properties import register_props, unregister_props, register_scene_props
 from .utils.helpers import (
 	require_work_scene,
     get_homeomorphic_tool_state, 
-    purge_faba_props_from_scene,
     migrate_faba_props_from_scene_to_windowmanager, 
 )
 class FrameAvatarAddonPreferences(bpy.types.AddonPreferences):
@@ -59,6 +58,55 @@ class FrameAvatarAddonPreferences(bpy.types.AddonPreferences):
 		layout.prop(self, 'custom_frame_validation')
 
 
+def timer_update_export_actions():
+	""" Create a list of actions that can be exported.
+	"""
+	HT = get_homeomorphic_tool_state(bpy.context)
+
+	eactions = [ea.name for ea in HT.export_animation_actions]
+	for action in bpy.data.actions:
+		if 'tpose' in action.name.lower() or action.name in eactions:
+			continue
+
+		item = HT.export_animation_actions.add()
+		item.name = action.name
+		item.checked = True
+
+	for idx, eaction in enumerate(HT.export_animation_actions):
+		if eaction.name not in [a.name for a in bpy.data.actions]:
+			HT.export_animation_actions.remove(idx)
+	return 2 # run every 2 seconds
+
+
+@persistent
+def onload_handler_migrate_props(dummy):
+	""" Migrate prop registration from the Scene to WindowManager.
+	"""
+	context = bpy.context
+	scene = require_work_scene(context)
+	has_old_props = scene.get('ui_state') and scene.get('homeomorphictools')
+	if has_old_props:
+		# if the props exist, we need to register the prop groups inorder to access the data
+		with register_scene_props():
+			migrate_faba_props_from_scene_to_windowmanager(scene, context.window_manager)
+
+	# -- remove all the old data
+	for sc in bpy.data.scenes:
+		try:
+			del sc['ui_state']
+		except KeyError:
+			pass
+		try:
+			del sc['homeomorphictools']
+		except KeyError:
+			pass
+
+
+@persistent
+def refresh_timer_on_file_open(dummy):
+	if not bpy.app.timers.is_registered(timer_update_export_actions):
+		bpy.app.timers.register(timer_update_export_actions, first_interval=1)
+
 
 # Addon registration
 def register():
@@ -68,53 +116,21 @@ def register():
 	register_ops()
 	register_ui()
 
-	def set_export_actions():
-		HT = get_homeomorphic_tool_state(bpy.context)
-
-		eactions = [ea.name for ea in HT.export_animation_actions]
-		for action in bpy.data.actions:
-			if 'tpose' in action.name.lower() or action.name in eactions:
-				continue
-
-			item = HT.export_animation_actions.add()
-			item.name = action.name
-			item.checked = True
-
-		for idx, eaction in enumerate(HT.export_animation_actions):
-			if eaction.name not in [a.name for a in bpy.data.actions]:
-				HT.export_animation_actions.remove(idx)
-		return 2 # run every 2 seconds
-	
-	def fix_property_regression(dummy):
-		""" Moving from registering props in Scene to WindowManager
-		Ensure we migrate any old props that may be in scene
-		"""
-		print(dummy)
-		context = bpy.context
-		scene = require_work_scene(context)
-		migrate_faba_props_from_scene_to_windowmanager(scene, context.window_manager)
-		purge_faba_props_from_scene()
-
-
-
-	bpy.app.timers.register(set_export_actions, first_interval=1)
-
-	@persistent
-	def refresh_timer_on_file_open(dummy):
-		if not bpy.app.timers.is_registered(set_export_actions):
-			bpy.app.timers.register(set_export_actions, first_interval=1)
+	bpy.app.timers.register(timer_update_export_actions, first_interval=1)
 	bpy.app.handlers.load_post.append(refresh_timer_on_file_open)
-	bpy.app.handlers.load_post.append(fix_property_regression)
+	bpy.app.handlers.load_post.append(onload_handler_migrate_props)
+	onload_handler_migrate_props(None)
 
 
 def unregister():
-	del bpy.types.Scene.ui_state
-	del bpy.types.Scene.homeomorphictools
-
 	unregister_ui()
 	unregister_ops()
 	unregister_props()
 	bpy.utils.unregister_class(FrameAvatarAddonPreferences)
+
+	bpy.app.timers.unregister(timer_update_export_actions)
+	bpy.app.handlers.load_post.remove(refresh_timer_on_file_open)
+	bpy.app.handlers.load_post.remove(onload_handler_migrate_props)
 
 
 if __name__ == '__main__':
@@ -123,9 +139,13 @@ if __name__ == '__main__':
 
 	try:
 		unregister()
+	except RuntimeError:
+		pass # some class probably not registered
 	except:
-		pass
+		# show any other exception
+		import traceback; traceback.print_exc()
+
 	register()
 
-	from .utils.bone_animation_viewer import view_animation
-	view_animation(animation="stand-clap", shapekey_name="Arm_L")
+	# from .utils.bone_animation_viewer import view_animation
+	# view_animation(animation="stand-clap", shapekey_name="Arm_L")
