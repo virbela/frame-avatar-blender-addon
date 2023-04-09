@@ -541,4 +541,7 @@ def migrate_faba_props_from_scene_to_windowmanager(scene: Scene, windowmanager: 
             newmirror.secondary = oldmirror.secondary
 
 
-        # -- bake groups skipped as they are not used
+def get_asset_file(name: str, mode: str) -> bytes | str:
+    asset_dir = Path(__file__).absolute().parent.parent / "assets"
+    with open(asset_dir / name, mode) as assetfile:
+        return assetfile.read()
