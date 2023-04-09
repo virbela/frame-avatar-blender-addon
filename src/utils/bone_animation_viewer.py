@@ -3,8 +3,8 @@ import gpu
 import numpy as np
 from gpu_extras.batch import batch_for_shader
 
-from .helpers import get_homeomorphic_tool_state
 from .bone_animation import BoneAnimationExporter
+from .helpers import get_asset_file, get_homeomorphic_tool_state, is_dev
 
 context = bpy.context
 
@@ -29,8 +29,8 @@ def Update3DViewPorts():
 
 class ShaderDrawer:
     def __init__(self, ht):
-        self.handle = None
         self.ht = ht
+        self.handle = None
         self.animation_data = BoneAnimationExporter(bpy.context, ht)
 
     def update(self):
@@ -45,19 +45,23 @@ class ShaderDrawer:
         mesh.loop_triangles.foreach_get(
             "vertices", np.reshape(indices, len(mesh.loop_triangles) * 3))
 
-        # -- green vis color
-        vertex_colors = [(0, 1, 0, 1) for _ in range(len(mesh.vertices))]
 
-        shader = gpu.shader.from_builtin('3D_SMOOTH_COLOR')
+        vertexshader = get_asset_file("bone_animation.vert.glsl", 'r')
+        fragmentshader = get_asset_file("bone_animation.frag.glsl", 'r')
+        shader = gpu.types.GPUShader(vertexshader, fragmentshader)
         batch = batch_for_shader(
             shader, 'TRIS',
-            {"pos": vertices, "color": vertex_colors},
+            {"position": vertices},
             indices=indices,
         )
 
         def draw():
             gpu.state.depth_test_set('LESS_EQUAL')
             gpu.state.depth_mask_set(True)
+            shader.bind()
+            shader.uniform_float("model", self.ht.avatar_mesh.matrix_world)
+            shader.uniform_float("view", bpy.context.region_data.view_matrix)
+            shader.uniform_float("projection", bpy.context.region_data.window_matrix)
             batch.draw(shader)
             gpu.state.depth_mask_set(False)
 
@@ -70,3 +74,12 @@ class ShaderDrawer:
                 bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
             except ValueError:
                 pass
+
+# Dev only
+# Destroy the shader drawer on scriptwatcher reload
+if is_dev():
+    print("Resetting Bone Animation ShaderDrawer...")
+    try:
+        del bpy.app.driver_namespace['sd']
+    except KeyError:
+        pass
