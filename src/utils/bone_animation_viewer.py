@@ -51,8 +51,13 @@ class ShaderDrawer:
         shader = gpu.types.GPUShader(vertexshader, fragmentshader)
         batch = batch_for_shader(
             shader, 'TRIS',
-            {"position": vertices},
+            {"position": vertices, "color": [(0, 1, 0, 1) for _ in range(len(mesh.vertices))]},
             indices=indices,
+        )
+
+        batch_verts = batch_for_shader(
+            shader, 'POINTS',
+            {"position": vertices, "color": [(0, 0, 0, 1) for _ in range(len(mesh.vertices))]}
         )
 
         def draw():
@@ -60,9 +65,10 @@ class ShaderDrawer:
             gpu.state.depth_mask_set(True)
             shader.bind()
             shader.uniform_float("model", self.ht.avatar_mesh.matrix_world)
-            shader.uniform_float("view", bpy.context.region_data.view_matrix)
-            shader.uniform_float("projection", bpy.context.region_data.window_matrix)
+            shader.uniform_float("view", context.region_data.view_matrix)
+            shader.uniform_float("projection", context.region_data.window_matrix)
             batch.draw(shader)
+            batch_verts.draw(shader)
             gpu.state.depth_mask_set(False)
 
 
@@ -77,7 +83,7 @@ class ShaderDrawer:
 
 # Dev only
 # Destroy the shader drawer on scriptwatcher reload
-if is_dev():
+if is_dev() and 1:
     print("Resetting Bone Animation ShaderDrawer...")
     try:
         del bpy.app.driver_namespace['sd']
