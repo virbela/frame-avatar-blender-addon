@@ -117,10 +117,17 @@ class ShaderDrawer:
 
             frame = int(time.time() % num_frames)
             transforms = bone_transforms[frame]
-            # shader.uniform_float("hep", np.zeros(16))
-            shader.uniform_float("model", self.ht.avatar_mesh.matrix_world)
-            shader.uniform_float("view", context.region_data.view_matrix)
-            shader.uniform_float("projection", context.region_data.window_matrix)
+            shader.uniform_vector_float(
+                shader.uniform_from_name("bones"),
+                np.array(transforms), 16, 31
+            )
+
+            mvp = (
+                context.region_data.window_matrix @
+                context.region_data.view_matrix @
+                self.ht.avatar_mesh.matrix_world
+            )
+            shader.uniform_float("mvp", mvp)
             for batch in batches:
                 batch.draw(shader)
             gpu.state.depth_mask_set(False)
