@@ -152,3 +152,5 @@ if is_dev() and 1:
         del bpy.app.driver_namespace['sd']
     except KeyError:
         pass
+
+    del bpy.app.driver_namespace['be']
