@@ -104,7 +104,7 @@ class ShaderDrawer:
         vertex_source = get_asset_file("bone_animation.vert.glsl", 'r')
         fragment_source = get_asset_file("bone_animation.frag.glsl", 'r')
 
-        shader = gpu.types.GPUShader(vertex_source, fragment_source)
+        shader = gpu.types.GPUShader(vertex_source, fragment_source, name="BoneAnimationShader")
         batches = self.make_mesh_batches(shader)
 
         bone_transforms = self.animation_data.transforms[self.action]
