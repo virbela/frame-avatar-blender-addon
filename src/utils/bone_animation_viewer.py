@@ -2,7 +2,7 @@ import bpy
 import gpu
 import time
 import bmesh
-
+import numpy as np
 from .bone_animation import BoneAnimationExporter
 from .helpers import get_asset_file, get_homeomorphic_tool_state, is_dev
 
@@ -43,7 +43,7 @@ class ShaderDrawer:
         self.ht = ht
         self.handle = None
         self.action = action
-        self.animation_data = bpy.app.driver_namespace['be']
+        self.animation_data: BoneAnimationExporter = bpy.app.driver_namespace['be']
 
     def make_mesh_batches(self, shader):
         batches = []
@@ -68,7 +68,7 @@ class ShaderDrawer:
             num_verts = len(vertices)
             colors_tri = [(0, 1, 0, 1) for _ in range(num_verts)]
             colors_vert = [(0, 0, 0, 1) for _ in range(num_verts)]
-            bone_weights = [(1,0,0,0) for _ in range(num_verts)]
+            bone_weights = [(0,0,0,0) for _ in range(num_verts)]
             bone_indices = [(0,1,2,3) for _ in range(num_verts)]
 
             fmt = gpu.types.GPUVertFormat()
