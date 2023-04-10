@@ -66,7 +66,8 @@ class ShaderDrawer:
             bm.free()
 
             num_verts = len(vertices)
-            colors = [(0, 1, 0, 1) for _ in range(num_verts)]
+            colors_tri = [(0, 1, 0, 1) for _ in range(num_verts)]
+            colors_vert = [(0, 0, 0, 1) for _ in range(num_verts)]
             bone_weights = [(1,0,0,0) for _ in range(num_verts)]
             bone_indices = [(0,1,2,3) for _ in range(num_verts)]
 
@@ -78,14 +79,21 @@ class ShaderDrawer:
 
             vbo = gpu.types.GPUVertBuf(format=fmt, len=num_verts)
             vbo.attr_fill(id="position", data=vertices)
-            vbo.attr_fill(id="color", data=colors)
+            vbo.attr_fill(id="color", data=colors_tri)
             vbo.attr_fill(id="bone_weights", data=bone_weights)
             vbo.attr_fill(id="bone_indices", data=bone_indices)
+
+            vbo_vert = gpu.types.GPUVertBuf(format=fmt, len=num_verts)
+            vbo_vert.attr_fill(id="position", data=vertices)
+            vbo_vert.attr_fill(id="color", data=colors_vert)
+            vbo_vert.attr_fill(id="bone_weights", data=bone_weights)
+            vbo_vert.attr_fill(id="bone_indices", data=bone_indices)
 
             ibo = gpu.types.GPUIndexBuf(type='TRIS', seq=indices)
 
             batch = gpu.types.GPUBatch(type='TRIS', buf=vbo, elem=ibo)
-            batches.extend([batch])
+            batch_verts = gpu.types.GPUBatch(type='POINTS', buf=vbo_vert, elem=ibo)
+            batches.extend([batch, batch_verts])
         return batches
 
 
