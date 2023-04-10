@@ -1,7 +1,7 @@
 import bpy
 import gpu
+import time
 import bmesh
-from gpu_extras.batch import batch_for_shader
 
 from .bone_animation import BoneAnimationExporter
 from .helpers import get_asset_file, get_homeomorphic_tool_state, is_dev
@@ -24,7 +24,7 @@ def view_animation(animation: str, show: bool):
         dns['be'] = BoneAnimationExporter(bpy.context, ht)
 
     if not dns.get('sd'):
-        dns["sd"] = ShaderDrawer(ht)
+        dns["sd"] = ShaderDrawer(ht, animation)
 
     sd = dns.get('sd')
     sd.remove()
@@ -39,9 +39,10 @@ def Update3DViewPorts():
             area.tag_redraw()
 
 class ShaderDrawer:
-    def __init__(self, ht):
+    def __init__(self, ht, action):
         self.ht = ht
         self.handle = None
+        self.action = action
         self.animation_data = bpy.app.driver_namespace['be']
 
     def make_mesh_batches(self, shader):
@@ -64,34 +65,51 @@ class ShaderDrawer:
                 indices.append([v.index for v in f.verts])
             bm.free()
 
-            batch = batch_for_shader(
-                shader, 'TRIS',
-                {"position": vertices, "color": [(0, 1, 0, 1) for _ in range(len(vertices))]},
-                indices=indices,
-            )
+            num_verts = len(vertices)
+            colors = [(0, 1, 0, 1) for _ in range(num_verts)]
+            bone_weights = [(1,0,0,0) for _ in range(num_verts)]
+            bone_indices = [(0,1,2,3) for _ in range(num_verts)]
 
-            batch_verts = batch_for_shader(
-                shader, 'POINTS',
-                {"position": vertices, "color": [(0, 0, 0, 1) for _ in range(len(vertices))]}
-            )
+            fmt = gpu.types.GPUVertFormat()
+            fmt.attr_add(id="position", comp_type='F32', len=3, fetch_mode='FLOAT')
+            fmt.attr_add(id="color", comp_type='F32', len=4, fetch_mode='FLOAT')
+            fmt.attr_add(id="bone_weights", comp_type='F32', len=4, fetch_mode='FLOAT')
+            fmt.attr_add(id="bone_indices", comp_type='F32', len=4, fetch_mode='FLOAT')
 
-            batches.extend([batch, batch_verts])
+            vbo = gpu.types.GPUVertBuf(format=fmt, len=num_verts)
+            vbo.attr_fill(id="position", data=vertices)
+            vbo.attr_fill(id="color", data=colors)
+            vbo.attr_fill(id="bone_weights", data=bone_weights)
+            vbo.attr_fill(id="bone_indices", data=bone_indices)
+
+            ibo = gpu.types.GPUIndexBuf(type='TRIS', seq=indices)
+
+            batch = gpu.types.GPUBatch(type='TRIS', buf=vbo, elem=ibo)
+            batches.extend([batch])
         return batches
 
 
 
     def update(self):
 
-        vertexshader = get_asset_file("bone_animation.vert.glsl", 'r')
-        fragmentshader = get_asset_file("bone_animation.frag.glsl", 'r')
-        shader = gpu.types.GPUShader(vertexshader, fragmentshader)
+        # -- shader sources
+        vertex_source = get_asset_file("bone_animation.vert.glsl", 'r')
+        fragment_source = get_asset_file("bone_animation.frag.glsl", 'r')
 
+        shader = gpu.types.GPUShader(vertex_source, fragment_source)
         batches = self.make_mesh_batches(shader)
+
+        bone_transforms = self.animation_data.transforms[self.action]
+        num_frames = len(bone_transforms)
 
         def draw():
             gpu.state.depth_test_set('LESS_EQUAL')
             gpu.state.depth_mask_set(True)
             shader.bind()
+
+            frame = int(time.time() % num_frames)
+            transforms = bone_transforms[frame]
+            # shader.uniform_float("hep", np.zeros(16))
             shader.uniform_float("model", self.ht.avatar_mesh.matrix_world)
             shader.uniform_float("view", context.region_data.view_matrix)
             shader.uniform_float("projection", context.region_data.window_matrix)
@@ -114,6 +132,8 @@ class ShaderDrawer:
 if is_dev() and 1:
     print("Resetting Bone Animation ShaderDrawer...")
     try:
+        sd = bpy.app.driver_namespace['sd']
+        sd.remove() 
         del bpy.app.driver_namespace['sd']
     except KeyError:
         pass
