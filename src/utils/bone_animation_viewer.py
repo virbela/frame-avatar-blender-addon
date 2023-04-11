@@ -63,13 +63,22 @@ class ShaderDrawer:
             bm.faces.ensure_lookup_table()
             for f in bm.faces:
                 indices.append([v.index for v in f.verts])
+            
+            bone_weights = []
+            bone_indices = []
+            weights = self.animation_data.weights[skname]
+            for vert in bm.verts:
+                bone_map = list(enumerate(weights[str(vert.index)]))
+                top_four = sorted(bone_map, key=lambda v:v[1])[-4:]
+                bi = tuple(v[0] for v in top_four)
+                bw = tuple(v[1] for v in top_four)
+                bone_indices.append(bi)
+                bone_weights.append(bw)
             bm.free()
 
             num_verts = len(vertices)
             colors_tri = [(0, 1, 0, 1) for _ in range(num_verts)]
             colors_vert = [(0, 0, 0, 1) for _ in range(num_verts)]
-            bone_weights = [(0,0,0,0) for _ in range(num_verts)]
-            bone_indices = [(0,1,2,3) for _ in range(num_verts)]
 
             fmt = gpu.types.GPUVertFormat()
             fmt.attr_add(id="position", comp_type='F32', len=3, fetch_mode='FLOAT')
@@ -93,7 +102,7 @@ class ShaderDrawer:
 
             batch = gpu.types.GPUBatch(type='TRIS', buf=vbo, elem=ibo)
             batch_verts = gpu.types.GPUBatch(type='POINTS', buf=vbo_vert, elem=ibo)
-            batches.extend([batch, batch_verts])
+            batches.extend([batch_verts])
         return batches
 
 
@@ -124,8 +133,7 @@ class ShaderDrawer:
 
             mvp = (
                 context.region_data.window_matrix @
-                context.region_data.view_matrix @
-                self.ht.avatar_mesh.matrix_world
+                context.region_data.view_matrix
             )
             shader.uniform_float("mvp", mvp)
             for batch in batches:
