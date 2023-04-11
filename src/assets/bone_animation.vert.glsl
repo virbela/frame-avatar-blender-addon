@@ -23,7 +23,8 @@ void main() {
         bone_mat = mat4(1.0);
     }
 
-    gl_Position = mvp * bone_mat * vec4(position, 1.0);
+    vec4 worldPos = bone_mat * vec4(position, 1.0);
+    gl_Position = mvp * worldPos;
 }
 
 int isMatZero(mat4 m) {
