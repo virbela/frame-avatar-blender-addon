@@ -21,12 +21,8 @@ from bpy.app.handlers import persistent
 
 from .ui import register_ui, unregister_ui
 from .ops import register_ops, unregister_ops
-from .utils.properties import register_props, unregister_props, register_scene_props
-from .utils.helpers import (
-    require_work_scene,
-    get_homeomorphic_tool_state, 
-    migrate_faba_props_from_scene_to_windowmanager, 
-)
+from .utils.helpers import get_homeomorphic_tool_state
+from .utils.properties import register_props, unregister_props
 class FrameAvatarAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __package__
 
@@ -79,35 +75,6 @@ def timer_update_export_actions():
 
 
 @persistent
-def onload_handler_migrate_props(dummy):
-    """ Migrate prop registration from the Scene to WindowManager.
-    """
-    context = bpy.context
-    scene = require_work_scene(context)
-    has_old_props = scene.get('ui_state') and scene.get('homeomorphictools')
-    if has_old_props:
-        # if the props exist, we need to register the prop groups inorder to access the data
-        with register_scene_props():
-            migrate_faba_props_from_scene_to_windowmanager(scene, context.window_manager)
-
-    # -- remove all the old data
-    for sc in bpy.data.scenes:
-        try:
-            del sc['ui_state']
-        except KeyError:
-            pass
-        try:
-            del sc['homeomorphictools']
-        except KeyError:
-            pass
-
-    # -- save the blendfile
-    # TODO(ranjian0) should we really do this
-    # if bpy.data.is_saved and bpy.data.is_dirty:
-    # 	bpy.ops.wm.save_mainfile(filepath=bpy.data.filepath)
-
-
-@persistent
 def refresh_timer_on_file_open(dummy):
     if not bpy.app.timers.is_registered(timer_update_export_actions):
         bpy.app.timers.register(timer_update_export_actions, first_interval=1)
@@ -123,10 +90,6 @@ def register():
 
     bpy.app.timers.register(timer_update_export_actions, first_interval=1)
     bpy.app.handlers.load_post.append(refresh_timer_on_file_open)
-    bpy.app.handlers.load_post.append(onload_handler_migrate_props)
-    if bpy.data.is_saved:
-        # if we are being registered in a blend file
-        onload_handler_migrate_props(None)
 
 
 def unregister():
@@ -137,7 +100,6 @@ def unregister():
 
     bpy.app.timers.unregister(timer_update_export_actions)
     bpy.app.handlers.load_post.remove(refresh_timer_on_file_open)
-    bpy.app.handlers.load_post.remove(onload_handler_migrate_props)
 
 
 if __name__ == '__main__':

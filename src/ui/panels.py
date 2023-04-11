@@ -13,7 +13,7 @@ class FRAME_PT_workflow(bpy.types.Panel):
 
 	def draw(self, context):
 		HT = get_homeomorphic_tool_state(context)
-		ui_state = context.window_manager.ui_state
+		ui_state = context.scene.ui_state
 
 		self.layout.prop(HT, "avatar_mesh")
 		self.layout.prop(HT, "avatar_rig")

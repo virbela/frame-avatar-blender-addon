@@ -482,27 +482,17 @@ classes = (
 
 register, unregister = bpy.utils.register_classes_factory(classes)
 
-@contextmanager
-def register_scene_props():
-    bpy.types.Scene.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
-    bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
-
-    yield 
-
-    del bpy.types.Scene.homeomorphictools
-    del bpy.types.Scene.ui_state
-
 
 def register_props():
 	register()
 
-	bpy.types.WindowManager.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
-	bpy.types.WindowManager.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
+	bpy.types.Scene.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
+	bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
 
 
 
 def unregister_props():
-	del bpy.types.WindowManager.ui_state
-	del bpy.types.WindowManager.homeomorphictools
+	del bpy.types.Scene.ui_state
+	del bpy.types.Scene.homeomorphictools
 
 	unregister()
