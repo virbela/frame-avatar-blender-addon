@@ -281,3 +281,7 @@ def load_material_templates():
 		for mat in data_to.materials:
 			if mat:
 				mat.use_fake_user = True
+
+
+def mirror_workmesh_verts(operator: Operator, context: Context, ht: HomeomorphicProperties):
+	pass

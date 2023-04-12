@@ -53,6 +53,7 @@ from .ops_workmesh import (
     workmesh_to_shapekey,
     shapekey_to_workmesh,
     update_all_workmeshes,
+    mirror_workmesh_verts,
     update_selected_workmesh,
     all_workmeshes_to_shapekey,
     all_shapekeys_to_workmeshes,

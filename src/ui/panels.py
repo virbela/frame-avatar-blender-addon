@@ -50,6 +50,12 @@ class FRAME_PT_workflow(bpy.types.Panel):
 			col = work_meshes.column(align=True)
 			col.operator('frame.update_all_workmeshes')
 			col.operator('frame.workmesh_symmetrize')
+			work_meshes.label(text="Mirror")
+			col = work_meshes.column(align=True)
+			col.prop(HT, "mirror_verts_source")
+			col.prop(HT, "mirror_verts_target")
+			col.operator('frame.mirror_workmesh_verts')
+
 
 		atlas_setup = self.layout.box()
 		atlas_setup.prop(ui_state, "workflow_texture_atlas_visible", text="Texture Atlas")

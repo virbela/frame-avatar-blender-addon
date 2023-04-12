@@ -418,6 +418,10 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
 	debug_animation_show:				bpy.props.BoolProperty(name="Show Debug Vis", default=False)
 	debug_animation_name:				bpy.props.StringProperty(name="Action", default="")
 
+	### Mirror Vertices Options:
+	mirror_verts_source:				bpy.props.PointerProperty(name="Mirror Source", type=bpy.types.Object, description="Object to copy vertex positions from.")
+	mirror_verts_target:				bpy.props.PointerProperty(name="Mirror Target", type=bpy.types.Object, description="Object to copy vertex positions to.")
+
 	def get_selected_effect(self) -> EffectProperty:
 		if self.selected_effect:
 			return self.effect_collection[self.selected_effect]

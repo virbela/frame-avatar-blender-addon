@@ -112,6 +112,13 @@ class FRAME_OT_workmesh_symmetrize(frame_operator):
     frame_operator = 	operations.workmesh_symmetrize
 
 
+class FRAME_OT_mirror_workmesh_verts(frame_operator):
+    bl_label = 			"Mirror Vertices"
+    bl_idname = 		"frame.mirror_workmesh_verts"
+    bl_description =    "Mirror vertices from source object to target object"
+    frame_operator = 	operations.mirror_workmesh_verts
+
+
 # Texture Atlas
 class FRAME_OT_auto_assign_atlas(frame_operator):
     bl_label = 			"Auto assign atlas/UV"
@@ -446,7 +453,8 @@ classes = (
     FRAME_OT_add_color_effect,
     FRAME_OT_clear_bake_scene,
     FRAME_OT_clear_bake_targets,
-    FRAME_OT_show_bone_debug
+    FRAME_OT_show_bone_debug,
+    FRAME_OT_mirror_workmesh_verts
 )
 
 register_ops, unregister_ops = bpy.utils.register_classes_factory(classes)
