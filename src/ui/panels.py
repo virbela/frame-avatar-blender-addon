@@ -2,7 +2,7 @@ import bpy
 
 from ..utils.exceptions import InternalError
 from ..utils.logging import log_writer as log
-from ..utils.helpers import get_homeomorphic_tool_state, require_work_scene, require_bake_scene, is_dev
+from ..utils.helpers import get_homeomorphic_tool_state, require_bake_scene, is_dev
 
 
 class FRAME_PT_workflow(bpy.types.Panel):
@@ -52,6 +52,7 @@ class FRAME_PT_workflow(bpy.types.Panel):
 			col.operator('frame.workmesh_symmetrize')
 			work_meshes.label(text="Mirror")
 			col = work_meshes.column(align=True)
+			col.prop(HT, "mirror_distance")
 			col.prop(HT, "mirror_verts_source")
 			col.prop(HT, "mirror_verts_target")
 			col.operator('frame.mirror_workmesh_verts')

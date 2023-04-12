@@ -418,7 +418,8 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
 	debug_animation_show:				bpy.props.BoolProperty(name="Show Debug Vis", default=False)
 	debug_animation_name:				bpy.props.StringProperty(name="Action", default="")
 
-	### Mirror Vertices Options:
+	### Mirror Vertices Options
+	mirror_distance:					bpy.props.FloatProperty(name="Mirror Distance", default=0.001, precision=4, description="Maximum distance to search for mirror a vertex")
 	mirror_verts_source:				bpy.props.PointerProperty(name="Mirror Source", type=bpy.types.Object, description="Object to copy vertex positions from.")
 	mirror_verts_target:				bpy.props.PointerProperty(name="Mirror Target", type=bpy.types.Object, description="Object to copy vertex positions to.")
 
