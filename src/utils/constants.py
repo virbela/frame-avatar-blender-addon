@@ -4,12 +4,12 @@ from pathlib import Path
 ASSET_DIR = Path(__file__).parent.parent.joinpath("assets").absolute()
 
 class COLORS(enum.Enum):
-	BLACK = (0.0, 0.0, 0.0, 1.0)
-	WHITE = (1.0, 1.0, 1.0, 1.0)
+    BLACK = (0.0, 0.0, 0.0, 1.0)
+    WHITE = (1.0, 1.0, 1.0, 1.0)
 
 class MIRROR_TYPE(enum.Enum):
-	PRIMARY = object()
-	SECONDARY = object()
+    PRIMARY = object()
+    SECONDARY = object()
 
 IGNORED = type('IGNORED', (), {})
 
@@ -25,18 +25,18 @@ GLB_VERT_COUNT = 441
 
 
 class Assets:
-	class AvatarBase:
-		url = ASSET_DIR / "avatarbase.blend"
-		name = "Avatar"
+    class AvatarBase:
+        url = ASSET_DIR / "avatarbase.blend"
+        name = "Avatar"
 
-	class Materials:
-		url = ASSET_DIR / "materials.blend"
-		class BakeAO:
-			name = "bake_material_ao"
+    class Materials:
+        url = ASSET_DIR / "materials.blend"
+        class BakeAO:
+            name = "bake_material_ao"
 
-		class BakeDiffuse:
-			name = "bake_material_diffuse"
+        class BakeDiffuse:
+            name = "bake_material_diffuse"
 
-		class BakePreview:
-			name = "bake_material_preview"
+        class BakePreview:
+            name = "bake_material_preview"
 

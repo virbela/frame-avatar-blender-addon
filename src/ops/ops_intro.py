@@ -5,4 +5,4 @@ from ..utils.properties import HomeomorphicProperties
 
 
 def setup_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties):
-	require_bake_scene(context)
+    require_bake_scene(context)
