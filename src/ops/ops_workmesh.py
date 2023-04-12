@@ -284,4 +284,39 @@ def load_material_templates():
 
 
 def mirror_workmesh_verts(operator: Operator, context: Context, ht: HomeomorphicProperties):
-	pass
+	source_obj = ht.mirror_verts_source
+	target_obj = ht.mirror_verts_target
+
+	# TODO(ranjian0)
+	# For now we assume the mirror axis is the x axis
+	
+	source_verts = [v for v in source_obj.data.vertices]
+	target_verts = [v for v in target_obj.data.vertices]
+
+	size = len(target_verts)
+	kd = mathutils.kdtree.KDTree(size)
+	for v in target_verts:
+		kd.insert(v.co, v.index)
+	kd.balance()
+
+	if context.mode == "EDIT_MESH":
+		bm = bmesh.from_edit_mesh(target_obj.data)
+	else:
+		bm = bmesh.new()
+		bm.from_mesh(target_obj.data)
+	bm.verts.ensure_lookup_table()
+
+	for vert in source_verts:
+		vert_mirror = vert.co.copy()
+		vert_mirror.x *= -1
+
+		_, index, dist = kd.find(vert_mirror)
+		if dist < ht.mirror_distance:
+			bm.verts[index].co = vert_mirror
+
+	if context.mode == "EDIT_MESH":
+		bmesh.update_edit_mesh(target_obj.data)
+	else:
+		bm.to_mesh(target_obj.data)
+	bm.free()
+	target_obj.data.update()
