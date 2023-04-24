@@ -320,3 +320,7 @@ def mirror_workmesh_verts(operator: Operator, context: Context, ht: Homeomorphic
         bm.to_mesh(target_obj.data)
     bm.free()
     target_obj.data.update()
+
+
+def transfer_skin_weights(operator: Operator, context: Context, ht: HomeomorphicProperties):
+    pass
