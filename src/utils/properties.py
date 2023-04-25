@@ -1,6 +1,5 @@
 import bpy
 import typing
-from contextlib import contextmanager
 from bpy.types import Context, Object, Image
 from .helpers import (
     popup_message,
@@ -459,13 +458,13 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
 
 
 class UIStateProperty(bpy.types.PropertyGroup):
-    workflow_introduction_visible: 			bpy.props.BoolProperty(default=True)
-    workflow_bake_targets_visible: 			bpy.props.BoolProperty(default=True)
-    workflow_work_meshes_visible: 			bpy.props.BoolProperty(default=False)
-    workflow_texture_atlas_visible: 		bpy.props.BoolProperty(default=False)
-    workflow_work_materials_visible: 		bpy.props.BoolProperty(default=False)
-    workflow_baking_visible: 				bpy.props.BoolProperty(default=False)
-    workflow_helpers_visible: 				bpy.props.BoolProperty(default=False)
+    workflow_introduction_visible:      bpy.props.BoolProperty(default=True)
+    workflow_bake_targets_visible:      bpy.props.BoolProperty(default=True)
+    workflow_work_meshes_visible:       bpy.props.BoolProperty(default=False)
+    workflow_texture_atlas_visible:     bpy.props.BoolProperty(default=False)
+    workflow_work_materials_visible:    bpy.props.BoolProperty(default=False)
+    workflow_baking_visible:            bpy.props.BoolProperty(default=False)
+    workflow_helpers_visible:           bpy.props.BoolProperty(default=False)
 
 
 classes = (
