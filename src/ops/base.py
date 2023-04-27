@@ -4,19 +4,19 @@ from ..utils.logging import log_writer as log
 from ..utils.exceptions import BakeException, InternalError
 from ..utils.helpers import get_homeomorphic_tool_state
 
-class frame_operator(Operator):
-  frame_poll = lambda context : True
-  frame_operator = lambda context, HT: None
+class FabaOperator(Operator):
+  faba_poll = lambda context : True
+  faba_operator = lambda context, HT: None
 
   @classmethod
   def poll(cls, context: Context) -> bool:
-    return cls.frame_poll(context)
+    return cls.faba_poll(context)
 
   def execute(self, context: Context) -> typing.Union[typing.Set[str], typing.Set[int]]:
     if HT := get_homeomorphic_tool_state(context):	#contribution note 2
-      if self.frame_operator:
+      if self.faba_operator:
         try:
-          self.frame_operator(context, HT)
+          self.faba_operator(context, HT)
 
         except BakeException.base as e:	#contribution note 4
           log.exception(f'Exception when calling operator for {self}: {e}')
