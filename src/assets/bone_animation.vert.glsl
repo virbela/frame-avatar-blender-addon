@@ -11,7 +11,7 @@ out vec4 fcolor;
 int isMatZero(mat4 m);
 
 void main() {
-    bones[0];
+    // bones[0];
     fcolor = color;
 
     mat4 bone_mat = mat4(0.0);

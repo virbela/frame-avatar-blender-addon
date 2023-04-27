@@ -24,6 +24,13 @@ def clear_bake_scene(operator: Operator, context: Context, ht: HomeomorphicPrope
 
 
 def debug_bone_animation(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    if ht.debug_animation_name:
+    if ht.debug_animation_avatar_basis:
         ht.debug_animation_show = not ht.debug_animation_show
-        view_animation(animation=ht.debug_animation_name, show=ht.debug_animation_show)
+
+        if len(ht.debug_animation_actions):
+            anim_name = ht.debug_animation_actions[0].name # First action is default animation
+            for action in ht.debug_animation_actions:
+                if action.checked:
+                    anim_name = action.name
+                    break
+            view_animation(animation=anim_name, show=ht.debug_animation_show)

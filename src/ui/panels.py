@@ -124,7 +124,16 @@ class FRAME_PT_workflow(bpy.types.Panel):
             debug.operator('frame.clear_bake_scene')
             debug.label(text="Bone Animation Viz")
             col = debug.column(align=True)
-            col.prop_search(HT, "debug_animation_name", bpy.data, "actions", text="Action")
+            col.prop_search(HT, "debug_animation_avatar_basis", bpy.data, "objects")
+            if basis := HT.debug_animation_avatar_basis:
+                if 'MorphSets_Avatar' not in basis:
+                    col.label(text="Avatar Basis does not have metadata", icon="ERROR")
+                else:
+                    for action in HT.debug_animation_actions:
+                        row = col.row(align=True)
+                        row.prop(action, "checked")
+                        row.label(text=action.name)
+
             op_text = "Stop Animation" if HT.debug_animation_show else "Show Animation"
             debug.operator('frame.debug_bone_animation', text=op_text)
 

@@ -367,9 +367,21 @@ class EffectProperty(bpy.types.PropertyGroup):
     colors:                 bpy.props.CollectionProperty(type = ColorEffect)
 
 
-class ExportAnimationProperty(bpy.types.PropertyGroup):
+class AnimationProperty(bpy.types.PropertyGroup):
     name:                   bpy.props.StringProperty(name="", default="")
     checked:                bpy.props.BoolProperty(name="", default=True)
+
+
+def update_debug_basis(HT: 'HomeomorphicProperties', context: bpy.types.Context):
+    HT.debug_animation_actions.clear()
+    if basis := HT.debug_animation_avatar_basis:
+        if metadata := basis.get('MorphSets_Avatar'):
+            animation_meta = metadata['Animation'].to_dict()
+            action_names = animation_meta['bone_transforms'].keys()
+            for name in action_names:
+                action = HT.debug_animation_actions.add()
+                action.name = name
+                action.checked = False
 
 
 class HomeomorphicProperties(bpy.types.PropertyGroup):
@@ -406,7 +418,7 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
     export_atlas:                       bpy.props.BoolProperty(name="Export Atlas", default=True)
     export_glb:                         bpy.props.BoolProperty(name="Export GLB", default=True)
     export_animation:                   bpy.props.BoolProperty(name="Export Animation", default=True)
-    export_animation_actions:           bpy.props.CollectionProperty(type=ExportAnimationProperty)
+    export_animation_actions:           bpy.props.CollectionProperty(type=AnimationProperty)
 
     ### Baking options
     baking_target_uvmap:                bpy.props.StringProperty(name="Bake UV map", default=TARGET_UV_MAP)
@@ -418,12 +430,17 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
 
     ### Debug bone animation
     debug_animation_show:               bpy.props.BoolProperty(name="Show Debug Vis", default=False)
-    debug_animation_name:               bpy.props.StringProperty(name="Action", default="")
+    debug_animation_actions:            bpy.props.CollectionProperty(type=AnimationProperty)
+    debug_animation_avatar_basis:       bpy.props.PointerProperty(name="Avatar Basis", type=bpy.types.Object, update=update_debug_basis, 
+                                                                  description="Avatar basis object with animation metadata")
 
     ### Mirror Vertices Options
-    mirror_distance:                    bpy.props.FloatProperty(name="Mirror Distance", default=0.001, precision=4, description="Maximum distance to search for mirror a vertex")
-    mirror_verts_source:                bpy.props.PointerProperty(name="Mirror Source", type=bpy.types.Object, description="Object to copy vertex positions from.")
-    mirror_verts_target:                bpy.props.PointerProperty(name="Mirror Target", type=bpy.types.Object, description="Object to copy vertex positions to.")
+    mirror_distance:                    bpy.props.FloatProperty(name="Mirror Distance", default=0.001, precision=4, 
+                                                                description="Maximum distance to search for mirror a vertex")
+    mirror_verts_source:                bpy.props.PointerProperty(name="Mirror Source", type=bpy.types.Object, 
+                                                                  description="Object to copy vertex positions from.")
+    mirror_verts_target:                bpy.props.PointerProperty(name="Mirror Target", type=bpy.types.Object, 
+                                                                  description="Object to copy vertex positions to.")
 
     def get_selected_effect(self) -> EffectProperty:
         if self.selected_effect:
@@ -483,7 +500,7 @@ classes = (
     EffectProperty,
 
     UIStateProperty,
-    ExportAnimationProperty,
+    AnimationProperty,
     HomeomorphicProperties,
 )
 

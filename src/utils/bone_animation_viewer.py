@@ -3,26 +3,17 @@ import gpu
 import time
 import bmesh
 import numpy as np
-from .bone_animation import BoneAnimationExporter
+
+from .properties import HomeomorphicProperties
 from .helpers import get_asset_file, get_homeomorphic_tool_state, is_dev
 
 context = bpy.context
 
-ANIMATED_SHAPE_KEYS = [
-    "Body_Human",
-    "Arm_L",
-    "Arm_R",
-    "Formal_pants_L",
-    "Formal_pants_R"
-]
 
 def view_animation(animation: str, show: bool):
     ht = get_homeomorphic_tool_state(bpy.context)
 
     dns = bpy.app.driver_namespace
-    if not dns.get('be'):
-        dns['be'] = BoneAnimationExporter(bpy.context, ht)
-
     if not dns.get('sd'):
         dns["sd"] = ShaderDrawer(ht, animation)
 
@@ -39,17 +30,22 @@ def Update3DViewPorts():
             area.tag_redraw()
 
 class ShaderDrawer:
-    def __init__(self, ht, action):
+    def __init__(self, ht: HomeomorphicProperties, action: str):
         self.ht = ht
         self.handle = None
         self.action = action
-        self.animation_data: BoneAnimationExporter = bpy.app.driver_namespace['be']
+
+        # -- extract mesh and metadata
+        self.avatar_basis = ht.debug_animation_avatar_basis
+        if metadata := self.avatar_basis.get('MorphSets_Avatar'):
+            self.animationdata = metadata['Animation'].to_dict()
+
 
     def make_mesh_batches(self, shader):
         batches = []
-        mesh = self.ht.avatar_mesh.data
+        mesh = self.avatar_basis.data
 
-        for skname in ANIMATED_SHAPE_KEYS:
+        for skname in self.animationdata['layers'][:8]:
             bm = bmesh.new()
             bm.from_mesh(mesh)
             shape = bm.verts.layers.shape[skname]
@@ -66,7 +62,7 @@ class ShaderDrawer:
             
             bone_weights = []
             bone_indices = []
-            weights = self.animation_data.weights[skname]
+            weights = self.animationdata['weights'][skname]
             for vert in bm.verts:
                 bone_map = list(enumerate(weights[str(vert.index)]))
                 top_four = sorted(bone_map, key=lambda v:v[1])[-4:]
@@ -116,7 +112,7 @@ class ShaderDrawer:
         shader = gpu.types.GPUShader(vertex_source, fragment_source, name="BoneAnimationShader")
         batches = self.make_mesh_batches(shader)
 
-        bone_transforms = self.animation_data.transforms[self.action]
+        bone_transforms = self.animationdata['bone_transforms'][self.action]
         num_frames = len(bone_transforms)
 
         def draw():
@@ -160,5 +156,3 @@ if is_dev() and 1:
         del bpy.app.driver_namespace['sd']
     except KeyError:
         pass
-
-    # del bpy.app.driver_namespace['be']
