@@ -1,13 +1,15 @@
 bl_info = {
-    "name": "Homeomorphic avatar creator",
-    "description": "Homeomorphic avatar creation tools",
+    "name": "Frame Avatar Blender Addon (FABA)",
+    "description": "Provides a set of tools for the creation of homeomorphic avatars.",
     "author": "Martin Petersson, Ian Karanja",
     "version": (0, 2, 3),
-    "blender": (2, 92, 2),
+    "blender": (2, 93, 0), # Previous Major LTS
     "location": "View3D",
     "warning": "",
-    "wiki_url": "",
-    "category": "Avatars"
+    "wiki_url": "https://github.com/virbela/frame-avatar-blender-addon",
+    "tracker_url": "https://github.com/virbela/frame-avatar-blender-addon/issues",
+    "support": "COMMUNITY",
+    "category": "Avatar"
 }
 #dependencies: UVPackmaster 2.5.8
 
