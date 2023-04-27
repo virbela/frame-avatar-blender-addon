@@ -397,6 +397,13 @@ class FABA_OT_show_bone_debug(FabaOperator):
 
 
 
+class FABA_OT_start_debug_server(FabaOperator):
+    bl_label =            "Start Debugger"
+    bl_idname =           "faba.start_debugger"
+    bl_description =      "This is for internal development purposes and should not be seen in distribution"
+    faba_operator =       operations.start_debug_server
+
+
 classes = (
     FABA_OT_setup_bake_scene,
     FABA_OT_export,
@@ -454,7 +461,8 @@ classes = (
     FABA_OT_clear_bake_scene,
     FABA_OT_clear_bake_targets,
     FABA_OT_show_bone_debug,
-    FABA_OT_mirror_workmesh_verts
+    FABA_OT_mirror_workmesh_verts,
+    FABA_OT_start_debug_server
 )
 
 register_ops, unregister_ops = bpy.utils.register_classes_factory(classes)

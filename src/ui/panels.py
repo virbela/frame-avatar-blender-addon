@@ -122,6 +122,7 @@ class FABA_PT_workflow(bpy.types.Panel):
             debug = self.layout.box()
             debug.label(text='Debug tools')
             debug.operator('faba.clear_bake_scene')
+            debug.operator('faba.start_debugger')
             debug.label(text="Bone Animation Viz")
             col = debug.column(align=True)
             col.prop_search(HT, "debug_animation_avatar_basis", bpy.data, "objects")

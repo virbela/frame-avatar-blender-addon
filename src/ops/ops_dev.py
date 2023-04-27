@@ -34,3 +34,7 @@ def debug_bone_animation(operator: Operator, context: Context, ht: HomeomorphicP
                     anim_name = action.name
                     break
             view_animation(animation=anim_name, show=ht.debug_animation_show)
+
+
+def start_debug_server(operator: Operator, context: Context, ht: HomeomorphicProperties):
+    bpy.ops.debug.connect_debugger_vscode()
