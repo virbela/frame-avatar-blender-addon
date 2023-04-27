@@ -5,7 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Addon",
+            "name": "Debug Remote Addon",
+            "type": "python",
+            "request": "attach",
+            "port": 5678, //careful, this used to be 3000 in older versions of vscode and this addon
+            "host": "localhost"
+        },
+        {
+            "name": "Debug Script",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/debug.py",
