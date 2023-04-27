@@ -191,6 +191,7 @@ def clean_normals(context: Context, object_: Object):
     bpy.ops.mesh.normals_make_consistent(inside=False)
     bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
+
 def copy_uv_layers(operator: Operator, context: Context, ht: HomeomorphicProperties):
     last_edit_mode = bpy.context.mode
     if last_edit_mode == 'EDIT_MESH':

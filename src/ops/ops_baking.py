@@ -116,6 +116,7 @@ def run_bake(ht: HomeomorphicProperties, invoke: bool = True):
 
     bpy.context.scene.render.bake.use_selected_to_active = last_op
 
+
 def ensure_color_output_node_ready(variant: BakeVariant, tree: NodeTree):
     material_nodes = tree.nodes
     material_links = tree.links
