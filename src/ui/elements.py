@@ -3,7 +3,7 @@ from ..utils.properties import UV_ISLAND_MODES
 from ..utils.helpers import get_homeomorphic_tool_state
 
 
-class FRAME_UL_bake_variants(bpy.types.UIList):
+class FABA_UL_bake_variants(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if item.image:
             layout.prop(item, 'name', icon_value=item.image.preview.icon_id, text='', emboss=False, translate=False)
@@ -11,7 +11,7 @@ class FRAME_UL_bake_variants(bpy.types.UIList):
             layout.prop(item, 'name', icon='UNLINKED', text='', emboss=False, translate=False)
 
 
-class FRAME_UL_bake_targets(bpy.types.UIList):
+class FABA_UL_bake_targets(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if item.bake_mode == 'UV_BM_MIRRORED':
             if target_item := data.bake_target_collection[item.mirror_source]:
@@ -22,12 +22,12 @@ class FRAME_UL_bake_targets(bpy.types.UIList):
         layout.prop(item, 'name', icon=UV_ISLAND_MODES.members[item.uv_mode].icon, text='', emboss=False, translate=False)
 
 
-class FRAME_UL_bake_groups(bpy.types.UIList):
+class FABA_UL_bake_groups(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, 'name', icon='UNLINKED', text='', emboss=False, translate=False)
 
 
-class FRAME_UL_bake_group_members(bpy.types.UIList):
+class FABA_UL_bake_group_members(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if ht := get_homeomorphic_tool_state(context):
             if item.target < len(ht.bake_target_collection):
@@ -39,7 +39,7 @@ class FRAME_UL_bake_group_members(bpy.types.UIList):
                 layout.label(icon='UNLINKED', text='No target')
 
 
-class FRAME_UL_bake_target_mirrors(bpy.types.UIList):
+class FABA_UL_bake_target_mirrors(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if ht := get_homeomorphic_tool_state(context):
             row = layout.row()
@@ -70,6 +70,6 @@ class FRAME_UL_bake_target_mirrors(bpy.types.UIList):
                 row.label(text=na(item.secondary))
 
 
-class FRAME_UL_effects(bpy.types.UIList):
+class FABA_UL_effects(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, 'name', icon="FORCE_TURBULENCE", text='', emboss=False, translate=False)
