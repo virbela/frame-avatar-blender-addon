@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Frame Avatar Blender Addon (FABA)",
     "description": "Provides a set of tools for the creation of homeomorphic avatars.",
-    "author": "Martin Petersson, Ian Karanja",
+    "author": "Martin Petersson, Mikael Lövqvist, Ian Karanja",
     "version": (0, 2, 3),
     "blender": (2, 93, 0), # Previous Major LTS
     "location": "View3D",
