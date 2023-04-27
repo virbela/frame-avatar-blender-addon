@@ -25,23 +25,28 @@ from .ui import register_ui, unregister_ui
 from .ops import register_ops, unregister_ops
 from .utils.helpers import get_homeomorphic_tool_state
 from .utils.properties import register_props, unregister_props
+
+
 class FrameAvatarAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __package__
 
-    log_target: 					bpy.props.StringProperty(name='Log File Name', subtype='FILE_NAME', default="fabalog")
-    glb_export_dir: 				bpy.props.StringProperty(
+    log_target:                     bpy.props.StringProperty(name='Log File Name', subtype='FILE_NAME', default="fabalog")
+    glb_export_dir:                 bpy.props.StringProperty(
                                         name='GLB Export Dir',
-                                        description='Folder to use for glb export (default is current blendfile folder).', subtype='DIR_PATH'
+                                        subtype='DIR_PATH',
+                                        description='Folder to use for glb export (default is current blendfile folder).'
                                     )
-    atlas_export_dir: 				bpy.props.StringProperty(
+    atlas_export_dir:               bpy.props.StringProperty(
                                         name='Atlas Export Dir',
-                                        description='Folder to use for atlas export (default is current blendfile folder).', subtype='DIR_PATH'
+                                        subtype='DIR_PATH',
+                                        description='Folder to use for atlas export (default is current blendfile folder).'
                                     )
-    npy_export_dir: 				bpy.props.StringProperty(
+    npy_export_dir:                 bpy.props.StringProperty(
                                         name='Npy Export Dir',
-                                        description='Folder to use for animation (.npy) export (default is current blendfile folder).', subtype='DIR_PATH'
+                                        subtype='DIR_PATH',
+                                        description='Folder to use for animation (.npy) export (default is current blendfile folder).'
                                     )
-    custom_frame_validation:		bpy.props.BoolProperty(
+    custom_frame_validation:        bpy.props.BoolProperty(
                                         default=False,
                                         name='Frame Validation',
                                         description='Enable validation for the frame avatars. (Frame artists only!)'
