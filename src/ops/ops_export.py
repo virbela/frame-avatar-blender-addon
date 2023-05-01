@@ -453,7 +453,7 @@ def obj_from_shapekey(obj: Object, keyname: str):
             )
             bpy.data.meshes.remove(pending_object.data, do_unlink=True)
 
-            log.info(f"Reimporting effect ...")
+            log.info("Reimporting effect ...")
             with active_scene(scene.name):
                 bpy.ops.import_scene.gltf(filepath=filepath)
                 pending_object = bpy.context.object
@@ -557,7 +557,7 @@ def get_uvtransform_metadata(context: Context, ht: HomeomorphicProperties, obj: 
         if bake_target.bake_mode == 'UV_BM_MIRRORED':
             # -- set the uv transform to opposite mirror
             base = bake_target.name[:-2]
-            Rk = f'{base}_L' if '_R' in bake_target.name else f'base_R'
+            Rk = f'{base}_L' if '_R' in bake_target.name else 'base_R'
             R = ht.bake_target_collection.get(Rk)
             if not R:
                 log.info(f'Missing mirror source for {bake_target.shortname}')
