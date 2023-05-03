@@ -44,6 +44,7 @@ class BoneAnimationExporter:
             return [val] * count
 
         for obj in self.animated_objects:
+            self.ht.export_progress_step(1.0)
             self.weights[obj.name] = dict()
 
             tmp_map = dict()
@@ -112,6 +113,7 @@ class BoneAnimationExporter:
             return [round(mat[j][i], 4) for i in range(4) for j in range(4)]
 
         for action in bpy.data.actions:
+            self.ht.export_progress_step(1.0)
             if action.name not in [ea.name for ea in self.ht.export_animation_actions]:
                 # Possibly not a valid export action eg tpose
                 continue

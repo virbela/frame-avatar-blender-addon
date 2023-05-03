@@ -384,6 +384,12 @@ def update_debug_basis(HT: 'HomeomorphicProperties', context: bpy.types.Context)
                 action.checked = False
 
 
+def update_export_progress(self, context):
+    # XXX Dirty Hack
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+    
+
+
 class HomeomorphicProperties(bpy.types.PropertyGroup):
 
     ### Bake targets ###
@@ -419,6 +425,15 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
     export_glb:                         bpy.props.BoolProperty(name="Export GLB", default=True)
     export_animation:                   bpy.props.BoolProperty(name="Export Animation", default=True)
     export_animation_actions:           bpy.props.CollectionProperty(type=AnimationProperty)
+    export_progress:                    bpy.props.FloatProperty(name="Export Progress", 
+                                                                default=-1,
+                                                                subtype='PERCENTAGE',
+                                                                precision=1,
+                                                                min=-1,
+                                                                soft_min=0,
+                                                                soft_max=100,
+                                                                max=101,
+                                                                update=update_export_progress)
 
     ### Baking options
     baking_target_uvmap:                bpy.props.StringProperty(name="Bake UV map", default=TARGET_UV_MAP)
@@ -475,6 +490,15 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
             if bt == target:    # note: We can't use identity comparison due to internal deferring in blender
                 return index
         return -1
+
+    def export_progress_start(self):
+        self.export_progress = 0
+
+    def export_progress_end(self):
+        self.export_progress = -1
+
+    def export_progress_step(self, step: float):
+        self.export_progress += step
 
 
 class UIStateProperty(bpy.types.PropertyGroup):

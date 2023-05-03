@@ -21,7 +21,13 @@ from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_
 
 
 def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
+    HT.export_progress_start()
+    context.window.cursor_set('WAIT')
     view_layer = require_work_scene(context).view_layers[0]
+
+    def on_exit():
+        HT.export_progress_end()
+        context.window.cursor_set('DEFAULT')
 
     if not validate_export(context, HT):
         return
@@ -38,16 +44,21 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
                     success = export_glb(context, HT)
                     if not success:
                         # XXX exit early if mesh export failed
+                        on_exit()
                         return
 
             if HT.export_atlas:
                 export_atlas(context, denoise=HT.denoise)
-
+            
+            on_exit()
         except FileExistsError:
             popup_message("Export files already exist in the current folder!")
+            on_exit()
         except PermissionError:
             popup_message("Please save the current blend file!")
+            on_exit()
         except Exception as e:
+            on_exit()
             raise e
 
 
@@ -109,6 +120,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
 
     # -- merge the metadata
     for morph_name, effect_data in effects_metadata.items():
+        ht.export_progress_step(0.1)
         if morph_name in uv_transform_metadata.keys():
             data = uv_transform_metadata[morph_name]
             if 'effects' not in data.keys():
@@ -158,6 +170,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
                 export_morph=True,
                 use_active_scene=True
             )
+            ht.export_progress_step(5)
 
             if is_dev():
                 directory = os.path.dirname(filepath)
@@ -530,6 +543,7 @@ def get_uvtransform_metadata(context: Context, ht: HomeomorphicProperties, obj: 
 
     effect_names = [pos.effect_shapekey for e in ht.effect_collection for pos in e.positions]
     for bake_target in ht.bake_target_collection:
+        ht.export_progress_step(0.5)
         if not bake_target.export:
             continue
 
@@ -574,6 +588,7 @@ def get_effects_metadata(ht: HomeomorphicProperties, obj: Object) -> dict:
     for effect in ht.effect_collection:
         if effect.type == "POSITION":
             for pos in effect.positions:
+                ht.export_progress_step(1.0)
                 effect_verts = calculate_effect_delta(obj, pos)
                 data = {
                     "type": 'POSITION',
@@ -583,6 +598,7 @@ def get_effects_metadata(ht: HomeomorphicProperties, obj: Object) -> dict:
                 effects_medatata[pos.parent_shapekey][effect.name.lower().strip(' ')] = data
         elif effect.type == "COLOR":
             for col in effect.colors:
+                ht.export_progress_step(1.0)
                 effect_verts = get_verts_or_vgroup(obj, col)
                 data = {
                     "type": "COLOR",
