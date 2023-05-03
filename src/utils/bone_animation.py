@@ -48,9 +48,10 @@ class BoneAnimationExporter:
 
             tmp_map = dict()
             for v in obj.data.vertices:
-                weights_per_vert = min(max_weights_per_vert, len(v.groups))
+                vgroups = [g for g in v.groups if obj.vertex_groups[g.group].name in self.bones]
+                weights_per_vert = min(max_weights_per_vert, len(vgroups))
 
-                groups = sorted(v.groups, key=lambda x: -x.weight)[:weights_per_vert]
+                groups = sorted(vgroups, key=lambda x: -x.weight)[:weights_per_vert]
                 total_weight = sum((x.weight for x in groups), 0.0) or 1.0
                 bones = ([x.group for x in groups] + el(0, weights_per_vert))[:weights_per_vert]
                 weights = ([x.weight / total_weight for x in groups] + el(0.0, weights_per_vert))[:weights_per_vert]
