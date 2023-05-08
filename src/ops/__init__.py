@@ -24,6 +24,20 @@ class FABA_OT_export(FabaOperator):
     bl_description =      "Export avatar meshes and metadata"
     faba_operator =       operations.export
 
+class FABA_OT_remove_export_json_path(FabaOperator):
+    bl_label =            "-"
+    bl_description =      'Remove JSON path'
+    bl_idname =           'faba.remove_json_path'
+    faba_operator =       operations.ExportAnimationJSONPaths.remove_json_path
+
+    index:                bpy.props.IntProperty()
+
+class FABA_OT_add_export_json_path(FabaOperator):
+    bl_label =            "+"
+    bl_description =      'Add JSON path'
+    bl_idname =           'faba.add_json_path'
+    faba_operator =       operations.ExportAnimationJSONPaths.add_json_path
+
 
 # Bake Targets
 class FABA_OT_create_targets_from_avatar(FabaOperator):
@@ -407,6 +421,8 @@ class FABA_OT_start_debug_server(FabaOperator):
 classes = (
     FABA_OT_setup_bake_scene,
     FABA_OT_export,
+    FABA_OT_add_export_json_path,
+    FABA_OT_remove_export_json_path,
     FABA_OT_create_targets_from_avatar,
     FABA_OT_create_workmeshes_for_all_targets,
     FABA_OT_create_workmeshes_for_selected_target,

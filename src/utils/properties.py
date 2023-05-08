@@ -372,6 +372,12 @@ class AnimationProperty(bpy.types.PropertyGroup):
     checked:                bpy.props.BoolProperty(name="", default=True)
 
 
+class ExportAnimationJSONPathProperty(bpy.types.PropertyGroup):
+    file:                  bpy.props.StringProperty(name="", default="", subtype='FILE_PATH')
+    export:                bpy.props.BoolProperty(name="Mark for export", default=True, 
+                                                  description="If checked, this json file data will be included in glb export")
+
+
 def update_debug_basis(HT: 'HomeomorphicProperties', context: bpy.types.Context):
     HT.debug_animation_actions.clear()
     if basis := HT.debug_animation_avatar_basis:
@@ -424,8 +430,13 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
     denoise:                            bpy.props.BoolProperty(name="Denoise Atlas", default=False)
     export_atlas:                       bpy.props.BoolProperty(name="Export Atlas", default=True)
     export_glb:                         bpy.props.BoolProperty(name="Export GLB", default=True)
+
     export_animation:                   bpy.props.BoolProperty(name="Export Animation", default=True)
     export_animation_actions:           bpy.props.CollectionProperty(type=AnimationProperty)
+
+    export_animation_json:              bpy.props.BoolProperty(name="Export Animation From JSON", default=False)
+    export_animation_json_paths:        bpy.props.CollectionProperty(name="JSON Paths", type=ExportAnimationJSONPathProperty)
+
     export_progress:                    bpy.props.FloatProperty(name="Export Progress", 
                                                                 default=-1,
                                                                 subtype='PERCENTAGE',
@@ -526,6 +537,8 @@ classes = (
 
     UIStateProperty,
     AnimationProperty,
+    ExportAnimationJSONPathProperty,
+
     HomeomorphicProperties,
 )
 

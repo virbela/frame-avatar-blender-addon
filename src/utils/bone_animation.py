@@ -1,6 +1,7 @@
 import os
 import bpy
 import json 
+import copy
 import math
 import numpy
 from pathlib import Path
@@ -35,6 +36,29 @@ class BoneAnimationExporter:
         self.set_weights()
         self.set_transforms()
         self.save_animation_json()
+
+    @classmethod
+    def load_from_json(cls, context: bpy.types.Context, ht: HomeomorphicProperties):
+        transforms = dict()
+        weights_compare = list()
+
+        for path in ht.export_animation_json_paths:
+            jsonfile = bpy.path.abspath(path.file)
+            with open(Path(jsonfile), 'r') as file:
+                data = json.loads(file.read())
+                if 'weights' in data.keys():
+                    weights_compare.append(data['weights'])
+
+                if 'transforms' in data.keys():
+                    for animName, trans in data['transforms'].items():
+                        transforms[animName] = trans
+
+        # TODO(ranjian0)
+        # compare the weights and make sure they are all the same for the animations
+
+        cls.weights = copy.deepcopy(weights_compare[0])
+        cls.transforms = copy.deepcopy(transforms)
+
 
     def set_weights(self):
         log.info("\tCalculating vertex weights...")

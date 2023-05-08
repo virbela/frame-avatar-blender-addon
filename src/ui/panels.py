@@ -274,6 +274,17 @@ class FABA_PT_export(bpy.types.Panel):
                     col.prop(ea, "checked", text=ea.name)
 
                 self.layout.prop(HT, "export_animation_actions", expand=True, text="")
+
+            self.layout.prop(HT, "export_animation_json")
+            if HT.avatar_type == "FULLBODY" and HT.export_animation_json:
+                for idx, path in enumerate(HT.export_animation_json_paths):
+                    box = self.layout.box()
+                    row = box.row(align=True)
+                    row.prop(path, 'file', text='JSON')
+                    row.separator()
+                    row.prop(path, "export", icon="EXPORT", text="")
+                    row.operator("faba.remove_json_path", icon="CANCEL", text="").index = idx
+                self.layout.operator("faba.add_json_path")
     
             self.layout.operator("faba.export", text="Export")
             # if HT.export_progress > -1:

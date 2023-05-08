@@ -38,6 +38,9 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
                     BoneAnimationExporter(context, HT)
                 else:
                     export_vertex_animation(context, HT)
+            if HT.avatar_type == "FULLBODY" and HT.export_animation_json:
+                if HT.animation_type == "BONE":
+                    BoneAnimationExporter.load_from_json(context, HT)
 
             if HT.export_glb:
                 with active_scene(require_work_scene(context).name):
@@ -608,3 +611,12 @@ def get_effects_metadata(ht: HomeomorphicProperties, obj: Object) -> dict:
                 effects_medatata[col.shape][effect.name.lower().strip(' ')] = data
 
     return effects_medatata
+
+
+class ExportAnimationJSONPaths:
+
+    def add_json_path(operator: Operator, context: Context, ht: HomeomorphicProperties):
+        ht.export_animation_json_paths.add()
+
+    def remove_json_path(operator: Operator, context: Context, ht: HomeomorphicProperties):
+        ht.export_animation_json_paths.remove(operator.index)

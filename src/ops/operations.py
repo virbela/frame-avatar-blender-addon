@@ -1,5 +1,5 @@
-from .ops_export import export
 from .ops_intro import setup_bake_scene
+from .ops_export import export, ExportAnimationJSONPaths
 
 from .ops_baketargets import (
     effects,
