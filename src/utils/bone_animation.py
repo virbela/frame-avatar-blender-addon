@@ -3,6 +3,7 @@ import bpy
 import json 
 import math
 import numpy
+from pathlib import Path
 from mathutils import Matrix
 from bpy_extras.io_utils import axis_conversion
 
@@ -33,6 +34,7 @@ class BoneAnimationExporter:
 
         self.set_weights()
         self.set_transforms()
+        self.save_animation_json()
 
     def set_weights(self):
         log.info("\tCalculating vertex weights...")
@@ -194,3 +196,14 @@ class BoneAnimationExporter:
             img.update()
             img.filepath = os.path.join(directory, f"{tname}.png")
             img.save()
+
+    def save_animation_json(self):
+        filepath = bpy.data.filepath
+        filename = Path(filepath).stem
+        directory = os.path.dirname(filepath)
+        data = {
+            "weights": self.weights,
+            "transforms": self.transforms
+        }
+        with open(os.path.join(directory, f"{filename}.json"), 'w') as file:
+            json.dump(data, file)
