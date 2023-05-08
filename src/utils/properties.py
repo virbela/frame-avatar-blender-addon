@@ -386,7 +386,8 @@ def update_debug_basis(HT: 'HomeomorphicProperties', context: bpy.types.Context)
 
 def update_export_progress(self, context):
     # XXX Dirty Hack
-    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+    # bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+    pass
     
 
 

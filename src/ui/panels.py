@@ -274,7 +274,9 @@ class FABA_PT_export(bpy.types.Panel):
                     col.prop(ea, "checked", text=ea.name)
 
                 self.layout.prop(HT, "export_animation_actions", expand=True, text="")
-        if HT.export_progress > -1:
-            self.layout.prop(HT, "export_progress", slider=True)
-        else:
+    
             self.layout.operator("faba.export", text="Export")
+            # if HT.export_progress > -1:
+            #     self.layout.prop(HT, "export_progress", slider=True)
+            # else:
+            #     self.layout.operator("faba.export", text="Export")
