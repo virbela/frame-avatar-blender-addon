@@ -49,7 +49,10 @@ class BoneAnimationExporter:
 
             tmp_map = dict()
             for v in obj.data.vertices:
+                # XXX Important to only use the groups for deformation bones, any other vertex groups
+                #     should be ignored (preserves user created groups too)
                 vgroups = [g for g in v.groups if obj.vertex_groups[g.group].name in self.bones]
+
                 weights_per_vert = min(max_weights_per_vert, len(vgroups))
 
                 groups = sorted(vgroups, key=lambda x: -x.weight)[:weights_per_vert]
