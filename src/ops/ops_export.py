@@ -32,10 +32,10 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
         return
     with selection(None, view_layer), active_object(None, view_layer):
         try:
-            if HT.avatar_type == "FULLBODY" and HT.export_animation:
+            if HT.should_export_animation_action():
                 BoneAnimationExporter(context, HT)
 
-            if HT.avatar_type == "FULLBODY" and HT.export_animation_json:
+            if HT.should_export_animation_json():
                 BoneAnimationExporter.load_from_json(context, HT)
 
             if HT.export_glb:
@@ -131,8 +131,16 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     }
 
 
-    if ht.avatar_type == "FULLBODY":
+    if ht.avatar_type == "FULLBODY" and ht.export_animation:
         morphsets_dict['Animation'] = animation_metadata(ht)
+
+        if ht.export_animation_preview:
+            # XXX Rename exported animation to idle (if many, pick the first one)
+            keys = list(morphsets_dict['Animation']['bone_transforms'].keys())
+            if len(keys):
+                anim = keys[0]
+                transforms = morphsets_dict['Animation']['bone_transforms'].pop(anim)
+                morphsets_dict['Animation']['bone_transforms']['idle'] = transforms
 
 
     prefs = get_prefs()
@@ -467,9 +475,8 @@ def animation_metadata(ht: HomeomorphicProperties) -> dict:
     result = dict()
     animated_objects = get_animation_objects(ht)
     result['layers'] = sorted(o.name for o in animated_objects)
-    if ht.animation_type == "BONE":
-        result['weights'] = BoneAnimationExporter.weights
-        result['bone_transforms'] = BoneAnimationExporter.transforms
+    result['weights'] = BoneAnimationExporter.weights
+    result['bone_transforms'] = BoneAnimationExporter.transforms
     return result
 
 

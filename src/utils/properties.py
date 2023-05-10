@@ -113,6 +113,15 @@ AVATAR_TYPE = enum_descriptor(
 
 )
 
+EXPORT_ANIMATION_SOURCE = enum_descriptor(
+    ('ACTION',         'Export from Action',               'Export animation from blender actions',
+        '',            0),
+
+    ('JSON',           'Export from JSON',                 'Export animation from external JSON files',
+        '',            1),
+
+)
+
 
 def update_atlas(self: 'BakeVariant', context: Context):
     # when atlas is set, also set the uv_channel
@@ -420,10 +429,9 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
     export_atlas:                       bpy.props.BoolProperty(name="Export Atlas", default=True)
     export_glb:                         bpy.props.BoolProperty(name="Export GLB", default=True)
 
-    export_animation:                   bpy.props.BoolProperty(name="Export Animation From Actions", default=True)
+    export_animation:                   bpy.props.BoolProperty(name="Export Animation",default=False)
+    export_animation_source:            bpy.props.EnumProperty(items=tuple(EXPORT_ANIMATION_SOURCE), name="Export Source", default=0)
     export_animation_actions:           bpy.props.CollectionProperty(type=AnimationProperty)
-
-    export_animation_json:              bpy.props.BoolProperty(name="Export Animation From JSON", default=False)
     export_animation_json_paths:        bpy.props.CollectionProperty(name="JSON Paths", type=ExportAnimationJSONPathProperty)
 
     export_animation_preview:           bpy.props.BoolProperty(name="Export Animation Preview", default=False, 
@@ -503,6 +511,16 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
 
     def export_progress_step(self, step: float):
         self.export_progress += step
+
+    def should_export_animation_action(self) -> bool:
+        return (self.avatar_type == "FULLBODY" and 
+                self.export_animation and 
+                self.export_animation_source == 'ACTION')
+
+    def should_export_animation_json(self) -> bool:
+        return (self.avatar_type == "FULLBODY" and 
+                self.export_animation and 
+                self.export_animation_source == 'JSON')
 
 
 class UIStateProperty(bpy.types.PropertyGroup):
