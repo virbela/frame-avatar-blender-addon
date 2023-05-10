@@ -264,18 +264,20 @@ class FABA_PT_export(bpy.types.Panel):
             anim.enabled = HT.avatar_type == "FULLBODY"
             anim.prop(HT, "export_animation")
             if HT.avatar_type == "FULLBODY" and HT.export_animation:
-                self.layout.prop(HT, "animation_type", expand=True)
                 if not HT.export_animation_actions:
                     self.layout.label(text="No actions found!", icon="ERROR")
-                sp = self.layout.split(factor=0.05)
-                _ = sp.column()
-                col = sp.column()
-                for ea in sorted(HT.export_animation_actions, key=lambda a: a.name):
-                    col.prop(ea, "checked", text=ea.name)
+                else:
+                    sp = self.layout.split(factor=0.05)
+                    _ = sp.column()
+                    col = sp.column()
+                    col.prop(HT, "export_animation_preview", toggle=True, text="Preview Only")
+                    for ea in sorted(HT.export_animation_actions, key=lambda a: a.name):
+                        col.prop(ea, "checked", text=ea.name)
 
-                self.layout.prop(HT, "export_animation_actions", expand=True, text="")
 
-            self.layout.prop(HT, "export_animation_json")
+            anim = self.layout.row()
+            anim.enabled = HT.avatar_type == "FULLBODY"
+            anim.prop(HT, "export_animation_json")
             if HT.avatar_type == "FULLBODY" and HT.export_animation_json:
                 for idx, path in enumerate(HT.export_animation_json_paths):
                     box = self.layout.box()
@@ -284,9 +286,15 @@ class FABA_PT_export(bpy.types.Panel):
                     row.separator()
                     row.prop(path, "export", icon="EXPORT", text="")
                     row.operator("faba.remove_json_path", icon="CANCEL", text="").index = idx
-                self.layout.operator("faba.add_json_path")
+
+                
+                cf = self.layout.column_flow(columns=3, align=True)
+                cf.label() # Dummy to fill first column
+                cf.operator("faba.add_json_path")
     
-            self.layout.operator("faba.export", text="Export")
+            row = self.layout.box()
+            row.scale_y = 1.5
+            row.operator("faba.export", text="Export")
             # if HT.export_progress > -1:
             #     self.layout.prop(HT, "export_progress", slider=True)
             # else:

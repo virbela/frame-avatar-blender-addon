@@ -114,16 +114,6 @@ AVATAR_TYPE = enum_descriptor(
 )
 
 
-ANIMATION_TYPE = enum_descriptor(
-    ('VERTEX',         'Vertex',                'Export vertex animations (npy blobs)',
-        '',            0),
-
-    ('BONE',           'Bone',                  'Export bone animation.',
-        '',            1),
-
-)
-
-
 def update_atlas(self: 'BakeVariant', context: Context):
     # when atlas is set, also set the uv_channel
     if self.intermediate_atlas:
@@ -369,11 +359,11 @@ class EffectProperty(bpy.types.PropertyGroup):
 
 class AnimationProperty(bpy.types.PropertyGroup):
     name:                   bpy.props.StringProperty(name="", default="")
-    checked:                bpy.props.BoolProperty(name="", default=True)
+    checked:                bpy.props.BoolProperty(name="", default=True, description="Mark for Export")
 
 
 class ExportAnimationJSONPathProperty(bpy.types.PropertyGroup):
-    file:                  bpy.props.StringProperty(name="", default="", subtype='FILE_PATH')
+    file:                  bpy.props.StringProperty(name="", default="", subtype='FILE_PATH', description="Path to animation JSON file")
     export:                bpy.props.BoolProperty(name="Mark for export", default=True, 
                                                   description="If checked, this json file data will be included in glb export")
 
@@ -426,16 +416,18 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
 
     ### Export options
     avatar_type:                        bpy.props.EnumProperty(items=tuple(AVATAR_TYPE), name="Avatar Type", default=1)
-    animation_type:                     bpy.props.EnumProperty(items=tuple(ANIMATION_TYPE), name="Animation Type", default=1)
     denoise:                            bpy.props.BoolProperty(name="Denoise Atlas", default=False)
     export_atlas:                       bpy.props.BoolProperty(name="Export Atlas", default=True)
     export_glb:                         bpy.props.BoolProperty(name="Export GLB", default=True)
 
-    export_animation:                   bpy.props.BoolProperty(name="Export Animation", default=True)
+    export_animation:                   bpy.props.BoolProperty(name="Export Animation From Actions", default=True)
     export_animation_actions:           bpy.props.CollectionProperty(type=AnimationProperty)
 
     export_animation_json:              bpy.props.BoolProperty(name="Export Animation From JSON", default=False)
     export_animation_json_paths:        bpy.props.CollectionProperty(name="JSON Paths", type=ExportAnimationJSONPathProperty)
+
+    export_animation_preview:           bpy.props.BoolProperty(name="Export Animation Preview", default=False, 
+                                                               description="Export an animation for preview")
 
     export_progress:                    bpy.props.FloatProperty(name="Export Progress", 
                                                                 default=-1,
