@@ -14,7 +14,6 @@ from ..utils.bake_targets import validate_bake_target_setup
 from ..utils.contextutils import active_object, selection, active_scene
 from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..utils.morph_spec import validate_floater_morphs, validate_fullbody_morphs
-from ..utils.vertex_animation import generate_animation_blob, validate_animation_export_verts
 from ..utils.uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
 from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
 from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name, get_animation_objects
@@ -34,13 +33,10 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
     with selection(None, view_layer), active_object(None, view_layer):
         try:
             if HT.avatar_type == "FULLBODY" and HT.export_animation:
-                if HT.animation_type == "BONE":
-                    BoneAnimationExporter(context, HT)
-                else:
-                    export_vertex_animation(context, HT)
+                BoneAnimationExporter(context, HT)
+
             if HT.avatar_type == "FULLBODY" and HT.export_animation_json:
-                if HT.animation_type == "BONE":
-                    BoneAnimationExporter.load_from_json(context, HT)
+                BoneAnimationExporter.load_from_json(context, HT)
 
             if HT.export_glb:
                 with active_scene(require_work_scene(context).name):
@@ -99,8 +95,6 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
         if not validate_bake_target_setup(HT):
             return False
         
-        if not validate_animation_export_verts(HT.avatar_mesh):
-            return False
     return True
 
 
@@ -332,14 +326,6 @@ def export_atlas(context: Context, denoise: bool = True):
                 os.path.join(dirname, f),
                 os.path.join(dirname, 'hasAtlas.png')
             )
-
-
-def export_vertex_animation(context: Context, ht: HomeomorphicProperties):
-    avatar_obj = ht.avatar_mesh
-    animated_objects = get_animation_objects(ht)
-    list(map(ensure_applied_rotation, animated_objects))
-    log.info(f"Animated Objects {animated_objects}")
-    generate_animation_blob(context, avatar_obj, animated_objects)
 
 
 @contextmanager
