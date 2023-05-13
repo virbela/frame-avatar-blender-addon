@@ -87,6 +87,7 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
     for mirror in mirror_list:
         create_mirror(ht.get_bake_target_index(mirror.primary.bake_target), ht.get_bake_target_index(mirror.secondary.bake_target))
 
+
 class bake_mirrors:
     def set_primary(operator: Operator, context: Context, ht: HomeomorphicProperties):
         if mirror := ht.get_selected_mirror():

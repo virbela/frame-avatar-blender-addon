@@ -2,6 +2,7 @@ import bpy
 from bpy.types import Operator, Context, ViewLayer, NodeTree
 
 from .base import FabaOperator
+from ..utils.logging import log_writer as log
 from ..utils.exceptions import BakeException
 from ..utils.properties import HomeomorphicProperties, BakeVariant
 from ..utils.helpers import require_bake_scene, set_scene, set_rendering, set_selection
@@ -15,7 +16,7 @@ def bake_all_bake_targets(operator: Operator, context: Context, ht: Homeomorphic
 
     for idx, bake_target in enumerate(ht.bake_target_collection, start=1):
         operator.report({'INFO'}, f"Baking target {idx} / {len(ht.bake_target_collection)}.")
-        print(f"Baking for {bake_target}")
+        log.info(f"Baking for {bake_target}")
         for variant in bake_target.variant_collection:
             bake_specific_variant(ht, view_layer, variant)
             # XXX bake cannot run as async here because of the loop, means we don't get

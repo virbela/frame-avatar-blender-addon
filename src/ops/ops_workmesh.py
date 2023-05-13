@@ -129,7 +129,7 @@ def shapekey_to_workmesh(operator: Operator, context: Context, ht: HomeomorphicP
     bake_scene = require_bake_scene(context)
     workmesh = bake_scene.objects.get(active_shapekey.name)
     if not workmesh:
-        print("Missing workmesh!")
+        log.info("Missing workmesh!")
         return
 
     for vert in workmesh.data.vertices:
@@ -179,8 +179,6 @@ def workmesh_symmetrize(operator: Operator, context: Context, ht: HomeomorphicPr
         mesh = obj.data
         right_verts = [v for v in mesh.vertices if v.co.x > 0.0]
         left_verts = [v for v in mesh.vertices if v.co.x < 0.0]
-
-        print(len(mesh.vertices), len(right_verts) + len(left_verts))
 
         size = len(left_verts)
         kd = mathutils.kdtree.KDTree(size)
