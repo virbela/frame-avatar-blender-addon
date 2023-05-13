@@ -523,16 +523,6 @@ class HomeomorphicProperties(bpy.types.PropertyGroup):
                 self.export_animation_source == 'JSON')
 
 
-class UIStateProperty(bpy.types.PropertyGroup):
-    workflow_introduction_visible:      bpy.props.BoolProperty(default=True)
-    workflow_bake_targets_visible:      bpy.props.BoolProperty(default=True)
-    workflow_work_meshes_visible:       bpy.props.BoolProperty(default=False)
-    workflow_texture_atlas_visible:     bpy.props.BoolProperty(default=False)
-    workflow_work_materials_visible:    bpy.props.BoolProperty(default=False)
-    workflow_baking_visible:            bpy.props.BoolProperty(default=False)
-    workflow_helpers_visible:           bpy.props.BoolProperty(default=False)
-
-
 classes = (
     BakeTargetReference,
     BakeGroup,
@@ -545,7 +535,6 @@ classes = (
     PositionEffect,
     EffectProperty,
 
-    UIStateProperty,
     AnimationProperty,
     ExportAnimationJSONPathProperty,
 
@@ -558,13 +547,11 @@ register, unregister = bpy.utils.register_classes_factory(classes)
 def register_props():
     register()
 
-    bpy.types.Scene.ui_state = bpy.props.PointerProperty(type=UIStateProperty)
     bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
 
 
 
 def unregister_props():
-    del bpy.types.Scene.ui_state
     del bpy.types.Scene.homeomorphictools
 
     unregister()
