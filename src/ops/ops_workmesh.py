@@ -12,7 +12,7 @@ from .common import (
 )
 from ..utils.logging import log_writer as log
 from ..utils.materials import setup_bake_material
-from ..utils.properties import HomeomorphicProperties, BakeTarget
+from ..props import HomeomorphicProperties, BakeTarget
 from ..utils.constants import PAINTING_UV_MAP, TARGET_UV_MAP, Assets
 from ..utils.helpers import (
     create_named_entry,

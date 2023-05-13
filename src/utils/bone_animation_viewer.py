@@ -4,7 +4,7 @@ import time
 import bmesh
 import numpy as np
 
-from .properties import HomeomorphicProperties
+from ..props import HomeomorphicProperties
 from .helpers import get_asset_file, get_homeomorphic_tool_state, is_dev
 
 context = bpy.context

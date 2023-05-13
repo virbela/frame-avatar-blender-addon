@@ -6,7 +6,7 @@ from .base import FabaOperator
 from ..utils.constants import TARGET_UV_MAP
 from ..utils.structures import intermediate
 from ..utils.logging import log_writer as log
-from ..utils.properties import HomeomorphicProperties
+from ..props import HomeomorphicProperties
 from .common import set_uv_map, guarded_operator
 from ..utils.helpers import (
     set_scene,

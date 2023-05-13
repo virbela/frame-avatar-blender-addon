@@ -16,7 +16,7 @@ from ..utils.contextutils import active_object, selection, active_scene
 from ..utils.helpers import ensure_applied_rotation, get_prefs, popup_message
 from ..utils.morph_spec import validate_floater_morphs, validate_fullbody_morphs
 from ..utils.uvtransform import UVTransform, uv_transformation_calculator, get_uv_map_from_mesh
-from ..utils.properties import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
+from ..props import BakeTarget, HomeomorphicProperties, BakeVariant, PositionEffect, ColorEffect
 from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_bake_target_variant_name, get_animation_objects
 
 

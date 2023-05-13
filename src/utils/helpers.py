@@ -23,7 +23,7 @@ from .exceptions import InternalError, FrameException
 
 
 if TYPE_CHECKING:
-    from .properties import HomeomorphicProperties, BakeTarget, BakeVariant
+    from ..props import HomeomorphicProperties, BakeTarget, BakeVariant
 
 
 def IMPLEMENTATION_PENDING(*p, **n):

@@ -1,7 +1,7 @@
 from typing import Callable, Any
 from bpy.types import CollectionProperty, Object, Context
 
-from ..utils.properties import BakeVariant
+from ..props import BakeVariant
 from ..utils.constants import WORK_SCENE, BAKE_SCENE
 
 class guarded_operator:

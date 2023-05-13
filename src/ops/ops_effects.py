@@ -4,7 +4,7 @@ from bpy.types import Operator, Context
 from .base import FabaOperator
 from .common import generic_list
 from ..utils.helpers import a_get, a_set
-from ..utils.properties import HomeomorphicProperties
+from ..props import HomeomorphicProperties
 
 
 class effects:

@@ -5,7 +5,7 @@ from .base import FabaOperator
 from ..utils.constants import MIRROR_TYPE
 from ..utils.logging import log_writer as log
 from ..utils.materials import setup_bake_material, get_material_variants
-from ..utils.properties import HomeomorphicProperties, BakeTarget, BakeVariant
+from ..props import HomeomorphicProperties, BakeTarget, BakeVariant
 from ..utils.helpers import (
     set_scene,
     set_selection,

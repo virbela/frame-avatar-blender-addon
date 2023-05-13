@@ -1,6 +1,6 @@
 import bpy
 from ..utils.exceptions import InternalError
-from ..utils.properties import UV_ISLAND_MODES
+from ..props.baketarget import UV_ISLAND_MODES
 from ..utils.helpers import get_homeomorphic_tool_state, require_bake_scene
 
 

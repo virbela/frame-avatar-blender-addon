@@ -3,7 +3,7 @@ from bpy.types import Operator, Context
 
 from .base import FabaOperator
 from ..utils.helpers import require_bake_scene
-from ..utils.properties import HomeomorphicProperties
+from ..props import HomeomorphicProperties
 from ..utils.bone_animation_viewer import view_animation
 
 def clear_bake_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):

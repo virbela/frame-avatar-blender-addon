@@ -23,8 +23,8 @@ from bpy.app.handlers import persistent
 
 from .ui import register_ui, unregister_ui
 from .ops import register_ops, unregister_ops
+from .props import register_props, unregister_props
 from .utils.helpers import get_homeomorphic_tool_state
-from .utils.properties import register_props, unregister_props
 
 
 class FrameAvatarAddonPreferences(bpy.types.AddonPreferences):

@@ -7,7 +7,7 @@ from .common import generic_list, poll_avatar_mesh
 from ..utils.constants import TARGET_UV_MAP
 from ..utils.logging import log_writer as log
 from ..utils.structures import intermediate, iter_dc
-from ..utils.properties import HomeomorphicProperties, BakeTargetMirrorEntry
+from ..props import HomeomorphicProperties, BakeTargetMirrorEntry
 from ..utils.helpers import a_get, a_set, popup_message, require_work_scene, set_scene, set_selection
 
 

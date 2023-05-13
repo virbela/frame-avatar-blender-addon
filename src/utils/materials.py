@@ -2,7 +2,7 @@ import bpy
 from bpy.types import Scene, Image, Material, ShaderNodeTree
 
 from .constants import Assets
-from .properties import BakeTarget
+from ..props import BakeTarget
 from .structures import intermediate
 from .helpers import create_named_entry, require_named_entry, get_nice_name, named_entry_action
 

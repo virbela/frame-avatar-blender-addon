@@ -2,7 +2,7 @@ from bpy.types import Context, Operator
 
 from .base import FabaOperator
 from ..utils.helpers import require_bake_scene
-from ..utils.properties import HomeomorphicProperties
+from ..props import HomeomorphicProperties
 
 
 def setup_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties):

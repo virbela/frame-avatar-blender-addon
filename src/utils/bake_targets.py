@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from .helpers import popup_message
-from .properties import BakeVariant, HomeomorphicProperties
+from ..props import BakeVariant, HomeomorphicProperties
 
 class validation_error:
     # Abstract errors
