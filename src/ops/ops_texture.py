@@ -2,6 +2,7 @@ import bpy
 import bmesh
 from bpy.types import Context, Operator, Object, Scene, Image
 
+from .base import FabaOperator
 from ..utils.constants import TARGET_UV_MAP
 from ..utils.structures import intermediate
 from ..utils.logging import log_writer as log
@@ -263,3 +264,17 @@ def copy_and_transform_uv(
     target_mesh.to_mesh(target_object.data)
     source_mesh.free()
     target_mesh.free()
+
+
+class FABA_OT_auto_assign_atlas(FabaOperator):
+    bl_label =            "Auto assign atlas/UV"
+    bl_idname =           "faba.auto_assign_atlas"
+    bl_description =      "Go through the bake targets and assign atlas texture and UV layer for all non frozen bake targets."
+    faba_operator =       auto_assign_atlas
+
+
+class FABA_OT_pack_uv_islands(FabaOperator):
+    bl_label =            "Pack UV islands"
+    bl_idname =           "faba.pack_uv_islands"
+    bl_description =      "Go through the bake targets and pack workmesh uvs into intermediate atlases"
+    faba_operator =       pack_uv_islands

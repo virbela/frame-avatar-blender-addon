@@ -2,6 +2,7 @@ import bpy
 import bmesh
 from bpy.types import Operator, Context, Object
 
+from .base import FabaOperator
 from ..utils.constants import MIRROR_TYPE
 from ..utils.helpers import require_bake_scene, set_selection
 from ..utils.properties import BakeTarget, HomeomorphicProperties
@@ -234,3 +235,66 @@ def copy_uv_layers(operator: Operator, context: Context, ht: HomeomorphicPropert
     if last_selection:
         for o, state in last_selection:
             o.select_set(state)
+
+
+class FABA_OT_synchronize_uv_to_vertices(FabaOperator):
+    bl_label =            "Select mesh vertices based on UV selection"
+    bl_idname =           "faba.synchronize_uv_to_vertices"
+    bl_description =      "Sync selection state for mesh and uvs"
+    faba_operator =       synchronize_uv_to_vertices
+
+
+class FABA_OT_select_objects_by_uv(FabaOperator):
+    bl_label =            "Select objects based on UV selection"
+    bl_idname =           "faba.select_objects_by_uv"
+    bl_description =      "Select all objects in the active uv"
+    faba_operator =       select_objects_by_uv
+
+
+class FABA_OT_synchronize_visibility_to_render(FabaOperator):
+    bl_label =            "Show to render only"
+    bl_idname =           "faba.synchronize_visibility_to_render"
+    bl_description =      "Will only make objects that are going to be rendered visible in the viewlayer"
+    faba_operator =       synchronize_visibility_to_render
+
+
+class FABA_OT_make_everything_visible(FabaOperator):
+    bl_label =            "Show everything"
+    bl_idname =           "faba.make_everything_visible"
+    bl_description =      "Will make everything in the baking viewlayer visible"
+    faba_operator =       make_everything_visible
+
+
+class FABA_OT_reset_uv_transforms(FabaOperator):
+    bl_label =            "Reset UV transforms"
+    bl_idname =           "faba.reset_uv_transforms"
+    bl_description =      "Resets UV transform to reflect the source object"
+    faba_operator =       reset_uv_transforms
+
+
+class FABA_OT_recalculate_normals(FabaOperator):
+    bl_label =            "Recalculate normals on selected meshes"
+    bl_idname =           "faba.recalculate_normals"
+    bl_description =      "Recalculates normals to combat artifacts"
+    faba_operator =       recalculate_normals
+
+
+class FABA_OT_update_baking_scene(FabaOperator):
+    bl_label =            "Update baking scene"
+    bl_idname =           "faba.update_baking_scene"
+    bl_description =      "Regenerate bake scene objects from bake targets"
+    faba_operator =       update_bake_scene
+
+
+class FABA_OT_synchronize_mirrors(FabaOperator):
+    bl_label =            "Synchronize mirrors"
+    bl_description =      'Copy settings from all primary targets to secondary targets in the mirror list'
+    bl_idname =           'faba.synchronize_mirrors'
+    faba_operator =       synchronize_mirrors
+
+
+class FABA_OT_copy_uv_layers(FabaOperator):
+    bl_label =            "Copy UV Layers"
+    bl_description =      'Transfer UV layers from one object to another'
+    bl_idname =           'faba.copy_uv_layers'
+    faba_operator =       copy_uv_layers

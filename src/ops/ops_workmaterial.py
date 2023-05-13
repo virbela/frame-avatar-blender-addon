@@ -1,6 +1,7 @@
 import bpy
 from bpy.types import Context, Operator
 
+from .base import FabaOperator
 from ..utils.constants import MIRROR_TYPE
 from ..utils.logging import log_writer as log
 from ..utils.materials import setup_bake_material, get_material_variants
@@ -96,3 +97,45 @@ def generic_switch_to_material(context: Context, ht: HomeomorphicProperties, mat
                 target.active_material = bpy.data.materials[getattr(materials, material_type)]
         else:
             log.warning(f'{bt.name} lacks atlas or uv_map')
+
+
+class FABA_OT_update_selected_material(FabaOperator):
+    bl_label =            "Update selected baketarget material"
+    bl_idname =           "faba.update_selected_material"
+    bl_description =      "Update the work mesh material for the selected bake target"
+    faba_operator =       update_selected_material
+
+
+class FABA_OT_update_all_materials(FabaOperator):
+    bl_label =            "Update all baketarget materials"
+    bl_idname =           "faba.update_all_materials"
+    bl_description =      "Update work mesh materials for all bake targets"
+    faba_operator =       update_all_materials
+
+
+class FABA_OT_switch_to_bake_material(FabaOperator):
+    bl_label =            "Show bake/paint material"
+    bl_description =      'Switch all bake objects to use the bake material'
+    bl_idname =           'faba.switch_to_bake_material'
+    faba_operator =       switch_to_bake_material
+
+
+class FABA_OT_switch_to_preview_material(FabaOperator):
+    bl_label =            "Show preview material"
+    bl_description =      'Switch all bake objects to use the preview material'
+    bl_idname =           'faba.switch_to_preview_material'
+    faba_operator =       switch_to_preview_material
+
+
+class FABA_OT_select_by_atlas(FabaOperator):
+    bl_label =            "Select work meshes based on atlas"
+    bl_idname =           "faba.select_by_atlas"
+    bl_description =      "Select all work meshes in `Match atlas`"
+    faba_operator =       select_by_atlas
+
+
+class FABA_OT_set_selected_workmesh_atlas(FabaOperator):
+    bl_label =            "Set work mesh atlas"
+    bl_idname =           "faba.set_selected_workmesh_atlas"
+    bl_description =      "Set the intermediate atlas for all selected workmeshes to `Match atlas`"
+    faba_operator =       set_selected_objects_atlas

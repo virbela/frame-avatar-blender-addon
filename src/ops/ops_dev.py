@@ -1,5 +1,7 @@
 import bpy
 from bpy.types import Operator, Context
+
+from .base import FabaOperator
 from ..utils.helpers import require_bake_scene
 from ..utils.properties import HomeomorphicProperties
 from ..utils.bone_animation_viewer import view_animation
@@ -38,3 +40,31 @@ def debug_bone_animation(operator: Operator, context: Context, ht: HomeomorphicP
 
 def start_debug_server(operator: Operator, context: Context, ht: HomeomorphicProperties):
     bpy.ops.debug.connect_debugger_vscode()
+
+
+class FABA_OT_clear_bake_scene(FabaOperator):
+    bl_label =            "Remove everything from bake scene"
+    bl_idname =           "faba.clear_bake_scene"
+    bl_description =      "This is for internal development purposes and should not be seen in distribution"
+    faba_operator =       clear_bake_scene
+
+
+class FABA_OT_clear_bake_targets(FabaOperator):
+    bl_label =            "Remove all bake targets"
+    bl_idname =           "faba.clear_bake_targets"
+    bl_description =      "Remove all the bake targets"
+    faba_operator =       clear_bake_targets
+
+
+class FABA_OT_show_bone_debug(FabaOperator):
+    bl_label =            "Show bone animation debug"
+    bl_idname =           "faba.debug_bone_animation"
+    bl_description =      "This is for internal development purposes and should not be seen in distribution"
+    faba_operator =       debug_bone_animation
+
+
+class FABA_OT_start_debug_server(FabaOperator):
+    bl_label =            "Start Debugger"
+    bl_idname =           "faba.start_debugger"
+    bl_description =      "This is for internal development purposes and should not be seen in distribution"
+    faba_operator =       start_debug_server

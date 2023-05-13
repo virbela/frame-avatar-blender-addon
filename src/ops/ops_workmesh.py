@@ -3,7 +3,13 @@ import bmesh
 import mathutils
 from bpy.types import Context, Operator, Scene
 
-from .common import set_uv_map
+from .base import FabaOperator
+from .common import ( 
+    set_uv_map,
+    poll_bake_scene,
+    poll_work_scene,
+    poll_baketargets,
+)
 from ..utils.logging import log_writer as log
 from ..utils.materials import setup_bake_material
 from ..utils.properties import HomeomorphicProperties, BakeTarget
@@ -324,3 +330,92 @@ def mirror_workmesh_verts(operator: Operator, context: Context, ht: Homeomorphic
 
 def transfer_skin_weights(operator: Operator, context: Context, ht: HomeomorphicProperties):
     pass
+
+
+class FABA_OT_create_workmeshes_for_all_targets(FabaOperator):
+    bl_label =            "New work meshes from all bake targets"
+    bl_idname =           "faba.create_workmeshes_for_all_targets"
+    bl_description =      "Create bake meshes for all bake targets"
+    faba_operator =       create_workmeshes_for_all_targets
+    faba_poll =           poll_baketargets
+
+
+class FABA_OT_create_workmeshes_for_selected_target(FabaOperator):
+    bl_label =            "New work meshes from selected bake targets"
+    bl_idname =           "faba.create_workmeshes_for_selected_target"
+    bl_description =      "Create bake meshes for the selected bake targets"
+    faba_operator =       create_workmeshes_for_selected_target
+
+
+class FABA_OT_update_selected_workmesh_all_shapekeys(FabaOperator):
+    bl_label =            "Update selected"
+    bl_idname =           "faba.update_selected_workmesh_all_shapekeys"
+    bl_description =      "Update vertex position data for all workmeshes"
+    faba_operator =       update_selected_workmesh_all_shapekeys
+
+
+class FABA_OT_update_selected_workmesh_active_shapekey(FabaOperator):
+    bl_label =            "Update active shapekey"
+    bl_idname =           "faba.update_selected_workmesh_active_shapekey"
+    bl_description =      "Update vertex position data for the active shape key mesh"
+    faba_operator =       update_selected_workmesh_active_shapekey
+
+
+class FABA_OT_update_selected_workmesh(FabaOperator):
+    bl_label =            "Update selected work mesh"
+    bl_idname =           "faba.update_selected_workmesh"
+    #TODO - bl_description
+    faba_operator =       update_selected_workmesh
+
+
+class FABA_OT_update_all_workmeshes(FabaOperator):
+    bl_label =            "Update all work meshes"
+    bl_idname =           "faba.update_all_workmeshes"
+    bl_description =      "Reset all the bake target workmeshes(uv, materials)"
+    faba_operator =       update_all_workmeshes
+
+
+class FABA_OT_workmesh_to_shapekey(FabaOperator):
+    bl_label =            "Selected workmesh to shapekey"
+    bl_idname =           "faba.workmesh_to_shapekey"
+    bl_description =      "Transfer the selected workmesh(es) geometry to the corresponding shapekey(s)"
+    faba_operator =       workmesh_to_shapekey
+    faba_poll =           poll_bake_scene
+
+
+class FABA_OT_all_workmeshes_to_shapekeys(FabaOperator):
+    bl_label =            "All workmeshes to shapekeys"
+    bl_idname =           "faba.all_workmesh_to_shapekey"
+    bl_description =      "Transfer the all workmesh geometry to the corresponding shapekey"
+    faba_operator =       all_workmeshes_to_shapekey
+    faba_poll =           poll_bake_scene
+
+
+class FABA_OT_shapekey_to_workmesh(FabaOperator):
+    bl_label =            "Active shapekey to workmesh"
+    bl_idname =           "faba.shapekey_to_workmesh"
+    bl_description =      "Transfer the active shapekey geometry to the corresponding workmesh"
+    faba_operator =       shapekey_to_workmesh
+    faba_poll=           poll_work_scene
+
+
+class FABA_OT_all_shapekey_to_workmesh(FabaOperator):
+    bl_label =            "All shapekeys to workmeshes"
+    bl_idname =           "faba.all_shapekey_to_workmesh"
+    bl_description =      "Transfer all shapekey geometry to the corresponding workmesh"
+    faba_operator =       all_shapekeys_to_workmeshes
+    faba_poll =           poll_work_scene
+
+
+class FABA_OT_workmesh_symmetrize(FabaOperator):
+    bl_label =            "Symmetrize workmesh"
+    bl_idname =           "faba.workmesh_symmetrize"
+    bl_description =      "Make the workmesh symmetrical along X axis"
+    faba_operator =       workmesh_symmetrize
+
+
+class FABA_OT_mirror_workmesh_verts(FabaOperator):
+    bl_label =            "Mirror Vertices"
+    bl_idname =           "faba.mirror_workmesh_verts"
+    bl_description =      "Mirror vertices from source object to target object"
+    faba_operator =       mirror_workmesh_verts

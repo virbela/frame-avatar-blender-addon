@@ -8,6 +8,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from bpy.types import Operator, Context, Object, Scene
 
+from .base import FabaOperator
 from ..utils.logging import log_writer as log
 from ..utils.bone_animation import BoneAnimationExporter
 from ..utils.bake_targets import validate_bake_target_setup
@@ -613,3 +614,26 @@ class ExportAnimationJSONPaths:
 
     def remove_json_path(operator: Operator, context: Context, ht: HomeomorphicProperties):
         ht.export_animation_json_paths.remove(operator.index)
+
+
+class FABA_OT_export(FabaOperator):
+    bl_label =            "Export GLTF"
+    bl_idname =           "faba.export"
+    bl_description =      "Export avatar meshes and metadata"
+    faba_operator =       export
+
+
+class FABA_OT_remove_export_json_path(FabaOperator):
+    bl_label =            "-"
+    bl_description =      'Remove JSON path'
+    bl_idname =           'faba.remove_json_path'
+    faba_operator =       ExportAnimationJSONPaths.remove_json_path
+
+    index:                bpy.props.IntProperty()
+
+
+class FABA_OT_add_export_json_path(FabaOperator):
+    bl_label =            "+"
+    bl_description =      'Add JSON path'
+    bl_idname =           'faba.add_json_path'
+    faba_operator =       ExportAnimationJSONPaths.add_json_path

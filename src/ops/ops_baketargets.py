@@ -1,7 +1,9 @@
 import bpy
 from bpy.types import Operator, Context, ShapeKey, Object
 
-from .common import generic_list
+from .base import FabaOperator
+from .common import generic_list, poll_avatar_mesh
+
 from ..utils.constants import TARGET_UV_MAP
 from ..utils.logging import log_writer as log
 from ..utils.structures import intermediate, iter_dc
@@ -164,30 +166,104 @@ class bake_variants:
             generic_list.remove(bake_target.variant_collection, a_get(bake_target, 'selected_variant'), a_set(bake_target, 'selected_variant'))
 
 
-class effects:
+class FABA_OT_create_targets_from_avatar(FabaOperator):
+    bl_label =            "New bake targets from avatar mesh"
+    bl_idname =           "faba.create_targets_from_avatar_object"
+    bl_description =      "Create shape key targets from avatar mesh"
+    faba_operator =       create_targets_from_avatar_object
+    faba_poll =           poll_avatar_mesh
 
-    def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        generic_list.add(ht.effect_collection, a_get(ht, 'selected_effect'), a_set(ht, 'selected_effect'))
 
-    def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        generic_list.remove(ht.effect_collection, a_get(ht, 'selected_effect'), a_set(ht, 'selected_effect'))
+class FABA_OT_add_bake_target(FabaOperator):
+    bl_label =            "Add Baketarget"
+    bl_description =      'Create new bake target'
+    bl_idname =           'faba.add_bake_target'
+    faba_operator =       bake_targets.add
 
-    def add_position_effect(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        if ht.selected_effect != -1:
-            et = ht.effect_collection[ht.selected_effect]
-            pos = et.positions.add()
 
-    def remove_position_effect(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        if ht.selected_effect != -1:
-            et = ht.effect_collection[ht.selected_effect]
-            et.positions.remove(operator.index)
+class FABA_OT_show_selected_bt(FabaOperator):
+    bl_label =            "Edit selected"
+    bl_description =      (
+                            'Edit selected bake target.\n'
+                            'Activates shape key as needed'
+                        )
+    bl_idname =           'faba.show_selected_bt'
+    faba_operator =       bake_targets.edit_selected
 
-    def add_color_effect(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        if ht.selected_effect != -1:
-            et = ht.effect_collection[ht.selected_effect]
-            pos = et.colors.add()
 
-    def remove_color_effect(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        if ht.selected_effect != -1:
-            et = ht.effect_collection[ht.selected_effect]
-            et.colors.remove(operator.index)
+class FABA_OT_remove_bake_target(FabaOperator):
+    bl_label =            "Remove Selected"
+    bl_description =      'Remove selected bake target'
+    bl_idname =           'faba.remove_bake_target'
+    faba_operator =       bake_targets.remove
+
+
+class FABA_OT_add_bake_target_variant(FabaOperator):
+    bl_label =            "+"
+    bl_description =      'Add variant'
+    bl_idname =           'faba.add_bake_target_variant'
+    faba_operator =       bake_variants.add
+
+
+class FABA_OT_remove_bake_target_variant(FabaOperator):
+    bl_label =            "-"
+    bl_description =      'Remove mirror entry'
+    bl_idname =           'faba.remove_bake_target_variant'
+    faba_operator =       bake_variants.remove
+
+
+class FABA_OT_set_bake_mirror_primary(FabaOperator):
+    bl_label =            "Set primary"
+    bl_description =      'Set primary bake target of selected mirror entry'
+    bl_idname =           'faba.set_bake_mirror_primary'
+    faba_operator =       bake_mirrors.set_primary
+
+
+class FABA_OT_set_bake_mirror_secondary(FabaOperator):
+    bl_label =            "Set secondary"
+    bl_description =      'Set secondary bake target of selected mirror entry'
+    bl_idname =           'faba.set_bake_mirror_secondary'
+    faba_operator =       bake_mirrors.set_secondary
+
+
+class FABA_OT_add_bake_target_mirror(FabaOperator):
+    bl_label =            "+"
+    bl_description =      'Create new mirror entry'
+    bl_idname =           'faba.add_bake_target_mirror'
+    faba_operator =       bake_mirrors.add
+
+
+class FABA_OT_remove_bake_target_mirror(FabaOperator):
+    bl_label =            "-"
+    bl_description =      'Remove mirror entry'
+    bl_idname =           'faba.remove_bake_target_mirror'
+    faba_operator =       bake_mirrors.remove
+
+
+class FABA_OT_add_bake_group(FabaOperator):
+    bl_label =            "+"
+    bl_description =      'Create new bake group'
+    bl_idname =           'faba.add_bake_group'
+    faba_operator =       bake_groups.add
+
+
+class FABA_OT_remove_bake_group(FabaOperator):
+    bl_label =            "-"
+    bl_description =      'Remove selected bake group'
+    bl_idname =           'faba.remove_bake_group'
+    faba_operator =       bake_groups.remove
+
+
+class FABA_OT_add_bake_group_member(FabaOperator):
+    bl_label =            "+"
+    bl_description =      'Add selected bake target to bake group'
+    bl_idname =           'faba.add_bake_group_member'
+    faba_operator =       bake_groups.members.add
+
+
+class FABA_OT_remove_bake_group_member(FabaOperator):
+    bl_label =            "-"
+    bl_description =      'Remove selected member from bake group'
+    bl_idname =           'faba.remove_bake_group_member'
+    faba_operator =       bake_groups.members.remove
+

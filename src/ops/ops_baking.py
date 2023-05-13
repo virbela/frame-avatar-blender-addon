@@ -1,6 +1,7 @@
 import bpy
 from bpy.types import Operator, Context, ViewLayer, NodeTree
 
+from .base import FabaOperator
 from ..utils.exceptions import BakeException
 from ..utils.properties import HomeomorphicProperties, BakeVariant
 from ..utils.helpers import require_bake_scene, set_scene, set_rendering, set_selection
@@ -144,3 +145,23 @@ def ensure_color_output_node_ready(variant: BakeVariant, tree: NodeTree):
     tree.links.new(texnode.outputs[0], diffusenode.inputs[0])
     tree.links.new(diffusenode.outputs[0], outputnode.inputs[0])
 
+
+class FABA_OT_bake_selected_bake_target(FabaOperator):
+    bl_label =            "Bake selected target"
+    bl_idname =           "faba.bake_selected_bake_target"
+    bl_description =      "Bake textures for the selected bake target"
+    faba_operator =       bake_selected_bake_target
+
+
+class FABA_OT_bake_selected_workmeshes(FabaOperator):
+    bl_label =            "Bake selected work meshes"
+    bl_idname =           "faba.bake_selected_workmeshes"
+    bl_description =      "Bake textures for selected work meshes"
+    faba_operator =       bake_selected_workmeshes
+
+
+class FABA_OT_bake_all(FabaOperator):
+    bl_label =            "Bake all targets"
+    bl_idname =           "faba.bake_all"
+    bl_description =      "Bake textures for all targets and their variants"
+    faba_operator =       bake_all_bake_targets
