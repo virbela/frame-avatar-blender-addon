@@ -36,7 +36,7 @@ class LogBase:
         self.info = 	LogLevelDescriptor(self, LogLevel.INFO, 		"Generic information to keep the user in the loop")
         self.warning = 	LogLevelDescriptor(self, LogLevel.WARNING, 	"Warnings are intended for things that is not really an error but that the user should still be made aware of")
         self.error = 	LogLevelDescriptor(self, LogLevel.ERROR,		"Errors the user should be made aware of")
-        self.fatal = 	LogLevelDescriptor(self, LogLevel.FATAL,	 	"Fatal errors are errors that we can"t recover from and we don"t know how to tell the user to recover from them")
+        self.fatal = 	LogLevelDescriptor(self, LogLevel.FATAL,	 	"Fatal errors are errors that we can't recover from and we don't know how to tell the user to recover from them")
 
     def exception(self, message: str):
         tab = "\t"
