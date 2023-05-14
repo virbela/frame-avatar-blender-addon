@@ -33,7 +33,7 @@ def get_uv_map_from_mesh(obj: Object) -> dict[int, Vector]:
 
     return uv_map
 
-class uv_transformation_calculator:
+class UVTransformationCalculator:
     def __init__(self, reference_uv_map: dict[int, Vector]):
 
         #Find two furthest points in UV map

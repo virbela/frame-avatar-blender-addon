@@ -48,27 +48,27 @@ def profile():
     print(s.getvalue())
 
 
-class missing_action(enum.Enum):
+class MissingAction(enum.Enum):
     FAIL = object()
     RETURN_NONE = object()
 
 
-class named_entry_action(enum.Enum):
+class NamedEntryAction(enum.Enum):
     RENAME = enum.auto()
     RECREATE = enum.auto()
     GET_EXISTING = enum.auto()
 
 @dataclass
-class enum_entry:
+class EnumEntry:
     identifier: str
     name: str
     description: str
     icon: str
     number: int
 
-class enum_descriptor:
+class EnumDescriptor:
     def __init__(self, *entries):
-        self.members = {ee.identifier:ee for ee in (enum_entry(*e) for e in entries)}
+        self.members = {ee.identifier:ee for ee in (EnumEntry(*e) for e in entries)}
         self.by_value = {ee.number: ee for ee in self.members.values()}
 
     def __iter__(self):
@@ -109,15 +109,15 @@ def require_named_entry(collection: bpy_prop_collection, name: str):
         raise FrameException.NamedEntryNotFound(collection, name)
 
 
-def create_named_entry(collection: bpy_prop_collection, name: str, *positional, action: named_entry_action = named_entry_action.GET_EXISTING) -> typing.Any:
+def create_named_entry(collection: bpy_prop_collection, name: str, *positional, action: NamedEntryAction = NamedEntryAction.GET_EXISTING) -> typing.Any:
 
     if name in collection:
-        if action == named_entry_action.RECREATE:
+        if action == NamedEntryAction.RECREATE:
             collection.remove(collection.get(name))
             return collection.new(name, *positional)
-        elif action == named_entry_action.GET_EXISTING:
+        elif action == NamedEntryAction.GET_EXISTING:
             return collection.get(name)
-        elif action == named_entry_action.RENAME:
+        elif action == NamedEntryAction.RENAME:
             return collection.new(name, *positional)
         else:
             raise FrameException.FailedToCreateNamedEntry(collection, name)
@@ -175,16 +175,16 @@ def set_rendering(collection: bpy_prop_collection, *selected, synchronize_active
         collection.active = selected[0]
 
 
-class attribute_reference:
+class AttributeReference:
     def __init__(self, target, attribute):
         self.target = target
         self.attribute = attribute
 
-class a_get(attribute_reference):
+class AttrGet(AttributeReference):
     def __call__(self):
         return getattr(self.target, self.attribute)
 
-class a_set(attribute_reference):
+class AttrSet(AttributeReference):
     def __call__(self, value):
         return setattr(self.target, self.attribute, value)
 
@@ -208,7 +208,7 @@ def is_reference_valid(target: typing.Any) -> bool:
         return False
 
 
-class UUID_manager:
+class UUIDManager:
     def __init__(self, key):
         self.key = key
         self.uuid_map = dict()

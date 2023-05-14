@@ -394,7 +394,7 @@ class FABA_OT_shapekey_to_workmesh(FabaOperator):
     bl_idname =           "faba.shapekey_to_workmesh"
     bl_description =      "Transfer the active shapekey geometry to the corresponding workmesh"
     faba_operator =       shapekey_to_workmesh
-    faba_poll=           poll_work_scene
+    faba_poll=            poll_work_scene
 
 
 class FABA_OT_all_shapekey_to_workmesh(FabaOperator):

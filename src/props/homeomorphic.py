@@ -17,9 +17,9 @@ from .animation import AnimationProperty, ExportAnimationJSONPathProperty
 
 from ..utils.logging import log
 from ..utils.constants import TARGET_UV_MAP
-from ..utils.helpers import enum_descriptor
+from ..utils.helpers import EnumDescriptor
 
-BAKING_MODE = enum_descriptor(
+BAKING_MODE = EnumDescriptor(
     ('COMBINED',       'Combined',          'Full bake',
         '',            0),
 
@@ -28,7 +28,7 @@ BAKING_MODE = enum_descriptor(
 )
 
 
-AVATAR_TYPE = enum_descriptor(
+AVATAR_TYPE = EnumDescriptor(
     ('FLOATER',        'Floater',              'Export floater avatar',
         '',            0),
 
@@ -37,7 +37,7 @@ AVATAR_TYPE = enum_descriptor(
 )
 
 
-EXPORT_ANIMATION_SOURCE = enum_descriptor(
+EXPORT_ANIMATION_SOURCE = EnumDescriptor(
     ('ACTION',         'Export from Action',               'Export animation from blender actions',
         '',            0),
 

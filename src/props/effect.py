@@ -7,10 +7,10 @@ from bpy.props import (
     CollectionProperty
 )
 
-from ..utils.helpers import enum_descriptor
+from ..utils.helpers import EnumDescriptor
 
 
-EFFECT_TYPE = enum_descriptor(
+EFFECT_TYPE = EnumDescriptor(
     ('POSITION',       'Position Effect',            'Effect to transform shape positions',
         '',            0),
 

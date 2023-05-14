@@ -4,16 +4,16 @@ from bpy.types import Context, Operator, Object, Scene, Image
 
 from .base import FabaOperator
 from ..utils.constants import TARGET_UV_MAP
-from ..utils.structures import intermediate
+from ..utils.structures import Intermediate
 from ..utils.logging import log
 from ..props import HomeomorphicProperties
-from .common import set_uv_map, guarded_operator
+from .common import set_uv_map, GuardedOperator
 from ..utils.helpers import (
     set_scene,
     set_active,
     set_selection,
     clear_selection,
-    named_entry_action,
+    NamedEntryAction,
     create_named_entry,
     require_bake_scene
 )
@@ -30,10 +30,10 @@ def auto_assign_atlas(operator: Operator, context: Context, ht: HomeomorphicProp
     a_width = ht.atlas_size
     a_height = ht.atlas_size
 
-    atlas_color = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_color', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
-    atlas_red = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_red', 		a_width, a_height, action=named_entry_action.GET_EXISTING)
-    atlas_green = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_green', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
-    atlas_blue = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_blue', 	a_width, a_height, action=named_entry_action.GET_EXISTING)
+    atlas_color = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_color', 	a_width, a_height, action=NamedEntryAction.GET_EXISTING)
+    atlas_red = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_red', 		a_width, a_height, action=NamedEntryAction.GET_EXISTING)
+    atlas_green = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_green', 	a_width, a_height, action=NamedEntryAction.GET_EXISTING)
+    atlas_blue = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_blue', 	a_width, a_height, action=NamedEntryAction.GET_EXISTING)
 
     for at in [atlas_blue, atlas_green, atlas_red, atlas_color]:
         if len(at.pixels) == 0:
@@ -75,13 +75,13 @@ def auto_assign_atlas(operator: Operator, context: Context, ht: HomeomorphicProp
 
     #NOTE - we support multiple color bins but it is not used yet
     color_bins = [
-        intermediate.packing.atlas_bin('color', atlas=bpy.data.images["atlas_intermediate_color"]),
+        Intermediate.Packing.AtlasBin('color', atlas=bpy.data.images["atlas_intermediate_color"]),
     ]
 
     mono_bins = [
-        intermediate.packing.atlas_bin('red', atlas=bpy.data.images["atlas_intermediate_red"]),
-        intermediate.packing.atlas_bin('green', atlas=bpy.data.images["atlas_intermediate_green"]),
-        intermediate.packing.atlas_bin('blue', atlas=bpy.data.images["atlas_intermediate_blue"]),
+        Intermediate.Packing.AtlasBin('red', atlas=bpy.data.images["atlas_intermediate_red"]),
+        Intermediate.Packing.AtlasBin('green', atlas=bpy.data.images["atlas_intermediate_green"]),
+        Intermediate.Packing.AtlasBin('blue', atlas=bpy.data.images["atlas_intermediate_blue"]),
     ]
 
 
@@ -89,7 +89,7 @@ def auto_assign_atlas(operator: Operator, context: Context, ht: HomeomorphicProp
         (monochrome_targets, mono_bins),
         (color_targets, color_bins),
     ]
-    def get_channel_from_bin(atlas_bin: intermediate.packing.atlas_bin) -> str:
+    def get_channel_from_bin(atlas_bin: Intermediate.Packing.AtlasBin) -> str:
         if atlas_bin.name == 'color':
             return 'UV_TARGET_COLOR'
         elif atlas_bin.name == 'red':
@@ -127,7 +127,7 @@ def pack_uv_islands(operator: Operator, context: Context, ht: HomeomorphicProper
     set_scene(context, last_active_scene)
 
 
-def get_intermediate_uv_object_list(ht: HomeomorphicProperties) -> list[intermediate.packing.bake_target]:
+def get_intermediate_uv_object_list(ht: HomeomorphicProperties) -> list[Intermediate.Packing.BakeTarget]:
     uv_object_list = list()
 
     for bake_target in ht.bake_target_collection:
@@ -142,13 +142,13 @@ def get_intermediate_uv_object_list(ht: HomeomorphicProperties) -> list[intermed
                 uv_area = sum(face.calc_area() * bake_target.uv_area_weight for face in mesh.faces)
                 mesh.free()
 
-                uv_object_list.append(intermediate.packing.bake_target(bake_target, variant, uv_area, variant_name))
+                uv_object_list.append(Intermediate.Packing.BakeTarget(bake_target, variant, uv_area, variant_name))
 
     return uv_object_list
 
 
 def pack_intermediate_atlas(
-    bake_scene: Scene, all_uv_object_list: list[intermediate.packing.bake_target],
+    bake_scene: Scene, all_uv_object_list: list[Intermediate.Packing.BakeTarget],
     atlas: Image, uv_map: str, box: tuple[float] = None):
     view_layer = bake_scene.view_layers[0]
 
@@ -180,8 +180,8 @@ def pack_intermediate_atlas(
     bpy.ops.uv.select_all(action='SELECT')		#Select UVs in UV editor
 
     if UVPM2_INSTALLED():
-        disable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.disable_target_box)
-        enable_packing_box = guarded_operator(bpy.ops.uvpackmaster2.enable_target_box)
+        disable_packing_box = GuardedOperator(bpy.ops.uvpackmaster2.disable_target_box)
+        enable_packing_box = GuardedOperator(bpy.ops.uvpackmaster2.enable_target_box)
 
         bpy.ops.uvpackmaster2.split_overlapping_islands()
         bake_scene.uvp2_props.rot_step = 45

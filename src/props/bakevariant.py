@@ -1,10 +1,10 @@
 from bpy.types import Context, Object, Image, PropertyGroup
 from bpy.props import StringProperty, PointerProperty, EnumProperty
 
-from ..utils.helpers import enum_descriptor
+from ..utils.helpers import EnumDescriptor
 
 
-UV_TARGET_CHANNEL = enum_descriptor(
+UV_TARGET_CHANNEL = EnumDescriptor(
     ('UV_TARGET_NIL',        'Unassigned',           'UV island has not yet been assigned an atlas channel',
         'DOT',               0),
 

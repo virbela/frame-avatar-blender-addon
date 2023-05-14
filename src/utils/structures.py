@@ -11,10 +11,10 @@ def iter_dc(d):
     return ((key, getattr(d, key)) for key in d.__dataclass_fields__)
 
 
-class intermediate:
-    class pending:
+class Intermediate:
+    class Pending:
         @dataclass
-        class bake_target:
+        class BakeTarget:
             name: 				str
             object_name: 		str
             source_object:		object
@@ -23,13 +23,13 @@ class intermediate:
             bake_target:		object		= None
 
         @dataclass
-        class materials:
+        class Materials:
             bake:				str
             preview:			str
 
-    class packing:
+    class Packing:
         @dataclass
-        class bake_target:
+        class BakeTarget:
             bake_target:		object
             variant:			object
             area:				float		= 0.0
@@ -37,15 +37,15 @@ class intermediate:
             bin:				object		= None
 
         @dataclass
-        class atlas_bin:
+        class AtlasBin:
             name:				str
             allocated:			float		= 0.0
             atlas:				object		= None
 
     @dataclass
-    class mirror:
-        primary: 				object	#intermediate.pending.bake_target
-        secondary: 				object	#intermediate.pending.bake_target
+    class Mirror:
+        primary: 				object
+        secondary: 				object
 
 
 

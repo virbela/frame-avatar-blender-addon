@@ -3,15 +3,15 @@ from bpy.types import Scene, Image, Material, ShaderNodeTree
 
 from .constants import Assets
 from ..props import BakeTarget
-from .structures import intermediate
-from .helpers import create_named_entry, require_named_entry, get_nice_name, named_entry_action
+from .structures import Intermediate
+from .helpers import create_named_entry, require_named_entry, get_nice_name, NamedEntryAction
 
 def get_material_variants(
         bt: BakeTarget, 
         bake_scene: Scene, 
         atlas: Image, 
         uv_map: str, 
-        recreate: bool = False) -> dict[str, intermediate.pending.materials]:
+        recreate: bool = False) -> dict[str, Intermediate.Pending.Materials]:
 
     #ISSUE-7: Material creation needs improvement
     #	*	We should handle the case when multiple variants are not used (we should use a generic naming function that is discussed elsewere).
@@ -30,11 +30,11 @@ def get_material_variants(
             bake_material_name = get_nice_name(result, f'bake-{bt.shortname}-{variant.name}', 32)
             preview_material_name = get_nice_name(result, f'preview-{bt.shortname}-{variant.name}', 32)
 
-            bake_material = create_named_entry(bpy.data.materials, bake_material_name, action=named_entry_action.RECREATE if recreate else named_entry_action.GET_EXISTING)
+            bake_material = create_named_entry(bpy.data.materials, bake_material_name, action=NamedEntryAction.RECREATE if recreate else NamedEntryAction.GET_EXISTING)
             bake_material.use_nodes = True	#contribution note 9
             setup_bake_material(bake_material, atlas, uv_map, paint_image, paint_uv)
 
-            preview_material = create_named_entry(bpy.data.materials, preview_material_name, action=named_entry_action.RECREATE if recreate else named_entry_action.GET_EXISTING)
+            preview_material = create_named_entry(bpy.data.materials, preview_material_name, action=NamedEntryAction.RECREATE if recreate else NamedEntryAction.GET_EXISTING)
             preview_material.use_nodes = True	#contribution note 9
             setup_bake_preview_material(preview_material, atlas, uv_map)
 
@@ -43,7 +43,7 @@ def get_material_variants(
             raise Exception('not implemented')	#TODO - implement
 
         #store what material we are using
-        result[variant_name] = intermediate.pending.materials(
+        result[variant_name] = Intermediate.Pending.Materials(
             bake = bake_material_name,
             preview = preview_material_name,
         )

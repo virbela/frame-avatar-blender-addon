@@ -9,10 +9,6 @@ from ..props import BakeTarget, HomeomorphicProperties
 from .common import set_uv_map, copy_object, copy_collection, transfer_variant
 
 def synchronize_uv_to_vertices(operator: Operator, context: Context, ht: HomeomorphicProperties):
-
-    #SECURITY - the video below should be made private and shared with the right people but is currently only unlisted
-    #VIDEO-REF	- https://www.youtube.com/watch?v=yDLP2QPx3kQ
-
     mesh = bmesh.from_edit_mesh(context.active_object.data)
     uv_layer = mesh.loops.layers.uv.active
 

@@ -3,31 +3,31 @@ from dataclasses import dataclass
 from .helpers import popup_message
 from ..props import BakeVariant, HomeomorphicProperties
 
-class validation_error:
+class ValidationError:
     # Abstract errors
     @dataclass
-    class invalid_bake_target_configuration:
+    class InvalidBakeTargetConfiguration:
         bake_target:	object
 
-    class internal_error:
+    class InternalError:
         pass
 
     # Concrete errors - invalid bake target configuration
-    class invalid_object_reference(invalid_bake_target_configuration):
+    class InvalidObjectReference(InvalidBakeTargetConfiguration):
         pass
 
-    class too_low_uv_area_weight(invalid_bake_target_configuration):
+    class TooLowUvAreaWeight(InvalidBakeTargetConfiguration):
         pass
 
-    class too_great_uv_area_weight(invalid_bake_target_configuration):
+    class TooGreatUvAreaWeight(InvalidBakeTargetConfiguration):
         pass
 
-    class no_atlas_assigned(invalid_bake_target_configuration):
+    class NoAtlasAssigned(InvalidBakeTargetConfiguration):
         pass
 
     # Concrete errors - internal data inconsistencies
     @dataclass
-    class invalid_enum(internal_error):
+    class InvalidEnum(InternalError):
         bake_target:	object
         member:			str
 

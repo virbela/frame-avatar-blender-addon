@@ -15,14 +15,14 @@ from bpy.props import (
 from .bakevariant import BakeVariant
 from ..utils.logging import log
 from ..utils.constants import MIRROR_TYPE, TARGET_UV_MAP
-from ..utils.helpers import popup_message, get_named_entry, require_named_entry, enum_descriptor
+from ..utils.helpers import popup_message, get_named_entry, require_named_entry, EnumDescriptor
 
 
 if TYPE_CHECKING:
     from .homeomorphic import HomeomorphicProperties
 
 
-UV_ISLAND_MODES = enum_descriptor(
+UV_ISLAND_MODES = EnumDescriptor(
     ('UV_IM_MONOCHROME',    'Grayscale',        'This UV island will be channel packed to a grayscale segment of the atlas',
         'IMAGE_ZDEPTH',     0),
 
@@ -37,7 +37,7 @@ UV_ISLAND_MODES = enum_descriptor(
 )
 
 
-UV_BAKE_MODE = enum_descriptor(
+UV_BAKE_MODE = EnumDescriptor(
     ('UV_BM_REGULAR',        'Regular',            'This is a regular, non mirrored, bake target',
         'OBJECT_DATA',       0),
 

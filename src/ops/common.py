@@ -4,7 +4,7 @@ from bpy.types import CollectionProperty, Object, Context, Operator
 from ..props import BakeVariant
 from ..utils.constants import WORK_SCENE, BAKE_SCENE
 
-class guarded_operator:
+class GuardedOperator:
     def __init__(self, operator: Operator):
         self.operator = operator
 
@@ -15,7 +15,7 @@ class guarded_operator:
         if self.operator.poll():
             return self.operator(*args, **kwargs)
 
-class generic_list:
+class GenericList:
     'This is an abstract handler for list operations. The operations needs a collection and callables to get and set the current selection'
 
     @staticmethod

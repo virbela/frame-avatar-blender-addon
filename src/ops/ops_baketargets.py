@@ -2,13 +2,13 @@ import bpy
 from bpy.types import Operator, Context, ShapeKey, Object
 
 from .base import FabaOperator
-from .common import generic_list, poll_avatar_mesh
+from .common import GenericList, poll_avatar_mesh
 
 from ..utils.constants import TARGET_UV_MAP
 from ..utils.logging import log
-from ..utils.structures import intermediate, iter_dc
+from ..utils.structures import Intermediate, iter_dc
 from ..props import HomeomorphicProperties, BakeTargetMirrorEntry
-from ..utils.helpers import a_get, a_set, popup_message, require_work_scene, set_scene, set_selection
+from ..utils.helpers import AttrGet, AttrSet, popup_message, require_work_scene, set_scene, set_selection
 
 
 def create_targets_from_avatar_object(operator: Operator, context: Context, ht: HomeomorphicProperties):
@@ -34,7 +34,7 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
 
     for sk in key_blocks:
         key = sk.name
-        targets[key] = intermediate.pending.bake_target(
+        targets[key] = Intermediate.Pending.BakeTarget(
             name = f'{source_object.name}_{key}',
             object_name = source_object.name,
             source_object = source_object,
@@ -51,7 +51,7 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
             R = targets.get(Rk)
 
             if R:
-                mirror_list.append(intermediate.mirror(target, R))
+                mirror_list.append(Intermediate.Mirror(target, R))
             else:
                 log.error(f"Could not create mirror for {key} since there was no such object `{Rk}`")
 
@@ -88,7 +88,7 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
         create_mirror(ht.get_bake_target_index(mirror.primary.bake_target), ht.get_bake_target_index(mirror.secondary.bake_target))
 
 
-class bake_mirrors:
+class BakeMirrors:
     def set_primary(operator: Operator, context: Context, ht: HomeomorphicProperties):
         if mirror := ht.get_selected_mirror():
             if bake_target := ht.get_selected_bake_target():
@@ -100,21 +100,20 @@ class bake_mirrors:
                 mirror.secondary = ht.get_bake_target_index(bake_target)
 
     def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        generic_list.add(ht.bake_target_mirror_collection, a_get(ht, 'selected_bake_target_mirror'), a_set(ht, 'selected_bake_target_mirror'))
+        GenericList.add(ht.bake_target_mirror_collection, AttrGet(ht, 'selected_bake_target_mirror'), AttrSet(ht, 'selected_bake_target_mirror'))
 
     def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        generic_list.remove(ht.bake_target_mirror_collection, a_get(ht, 'selected_bake_target_mirror'), a_set(ht, 'selected_bake_target_mirror'))
+        GenericList.remove(ht.bake_target_mirror_collection, AttrGet(ht, 'selected_bake_target_mirror'), AttrSet(ht, 'selected_bake_target_mirror'))
 
 
-class bake_targets:
+class BakeTargets:
 
     def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        generic_list.add(ht.bake_target_collection, a_get(ht, 'selected_bake_target'), a_set(ht, 'selected_bake_target'))
+        GenericList.add(ht.bake_target_collection, AttrGet(ht, 'selected_bake_target'), AttrSet(ht, 'selected_bake_target'))
 
     def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        generic_list.remove(ht.bake_target_collection, a_get(ht, 'selected_bake_target'), a_set(ht, 'selected_bake_target'))
+        GenericList.remove(ht.bake_target_collection, AttrGet(ht, 'selected_bake_target'), AttrSet(ht, 'selected_bake_target'))
 
-    #TDB use?
     def edit_selected(operator: Operator, context: Context, ht: HomeomorphicProperties):
         bake_target = ht.get_selected_bake_target()
         if not bake_target:
@@ -134,36 +133,36 @@ class bake_targets:
         bpy.ops.object.mode_set(mode='EDIT')
 
 
-class bake_groups:
+class BakeGroups:
 
     def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        generic_list.add(ht.bake_group_collection, a_get(ht, 'selected_bake_group'), a_set(ht, 'selected_bake_group'))
+        GenericList.add(ht.bake_group_collection, AttrGet(ht, 'selected_bake_group'), AttrSet(ht, 'selected_bake_group'))
 
     def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        generic_list.remove(ht.bake_group_collection, a_get(ht, 'selected_bake_group'), a_set(ht, 'selected_bake_group'))
+        GenericList.remove(ht.bake_group_collection, AttrGet(ht, 'selected_bake_group'), AttrSet(ht, 'selected_bake_group'))
 
 
-    class members:
+    class Members:
         def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
             if bake_group := ht.get_selected_bake_group():
                 if bake_target := ht.get_selected_bake_target():
-                    new = generic_list.add(bake_group.members, a_get(bake_group, 'selected_member'), a_set(bake_group, 'selected_member'))
+                    new = GenericList.add(bake_group.members, AttrGet(bake_group, 'selected_member'), AttrSet(bake_group, 'selected_member'))
                     new.target = ht.get_bake_target_index(bake_target)
 
         def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
             if bake_group := ht.get_selected_bake_group():
-                generic_list.remove(bake_group.members, a_get(bake_group, 'selected_member'), a_set(bake_group, 'selected_member'))
+                GenericList.remove(bake_group.members, AttrGet(bake_group, 'selected_member'), AttrSet(bake_group, 'selected_member'))
 
 
-class bake_variants:
+class BakeVariants:
 
     def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
         if bake_target := ht.get_selected_bake_target():
-            generic_list.add(bake_target.variant_collection, a_get(bake_target, 'selected_variant'), a_set(bake_target, 'selected_variant'))
+            GenericList.add(bake_target.variant_collection, AttrGet(bake_target, 'selected_variant'), AttrSet(bake_target, 'selected_variant'))
 
     def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
         if bake_target := ht.get_selected_bake_target():
-            generic_list.remove(bake_target.variant_collection, a_get(bake_target, 'selected_variant'), a_set(bake_target, 'selected_variant'))
+            GenericList.remove(bake_target.variant_collection, AttrGet(bake_target, 'selected_variant'), AttrSet(bake_target, 'selected_variant'))
 
 
 class FABA_OT_create_targets_from_avatar(FabaOperator):
@@ -178,7 +177,7 @@ class FABA_OT_add_bake_target(FabaOperator):
     bl_label =            "Add Baketarget"
     bl_description =      'Create new bake target'
     bl_idname =           'faba.add_bake_target'
-    faba_operator =       bake_targets.add
+    faba_operator =       BakeTargets.add
 
 
 class FABA_OT_show_selected_bt(FabaOperator):
@@ -188,82 +187,82 @@ class FABA_OT_show_selected_bt(FabaOperator):
                             'Activates shape key as needed'
                         )
     bl_idname =           'faba.show_selected_bt'
-    faba_operator =       bake_targets.edit_selected
+    faba_operator =       BakeTargets.edit_selected
 
 
 class FABA_OT_remove_bake_target(FabaOperator):
     bl_label =            "Remove Selected"
     bl_description =      'Remove selected bake target'
     bl_idname =           'faba.remove_bake_target'
-    faba_operator =       bake_targets.remove
+    faba_operator =       BakeTargets.remove
 
 
 class FABA_OT_add_bake_target_variant(FabaOperator):
     bl_label =            "+"
     bl_description =      'Add variant'
     bl_idname =           'faba.add_bake_target_variant'
-    faba_operator =       bake_variants.add
+    faba_operator =       BakeVariants.add
 
 
 class FABA_OT_remove_bake_target_variant(FabaOperator):
     bl_label =            "-"
     bl_description =      'Remove mirror entry'
     bl_idname =           'faba.remove_bake_target_variant'
-    faba_operator =       bake_variants.remove
+    faba_operator =       BakeVariants.remove
 
 
 class FABA_OT_set_bake_mirror_primary(FabaOperator):
     bl_label =            "Set primary"
     bl_description =      'Set primary bake target of selected mirror entry'
     bl_idname =           'faba.set_bake_mirror_primary'
-    faba_operator =       bake_mirrors.set_primary
+    faba_operator =       BakeMirrors.set_primary
 
 
 class FABA_OT_set_bake_mirror_secondary(FabaOperator):
     bl_label =            "Set secondary"
     bl_description =      'Set secondary bake target of selected mirror entry'
     bl_idname =           'faba.set_bake_mirror_secondary'
-    faba_operator =       bake_mirrors.set_secondary
+    faba_operator =       BakeMirrors.set_secondary
 
 
 class FABA_OT_add_bake_target_mirror(FabaOperator):
     bl_label =            "+"
     bl_description =      'Create new mirror entry'
     bl_idname =           'faba.add_bake_target_mirror'
-    faba_operator =       bake_mirrors.add
+    faba_operator =       BakeMirrors.add
 
 
 class FABA_OT_remove_bake_target_mirror(FabaOperator):
     bl_label =            "-"
     bl_description =      'Remove mirror entry'
     bl_idname =           'faba.remove_bake_target_mirror'
-    faba_operator =       bake_mirrors.remove
+    faba_operator =       BakeMirrors.remove
 
 
 class FABA_OT_add_bake_group(FabaOperator):
     bl_label =            "+"
     bl_description =      'Create new bake group'
     bl_idname =           'faba.add_bake_group'
-    faba_operator =       bake_groups.add
+    faba_operator =       BakeGroups.add
 
 
 class FABA_OT_remove_bake_group(FabaOperator):
     bl_label =            "-"
     bl_description =      'Remove selected bake group'
     bl_idname =           'faba.remove_bake_group'
-    faba_operator =       bake_groups.remove
+    faba_operator =       BakeGroups.remove
 
 
 class FABA_OT_add_bake_group_member(FabaOperator):
     bl_label =            "+"
     bl_description =      'Add selected bake target to bake group'
     bl_idname =           'faba.add_bake_group_member'
-    faba_operator =       bake_groups.members.add
+    faba_operator =       BakeGroups.Members.add
 
 
 class FABA_OT_remove_bake_group_member(FabaOperator):
     bl_label =            "-"
     bl_description =      'Remove selected member from bake group'
     bl_idname =           'faba.remove_bake_group_member'
-    faba_operator =       bake_groups.members.remove
+    faba_operator =       BakeGroups.Members.remove
 
