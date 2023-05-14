@@ -180,6 +180,26 @@ class FABA_PT_workflow_helpers(Panel):
         uv_col.operator("faba.copy_uv_layers")
 
 
+class FABA_PT_workflow_animation(Panel):
+    bl_label = "Animation"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "Avatar"
+    bl_parent_id = "FABA_PT_workflow"
+    bl_options = {"DEFAULT_CLOSED"}
+
+    def draw(self, context):
+        layout = self.layout
+        HT = get_homeomorphic_tool_state(context)
+
+        box = layout.box()
+        box.label(text="Transfer Skin Weights")
+        col = box.column(align=True)
+        col.prop(HT, "transfer_skin_source", text="Source")
+        col.prop(HT, "transfer_skin_target", text="Target")
+        box.operator("faba.transfer_skin_weights")
+
+
 class FABA_PT_workflow_debug(Panel):
     bl_label = "Debug"
     bl_space_type = "VIEW_3D"

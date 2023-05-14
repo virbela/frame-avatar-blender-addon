@@ -274,6 +274,20 @@ class HomeomorphicProperties(PropertyGroup):
         description="Object to copy vertex positions to"
     )
 
+    ### Transfer Skin Weights Options
+    transfer_skin_source: PointerProperty(
+        name="Transfer Source", 
+        type=Object, 
+        description="Object to copy vertex groups from"
+    )
+
+    transfer_skin_target: PointerProperty(
+        name="Transfer Target", 
+        type=Object, 
+        description="Object to copy vertex groups to"
+    )
+
+
     def get_selected_effect(self) -> EffectProperty:
         if self.selected_effect:
             return self.effect_collection[self.selected_effect]

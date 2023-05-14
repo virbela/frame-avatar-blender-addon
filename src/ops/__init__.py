@@ -1,6 +1,7 @@
 import bpy
 
 from .ops_intro import FABA_OT_setup_bake_scene
+from .ops_animation import FABA_OT_transfer_skin_weights
 
 from .ops_baketargets import (
     FABA_OT_add_bake_group_member,
@@ -92,6 +93,7 @@ from .ops_workmesh import (
 classes = (
     FABA_OT_setup_bake_scene,
     FABA_OT_export,
+    FABA_OT_transfer_skin_weights,
     FABA_OT_add_export_json_path,
     FABA_OT_remove_export_json_path,
     FABA_OT_create_targets_from_avatar,
