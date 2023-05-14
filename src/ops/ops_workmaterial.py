@@ -3,7 +3,7 @@ from bpy.types import Context, Operator
 
 from .base import FabaOperator
 from ..utils.constants import MIRROR_TYPE
-from ..utils.logging import log_writer as log
+from ..utils.logging import log
 from ..utils.materials import setup_bake_material, get_material_variants
 from ..props import HomeomorphicProperties, BakeTarget, BakeVariant
 from ..utils.helpers import (
@@ -51,7 +51,7 @@ def select_by_atlas(operator: Operator, context: Context, ht: HomeomorphicProper
                 selection.append(variant.workmesh)
 
 
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
     set_scene(context, bake_scene)
     set_selection(view_layer.objects, *selection, synchronize_active=True, make_sure_active=True)
@@ -78,7 +78,7 @@ def update_workmesh_materials(context: Context, ht: HomeomorphicProperties,  bak
 
 
 def generic_switch_to_material(context: Context, ht: HomeomorphicProperties, material_type: str):
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     #todo note 1
     for bt in ht.bake_target_collection:
         _, mt = bt.get_mirror_type(ht)

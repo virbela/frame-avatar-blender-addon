@@ -1,10 +1,11 @@
-import bpy
+from bpy.types import Panel, UIList
+
 from ..utils.exceptions import InternalError
 from ..props.baketarget import UV_ISLAND_MODES
 from ..utils.helpers import get_homeomorphic_tool_state, require_bake_scene
 
 
-class FABA_PT_bake_targets(bpy.types.Panel):
+class FABA_PT_bake_targets(Panel):
     bl_label = "Bake targets"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -47,7 +48,7 @@ class FABA_PT_bake_targets(bpy.types.Panel):
 
                         # TODO(ranjian0) Is this used for UV packing really?
                         # self.layout.prop(et, 'uv_area_weight', text="UV Area")
-                        if bake_scene := require_bake_scene(context):
+                        if bake_scene := require_bake_scene():
                             self.layout.prop_search(variant, 'workmesh', bake_scene, 'objects')
                         else:
                             self.layout.label("Missing bake scene!", icon="ERROR")
@@ -67,7 +68,7 @@ class FABA_PT_bake_targets(bpy.types.Panel):
 
 
 
-class FABA_UL_bake_variants(bpy.types.UIList):
+class FABA_UL_bake_variants(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if item.image:
             layout.prop(item, 'name', icon_value=item.image.preview.icon_id, text='', emboss=False, translate=False)
@@ -75,7 +76,7 @@ class FABA_UL_bake_variants(bpy.types.UIList):
             layout.prop(item, 'name', icon='UNLINKED', text='', emboss=False, translate=False)
 
 
-class FABA_UL_bake_targets(bpy.types.UIList):
+class FABA_UL_bake_targets(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if item.bake_mode == 'UV_BM_MIRRORED':
             if target_item := data.bake_target_collection[item.mirror_source]:
@@ -86,12 +87,12 @@ class FABA_UL_bake_targets(bpy.types.UIList):
         layout.prop(item, 'name', icon=UV_ISLAND_MODES.members[item.uv_mode].icon, text='', emboss=False, translate=False)
 
 
-class FABA_UL_bake_groups(bpy.types.UIList):
+class FABA_UL_bake_groups(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, 'name', icon='UNLINKED', text='', emboss=False, translate=False)
 
 
-class FABA_UL_bake_group_members(bpy.types.UIList):
+class FABA_UL_bake_group_members(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if ht := get_homeomorphic_tool_state(context):
             if item.target < len(ht.bake_target_collection):
@@ -103,7 +104,7 @@ class FABA_UL_bake_group_members(bpy.types.UIList):
                 layout.label(icon='UNLINKED', text='No target')
 
 
-class FABA_UL_bake_target_mirrors(bpy.types.UIList):
+class FABA_UL_bake_target_mirrors(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if ht := get_homeomorphic_tool_state(context):
             row = layout.row()

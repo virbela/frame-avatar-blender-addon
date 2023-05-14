@@ -15,9 +15,9 @@ from pathlib import Path
 from dataclasses import dataclass
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Tuple
-from bpy.types import Context, Scene, bpy_prop_collection, Object, Preferences, Mesh, Action, WindowManager
+from bpy.types import Context, Scene, bpy_prop_collection, Object, Preferences, Mesh, Action
 
-from .logging import log_writer as log
+from .logging import log
 from .constants import BAKE_SCENE, WORK_SCENE
 from .exceptions import InternalError, FrameException
 
@@ -76,14 +76,14 @@ class enum_descriptor:
             yield (member.identifier, member.name, member.description, member.icon, member.number)
 
 
-def require_work_scene(context: Context) -> Scene:
+def require_work_scene() -> Scene:
     if scene := bpy.data.scenes.get(WORK_SCENE):
         return scene
 
     log.error(f'Work scene `{WORK_SCENE}` could not be found.')
 
 
-def require_bake_scene(context: Context) -> Scene:
+def require_bake_scene() -> Scene:
     if scene := bpy.data.scenes.get(BAKE_SCENE):
         return scene
 
@@ -91,7 +91,7 @@ def require_bake_scene(context: Context) -> Scene:
 
 
 def get_homeomorphic_tool_state(context: Context) -> 'HomeomorphicProperties':
-    scene = require_work_scene(context)
+    scene = require_work_scene()
     return scene.homeomorphictools
 
 
@@ -124,12 +124,6 @@ def create_named_entry(collection: bpy_prop_collection, name: str, *positional, 
 
     return collection.new(name, *positional)
 
-
-#ISSUE-12: Context handling
-#	When modifying the context by switching scene or updating view layers we leave things in a different state than we found it.
-#	Either we need to make sure we override the context properly (if this is possible with stuff like view layer configurations and such)
-#	or we have to keep track of our changes that we want reverted and what changes we want to keep (like with paint assist we may actually want to change the state).
-#	labels: needs-work, needs-research
 
 def set_scene(context: Context, scene: Scene):
     context.window.scene = scene
@@ -167,7 +161,6 @@ def clear_active(collection: bpy_prop_collection):
 
 
 def set_rendering(collection: bpy_prop_collection, *selected, synchronize_active: bool = False, make_sure_active: bool = False):
-    'Replaces current rendering selection'
     new_selection = set(selected)
 
     for item in collection:
@@ -182,7 +175,6 @@ def set_rendering(collection: bpy_prop_collection, *selected, synchronize_active
         collection.active = selected[0]
 
 
-#NOTE - was going to use https://docs.python.org/3/library/operator.html#operator.attrgetter but there is no attrsetter so we'll just define both for consistency
 class attribute_reference:
     def __init__(self, target, attribute):
         self.target = target

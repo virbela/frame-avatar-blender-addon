@@ -2,7 +2,8 @@ import bmesh
 from bpy.types import Object
 from mathutils import Vector
 from dataclasses import dataclass
-from .logging import log_writer as log
+
+from .logging import log
 from .constants import TARGET_UV_MAP
 
 @dataclass

@@ -41,7 +41,7 @@ class ShaderDrawer:
             self.animationdata = metadata['Animation'].to_dict()
 
 
-    def make_mesh_batches(self, shader):
+    def make_mesh_batches(self) -> list[gpu.types.GPUBatch]:
         batches = []
         mesh = self.avatar_basis.data
 
@@ -110,7 +110,7 @@ class ShaderDrawer:
         fragment_source = get_asset_file("bone_animation.frag.glsl", 'r')
 
         shader = gpu.types.GPUShader(vertex_source, fragment_source, name="BoneAnimationShader")
-        batches = self.make_mesh_batches(shader)
+        batches = self.make_mesh_batches()
 
         bone_transforms = self.animationdata['bone_transforms'][self.action]
         num_frames = len(bone_transforms)

@@ -1,11 +1,11 @@
 from typing import Callable, Any
-from bpy.types import CollectionProperty, Object, Context
+from bpy.types import CollectionProperty, Object, Context, Operator
 
 from ..props import BakeVariant
 from ..utils.constants import WORK_SCENE, BAKE_SCENE
 
 class guarded_operator:
-    def __init__(self, operator):
+    def __init__(self, operator: Operator):
         self.operator = operator
 
     def __repr__(self):
@@ -66,7 +66,7 @@ def poll_selected_objects(context: Context) -> bool:
     return context.selected_objects
 
 def poll_baketargets(context: Context) -> bool:
-    return  len(context.scene.homeomorphictools.bake_target_collection)
+    return len(context.scene.homeomorphictools.bake_target_collection)
 
-def poll_avatar_mesh(context: Context):
+def poll_avatar_mesh(context: Context) -> bool:
     return context.scene.homeomorphictools.avatar_mesh

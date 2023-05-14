@@ -76,5 +76,5 @@ class dummy_log_instance(log_base):
         pass
 
 
-log_writer = log_instance()
+log = log_instance()
 no_logging = dummy_log_instance()

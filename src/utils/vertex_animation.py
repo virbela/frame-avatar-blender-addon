@@ -7,7 +7,7 @@ from mathutils import Matrix
 from bpy.types import Action, Context, Object, Mesh
 
 from .constants import GLB_VERT_COUNT
-from .logging import log_writer as log
+from .logging import log
 from .helpers import (
     get_prefs, 
     popup_message, 
@@ -73,7 +73,7 @@ def generate_animation_blob(context: Context, avatar: Object, animated_objects: 
 
 def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list[Mesh]:
     meshes = []
-    bakescene = require_bake_scene(context)
+    bakescene = require_bake_scene()
     for i in range(*get_action_frame_range(action)):
         bakescene.frame_set(i)
         depsgraph = bakescene.view_layers[0].depsgraph
@@ -86,7 +86,13 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list
     return meshes
 
 
-def export_action_animation(context: Context, action: Action, animated_objects: list[Object], num_verts: int, export_indices: list[int]):
+def export_action_animation(
+        context: Context, 
+        action: Action, 
+        animated_objects: list[Object], 
+        num_verts: int, 
+        export_indices: list[int]):
+
     HT = get_homeomorphic_tool_state(context)
     if action.name not in [ea.name for ea in HT.export_animation_actions]:
         # Possibly not a valid export action eg tpose
@@ -122,7 +128,7 @@ def export_action_animation(context: Context, action: Action, animated_objects: 
     np.save(blob_file, animation_buffer, allow_pickle=False)
 
 
-def validate_animation_export_verts(avatar):
+def validate_animation_export_verts(avatar: Object) -> bool:
     export_indices = get_gltf_export_indices(avatar)
     if len(export_indices) != GLB_VERT_COUNT:
         log.error(f"Invalid GLB vert count. \nExpected {GLB_VERT_COUNT} got {len(export_indices)}. Ensure base avatar mesh has no materials and only 2 uv layers")

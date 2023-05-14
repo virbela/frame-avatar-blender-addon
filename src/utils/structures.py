@@ -12,9 +12,6 @@ def iter_dc(d):
 
 
 class intermediate:
-    # it would be nice to specify these members more fully but the problem is that we can't both define a tree structure AND refer to things in the tree in
-    # a satisfying way. Since we are not using typing now anyway we will let it be like this. It wouldn't hurt to add comments though that explains the proper type
-
     class pending:
         @dataclass
         class bake_target:

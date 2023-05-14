@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from bpy.types import Operator, Context, Object, Scene
 
 from .base import FabaOperator
-from ..utils.logging import log_writer as log
+from ..utils.logging import log
 from ..utils.bone_animation import BoneAnimationExporter
 from ..utils.bake_targets import validate_bake_target_setup
 from ..utils.contextutils import active_object, selection, active_scene
@@ -23,7 +23,7 @@ from ..utils.helpers import require_bake_scene, require_work_scene, is_dev, get_
 def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
     HT.export_progress_start()
     context.window.cursor_set('WAIT')
-    view_layer = require_work_scene(context).view_layers[0]
+    view_layer = require_work_scene().view_layers[0]
 
     def on_exit():
         HT.export_progress_end()
@@ -40,7 +40,7 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
                 BoneAnimationExporter.load_from_json(context, HT)
 
             if HT.export_glb:
-                with active_scene(require_work_scene(context).name):
+                with active_scene(require_work_scene().name):
                     success = export_glb(context, HT)
                     if not success:
                         # XXX exit early if mesh export failed
@@ -64,7 +64,7 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
 
 def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
     log.info("Validating Export state...")
-    work_scene = require_work_scene(context)
+    work_scene = require_work_scene()
     if work_scene is None:
         popup_message("Export validation failed! Work scene missing!", "Validation Error")
         return False
@@ -101,7 +101,7 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
 
 def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     obj = ht.avatar_mesh
-    view_layer = require_work_scene(context).view_layers[0]
+    view_layer = require_work_scene().view_layers[0]
     ensure_applied_rotation(obj)
 
     if not obj.data.shape_keys:
@@ -216,7 +216,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
 
 
 def export_atlas(context: Context, denoise: bool = True):
-    work_scene = require_work_scene(context)
+    work_scene = require_work_scene()
 
     work_scene.use_nodes = True
     tree = work_scene.node_tree
@@ -496,7 +496,7 @@ def get_uvtransform_metadata(context: Context, ht: HomeomorphicProperties, obj: 
             variant = bake_target.variant_collection[0]
             valid_workmeshes.append(variant.workmesh)
 
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     for name, item in bake_scene.objects.items():
         if item.type != 'MESH':
             continue

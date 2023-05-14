@@ -18,8 +18,8 @@ bl_info = {
 #	labels: dependency
 
 import bpy
-from bpy.types import Context
 from bpy.app.handlers import persistent
+from bpy.types import Context, AddonPreferences
 
 from .ui import register_ui, unregister_ui
 from .ops import register_ops, unregister_ops
@@ -27,7 +27,7 @@ from .props import register_props, unregister_props
 from .utils.helpers import get_homeomorphic_tool_state
 
 
-class FrameAvatarAddonPreferences(bpy.types.AddonPreferences):
+class FrameAvatarAddonPreferences(AddonPreferences):
     bl_idname = __package__
 
     log_target:                     bpy.props.StringProperty(name='Log File Name', subtype='FILE_NAME', default="fabalog")

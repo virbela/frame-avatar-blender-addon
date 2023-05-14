@@ -1,8 +1,16 @@
 import bpy
-from bpy.types import Operator, Context, ViewLayer, NodeTree
+from bpy.types import (
+    Operator, 
+    Context, 
+    ViewLayer, 
+    NodeTree,
+    ShaderNodeTexImage,
+    ShaderNodeOutputMaterial,
+    ShaderNodeBsdfPrincipled
+)
 
 from .base import FabaOperator
-from ..utils.logging import log_writer as log
+from ..utils.logging import log
 from ..utils.exceptions import BakeException
 from ..props import HomeomorphicProperties, BakeVariant
 from ..utils.helpers import require_bake_scene, set_scene, set_rendering, set_selection
@@ -10,7 +18,7 @@ from ..utils.helpers import require_bake_scene, set_scene, set_rendering, set_se
 def bake_all_bake_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):
 
     last_active_scene = context.scene
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
     set_scene(context, bake_scene)
 
@@ -28,7 +36,7 @@ def bake_all_bake_targets(operator: Operator, context: Context, ht: Homeomorphic
 def bake_selected_bake_target(operator: Operator, context: Context, ht: HomeomorphicProperties):
 
     last_active_scene = context.scene
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
     set_scene(context, bake_scene)
 
@@ -41,7 +49,7 @@ def bake_selected_bake_target(operator: Operator, context: Context, ht: Homeomor
 
 
 def bake_selected_workmeshes(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
     #NOTE - see technical detail 5 for further info on this temporary solution
@@ -126,7 +134,7 @@ def ensure_color_output_node_ready(variant: BakeVariant, tree: NodeTree):
     # ensure the texture output goes through diffusebsdf
     texnode = None
     for node in material_nodes:
-        if isinstance(node, bpy.types.ShaderNodeTexImage):
+        if isinstance(node, ShaderNodeTexImage):
             if node.image == variant.image:
                 texnode = node
                 break
@@ -134,8 +142,8 @@ def ensure_color_output_node_ready(variant: BakeVariant, tree: NodeTree):
     if not texnode:
         return
 
-    outputnode = [n for n in material_nodes if isinstance(n, bpy.types.ShaderNodeOutputMaterial)].pop()
-    diffusenode = [n for n in material_nodes if isinstance(n, bpy.types.ShaderNodeBsdfPrincipled)].pop()
+    outputnode = [n for n in material_nodes if isinstance(n, ShaderNodeOutputMaterial)].pop()
+    diffusenode = [n for n in material_nodes if isinstance(n, ShaderNodeBsdfPrincipled)].pop()
 
     # remove all links from the texnode or the diffuse node
     for link in material_links:

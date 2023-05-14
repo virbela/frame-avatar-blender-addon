@@ -5,7 +5,7 @@ from .base import FabaOperator
 from .common import generic_list, poll_avatar_mesh
 
 from ..utils.constants import TARGET_UV_MAP
-from ..utils.logging import log_writer as log
+from ..utils.logging import log
 from ..utils.structures import intermediate, iter_dc
 from ..props import HomeomorphicProperties, BakeTargetMirrorEntry
 from ..utils.helpers import a_get, a_set, popup_message, require_work_scene, set_scene, set_selection
@@ -107,7 +107,6 @@ class bake_mirrors:
 
 
 class bake_targets:
-    #BUG - currently we don't check if a target is in a mirror and therefore a mirror will point to the wrong thing if removing a reference
 
     def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
         generic_list.add(ht.bake_target_collection, a_get(ht, 'selected_bake_target'), a_set(ht, 'selected_bake_target'))
@@ -125,7 +124,7 @@ class bake_targets:
         if not bto:
             return
 
-        work_scene = require_work_scene(context)
+        work_scene = require_work_scene()
         set_scene(context, work_scene)
         view_layer = context.view_layer
         set_selection(view_layer.objects, bto)

@@ -6,7 +6,12 @@ from ..props import BakeTarget
 from .structures import intermediate
 from .helpers import create_named_entry, require_named_entry, get_nice_name, named_entry_action
 
-def get_material_variants(bt: BakeTarget, bake_scene: Scene, atlas: Image, uv_map: str, recreate: bool = False):
+def get_material_variants(
+        bt: BakeTarget, 
+        bake_scene: Scene, 
+        atlas: Image, 
+        uv_map: str, 
+        recreate: bool = False) -> dict[str, intermediate.pending.materials]:
 
     #ISSUE-7: Material creation needs improvement
     #	*	We should handle the case when multiple variants are not used (we should use a generic naming function that is discussed elsewere).

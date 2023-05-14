@@ -3,8 +3,6 @@ from bpy.types import bpy_prop_collection, Object
 class InternalError(Exception):
     pass
 
-#DECISION - should we go away from pythons camel case exception naming scheme to make it easier to read? If everything is prefixed by the module name it shouldn't be a surprise to anyone.
-
 class FrameException:
     class FailedToCreateNamedEntry(Exception):
         def __init__(self, collection: bpy_prop_collection, name: str):

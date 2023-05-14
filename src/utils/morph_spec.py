@@ -2,7 +2,7 @@ from pprint import pformat
 from bpy.types import Object, Mesh
 
 from .helpers import popup_message
-from .logging import log_writer as log
+from .logging import log
 
 EXPECTED_SHAPEKEYS_COMMON = [
     'Basis',

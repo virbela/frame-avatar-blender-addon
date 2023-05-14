@@ -30,7 +30,7 @@ def synchronize_uv_to_vertices(operator: Operator, context: Context, ht: Homeomo
 
 
 def select_objects_by_uv(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     to_select = list()
     for obj in bake_scene.objects:
         mesh = bmesh.new()
@@ -55,7 +55,7 @@ def select_objects_by_uv(operator: Operator, context: Context, ht: HomeomorphicP
 
 
 def synchronize_visibility_to_render(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
     for item in view_layer.objects:
@@ -63,7 +63,7 @@ def synchronize_visibility_to_render(operator: Operator, context: Context, ht: H
 
 
 def make_everything_visible(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
     for item in view_layer.objects:
@@ -71,7 +71,7 @@ def make_everything_visible(operator: Operator, context: Context, ht: Homeomorph
 
 
 def recalculate_normals(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
     for workmesh in context.selected_objects:
@@ -79,7 +79,7 @@ def recalculate_normals(operator: Operator, context: Context, ht: HomeomorphicPr
 
 
 def update_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
 
     #DECISION - should we clear the bake scene each update?
     #Clear bake scene from meshes (this will remove the objects that own the meshes as ell)
@@ -134,7 +134,7 @@ def synchronize_mirrors(operator: Operator, context: Context, ht: HomeomorphicPr
 
 
 def reset_uv_transforms(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
 
     to_reset = list()

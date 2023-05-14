@@ -1,8 +1,9 @@
 import bpy
-from ..utils.logging import log_writer as log
+from bpy.types import Panel
+from ..utils.logging import log
 from ..utils.helpers import get_homeomorphic_tool_state, require_bake_scene
 
-class FABA_PT_workflow(bpy.types.Panel):
+class FABA_PT_workflow(Panel):
     bl_label = "Workflow"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -17,7 +18,7 @@ class FABA_PT_workflow(bpy.types.Panel):
         layout.prop(HT, "avatar_rig")
 
 
-class FABA_PT_workflow_intro(bpy.types.Panel):
+class FABA_PT_workflow_intro(Panel):
     bl_label = "Introduction"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -32,7 +33,7 @@ class FABA_PT_workflow_intro(bpy.types.Panel):
         layout.operator('faba.setup_bake_scene')
 
 
-class FABA_PT_workflow_bake_targets(bpy.types.Panel):
+class FABA_PT_workflow_bake_targets(Panel):
     bl_label = "Bake Targets"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -46,7 +47,7 @@ class FABA_PT_workflow_bake_targets(bpy.types.Panel):
         layout.operator('faba.clear_bake_targets')
 
 
-class FABA_PT_workflow_workmeshes(bpy.types.Panel):
+class FABA_PT_workflow_workmeshes(Panel):
     bl_label = "Work Meshes"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -78,7 +79,7 @@ class FABA_PT_workflow_workmeshes(bpy.types.Panel):
         col.operator('faba.mirror_workmesh_verts')
 
 
-class FABA_PT_workflow_texture(bpy.types.Panel):
+class FABA_PT_workflow_texture(Panel):
     bl_label = "Texture Atlas"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -99,7 +100,7 @@ class FABA_PT_workflow_texture(bpy.types.Panel):
         layout.operator('faba.pack_uv_islands')
 
 
-class FABA_PT_workflow_materials(bpy.types.Panel):
+class FABA_PT_workflow_materials(Panel):
     bl_label = "Work Materials"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -122,7 +123,7 @@ class FABA_PT_workflow_materials(bpy.types.Panel):
         layout.prop(HT, 'select_by_atlas_image')
 
 
-class FABA_PT_workflow_baking(bpy.types.Panel):
+class FABA_PT_workflow_baking(Panel):
     bl_label = "Baking"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -135,7 +136,7 @@ class FABA_PT_workflow_baking(bpy.types.Panel):
         HT = get_homeomorphic_tool_state(context)
 
 
-        bake_scene = require_bake_scene(context)
+        bake_scene = require_bake_scene()
         selection = [o for o in context.selected_objects]
         try:
             col = layout.column(align=True)
@@ -158,7 +159,7 @@ class FABA_PT_workflow_baking(bpy.types.Panel):
             layout.label(text='Please select a workmesh to bake from one!', icon='INFO')
 
 
-class FABA_PT_workflow_helpers(bpy.types.Panel):
+class FABA_PT_workflow_helpers(Panel):
     bl_label = "Helpers"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -179,7 +180,7 @@ class FABA_PT_workflow_helpers(bpy.types.Panel):
         uv_col.operator('faba.copy_uv_layers')
 
 
-class FABA_PT_workflow_debug(bpy.types.Panel):
+class FABA_PT_workflow_debug(Panel):
     bl_label = "Debug"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'

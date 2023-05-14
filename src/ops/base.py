@@ -1,6 +1,6 @@
 import typing
 from bpy.types import Operator, Context
-from ..utils.logging import log_writer as log
+from ..utils.logging import log
 from ..utils.exceptions import BakeException, InternalError
 from ..utils.helpers import get_homeomorphic_tool_state
 

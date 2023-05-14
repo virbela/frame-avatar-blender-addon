@@ -1,13 +1,14 @@
-import bpy
+from bpy.types import Panel, UIList
+
 from ..utils.helpers import get_homeomorphic_tool_state
 
 
-class FABA_UL_effects(bpy.types.UIList):
+class FABA_UL_effects(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, 'name', icon="FORCE_TURBULENCE", text='', emboss=False, translate=False)
 
 
-class FABA_PT_effects(bpy.types.Panel):
+class FABA_PT_effects(Panel):
     bl_label = "Effects"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'

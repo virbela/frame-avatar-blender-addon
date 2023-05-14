@@ -1,5 +1,6 @@
 import bpy
 from contextlib import contextmanager
+from bpy.types import Object, ViewLayer
 
 from .helpers import is_reference_valid
 
@@ -18,7 +19,7 @@ def active_scene(name: str):
 
 
 @contextmanager
-def selection(objects: list[bpy.types.Object] = None, view_layer: bpy.types.ViewLayer = None):
+def selection(objects: list[Object] = None, view_layer: ViewLayer = None):
     selected = [o for o in bpy.data.objects if o.select_get()]
 
     # -- clear old selection state
@@ -44,7 +45,7 @@ def selection(objects: list[bpy.types.Object] = None, view_layer: bpy.types.View
             obj.select_set(True, view_layer=view_layer)
 
 @contextmanager
-def active_object(object: bpy.types.Object = None, view_layer: bpy.types.ViewLayer = None):
+def active_object(object: Object = None, view_layer: ViewLayer = None):
     active = view_layer.objects.active
 
     # -- set current active

@@ -6,9 +6,10 @@ import math
 import numpy
 from pathlib import Path
 from mathutils import Matrix
+from bpy.types import Context, PoseBone
 from bpy_extras.io_utils import axis_conversion
 
-from .logging import log_writer as log
+from .logging import log
 from ..props import HomeomorphicProperties
 from .helpers import get_action_frame_range, get_animation_objects, require_bake_scene, get_gltf_export_indices
 
@@ -16,13 +17,13 @@ class BoneAnimationExporter:
     weights = dict()
     transforms = dict()
 
-    def __init__(self, context: bpy.types.Context, ht: HomeomorphicProperties):
+    def __init__(self, context: Context, ht: HomeomorphicProperties):
         log.info("Bone animation export started ...")
         self.ht = ht
         self.context = context
         self.armature = None
 
-        sc = require_bake_scene(context)
+        sc = require_bake_scene()
         for ob in sc.objects:
             if ob.type == 'ARMATURE':
                 self.armature = ob
@@ -38,7 +39,7 @@ class BoneAnimationExporter:
         self.save_animation_json()
 
     @classmethod
-    def load_from_json(cls, context: bpy.types.Context, ht: HomeomorphicProperties):
+    def load_from_json(cls, context: Context, ht: HomeomorphicProperties):
         transforms = dict()
         weights_compare = list()
 
@@ -120,7 +121,7 @@ class BoneAnimationExporter:
             to_forward='Z', to_up='Y'
         ).to_4x4() @ R1
 
-        def get_bone_mat(pose_bone: bpy.types.PoseBone):
+        def get_bone_mat(pose_bone: PoseBone):
             inverse_bind_pose = (
                 self.armature.matrix_world @ 
                 pose_bone.bone.matrix_local

@@ -6,7 +6,7 @@ from ..props import HomeomorphicProperties
 
 
 def setup_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    require_bake_scene(context)
+    require_bake_scene()
 
 
 class FABA_OT_setup_bake_scene(FabaOperator):

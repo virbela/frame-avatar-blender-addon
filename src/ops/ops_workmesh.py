@@ -10,7 +10,7 @@ from .common import (
     poll_work_scene,
     poll_baketargets,
 )
-from ..utils.logging import log_writer as log
+from ..utils.logging import log
 from ..utils.materials import setup_bake_material
 from ..props import HomeomorphicProperties, BakeTarget
 from ..utils.constants import PAINTING_UV_MAP, TARGET_UV_MAP, Assets
@@ -28,19 +28,19 @@ update_selected_workmesh_all_shapekeys = IMPLEMENTATION_PENDING
 update_selected_workmesh_active_shapekey = IMPLEMENTATION_PENDING
 
 def create_workmeshes_for_all_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     for bake_target in ht.bake_target_collection:
         create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
 
 def create_workmeshes_for_selected_target(operator: Operator, context: Context, ht: HomeomorphicProperties):
     if bake_target := ht.get_selected_bake_target():
-        bake_scene = require_bake_scene(context)
+        bake_scene = require_bake_scene()
         create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
 
 def update_all_workmeshes(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     for bake_target in ht.bake_target_collection:
         for variant in bake_target.variant_collection:
             obj_name = get_bake_target_variant_name(bake_target, variant)
@@ -54,7 +54,7 @@ def update_all_workmeshes(operator: Operator, context: Context, ht: Homeomorphic
 
 
 def workmesh_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    work_scene = require_work_scene(context)
+    work_scene = require_work_scene()
     avatar_object = work_scene.objects.get('Avatar')
     if not avatar_object:
         return
@@ -79,8 +79,8 @@ def workmesh_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicP
 
 
 def all_workmeshes_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    bake_scene = require_bake_scene(context)
-    work_scene = require_work_scene(context)
+    bake_scene = require_bake_scene()
+    work_scene = require_work_scene()
     avatar_object = work_scene.objects.get('Avatar')
     if not avatar_object:
         return
@@ -108,7 +108,7 @@ def all_workmeshes_to_shapekey(operator: Operator, context: Context, ht: Homeomo
 
 
 def shapekey_to_workmesh(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    work_scene = require_work_scene(context)
+    work_scene = require_work_scene()
     avatar_object = work_scene.objects.get('Avatar')
     if not avatar_object:
         return
@@ -126,7 +126,7 @@ def shapekey_to_workmesh(operator: Operator, context: Context, ht: HomeomorphicP
     bm.free()
 
     # -- get corresponding workmesh and update vertices
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     workmesh = bake_scene.objects.get(active_shapekey.name)
     if not workmesh:
         log.info("Missing workmesh!")
@@ -137,8 +137,8 @@ def shapekey_to_workmesh(operator: Operator, context: Context, ht: HomeomorphicP
 
 
 def all_shapekeys_to_workmeshes(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    bake_scene = require_bake_scene(context)
-    work_scene = require_work_scene(context)
+    bake_scene = require_bake_scene()
+    work_scene = require_work_scene()
     avatar_object = work_scene.objects.get('Avatar')
     if not avatar_object:
         return

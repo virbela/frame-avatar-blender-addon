@@ -17,7 +17,7 @@ def clear_bake_targets(operator: Operator, context: Context, ht: HomeomorphicPro
 
 
 def clear_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    scene = require_bake_scene(context)
+    scene = require_bake_scene()
     for item in scene.objects:
         if item.type == 'MESH':
             bpy.data.meshes.remove(item.data, do_unlink=True)

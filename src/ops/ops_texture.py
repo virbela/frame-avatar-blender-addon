@@ -5,7 +5,7 @@ from bpy.types import Context, Operator, Object, Scene, Image
 from .base import FabaOperator
 from ..utils.constants import TARGET_UV_MAP
 from ..utils.structures import intermediate
-from ..utils.logging import log_writer as log
+from ..utils.logging import log
 from ..props import HomeomorphicProperties
 from .common import set_uv_map, guarded_operator
 from ..utils.helpers import (
@@ -112,7 +112,7 @@ def auto_assign_atlas(operator: Operator, context: Context, ht: HomeomorphicProp
 def pack_uv_islands(operator: Operator, context: Context, ht: HomeomorphicProperties):
     last_active_scene = context.scene
 
-    bake_scene = require_bake_scene(context)
+    bake_scene = require_bake_scene()
     set_scene(context, bake_scene)
 
     all_uv_object_list = get_intermediate_uv_object_list(ht)

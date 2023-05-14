@@ -15,7 +15,7 @@ from .effect import EffectProperty
 from .baketarget import BakeTarget, BakeTargetMirrorEntry
 from .animation import AnimationProperty, ExportAnimationJSONPathProperty
 
-from ..utils.logging import log_writer as log
+from ..utils.logging import log
 from ..utils.constants import TARGET_UV_MAP
 from ..utils.helpers import enum_descriptor
 
