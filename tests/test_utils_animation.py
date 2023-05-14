@@ -5,7 +5,7 @@ from src.utils import vertex_animation
 
 class TestUtilsAnimation(unittest.TestCase):
     def test_get_per_frame_mesh(self):
-        obj = bpy.data.objects['Cube']
+        obj = bpy.data.objects["Cube"]
 
         # single frame action
         obj.keyframe_insert("location", frame=1)
@@ -20,12 +20,12 @@ class TestUtilsAnimation(unittest.TestCase):
     def test_get_num_frames(self):
         self.assertEqual(vertex_animation.get_num_frames(), 0)
 
-        action = bpy.data.actions.new('test_action')
+        action = bpy.data.actions.new("test_action")
         action.use_frame_range = True
         action.frame_start = 1
         action.frame_end = 100
 
-        action = bpy.data.actions.new('test_action2')
+        action = bpy.data.actions.new("test_action2")
         action.use_frame_range = True
         action.frame_start = 1
         action.frame_end = 30
@@ -33,7 +33,7 @@ class TestUtilsAnimation(unittest.TestCase):
         self.assertEqual(vertex_animation.get_num_frames(), 130)
 
     def test_gltf_export_indices(self):
-        obj = bpy.data.objects['Cube']
+        obj = bpy.data.objects["Cube"]
         indices = vertex_animation.get_gltf_export_indices(obj)
         self.assertEqual(len(indices), 14)
 

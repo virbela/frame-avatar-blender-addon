@@ -20,35 +20,35 @@ from ..utils.constants import TARGET_UV_MAP
 from ..utils.helpers import EnumDescriptor
 
 BAKING_MODE = EnumDescriptor(
-    ('COMBINED',       'Combined',          'Full bake',
-        '',            0),
+    ("COMBINED",       "Combined",          "Full bake",
+        "",            0),
 
-    ('DIFFUSE',        'Color',             'Color only bake',
-        '',            1),
+    ("DIFFUSE",        "Color",             "Color only bake",
+        "",            1),
 )
 
 
 AVATAR_TYPE = EnumDescriptor(
-    ('FLOATER',        'Floater',              'Export floater avatar',
-        '',            0),
+    ("FLOATER",        "Floater",              "Export floater avatar",
+        "",            0),
 
-    ('FULLBODY',       'Full body',            'Export full body avatar',
-        '',            1),
+    ("FULLBODY",       "Full body",            "Export full body avatar",
+        "",            1),
 )
 
 
 EXPORT_ANIMATION_SOURCE = EnumDescriptor(
-    ('ACTION',         'Export from Action',               'Export animation from blender actions',
-        '',            0),
+    ("ACTION",         "Export from Action",               "Export animation from blender actions",
+        "",            0),
 
-    ('JSON',           'Export from JSON',                 'Export animation from external JSON files',
-        '',            1),
+    ("JSON",           "Export from JSON",                 "Export animation from external JSON files",
+        "",            1),
 )
 
 
 
 def update_atlas_size(self, context: Context):
-    atlas_images = [im for im in bpy.data.images if 'atlas_intermediate' in im.name]
+    atlas_images = [im for im in bpy.data.images if "atlas_intermediate" in im.name]
     if atlas_images:
         ats = self.atlas_size
         for at in atlas_images:
@@ -60,12 +60,12 @@ def update_atlas_size(self, context: Context):
                     at.update()
 
 
-def update_debug_basis(HT: 'HomeomorphicProperties', context: Context):
+def update_debug_basis(HT: "HomeomorphicProperties", context: Context):
     HT.debug_animation_actions.clear()
     if basis := HT.debug_animation_avatar_basis:
-        if metadata := basis.get('MorphSets_Avatar'):
-            animation_meta = metadata['Animation'].to_dict()
-            action_names = animation_meta['bone_transforms'].keys()
+        if metadata := basis.get("MorphSets_Avatar"):
+            animation_meta = metadata["Animation"].to_dict()
+            action_names = animation_meta["bone_transforms"].keys()
             for name in action_names:
                 action = HT.debug_animation_actions.add()
                 action.name = name
@@ -74,18 +74,18 @@ def update_debug_basis(HT: 'HomeomorphicProperties', context: Context):
 
 def update_export_progress(self, context):
     # XXX Dirty Hack
-    # bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+    # bpy.ops.wm.redraw_timer(type="DRAW_WIN_SWAP", iterations=1)
     pass
 
 
 class HomeomorphicProperties(PropertyGroup):
     avatar_rig: PointerProperty(
-        name='Avatar Rig', 
+        name="Avatar Rig", 
         type=Object
     )
 
     avatar_mesh: PointerProperty(
-        name='Avatar Mesh', 
+        name="Avatar Mesh", 
         type=Object
     )
 
@@ -149,7 +149,7 @@ class HomeomorphicProperties(PropertyGroup):
     )
 
     select_by_atlas_image: PointerProperty(
-        name='Match atlas', 
+        name="Match atlas", 
         type=Image
     )
 
@@ -204,7 +204,7 @@ class HomeomorphicProperties(PropertyGroup):
     export_progress: FloatProperty(
         name="Export Progress", 
         default=-1,
-        subtype='PERCENTAGE',
+        subtype="PERCENTAGE",
         precision=1,
         min=-1,
         soft_min=0,
@@ -320,9 +320,9 @@ class HomeomorphicProperties(PropertyGroup):
     def should_export_animation_action(self) -> bool:
         return (self.avatar_type == "FULLBODY" and 
                 self.export_animation and 
-                self.export_animation_source == 'ACTION')
+                self.export_animation_source == "ACTION")
 
     def should_export_animation_json(self) -> bool:
         return (self.avatar_type == "FULLBODY" and 
                 self.export_animation and 
-                self.export_animation_source == 'JSON')
+                self.export_animation_source == "JSON")

@@ -23,17 +23,17 @@ UVPM3_INSTALLED = lambda: "uvpackmaster3" in dir(bpy.ops)
 UVPM_INSTALLED = lambda: UVPM2_INSTALLED() or UVPM3_INSTALLED()
 
 def auto_assign_atlas(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    'Goes through all bake targets and assigns them to the correct intermediate atlas and UV set based on the uv_mode'
+    "Goes through all bake targets and assigns them to the correct intermediate atlas and UV set based on the uv_mode"
 
     #TODO - currently we don't take into account that variants may end up on different bins which is fine but we need to store the intermediate target with the variant and not the bake target
     #TODO - currently we will just hardcode the intermediate atlases but later we need to check which to use and create them if needed
     a_width = ht.atlas_size
     a_height = ht.atlas_size
 
-    atlas_color = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_color', 	a_width, a_height, action=NamedEntryAction.GET_EXISTING)
-    atlas_red = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_red', 		a_width, a_height, action=NamedEntryAction.GET_EXISTING)
-    atlas_green = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_green', 	a_width, a_height, action=NamedEntryAction.GET_EXISTING)
-    atlas_blue = 	create_named_entry(	bpy.data.images, 'atlas_intermediate_blue', 	a_width, a_height, action=NamedEntryAction.GET_EXISTING)
+    atlas_color = 	create_named_entry(	bpy.data.images, "atlas_intermediate_color", 	a_width, a_height, action=NamedEntryAction.GET_EXISTING)
+    atlas_red = 	create_named_entry(	bpy.data.images, "atlas_intermediate_red", 		a_width, a_height, action=NamedEntryAction.GET_EXISTING)
+    atlas_green = 	create_named_entry(	bpy.data.images, "atlas_intermediate_green", 	a_width, a_height, action=NamedEntryAction.GET_EXISTING)
+    atlas_blue = 	create_named_entry(	bpy.data.images, "atlas_intermediate_blue", 	a_width, a_height, action=NamedEntryAction.GET_EXISTING)
 
     for at in [atlas_blue, atlas_green, atlas_red, atlas_color]:
         if len(at.pixels) == 0:
@@ -59,29 +59,29 @@ def auto_assign_atlas(operator: Operator, context: Context, ht: HomeomorphicProp
     nil_targets = list()
     frozen_targets = list()
     for uv in uv_object_list:
-        if uv.bake_target.uv_mode == 'UV_IM_MONOCHROME':
+        if uv.bake_target.uv_mode == "UV_IM_MONOCHROME":
             monochrome_targets.append(uv)
-        elif uv.bake_target.uv_mode == 'UV_IM_COLOR':
+        elif uv.bake_target.uv_mode == "UV_IM_COLOR":
             color_targets.append(uv)
-        elif uv.bake_target.uv_mode == 'UV_IM_NIL':
+        elif uv.bake_target.uv_mode == "UV_IM_NIL":
             nil_targets.append(uv)
-        elif uv.bake_target.uv_mode == 'UV_IM_FROZEN':
+        elif uv.bake_target.uv_mode == "UV_IM_FROZEN":
             frozen_targets.append(uv)
         else:
             raise Exception(uv.bake_target.uv_mode)	#TODO proper exception
 
-    log.debug(f'UV bins - monochrome: {len(monochrome_targets)}, color: {len(color_targets)}, nil: {len(nil_targets)}, frozen: {len(frozen_targets)}')
+    log.debug(f"UV bins - monochrome: {len(monochrome_targets)}, color: {len(color_targets)}, nil: {len(nil_targets)}, frozen: {len(frozen_targets)}")
 
 
     #NOTE - we support multiple color bins but it is not used yet
     color_bins = [
-        Intermediate.Packing.AtlasBin('color', atlas=bpy.data.images["atlas_intermediate_color"]),
+        Intermediate.Packing.AtlasBin("color", atlas=bpy.data.images["atlas_intermediate_color"]),
     ]
 
     mono_bins = [
-        Intermediate.Packing.AtlasBin('red', atlas=bpy.data.images["atlas_intermediate_red"]),
-        Intermediate.Packing.AtlasBin('green', atlas=bpy.data.images["atlas_intermediate_green"]),
-        Intermediate.Packing.AtlasBin('blue', atlas=bpy.data.images["atlas_intermediate_blue"]),
+        Intermediate.Packing.AtlasBin("red", atlas=bpy.data.images["atlas_intermediate_red"]),
+        Intermediate.Packing.AtlasBin("green", atlas=bpy.data.images["atlas_intermediate_green"]),
+        Intermediate.Packing.AtlasBin("blue", atlas=bpy.data.images["atlas_intermediate_blue"]),
     ]
 
 
@@ -90,15 +90,15 @@ def auto_assign_atlas(operator: Operator, context: Context, ht: HomeomorphicProp
         (color_targets, color_bins),
     ]
     def get_channel_from_bin(atlas_bin: Intermediate.Packing.AtlasBin) -> str:
-        if atlas_bin.name == 'color':
-            return 'UV_TARGET_COLOR'
-        elif atlas_bin.name == 'red':
-            return 'UV_TARGET_R'
-        elif atlas_bin.name == 'green':
-            return 'UV_TARGET_G'
-        elif atlas_bin.name == 'blue':
-            return 'UV_TARGET_B'
-        return 'UV_TARGET_NIL'
+        if atlas_bin.name == "color":
+            return "UV_TARGET_COLOR"
+        elif atlas_bin.name == "red":
+            return "UV_TARGET_R"
+        elif atlas_bin.name == "green":
+            return "UV_TARGET_G"
+        elif atlas_bin.name == "blue":
+            return "UV_TARGET_B"
+        return "UV_TARGET_NIL"
 
 
     for target_list, bin_list in all_targets:
@@ -119,10 +119,10 @@ def pack_uv_islands(operator: Operator, context: Context, ht: HomeomorphicProper
     mono_box = (0.0, 1.0, 1.0, ht.color_percentage / 100.0)
     color_box = (0.0, 0.0, 1.0, ht.color_percentage / 100.0)
 
-    pack_intermediate_atlas(bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_red'], TARGET_UV_MAP, mono_box)
-    pack_intermediate_atlas(bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_green'], TARGET_UV_MAP, mono_box)
-    pack_intermediate_atlas(bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_blue'], TARGET_UV_MAP, mono_box)
-    pack_intermediate_atlas(bake_scene, all_uv_object_list, bpy.data.images['atlas_intermediate_color'], TARGET_UV_MAP, color_box)
+    pack_intermediate_atlas(bake_scene, all_uv_object_list, bpy.data.images["atlas_intermediate_red"], TARGET_UV_MAP, mono_box)
+    pack_intermediate_atlas(bake_scene, all_uv_object_list, bpy.data.images["atlas_intermediate_green"], TARGET_UV_MAP, mono_box)
+    pack_intermediate_atlas(bake_scene, all_uv_object_list, bpy.data.images["atlas_intermediate_blue"], TARGET_UV_MAP, mono_box)
+    pack_intermediate_atlas(bake_scene, all_uv_object_list, bpy.data.images["atlas_intermediate_color"], TARGET_UV_MAP, color_box)
 
     set_scene(context, last_active_scene)
 
@@ -131,7 +131,7 @@ def get_intermediate_uv_object_list(ht: HomeomorphicProperties) -> list[Intermed
     uv_object_list = list()
 
     for bake_target in ht.bake_target_collection:
-        if bake_target.bake_mode == 'UV_BM_REGULAR':
+        if bake_target.bake_mode == "UV_BM_REGULAR":
 
             for variant_name, variant in bake_target.iter_variants():
                 if not variant.workmesh:
@@ -175,9 +175,9 @@ def pack_intermediate_atlas(
     set_active(view_layer.objects, uv_object_list[0].variant.workmesh)
 
     # enter edit mode and select all faces and UVs
-    bpy.ops.object.mode_set(mode='EDIT')
-    bpy.ops.mesh.select_all(action='SELECT')	#Select faces in model editor
-    bpy.ops.uv.select_all(action='SELECT')		#Select UVs in UV editor
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")	#Select faces in model editor
+    bpy.ops.uv.select_all(action="SELECT")		#Select UVs in UV editor
 
     if UVPM2_INSTALLED():
         disable_packing_box = GuardedOperator(bpy.ops.uvpackmaster2.disable_target_box)
@@ -221,14 +221,14 @@ def pack_intermediate_atlas(
         #TODO(ranjian0) - dont hardcode pixel margin!
         bake_scene.uvpm3_props.pixel_margin_enable = True
         bake_scene.uvpm3_props.pixel_margin = 5
-        bpy.ops.uvpackmaster3.pack(mode_id='pack.single_tile')
+        bpy.ops.uvpackmaster3.pack(mode_id="pack.single_tile")
     else:
         # TODO(ranjian0) Find a way to box pack with default blender packer.
         bpy.ops.uv.average_islands_scale()
         bpy.ops.uv.pack_islands(margin=0.01)
 
     clear_selection(view_layer.objects)
-    bpy.ops.object.mode_set(mode='OBJECT')
+    bpy.ops.object.mode_set(mode="OBJECT")
 
 
 def copy_and_transform_uv(
@@ -237,7 +237,7 @@ def copy_and_transform_uv(
 
     #TODO - investigate if we can get uv layer index without actually changing it and getting mesh.loops.layers.uv.active
     try:
-        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.mode_set(mode="OBJECT")
     except:
         # No need, context already set
         pass

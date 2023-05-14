@@ -5,7 +5,7 @@ from bpy.props import IntProperty, StringProperty, CollectionProperty
 
 class BakeTargetReference(PropertyGroup):
     target: IntProperty(
-        name='Bake target identifier', 
+        name="Bake target identifier", 
         default=-1
     )
 
@@ -13,7 +13,7 @@ class BakeTargetReference(PropertyGroup):
 class BakeGroup(PropertyGroup):
     name: StringProperty(
         name="Group name", 
-        default='Untitled group'
+        default="Untitled group"
     )
     
     members: CollectionProperty(

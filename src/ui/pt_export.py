@@ -3,8 +3,8 @@ from ..utils.helpers import get_homeomorphic_tool_state
 
 class FABA_PT_export(bpy.types.Panel):
     bl_label = "Export"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
     bl_category = "Avatar"
 
     def draw(self, context):
@@ -42,7 +42,7 @@ class FABA_PT_export(bpy.types.Panel):
                     for idx, path in enumerate(HT.export_animation_json_paths):
                         box = self.layout.box()
                         row = box.row(align=True)
-                        row.prop(path, 'file', text='JSON')
+                        row.prop(path, "file", text="JSON")
                         row.separator()
                         row.prop(path, "export", icon="EXPORT", text="")
                         row.operator("faba.remove_json_path", icon="CANCEL", text="").index = idx

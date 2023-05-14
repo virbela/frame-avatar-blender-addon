@@ -18,7 +18,7 @@ class PendingLogEntry:
 
 
 class LogLevelDescriptor:
-    def __init__(self, log_instance: 'LogBase', log_level: LogLevel, description: str):
+    def __init__(self, log_instance: "LogBase", log_level: LogLevel, description: str):
         self.__doc__ = description
         self.log_instance = log_instance
         self.log_level = log_level
@@ -36,15 +36,15 @@ class LogBase:
         self.info = 	LogLevelDescriptor(self, LogLevel.INFO, 		"Generic information to keep the user in the loop")
         self.warning = 	LogLevelDescriptor(self, LogLevel.WARNING, 	"Warnings are intended for things that is not really an error but that the user should still be made aware of")
         self.error = 	LogLevelDescriptor(self, LogLevel.ERROR,		"Errors the user should be made aware of")
-        self.fatal = 	LogLevelDescriptor(self, LogLevel.FATAL,	 	"Fatal errors are errors that we can't recover from and we don't know how to tell the user to recover from them")
+        self.fatal = 	LogLevelDescriptor(self, LogLevel.FATAL,	 	"Fatal errors are errors that we can"t recover from and we don"t know how to tell the user to recover from them")
 
     def exception(self, message: str):
-        tab = '\t'
-        self.fatal(f'{message}\n{textwrap.indent(traceback.format_exc().strip(), tab)}\n')
+        tab = "\t"
+        self.fatal(f"{message}\n{textwrap.indent(traceback.format_exc().strip(), tab)}\n")
 
 
 class LogInstance(LogBase):
-    'Log instance'
+    "Log instance"
 
     def process_message(self, message: PendingLogEntry, print_console: bool):
         try:
@@ -58,9 +58,9 @@ class LogInstance(LogBase):
         #Get or create text target based on addon preference `log_target´
         text = bpy.data.texts.get(preferences.log_target) or bpy.data.texts.new(preferences.log_target)
 
-        t = time.strftime('%X', message.timestamp)
-        line = f'{t} {message.log_level.name}: {message.message}'
-        text.write(f'{line}\n')
+        t = time.strftime("%X", message.timestamp)
+        line = f"{t} {message.log_level.name}: {message.message}"
+        text.write(f"{line}\n")
         if print_console:
             print(line)
         self.history.append(message)
@@ -70,7 +70,7 @@ class LogInstance(LogBase):
 
 
 class DummyLogInstance(LogBase):
-    'Dummy log'
+    "Dummy log"
 
     def process_message(self, message: PendingLogEntry):
         pass

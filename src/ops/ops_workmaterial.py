@@ -36,11 +36,11 @@ def set_selected_objects_atlas(operator: Operator, context: Context, ht: Homeomo
 
 
 def switch_to_bake_material(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    generic_switch_to_material(context, ht, 'bake')
+    generic_switch_to_material(context, ht, "bake")
 
 
 def switch_to_preview_material(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    generic_switch_to_material(context, ht, 'preview')
+    generic_switch_to_material(context, ht, "preview")
 
 
 def select_by_atlas(operator: Operator, context: Context, ht: HomeomorphicProperties):
@@ -62,10 +62,10 @@ def update_workmesh_materials(context: Context, ht: HomeomorphicProperties,  bak
     #TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
     if not variant.uv_map:
         variant.workmesh.active_material = None
-        log.error(f'Missing UV map for {variant}')
+        log.error(f"Missing UV map for {variant}")
         return
 
-    bake_material_name =f'bake-{get_bake_target_variant_name(bake_target, variant)}'
+    bake_material_name =f"bake-{get_bake_target_variant_name(bake_target, variant)}"
     if bake_material_name in bpy.data.materials:
         # Remove existing
         bpy.data.materials.remove(bpy.data.materials[bake_material_name])
@@ -96,7 +96,7 @@ def generic_switch_to_material(context: Context, ht: HomeomorphicProperties, mat
                 materials = variant_materials[variant_name]
                 target.active_material = bpy.data.materials[getattr(materials, material_type)]
         else:
-            log.warning(f'{bt.name} lacks atlas or uv_map')
+            log.warning(f"{bt.name} lacks atlas or uv_map")
 
 
 class FABA_OT_update_selected_material(FabaOperator):
@@ -115,15 +115,15 @@ class FABA_OT_update_all_materials(FabaOperator):
 
 class FABA_OT_switch_to_bake_material(FabaOperator):
     bl_label =            "Show bake/paint material"
-    bl_description =      'Switch all bake objects to use the bake material'
-    bl_idname =           'faba.switch_to_bake_material'
+    bl_description =      "Switch all bake objects to use the bake material"
+    bl_idname =           "faba.switch_to_bake_material"
     faba_operator =       switch_to_bake_material
 
 
 class FABA_OT_switch_to_preview_material(FabaOperator):
     bl_label =            "Show preview material"
-    bl_description =      'Switch all bake objects to use the preview material'
-    bl_idname =           'faba.switch_to_preview_material'
+    bl_description =      "Switch all bake objects to use the preview material"
+    bl_idname =           "faba.switch_to_preview_material"
     faba_operator =       switch_to_preview_material
 
 

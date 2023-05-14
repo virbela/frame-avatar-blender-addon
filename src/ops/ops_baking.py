@@ -23,7 +23,7 @@ def bake_all_bake_targets(operator: Operator, context: Context, ht: Homeomorphic
     set_scene(context, bake_scene)
 
     for idx, bake_target in enumerate(ht.bake_target_collection, start=1):
-        operator.report({'INFO'}, f"Baking target {idx} / {len(ht.bake_target_collection)}.")
+        operator.report({"INFO"}, f"Baking target {idx} / {len(ht.bake_target_collection)}.")
         log.info(f"Baking for {bake_target}")
         for variant in bake_target.variant_collection:
             bake_specific_variant(ht, view_layer, variant)
@@ -74,7 +74,7 @@ def bake_selected_workmeshes(operator: Operator, context: Context, ht: Homeomorp
 
         # set active image in material
         material_nodes = workmesh.active_material.node_tree.nodes
-        material_nodes.active = material_nodes['tex_target']
+        material_nodes.active = material_nodes["tex_target"]
 
         # set active UV index to source UV Map (since we want this in the final atlas)
         uv_layers = workmesh.data.uv_layers
@@ -93,7 +93,7 @@ def bake_specific_variant(ht: HomeomorphicProperties, view_layer: ViewLayer, var
 
     # set active image in material
     material_nodes = workmesh.active_material.node_tree.nodes
-    material_nodes.active = material_nodes['tex_target']
+    material_nodes.active = material_nodes["tex_target"]
 
     # set active UV index to source UV Map (since we want this in the final atlas)
     uv_layers = workmesh.data.uv_layers
@@ -101,8 +101,8 @@ def bake_specific_variant(ht: HomeomorphicProperties, view_layer: ViewLayer, var
 
 
 def run_bake(ht: HomeomorphicProperties, invoke: bool = True):
-    bpy.context.scene.cycles.device = 'GPU'
-    bpy.context.scene.render.engine = 'CYCLES'
+    bpy.context.scene.cycles.device = "GPU"
+    bpy.context.scene.render.engine = "CYCLES"
     bpy.context.scene.render.bake.use_clear = False
     last_op = bpy.context.scene.render.bake.use_selected_to_active
     bpy.context.scene.render.bake.use_selected_to_active = False
@@ -118,9 +118,9 @@ def run_bake(ht: HomeomorphicProperties, invoke: bool = True):
         bpy.context.scene.render.bake.use_pass_emit = True
         bpy.context.scene.render.bake.use_pass_transmission = True
 
-    bpy.context.scene.view_settings.view_transform = 'Standard'
+    bpy.context.scene.view_settings.view_transform = "Standard"
     if invoke:
-        bpy.ops.object.bake('INVOKE_DEFAULT', type=ht.baking_options)
+        bpy.ops.object.bake("INVOKE_DEFAULT", type=ht.baking_options)
     else:
         bpy.ops.object.bake(type=ht.baking_options)
 

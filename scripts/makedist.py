@@ -80,16 +80,16 @@ def main():
                 if not zip_path.parent.exists():
                     zip_path.parent.mkdir()
 
-                with open(zip_path, 'wb') as file:
+                with open(zip_path, "wb") as file:
                     file.write(object_contents)
 
     if len(list(zip_folder.glob("**/*.py"))):
-        shutil.make_archive(foldername, 'zip', base_dir=str(zip_folder))
+        shutil.make_archive(foldername, "zip", base_dir=str(zip_folder))
         shutil.rmtree(str(zip_folder))
         sys.stdout.write("created archive: %s\n" % outfilename)
     else:
         shutil.rmtree(str(zip_folder))
         sys.stdout.write(f"Error: No files at tagged at {upto}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

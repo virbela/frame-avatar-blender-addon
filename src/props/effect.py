@@ -11,11 +11,11 @@ from ..utils.helpers import EnumDescriptor
 
 
 EFFECT_TYPE = EnumDescriptor(
-    ('POSITION',       'Position Effect',            'Effect to transform shape positions',
-        '',            0),
+    ("POSITION",       "Position Effect",            "Effect to transform shape positions",
+        "",            0),
 
-    ('COLOR',          'Color Effect',               'Effect to override shape color',
-        '',            1),
+    ("COLOR",          "Color Effect",               "Effect to override shape color",
+        "",            1),
 
 )
 
@@ -39,7 +39,7 @@ class ColorEffect(PropertyGroup):
 
     color: FloatVectorProperty(
         name="Color", 
-        subtype='COLOR',
+        subtype="COLOR",
         size = 4,
         min = 0.0,
         max = 1.0,
@@ -54,7 +54,7 @@ class ColorEffect(PropertyGroup):
 class EffectProperty(PropertyGroup):
     name: StringProperty(
         name="Effect Name", 
-        default='Untitled Effect'
+        default="Untitled Effect"
     )
 
     type: EnumProperty(
@@ -63,7 +63,7 @@ class EffectProperty(PropertyGroup):
     )
 
     target: IntProperty(
-        name='Effect identifier', 
+        name="Effect identifier", 
         default=-1
     )
 

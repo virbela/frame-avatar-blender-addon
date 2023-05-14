@@ -47,7 +47,7 @@ def generate_animation_blob(context: Context, avatar: Object, animated_objects: 
                 for mesh in meshes:
                     count = len(mesh.vertices)
                     buff = np.empty(count * 3, dtype=np.float64)
-                    mesh.vertices.foreach_get('co', buff)
+                    mesh.vertices.foreach_get("co", buff)
                     # duplicate by gltf verts
                     buff = buff.reshape((count, 3))[export_indices]
                     animation_buffer[:,frame_counter[anim_obj.name],oid] = buff.ravel()
@@ -57,7 +57,7 @@ def generate_animation_blob(context: Context, avatar: Object, animated_objects: 
                 # XXX Deprecated Old Shapekey animation export
                 # -- create shapekey in avatar
                 # for frame, mesh in enumerate(meshes, start=1):
-                #     sk_name = f'fabanim.{anim_obj.name}.{action.name}#{frame}'
+                #     sk_name = f"fabanim.{anim_obj.name}.{action.name}#{frame}"
                 #     avatar.shape_key_add(name=sk_name, from_mix=False)
                 #     shape_key_from_mesh(sk_name, avatar, mesh)
                 [bpy.data.meshes.remove(me) for me in meshes]
@@ -66,7 +66,7 @@ def generate_animation_blob(context: Context, avatar: Object, animated_objects: 
     context.scene.frame_set(1)
     if export_full_blob:
         directory = os.path.dirname(filepath)
-        blob_file = open(os.path.join(directory, "animations.npy"), 'wb')
+        blob_file = open(os.path.join(directory, "animations.npy"), "wb")
         np.save(blob_file, animation_buffer, allow_pickle=False)
         blob_file.close()
 
@@ -81,7 +81,7 @@ def get_per_frame_mesh(context: Context, action: Action, object: Object) -> list
         eval_object = object.evaluated_get(depsgraph)
         me = bpy.data.meshes.new_from_object(eval_object)
         # -- convert coordinates from +Z up to +Y up
-        me.transform(object.matrix_world @ Matrix.Rotation(math.radians(-90), 4, 'X'))
+        me.transform(object.matrix_world @ Matrix.Rotation(math.radians(-90), 4, "X"))
         meshes.append(me)
     return meshes
 
@@ -109,17 +109,17 @@ def export_action_animation(
     directory = os.path.dirname(filepath)
     if os.path.exists(prefs.npy_export_dir):
         directory = str(Path(prefs.npy_export_dir).absolute())
-    blob_file = open(os.path.join(directory, f"{action.name}.npy"), 'wb')
+    blob_file = open(os.path.join(directory, f"{action.name}.npy"), "wb")
 
     num_frames = get_num_frames_single_action(action)
-    animation_buffer = np.zeros((num_verts * 3, int(num_frames), len(animated_objects)), dtype=np.float32, order='F')
+    animation_buffer = np.zeros((num_verts * 3, int(num_frames), len(animated_objects)), dtype=np.float32, order="F")
     for oid, anim_obj in enumerate(sorted(animated_objects, key=lambda o:o.name)):
         meshes = get_per_frame_mesh(context, action, anim_obj)
         # -- add to blob file
         for frame, mesh in enumerate(meshes):
             count = len(mesh.vertices)
             buff = np.empty(count * 3, dtype=np.float64)
-            mesh.vertices.foreach_get('co', buff)
+            mesh.vertices.foreach_get("co", buff)
             # duplicate by gltf verts
             buff = buff.reshape((count, 3))[export_indices]
             animation_buffer[:,frame,oid] = buff.ravel()

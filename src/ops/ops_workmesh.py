@@ -55,15 +55,15 @@ def update_all_workmeshes(operator: Operator, context: Context, ht: Homeomorphic
 
 def workmesh_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicProperties):
     work_scene = require_work_scene()
-    avatar_object = work_scene.objects.get('Avatar')
+    avatar_object = work_scene.objects.get("Avatar")
     if not avatar_object:
         return
 
     for object in  context.selected_objects:
         shape_name = object.name
         # Handle multiple variant names
-        if '.' in shape_name:
-            shape_name = shape_name.split('.')[0]
+        if "." in shape_name:
+            shape_name = shape_name.split(".")[0]
 
         workmesh = object.data
         # -- set corresponding shapekey
@@ -81,7 +81,7 @@ def workmesh_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicP
 def all_workmeshes_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicProperties):
     bake_scene = require_bake_scene()
     work_scene = require_work_scene()
-    avatar_object = work_scene.objects.get('Avatar')
+    avatar_object = work_scene.objects.get("Avatar")
     if not avatar_object:
         return
 
@@ -89,8 +89,8 @@ def all_workmeshes_to_shapekey(operator: Operator, context: Context, ht: Homeomo
     for object in  workmeshes:
         shape_name = object.name
         # Handle multiple variant names
-        if '.' in shape_name and 'offset' not in shape_name.lower():
-            shape_name = shape_name.split('.')[0]
+        if "." in shape_name and "offset" not in shape_name.lower():
+            shape_name = shape_name.split(".")[0]
 
         workmesh = object.data
         # -- set corresponding shapekey
@@ -109,7 +109,7 @@ def all_workmeshes_to_shapekey(operator: Operator, context: Context, ht: Homeomo
 
 def shapekey_to_workmesh(operator: Operator, context: Context, ht: HomeomorphicProperties):
     work_scene = require_work_scene()
-    avatar_object = work_scene.objects.get('Avatar')
+    avatar_object = work_scene.objects.get("Avatar")
     if not avatar_object:
         return
 
@@ -139,7 +139,7 @@ def shapekey_to_workmesh(operator: Operator, context: Context, ht: HomeomorphicP
 def all_shapekeys_to_workmeshes(operator: Operator, context: Context, ht: HomeomorphicProperties):
     bake_scene = require_bake_scene()
     work_scene = require_work_scene()
-    avatar_object = work_scene.objects.get('Avatar')
+    avatar_object = work_scene.objects.get("Avatar")
     if not avatar_object:
         return
 
@@ -212,7 +212,7 @@ def create_workmeshes_for_specific_target(context: Context, ht: HomeomorphicProp
         if pending_name in bake_scene.objects:
             # NOTE(ranjian0) since artists may have performed actions on the workmeshs,
             # we choose to skip regeneration.
-            log.warning(f'Skipping existing workmesh ...')
+            log.warning(f"Skipping existing workmesh ...")
             pending_object = bake_scene.objects.get(pending_name)
             bake_uv = pending_object.data.uv_layers[TARGET_UV_MAP]
             local_uv = pending_object.data.uv_layers[PAINTING_UV_MAP]
@@ -263,7 +263,7 @@ def update_workmesh_materials(bake_target, variant):
         log.error(f"No uv found for variant {variant}")
         return
 
-    bake_material_name =f'bake-{get_bake_target_variant_name(bake_target, variant)}'
+    bake_material_name =f"bake-{get_bake_target_variant_name(bake_target, variant)}"
     bake_material = create_named_entry(bpy.data.materials, bake_material_name)
     bake_material.use_nodes = True	#contribution note 9
     #TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?

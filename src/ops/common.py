@@ -9,14 +9,14 @@ class GuardedOperator:
         self.operator = operator
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} of {self.operator}>'
+        return f"<{self.__class__.__name__} of {self.operator}>"
 
     def __call__(self, *args, **kwargs):
         if self.operator.poll():
             return self.operator(*args, **kwargs)
 
 class GenericList:
-    'This is an abstract handler for list operations. The operations needs a collection and callables to get and set the current selection'
+    "This is an abstract handler for list operations. The operations needs a collection and callables to get and set the current selection"
 
     @staticmethod
     def add(collection: CollectionProperty, get_selected: Any, set_selected: Any):

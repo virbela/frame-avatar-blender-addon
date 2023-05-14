@@ -11,15 +11,15 @@ class MIRROR_TYPE(enum.Enum):
     PRIMARY = object()
     SECONDARY = object()
 
-IGNORED = type('IGNORED', (), {})
+IGNORED = type("IGNORED", (), {})
 
-WORK_SCENE = 'Scene'
-BAKE_SCENE = 'Baking'
-PARTITIONING_OBJECT = '_uv_partitioning_object_'
-BAKE_MATERIAL = 'BakeMaterial'
+WORK_SCENE = "Scene"
+BAKE_SCENE = "Baking"
+PARTITIONING_OBJECT = "_uv_partitioning_object_"
+BAKE_MATERIAL = "BakeMaterial"
 
-TARGET_UV_MAP = 'TargetMap'
-PAINTING_UV_MAP = 'PaintingMap'
+TARGET_UV_MAP = "TargetMap"
+PAINTING_UV_MAP = "PaintingMap"
 
 GLB_VERT_COUNT = 441
 

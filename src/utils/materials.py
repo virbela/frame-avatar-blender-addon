@@ -27,8 +27,8 @@ def get_material_variants(
             paint_uv = variant.uv_map
 
             # we are hitting the 63 char limit here and therefore we use get_nice_name
-            bake_material_name = get_nice_name(result, f'bake-{bt.shortname}-{variant.name}', 32)
-            preview_material_name = get_nice_name(result, f'preview-{bt.shortname}-{variant.name}', 32)
+            bake_material_name = get_nice_name(result, f"bake-{bt.shortname}-{variant.name}", 32)
+            preview_material_name = get_nice_name(result, f"preview-{bt.shortname}-{variant.name}", 32)
 
             bake_material = create_named_entry(bpy.data.materials, bake_material_name, action=NamedEntryAction.RECREATE if recreate else NamedEntryAction.GET_EXISTING)
             bake_material.use_nodes = True	#contribution note 9
@@ -40,7 +40,7 @@ def get_material_variants(
 
 
         else:
-            raise Exception('not implemented')	#TODO - implement
+            raise Exception("not implemented")	#TODO - implement
 
         #store what material we are using
         result[variant_name] = Intermediate.Pending.Materials(
@@ -53,7 +53,7 @@ def get_material_variants(
 
 def setup_bake_material(
         material: Material, 
-        atlas: Image, uv_map: str ='UVMap', 
+        atlas: Image, uv_map: str ="UVMap", 
         diffuse_image: Image = None, diffuse_uv_map: Image = None) -> None:
     template =  bpy.data.materials[Assets.Materials.BakeAO.name]
     if diffuse_image and diffuse_uv_map:
@@ -62,23 +62,23 @@ def setup_bake_material(
     copy_nodetree(template.node_tree, material.node_tree)
 
     nodes = material.node_tree.nodes
-    nodes['tex_target'].image = atlas
-    nodes['uvm_target'].uv_map = uv_map
+    nodes["tex_target"].image = atlas
+    nodes["uvm_target"].uv_map = uv_map
     if diffuse_image and diffuse_uv_map:
-        nodes['tex_diffuse'].image = diffuse_image
-        nodes['uvm_diffuse'].uv_map = diffuse_uv_map
+        nodes["tex_diffuse"].image = diffuse_image
+        nodes["uvm_diffuse"].uv_map = diffuse_uv_map
     
 
 def setup_bake_preview_material(
         material: Material, 
-        atlas: Image, uv_map: str ='UVMap') -> None:
+        atlas: Image, uv_map: str ="UVMap") -> None:
     
     template =  bpy.data.materials[Assets.Materials.BakePreview.name]
     copy_nodetree(template.node_tree, material.node_tree)
 
     nodes = material.node_tree.nodes
-    nodes['tex_target'].image = atlas
-    nodes['uvm_target'].uv_map = uv_map
+    nodes["tex_target"].image = atlas
+    nodes["uvm_target"].uv_map = uv_map
 
 
 def copy_nodetree(tree_from: ShaderNodeTree, tree_to: ShaderNodeTree) -> None:

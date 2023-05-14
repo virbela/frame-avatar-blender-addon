@@ -21,5 +21,5 @@ def main():
     [f.unlink() for f in files]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

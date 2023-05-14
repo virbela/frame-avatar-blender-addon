@@ -19,16 +19,16 @@ class FabaOperator(Operator):
           self.faba_operator(context, HT)
 
         except BakeException.base as e:	#contribution note 4
-          log.exception(f'Exception when calling operator for {self}: {e}')
-          return {'CANCELLED'}
+          log.exception(f"Exception when calling operator for {self}: {e}")
+          return {"CANCELLED"}
 
         except Exception as e:
-          log.exception(f'Exception when calling operator for {self}: {e}')
-          return {'CANCELLED'}
+          log.exception(f"Exception when calling operator for {self}: {e}")
+          return {"CANCELLED"}
 
-        return {'FINISHED'}
+        return {"FINISHED"}
       else:
-        raise InternalError(f'{self} does not define `frame_operator` and can not be executed')	#contribution note 5
+        raise InternalError(f"{self} does not define `frame_operator` and can not be executed")	#contribution note 5
 
-    return {'CANCELLED'}
+    return {"CANCELLED"}
 

@@ -23,53 +23,53 @@ if TYPE_CHECKING:
 
 
 UV_ISLAND_MODES = EnumDescriptor(
-    ('UV_IM_MONOCHROME',    'Grayscale',        'This UV island will be channel packed to a grayscale segment of the atlas',
-        'IMAGE_ZDEPTH',     0),
+    ("UV_IM_MONOCHROME",    "Grayscale",        "This UV island will be channel packed to a grayscale segment of the atlas",
+        "IMAGE_ZDEPTH",     0),
 
-    ('UV_IM_COLOR',         'Color',            'This UV island will end up on the color segment of the atlas',
-        'COLOR',            1),
+    ("UV_IM_COLOR",         "Color",            "This UV island will end up on the color segment of the atlas",
+        "COLOR",            1),
 
-    ('UV_IM_NIL',           'Nil UV island',    'This UV island will have zero area (unshaded)',
-        'DOT',              2),
+    ("UV_IM_NIL",           "Nil UV island",    "This UV island will have zero area (unshaded)",
+        "DOT",              2),
 
-    ('UV_IM_FROZEN',        'Frozen',           'This UV island will not be modified by the packer',
-        'FREEZE',           3),
+    ("UV_IM_FROZEN",        "Frozen",           "This UV island will not be modified by the packer",
+        "FREEZE",           3),
 )
 
 
 UV_BAKE_MODE = EnumDescriptor(
-    ('UV_BM_REGULAR',        'Regular',            'This is a regular, non mirrored, bake target',
-        'OBJECT_DATA',       0),
+    ("UV_BM_REGULAR",        "Regular",            "This is a regular, non mirrored, bake target",
+        "OBJECT_DATA",       0),
 
-    ('UV_BM_MIRRORED',       'Mirrored',           'This bake target will be mirrored upon another target along the U axis',
-        'MOD_MIRROR',        1),
+    ("UV_BM_MIRRORED",       "Mirrored",           "This bake target will be mirrored upon another target along the U axis",
+        "MOD_MIRROR",        1),
 )
 
 
 class BakeTargetMirrorEntry(PropertyGroup):
     primary: IntProperty(
-        name='Primary bake target identifier', 
+        name="Primary bake target identifier", 
         default=-1
     )
 
     secondary: IntProperty(
-        name='Secondary bake target identifier', 
+        name="Secondary bake target identifier", 
         default=-1
     )
 
 
 
-def get_baketarget_name(self: 'BakeTarget'):
-    return self.get("name", 'Untitled bake target')
+def get_baketarget_name(self: "BakeTarget"):
+    return self.get("name", "Untitled bake target")
 
 
-def set_baketarget_name(self: 'BakeTarget', value: str):
+def set_baketarget_name(self: "BakeTarget", value: str):
     if not self.source_object:
         # Initial name set from the create bake targets operator
-        self['name'] = value
+        self["name"] = value
         return
 
-    # This is manual user name editing (remove leading 'Avatar_')
+    # This is manual user name editing (remove leading "Avatar_")
     newname = value.lstrip(f"{self.source_object.name}_")
 
     # -- rename shapekey
@@ -91,7 +91,7 @@ def set_baketarget_name(self: 'BakeTarget', value: str):
         if variant.workmesh:
             variant.workmesh.name = variantname
 
-    self['name'] = value
+    self["name"] = value
     log.info(f"Renaming baketarget to {value} ... ")
 
 
@@ -99,7 +99,7 @@ class BakeTarget(PropertyGroup):
 
     name: StringProperty(
         name = "Bake target name", 
-        default='Untitled bake target', 
+        default="Untitled bake target", 
         get=get_baketarget_name, 
         set=set_baketarget_name
     )
@@ -111,7 +111,7 @@ class BakeTarget(PropertyGroup):
     )
 
     source_object: PointerProperty(
-        name='Source object', 
+        name="Source object", 
         type=Object
     )
 
@@ -133,7 +133,7 @@ class BakeTarget(PropertyGroup):
     )
 
     mirror_source: IntProperty(
-        name='Bake target used for mirror'
+        name="Bake target used for mirror"
     )
 
     uv_mode: EnumProperty(
@@ -188,9 +188,9 @@ class BakeTarget(PropertyGroup):
                 return self.shape_key_name
             else:
                 return self.object_name
-        return 'untitled'
+        return "untitled"
 
-    def get_mirror_type(self, ht: 'HomeomorphicProperties') -> tuple[BakeTargetMirrorEntry, MIRROR_TYPE]:
+    def get_mirror_type(self, ht: "HomeomorphicProperties") -> tuple[BakeTargetMirrorEntry, MIRROR_TYPE]:
         find_id = ht.get_bake_target_index(self)
         for mirror in ht.bake_target_mirror_collection:
             if find_id == mirror.primary:
@@ -204,20 +204,20 @@ class BakeTarget(PropertyGroup):
         prefix = self.name
         if self.multi_variants:
             for variant in self.variant_collection:
-                yield f'{prefix}.{variant.name}', variant
+                yield f"{prefix}.{variant.name}", variant
 
     def iter_variants(self) -> typing.Generator[tuple[str, BakeVariant], None, None]:
         prefix = self.name
         for variant in self.variant_collection:
             if self.multi_variants:
-                yield f'{prefix}.{variant.name}', variant
+                yield f"{prefix}.{variant.name}", variant
             else:
-                yield f'{prefix}', variant
+                yield f"{prefix}", variant
 
     def iter_bake_scene_variant_names(self) -> typing.Generator[str, None, None]:
         prefix = self.name
         if self.multi_variants:
             for variant in self.variant_collection:
-                yield f'{prefix}.{variant.name}'
+                yield f"{prefix}.{variant.name}"
         else:
             yield prefix

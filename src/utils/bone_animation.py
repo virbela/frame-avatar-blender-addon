@@ -25,7 +25,7 @@ class BoneAnimationExporter:
 
         sc = require_bake_scene()
         for ob in sc.objects:
-            if ob.type == 'ARMATURE':
+            if ob.type == "ARMATURE":
                 self.armature = ob
         
         if not self.armature:
@@ -45,13 +45,13 @@ class BoneAnimationExporter:
 
         for path in ht.export_animation_json_paths:
             jsonfile = bpy.path.abspath(path.file)
-            with open(Path(jsonfile), 'r') as file:
+            with open(Path(jsonfile), "r") as file:
                 data = json.loads(file.read())
-                if 'weights' in data.keys():
-                    weights_compare.append(data['weights'])
+                if "weights" in data.keys():
+                    weights_compare.append(data["weights"])
 
-                if 'transforms' in data.keys():
-                    for animName, trans in data['transforms'].items():
+                if "transforms" in data.keys():
+                    for animName, trans in data["transforms"].items():
                         transforms[animName] = trans
 
         # TODO(ranjian0)
@@ -105,20 +105,20 @@ class BoneAnimationExporter:
     def export_weights_json(self):
         filepath = bpy.data.filepath
         directory = os.path.dirname(filepath)
-        with open(os.path.join(directory, "weights.json"), 'w') as file:
+        with open(os.path.join(directory, "weights.json"), "w") as file:
             json.dump(self.weights, file, indent=4)
 
     def set_transforms(self):
         log.info("\tGetting bone transforms...")
         bakescene = require_bake_scene(self.context)
         # blender z-up to babylon y-up
-        R1 = Matrix.Rotation(math.radians(180), 4, 'Y')
-        R2 = Matrix.Rotation(math.radians(-90), 4, 'X')
+        R1 = Matrix.Rotation(math.radians(180), 4, "Y")
+        R2 = Matrix.Rotation(math.radians(-90), 4, "X")
 
         # Our rig has -Y as forward, R1 switches it to +Y
         axis_basis_change = axis_conversion(
-            from_forward='Y', from_up='Z',
-            to_forward='Z', to_up='Y'
+            from_forward="Y", from_up="Z",
+            to_forward="Z", to_up="Y"
         ).to_4x4() @ R1
 
         def get_bone_mat(pose_bone: PoseBone):
@@ -164,7 +164,7 @@ class BoneAnimationExporter:
     def export_transforms_json(self):
         filepath = bpy.data.filepath
         directory = os.path.dirname(filepath)
-        with open(os.path.join(directory, "bone_transforms.json"), 'w') as file:
+        with open(os.path.join(directory, "bone_transforms.json"), "w") as file:
             json.dump(self.transforms, file, indent=4)
 
     def save_weights_to_png(self):
@@ -184,13 +184,13 @@ class BoneAnimationExporter:
                     print(ob, bo)
                     raise e
 
-        oldimg = bpy.data.images.get('weights_texture')
+        oldimg = bpy.data.images.get("weights_texture")
         if oldimg:
             bpy.data.images.remove(oldimg)
         
-        img = bpy.data.images.new(name='weights_texture', width=width // 3, height=height, alpha=False)
-        img.alpha_mode = 'NONE'
-        img.file_format = 'PNG'
+        img = bpy.data.images.new(name="weights_texture", width=width // 3, height=height, alpha=False)
+        img.alpha_mode = "NONE"
+        img.file_format = "PNG"
         img.pixels = buff.ravel()
         img.update()
         filepath = bpy.data.filepath
@@ -216,7 +216,7 @@ class BoneAnimationExporter:
                 bpy.data.images.remove(oldimg)
             
             img = bpy.data.images.new(name=tname, width=width // 4, height=height, alpha=False)
-            img.file_format = 'PNG'
+            img.file_format = "PNG"
             img.pixels = buff.ravel()
             img.update()
             img.filepath = os.path.join(directory, f"{tname}.png")
@@ -230,5 +230,5 @@ class BoneAnimationExporter:
             "weights": self.weights,
             "transforms": self.transforms
         }
-        with open(os.path.join(directory, f"{filename}.json"), 'w') as file:
+        with open(os.path.join(directory, f"{filename}.json"), "w") as file:
             json.dump(data, file)

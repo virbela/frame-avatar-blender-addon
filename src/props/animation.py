@@ -19,7 +19,7 @@ class ExportAnimationJSONPathProperty(PropertyGroup):
     file: StringProperty(
         name="", 
         default="", 
-        subtype='FILE_PATH', 
+        subtype="FILE_PATH", 
         description="Path to animation JSON file"
     )
     

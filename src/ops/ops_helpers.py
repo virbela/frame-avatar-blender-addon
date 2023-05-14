@@ -95,11 +95,11 @@ def update_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProp
             if variant in bake_scene.objects:
                 #Object is already in bake scene - since we clear the bake scene this means two bake targets resolved to the same name
                 #TODO - we should validate the state before even starting this operation
-                raise Exception('FAIL') #TODO - proper exception
+                raise Exception("FAIL") #TODO - proper exception
 
             elif variant in bpy.data.objects:
                 #Object is not in bake scene but it does exist, this is a serious issue
-                raise Exception(f'Object {variant} already existing') #TODO - proper exception
+                raise Exception(f"Object {variant} already existing") #TODO - proper exception
                 #NOTE - this can happen if there is orphaned objects, like if the scene is deleted but not the objects
                 #TBD - how should we deal with this situation? Delete conflicting objects? warn user? Instruct user how to resolve situation?
 
@@ -153,7 +153,7 @@ def copy_and_transform_uv(
     target_object: Object, target_layer: str, scale_factor: float = 1.0):
 
     #TODO - investigate if we can get uv layer index without actually changing it and getting mesh.loops.layers.uv.active
-    bpy.ops.object.mode_set(mode='OBJECT')
+    bpy.ops.object.mode_set(mode="OBJECT")
 
     #TODO - would be great if we made a context manager for these commands so that we could reset all changes when exiting the context (this applies to a lot of things outside this function too)
     set_uv_map(source_object, source_layer)
@@ -180,20 +180,20 @@ def copy_and_transform_uv(
 
 def clean_normals(context: Context, object_: Object):
     context.view_layer.objects.active = object_
-    bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.object.mode_set(mode="EDIT", toggle=False)
+    bpy.ops.mesh.select_all(action="SELECT")
     # average normals
-    bpy.ops.mesh.average_normals(average_type='FACE_AREA')
+    bpy.ops.mesh.average_normals(average_type="FACE_AREA")
     # make normals consistent
     bpy.ops.mesh.normals_make_consistent(inside=False)
-    bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+    bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 
 
 def copy_uv_layers(operator: Operator, context: Context, ht: HomeomorphicProperties):
     last_edit_mode = bpy.context.mode
-    if last_edit_mode == 'EDIT_MESH':
+    if last_edit_mode == "EDIT_MESH":
         # -- switch to object mode
-        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.mode_set(mode="OBJECT")
 
     # transfer all missing uv layers from one object to another
     obj, ob = ht.source_object_uv, ht.target_object_uv
@@ -211,7 +211,7 @@ def copy_uv_layers(operator: Operator, context: Context, ht: HomeomorphicPropert
     # -- transfer uv layers in source not in target
     uv_layer_names = [uv.name for uv in obj.data.uv_layers]
     if uv_layer_names:
-        if ob.type =='MESH':
+        if ob.type =="MESH":
             for uv_map in uv_layer_names:
                 obj.data.uv_layers[uv_map].active = True
                 if uv_map not in ob.data.uv_layers:
@@ -223,8 +223,8 @@ def copy_uv_layers(operator: Operator, context: Context, ht: HomeomorphicPropert
     obj.select_set(False)
 
     # -- restore previous selection and active state
-    if last_edit_mode == 'EDIT_MESH':
-        bpy.ops.object.mode_set(mode='EDIT')
+    if last_edit_mode == "EDIT_MESH":
+        bpy.ops.object.mode_set(mode="EDIT")
 
     if last_active:
         bpy.context.view_layer.objects.active = last_active
@@ -284,13 +284,13 @@ class FABA_OT_update_baking_scene(FabaOperator):
 
 class FABA_OT_synchronize_mirrors(FabaOperator):
     bl_label =            "Synchronize mirrors"
-    bl_description =      'Copy settings from all primary targets to secondary targets in the mirror list'
-    bl_idname =           'faba.synchronize_mirrors'
+    bl_description =      "Copy settings from all primary targets to secondary targets in the mirror list"
+    bl_idname =           "faba.synchronize_mirrors"
     faba_operator =       synchronize_mirrors
 
 
 class FABA_OT_copy_uv_layers(FabaOperator):
     bl_label =            "Copy UV Layers"
-    bl_description =      'Transfer UV layers from one object to another'
-    bl_idname =           'faba.copy_uv_layers'
+    bl_description =      "Transfer UV layers from one object to another"
+    bl_idname =           "faba.copy_uv_layers"
     faba_operator =       copy_uv_layers

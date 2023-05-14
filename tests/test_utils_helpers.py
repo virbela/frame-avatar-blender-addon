@@ -20,36 +20,36 @@ class TestUtilsHelpers(unittest.TestCase):
         self.assertEqual(m_sc.name, "Scene")
 
     def test_named_entry(self):
-        self.assertIsNotNone(helpers.get_named_entry(bpy.data.objects, 'Cube'))
-        self.assertIsNone(helpers.get_named_entry(bpy.data.objects, 'Cubexxx'))
+        self.assertIsNotNone(helpers.get_named_entry(bpy.data.objects, "Cube"))
+        self.assertIsNone(helpers.get_named_entry(bpy.data.objects, "Cubexxx"))
 
         with self.assertRaises(exceptions.FrameException.NamedEntryNotFound):
-            helpers.require_named_entry(bpy.data.objects, 'Cubezz')
+            helpers.require_named_entry(bpy.data.objects, "Cubezz")
 
     def test_get_nice_name(self):
-        name = helpers.get_nice_name(bpy.data.objects, 'Cube', 10)
-        self.assertEqual(name, 'Cube-001')
+        name = helpers.get_nice_name(bpy.data.objects, "Cube", 10)
+        self.assertEqual(name, "Cube-001")
 
         with self.assertRaises(Exception):
             for _ in range(11):
-                name = helpers.get_nice_name(bpy.data.objects, 'Cube', 10, max_tries=10)
+                name = helpers.get_nice_name(bpy.data.objects, "Cube", 10, max_tries=10)
                 bpy.data.objects.new(name, None)
 
     def test_is_reference_valid(self):
-        obj = bpy.data.objects.new('testobj', None)
+        obj = bpy.data.objects.new("testobj", None)
         self.assertTrue(helpers.is_reference_valid(obj))
 
         bpy.data.objects.remove(obj)
         self.assertFalse(helpers.is_reference_valid(obj))
 
     def test_purge_object(self):
-        obj = bpy.data.objects.new('testobj1', None)
+        obj = bpy.data.objects.new("testobj1", None)
         helpers.purge_object(obj)
 
-        self.assertIsNone(bpy.data.objects.get('testobj1'))
+        self.assertIsNone(bpy.data.objects.get("testobj1"))
 
     def test_ensure_applied_rotation(self):
-        obj = bpy.data.objects['Cube']
+        obj = bpy.data.objects["Cube"]
         obj.rotation_euler.x = 90
 
         helpers.ensure_applied_rotation(obj)

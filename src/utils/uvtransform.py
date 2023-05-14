@@ -14,9 +14,9 @@ class UVTransform:
     rotation: float
 
 def get_uv_map_from_mesh(obj: Object) -> dict[int, Vector]:
-    'If uv_layer is ACTIVE_LAYER, the active UV layer will be used, otherwise, uv_layer is considered to be the index of the wanted UV layer.'
+    "If uv_layer is ACTIVE_LAYER, the active UV layer will be used, otherwise, uv_layer is considered to be the index of the wanted UV layer."
 
-    if obj.mode == 'EDIT':
+    if obj.mode == "EDIT":
         mesh = bmesh.from_edit_mesh(obj.data)
     else:
         mesh = bmesh.new()

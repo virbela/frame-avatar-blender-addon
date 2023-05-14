@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 def IMPLEMENTATION_PENDING(*p, **n):
-    raise InternalError(f'This feature is not implemented! (arguments: {p} {n})')
+    raise InternalError(f"This feature is not implemented! (arguments: {p} {n})")
 
 PREFS_LOG = True
 
@@ -42,7 +42,7 @@ def profile():
 
     ps = pstats.Stats(pr, stream=s)
     ps.strip_dirs()
-    ps.sort_stats('time')
+    ps.sort_stats("time")
     ps.print_stats()
 
     print(s.getvalue())
@@ -80,7 +80,7 @@ def require_work_scene() -> Scene:
     if scene := bpy.data.scenes.get(WORK_SCENE):
         return scene
 
-    log.error(f'Work scene `{WORK_SCENE}` could not be found.')
+    log.error(f"Work scene `{WORK_SCENE}` could not be found.")
 
 
 def require_bake_scene() -> Scene:
@@ -90,7 +90,7 @@ def require_bake_scene() -> Scene:
     return bpy.data.scenes.new(BAKE_SCENE)
 
 
-def get_homeomorphic_tool_state(context: Context) -> 'HomeomorphicProperties':
+def get_homeomorphic_tool_state(context: Context) -> "HomeomorphicProperties":
     scene = require_work_scene()
     return scene.homeomorphictools
 
@@ -134,7 +134,7 @@ def set_selection(collection: list, *selected, synchronize_active: bool = False,
 
     for item in collection:
         #NOTE There are two APIs to select things, we will favor the setter since that seems the be most recent
-        if setter := getattr(item, 'select_set', None):
+        if setter := getattr(item, "select_set", None):
             setter(item in new_selection)
         else:
             item.select = item in new_selection
@@ -192,12 +192,12 @@ class AttrSet(AttributeReference):
 def get_nice_name(collection: list, prefix: str, max_prefix_length: int, random_hash_length: int = 8, max_tries: int = 1000):
 
     for v in range(max_tries):
-        tail = f'-{v:03}' if v else ''
-        candidate = f'{prefix[:max_prefix_length]}{tail}'
+        tail = f"-{v:03}" if v else ""
+        candidate = f"{prefix[:max_prefix_length]}{tail}"
         if candidate not in collection:
             return candidate
 
-    raise Exception(f'Failed to create name for {prefix}')
+    raise Exception(f"Failed to create name for {prefix}")
 
 
 def is_reference_valid(target: typing.Any) -> bool:
@@ -221,17 +221,17 @@ class UUIDManager:
 
         for key, value in self.uuid_map.items():
             if self.uuid_map.get(key) is not value:
-                log.warning('UUID connection was broken')
+                log.warning("UUID connection was broken")
 
     def register(self, obj, auto_fix=True):
         with self.lock:
-            if existing_uuid := obj.get(self.key, ''):
+            if existing_uuid := obj.get(self.key, ""):
                 if self.uuid_map.get(existing_uuid) is not obj:
                     if auto_fix:
                         self.uuid_map[existing_uuid] = obj
-                        log.debug('Updated incorrect UUID')
+                        log.debug("Updated incorrect UUID")
                     else:
-                        raise Exception('UUID does not match')
+                        raise Exception("UUID does not match")
                 return existing_uuid
             else:
                 while True:
@@ -242,10 +242,10 @@ class UUIDManager:
                         return candidate
 
 
-def get_bake_target_variant_name(bake_target: 'BakeTarget', variant: 'BakeVariant'):
+def get_bake_target_variant_name(bake_target: "BakeTarget", variant: "BakeVariant"):
     if bake_target.multi_variants:
-        return f'{bake_target.shortname}.{variant.name}'
-    return f'{bake_target.shortname}'
+        return f"{bake_target.shortname}.{variant.name}"
+    return f"{bake_target.shortname}"
 
 
 def purge_object(obj: Object):
@@ -262,7 +262,7 @@ def purge_object(obj: Object):
 def is_dev() -> bool:
     # if we are installed as an addon, assume this is a production dist
     for mod in addon_utils.modules():
-        if 'frame_avatar_addon' == mod.__name__:
+        if "frame_avatar_addon" == mod.__name__:
             return False
     return True
 
@@ -283,19 +283,19 @@ def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
         # -- check for .env.json to load dev frame dirs
         env_file = Path(__file__).parent.parent.parent.joinpath(".env.json").absolute()
         if env_file.exists():
-            with open(env_file, 'r') as file:
+            with open(env_file, "r") as file:
                 data = json.load(file)
-                glb_folder = data['frame_glb_folder']
+                glb_folder = data["frame_glb_folder"]
                 if Path(glb_folder).exists():
                     preferences.glb_export_dir = glb_folder
                     if PREFS_LOG:
                         log.info(f"GLB Export dir set to {glb_folder}")
-                atlas_folder = data['frame_atlas_folder']
+                atlas_folder = data["frame_atlas_folder"]
                 if Path(atlas_folder).exists():
                     preferences.atlas_export_dir = atlas_folder
                     if PREFS_LOG:
                         log.info(f"Atlas Export dir set to {atlas_folder}")
-                npy_folder = data['frame_npy_folder']
+                npy_folder = data["frame_npy_folder"]
                 if Path(npy_folder).exists():
                     preferences.npy_export_dir = npy_folder
                     if PREFS_LOG:
@@ -336,7 +336,7 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
     def __get_uvs(blender_mesh, uv_i):
         layer = blender_mesh.uv_layers[uv_i]
         uvs = np.empty(len(blender_mesh.loops) * 2, dtype=np.float32)
-        layer.data.foreach_get('uv', uvs)
+        layer.data.foreach_get("uv", uvs)
         uvs = uvs.reshape(len(blender_mesh.loops), 2)
 
         # Blender UV space -> glTF UV space
@@ -350,21 +350,21 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
     me: Mesh = obj.data
     tex_coord_max = len(me.uv_layers)
 
-    dot_fields = [('vertex_index', np.uint32)]
+    dot_fields = [("vertex_index", np.uint32)]
     for uv_i in range(tex_coord_max):
-        dot_fields += [('uv%dx' % uv_i, np.float32), ('uv%dy' % uv_i, np.float32)]
+        dot_fields += [("uv%dx" % uv_i, np.float32), ("uv%dy" % uv_i, np.float32)]
 
 
     dots = np.empty(len(me.loops), dtype=np.dtype(dot_fields))
     vidxs = np.empty(len(me.loops))
-    me.loops.foreach_get('vertex_index', vidxs)
-    dots['vertex_index'] = vidxs
+    me.loops.foreach_get("vertex_index", vidxs)
+    dots["vertex_index"] = vidxs
     del vidxs
 
     for uv_i in range(tex_coord_max):
         uvs = __get_uvs(me, uv_i)
-        dots['uv%dx' % uv_i] = uvs[:, 0]
-        dots['uv%dy' % uv_i] = uvs[:, 1]
+        dots["uv%dx" % uv_i] = uvs[:, 0]
+        dots["uv%dy" % uv_i] = uvs[:, 1]
         del uvs
 
 
@@ -372,14 +372,14 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
 
     me.calc_loop_triangles()
     loop_indices = np.empty(len(me.loop_triangles) * 3, dtype=np.uint32)
-    me.loop_triangles.foreach_get('loops', loop_indices)
+    me.loop_triangles.foreach_get("loops", loop_indices)
 
     prim_indices = {}  # maps material index to TRIANGLES-style indices into dots
 
     # Bucket by material index.
 
     tri_material_idxs = np.empty(len(me.loop_triangles), dtype=np.uint32)
-    me.loop_triangles.foreach_get('material_index', tri_material_idxs)
+    me.loop_triangles.foreach_get("material_index", tri_material_idxs)
     loop_material_idxs = np.repeat(tri_material_idxs, 3)  # material index for every loop
     unique_material_idxs = np.unique(tri_material_idxs)
     del tri_material_idxs
@@ -394,7 +394,7 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
     return result
 
 
-def get_animation_objects(ht: 'HomeomorphicProperties') -> list[Object]:
+def get_animation_objects(ht: "HomeomorphicProperties") -> list[Object]:
     avatar_obj = ht.avatar_mesh
     animated_objects = []
     for bake_target in ht.bake_target_collection:
@@ -413,7 +413,7 @@ def get_animation_objects(ht: 'HomeomorphicProperties') -> list[Object]:
             log.info(f"Skipping missing workmesh {bake_target.name}", print_console=False)
             continue
 
-        has_armature = any(mod.type == 'ARMATURE' for mod in obj.modifiers)
+        has_armature = any(mod.type == "ARMATURE" for mod in obj.modifiers)
         if not has_armature:
             # Object has no armature!
             log.info(f"Skipping missing armature {bake_target.name}", print_console=False)
