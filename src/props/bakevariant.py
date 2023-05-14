@@ -1,4 +1,6 @@
-import bpy 
+from bpy.types import Context, Object, Image, PropertyGroup
+from bpy.props import StringProperty, PointerProperty, EnumProperty
+
 from ..utils.helpers import enum_descriptor
 
 
@@ -21,7 +23,7 @@ UV_TARGET_CHANNEL = enum_descriptor(
 
 
 
-def update_atlas(self: 'BakeVariant', context: bpy.types.Context):
+def update_atlas(self: 'BakeVariant', context: Context):
     # when atlas is set, also set the uv_channel
     if self.intermediate_atlas:
         if 'red' in self.intermediate_atlas.name:
@@ -55,22 +57,35 @@ def set_bakevariant_name(self: 'BakeVariant', value: str):
     self['name'] = value
 
 
-class BakeVariant(bpy.types.PropertyGroup):
-    name:   bpy.props.StringProperty(
-                name="Variant name", 
-                default='Untitled variant', 
-                get=get_bakevariant_name, 
-                set=set_bakevariant_name
-            )
+class BakeVariant(PropertyGroup):
+    name: StringProperty(
+        name="Variant name", 
+        default='Untitled variant', 
+        get=get_bakevariant_name, 
+        set=set_bakevariant_name
+    )
 
-    image:  bpy.props.PointerProperty(
-                name="Image texture", 
-                type=bpy.types.Image
-            )
+    image: PointerProperty(
+        name="Image texture", 
+        type=Image
+    )
 
-    uv_map:     bpy.props.StringProperty(name="UV Map")
-    workmesh:   bpy.props.PointerProperty(name='Work mesh', type=bpy.types.Object)
+    uv_map: StringProperty(
+        name="UV Map"
+    )
 
-    #NOTE - we are not caring about target channel right now - we instead use intermediate_atlas
-    uv_target_channel:   bpy.props.EnumProperty(items=tuple(UV_TARGET_CHANNEL), name="UV target channel", default=0)
-    intermediate_atlas:  bpy.props.PointerProperty(name='Intermediate atlas', type=bpy.types.Image, update=update_atlas)
+    workmesh: PointerProperty(
+        name='Work mesh', type=Object
+    )
+
+    uv_target_channel: EnumProperty(
+        items=tuple(UV_TARGET_CHANNEL), 
+        name="UV target channel", 
+        default=0
+    )
+
+    intermediate_atlas: PointerProperty(
+        name='Intermediate atlas', 
+        type=Image, 
+        update=update_atlas
+    )

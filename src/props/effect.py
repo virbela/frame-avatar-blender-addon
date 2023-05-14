@@ -1,4 +1,12 @@
-import bpy
+from bpy.types import PropertyGroup
+from bpy.props import (
+    StringProperty, 
+    FloatVectorProperty, 
+    IntProperty, 
+    EnumProperty, 
+    CollectionProperty
+)
+
 from ..utils.helpers import enum_descriptor
 
 
@@ -11,33 +19,59 @@ EFFECT_TYPE = enum_descriptor(
 
 )
 
-class PositionEffect(bpy.types.PropertyGroup):
-    parent_shapekey:    bpy.props.StringProperty(
-                            name="Parent Shapekey",
-                            description="Shape key used as the relative key for this effect"
-                        )
-    effect_shapekey:    bpy.props.StringProperty(
-                            name="Effect Shapekey",
-                            description="Shape key with the final effect"
-                        )
+class PositionEffect(PropertyGroup):
+    parent_shapekey: StringProperty(
+        name="Parent Shapekey",
+        description="Shape key used as the relative key for this effect"
+    )
+
+    effect_shapekey: StringProperty(
+        name="Effect Shapekey",
+        description="Shape key with the final effect"
+    )
 
 
-class ColorEffect(bpy.types.PropertyGroup):
-    shape:  bpy.props.StringProperty(name="Target Shapekey")
-    color:  bpy.props.FloatVectorProperty(name="Color", subtype='COLOR',
-                size = 4,
-                min = 0.0,
-                max = 1.0,
-                default = (1.0, 1.0, 1.0, 1.0)
-            )
-    vert_group: bpy.props.StringProperty(name="Vertex Group")
+
+class ColorEffect(PropertyGroup):
+    shape: StringProperty(
+        name="Target Shapekey"
+    )
+
+    color: FloatVectorProperty(
+        name="Color", 
+        subtype='COLOR',
+        size = 4,
+        min = 0.0,
+        max = 1.0,
+        default = (1.0, 1.0, 1.0, 1.0)
+    )
+
+    vert_group: StringProperty(
+        name="Vertex Group"
+    )
 
 
-class EffectProperty(bpy.types.PropertyGroup):
-    name:   bpy.props.StringProperty(name="Effect Name", default='Untitled Effect')
-    type:   bpy.props.EnumProperty(items=tuple(EFFECT_TYPE), name="Effect Type")
-    target: bpy.props.IntProperty(name='Effect identifier', default=-1)
+class EffectProperty(PropertyGroup):
+    name: StringProperty(
+        name="Effect Name", 
+        default='Untitled Effect'
+    )
 
-    positions:  bpy.props.CollectionProperty(type = PositionEffect)
-    colors:     bpy.props.CollectionProperty(type = ColorEffect)
+    type: EnumProperty(
+        items=tuple(EFFECT_TYPE), 
+        name="Effect Type"
+    )
+
+    target: IntProperty(
+        name='Effect identifier', 
+        default=-1
+    )
+
+    positions: CollectionProperty(
+        type=PositionEffect
+    )
+
+    colors: CollectionProperty(
+        type=ColorEffect
+    )
 

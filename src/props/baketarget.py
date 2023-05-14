@@ -1,7 +1,16 @@
 import bpy
 import typing 
 from typing import TYPE_CHECKING
-
+from bpy.types import PropertyGroup, Object, Image
+from bpy.props import (
+    IntProperty,
+    StringProperty,
+    PointerProperty,
+    FloatProperty,
+    EnumProperty,
+    BoolProperty,
+    CollectionProperty,
+)
 
 from .bakevariant import BakeVariant
 from ..utils.logging import log_writer as log
@@ -37,9 +46,17 @@ UV_BAKE_MODE = enum_descriptor(
 )
 
 
-class BakeTargetMirrorEntry(bpy.types.PropertyGroup):
-    primary:            bpy.props.IntProperty(name='Primary bake target identifier', default=-1)
-    secondary:          bpy.props.IntProperty(name='Secondary bake target identifier', default=-1)
+class BakeTargetMirrorEntry(PropertyGroup):
+    primary: IntProperty(
+        name='Primary bake target identifier', 
+        default=-1
+    )
+
+    secondary: IntProperty(
+        name='Secondary bake target identifier', 
+        default=-1
+    )
+
 
 
 def get_baketarget_name(self: 'BakeTarget'):
@@ -78,58 +95,90 @@ def set_baketarget_name(self: 'BakeTarget', value: str):
     log.info(f"Renaming baketarget to {value} ... ")
 
 
-class BakeTarget(bpy.types.PropertyGroup):
+class BakeTarget(PropertyGroup):
 
-    name:                 bpy.props.StringProperty(
-                            name = "Bake target name", default='Untitled bake target', 
-                            get=get_baketarget_name, set=set_baketarget_name
-                        )
+    name: StringProperty(
+        name = "Bake target name", 
+        default='Untitled bake target', 
+        get=get_baketarget_name, 
+        set=set_baketarget_name
+    )
 
-    object_name:          bpy.props.StringProperty(
-                            name = "Object name",
-                            description = "The object that is used for this bake target.\n"
-                                          "Once selected it is possible to select a specific shape key",
-                        )
+    object_name: StringProperty(
+        name = "Object name",
+        description = "The object that is used for this bake target.\n"
+                      "Once selected it is possible to select a specific shape key",
+    )
 
-    # source info
-    source_object:        bpy.props.PointerProperty(name='Source object', type=bpy.types.Object)
-    shape_key_name:       bpy.props.StringProperty(name="Shape key")
+    source_object: PointerProperty(
+        name='Source object', 
+        type=Object
+    )
 
-    uv_area_weight:       bpy.props.FloatProperty(
-                            name="UV island area weight", default=1.0,
-                            min=0.0, max=1.0
-                          )
+    shape_key_name: StringProperty(
+        name="Shape key"
+    )
 
-    bake_mode:            bpy.props.EnumProperty(items=tuple(UV_BAKE_MODE), name="UV bake mode", default=0)
+    uv_area_weight: FloatProperty(
+        name="UV island area weight", 
+        default=1.0,
+        min=0.0, 
+        max=1.0
+    )
 
-    mirror_source:        bpy.props.IntProperty(name='Bake target used for mirror')
+    bake_mode: EnumProperty(
+        items=tuple(UV_BAKE_MODE), 
+        name="UV bake mode", 
+        default=0
+    )
 
-    uv_mode:              bpy.props.EnumProperty(items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0)
-    atlas:                bpy.props.PointerProperty(name="Atlas image", type=bpy.types.Image)
-    # ↑ This is used for storing the automatic choice as well as the manual (frozen) one
+    mirror_source: IntProperty(
+        name='Bake target used for mirror'
+    )
 
-    #TBD - use this? - yes we need UV map for when rescaling from source
-    source_uv_map:        bpy.props.StringProperty(name="UV map", default=TARGET_UV_MAP)
+    uv_mode: EnumProperty(
+        items=tuple(UV_ISLAND_MODES), 
+        name="UV island mode", 
+        default=0
+    )
 
+    atlas: PointerProperty(
+        name="Atlas image", 
+        type=Image
+    )
 
-    #Variants
-    multi_variants:       bpy.props.BoolProperty(name="Multiple variants", default=False)
-    variant_collection:   bpy.props.CollectionProperty(type = BakeVariant)
-    selected_variant:     bpy.props.IntProperty(name = "Selected bake variant", default = -1)
+    source_uv_map: StringProperty(
+        name="UV map", 
+        default=TARGET_UV_MAP
+    )
+
+    multi_variants: BoolProperty(
+        name="Multiple variants", 
+        default=False
+    )
+
+    variant_collection: CollectionProperty(
+        type=BakeVariant
+    )
+
+    selected_variant: IntProperty(
+        name="Selected bake variant", 
+        default=-1
+    )
 
     # Flag export
-    export:                            bpy.props.BoolProperty(name="Export Bake Target", default=True)
+    export: BoolProperty(name="Export Bake Target", default=True)
 
-    def get_object(self) -> bpy.types.Object:
+    def get_object(self) -> Object:
         return get_named_entry(bpy.data.objects, self.object_name)
 
-    def require_object(self) -> bpy.types.Object:
+    def require_object(self) -> Object:
         return require_named_entry(bpy.data.objects, self.object_name)
 
-    def get_atlas(self) -> bpy.types.Image:
+    def get_atlas(self) -> Image:
         return get_named_entry(bpy.data.images, self.atlas)
 
-    def require_atlas(self) -> bpy.types.Image:
+    def require_atlas(self) -> Image:
         return require_named_entry(bpy.data.images, self.atlas)
 
     @property
@@ -141,7 +190,6 @@ class BakeTarget(bpy.types.PropertyGroup):
                 return self.object_name
         return 'untitled'
 
-
     def get_mirror_type(self, ht: 'HomeomorphicProperties') -> tuple[BakeTargetMirrorEntry, MIRROR_TYPE]:
         find_id = ht.get_bake_target_index(self)
         for mirror in ht.bake_target_mirror_collection:
@@ -152,27 +200,22 @@ class BakeTarget(bpy.types.PropertyGroup):
 
         return None, None
 
-    #NOTE we should probably deprecate this in favor of iter_variants
-    # this doesn't yield anything if there are no variants
     def iter_bake_scene_variants(self) -> typing.Generator[tuple[str, BakeVariant], None, None]:
-        prefix = self.name # self.get_bake_scene_name()
+        prefix = self.name
         if self.multi_variants:
             for variant in self.variant_collection:
                 yield f'{prefix}.{variant.name}', variant
 
-
-    #TODO - use a helper function for creating names
     def iter_variants(self) -> typing.Generator[tuple[str, BakeVariant], None, None]:
-        prefix = self.name # self.get_bake_scene_name()
+        prefix = self.name
         for variant in self.variant_collection:
             if self.multi_variants:
                 yield f'{prefix}.{variant.name}', variant
             else:
                 yield f'{prefix}', variant
 
-
     def iter_bake_scene_variant_names(self) -> typing.Generator[str, None, None]:
-        prefix = self.name # self.get_bake_scene_name()
+        prefix = self.name
         if self.multi_variants:
             for variant in self.variant_collection:
                 yield f'{prefix}.{variant.name}'

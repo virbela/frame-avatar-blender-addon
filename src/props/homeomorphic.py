@@ -1,4 +1,14 @@
 import bpy
+from bpy.types import Context, PropertyGroup, Object, Image
+from bpy.props import (
+    IntProperty,
+    StringProperty,
+    PointerProperty,
+    FloatProperty,
+    EnumProperty,
+    BoolProperty,
+    CollectionProperty,
+)
 
 from .bakegroup import BakeGroup
 from .effect import EffectProperty
@@ -37,7 +47,7 @@ EXPORT_ANIMATION_SOURCE = enum_descriptor(
 
 
 
-def update_atlas_size(self, context: bpy.types.Context):
+def update_atlas_size(self, context: Context):
     atlas_images = [im for im in bpy.data.images if 'atlas_intermediate' in im.name]
     if atlas_images:
         ats = self.atlas_size
@@ -50,7 +60,7 @@ def update_atlas_size(self, context: bpy.types.Context):
                     at.update()
 
 
-def update_debug_basis(HT: 'HomeomorphicProperties', context: bpy.types.Context):
+def update_debug_basis(HT: 'HomeomorphicProperties', context: Context):
     HT.debug_animation_actions.clear()
     if basis := HT.debug_animation_avatar_basis:
         if metadata := basis.get('MorphSets_Avatar'):
@@ -68,83 +78,201 @@ def update_export_progress(self, context):
     pass
 
 
-class HomeomorphicProperties(bpy.types.PropertyGroup):
+class HomeomorphicProperties(PropertyGroup):
+    avatar_rig: PointerProperty(
+        name='Avatar Rig', 
+        type=Object
+    )
 
-    ### Bake targets ###
-    avatar_rig:                         bpy.props.PointerProperty(name='Avatar Rig', type=bpy.types.Object)
-    avatar_mesh:                        bpy.props.PointerProperty(name='Avatar Mesh', type=bpy.types.Object)
+    avatar_mesh: PointerProperty(
+        name='Avatar Mesh', 
+        type=Object
+    )
+
 
     #Note that we use -1 to indicate that nothing is selected for integer selections
-    effect_collection:                  bpy.props.CollectionProperty(type = EffectProperty)
-    selected_effect:                    bpy.props.IntProperty(name = "Selected effect", default = -1)
+    effect_collection: CollectionProperty(
+        type=EffectProperty
+    )
 
-    bake_target_collection:             bpy.props.CollectionProperty(type = BakeTarget)
-    selected_bake_target:               bpy.props.IntProperty(name = "Selected bake target", default = -1)
+    selected_effect: IntProperty(
+        name="Selected effect", 
+        default=-1
+    )
 
-    bake_target_mirror_collection:      bpy.props.CollectionProperty(type = BakeTargetMirrorEntry)
-    selected_bake_target_mirror:        bpy.props.IntProperty(name = "Selected mirror entry", default = -1)
+    bake_target_collection: CollectionProperty(
+        type=BakeTarget
+    )
 
-    bake_group_collection:              bpy.props.CollectionProperty(type = BakeGroup)
-    selected_bake_group:                bpy.props.IntProperty(name = "Selected bake group", default = -1)
+    selected_bake_target: IntProperty(
+        name="Selected bake target", 
+        default=-1
+    )
 
-    source_object:                      bpy.props.StringProperty(name="Object name")
+    bake_target_mirror_collection: CollectionProperty(
+        type=BakeTargetMirrorEntry
+    )
+
+    selected_bake_target_mirror: IntProperty(
+        name="Selected mirror entry", 
+        default=-1
+    )
+
+    bake_group_collection: CollectionProperty(
+        type=BakeGroup
+    )
+
+    selected_bake_group: IntProperty(
+        name="Selected bake group", 
+        default=-1
+    )
+
+    source_object: StringProperty(
+        name="Object name"
+    )
 
     ### Atlas,textures, paint assist ###
-    atlas_size:                         bpy.props.IntProperty(name="Atlas size", default = 4096, update=update_atlas_size)
-    color_percentage:                   bpy.props.FloatProperty(name="Atlas color region percentage", default = 25.0)
-    painting_size:                      bpy.props.IntProperty(name="Hand paint texture size", default = 1024)
-    select_by_atlas_image:              bpy.props.PointerProperty(name='Match atlas', type=bpy.types.Image)
+    atlas_size: IntProperty(
+        name="Atlas size", 
+        default=4096, 
+        update=update_atlas_size
+    )
+
+    color_percentage: FloatProperty(
+        name="Atlas color region percentage", 
+        default=25.0
+    )
+
+    painting_size: IntProperty(
+        name="Hand paint texture size", 
+        default=1024
+    )
+
+    select_by_atlas_image: PointerProperty(
+        name='Match atlas', 
+        type=Image
+    )
 
     ### Export options
-    avatar_type:                        bpy.props.EnumProperty(items=tuple(AVATAR_TYPE), name="Avatar Type", default=1)
-    denoise:                            bpy.props.BoolProperty(name="Denoise Atlas", default=False)
-    export_atlas:                       bpy.props.BoolProperty(name="Export Atlas", default=True)
-    export_glb:                         bpy.props.BoolProperty(name="Export GLB", default=True)
+    avatar_type: EnumProperty(
+        items=tuple(AVATAR_TYPE), 
+        name="Avatar Type", 
+        default=1
+    )
 
-    export_animation:                   bpy.props.BoolProperty(name="Export Animation",default=False)
-    export_animation_source:            bpy.props.EnumProperty(items=tuple(EXPORT_ANIMATION_SOURCE), name="Export Source", default=0)
-    export_animation_actions:           bpy.props.CollectionProperty(type=AnimationProperty)
-    export_animation_json_paths:        bpy.props.CollectionProperty(name="JSON Paths", type=ExportAnimationJSONPathProperty)
+    denoise: BoolProperty(
+        name="Denoise Atlas", 
+        default=False
+    )
 
-    export_animation_preview:           bpy.props.BoolProperty(name="Export Animation Preview", default=False, 
-                                                               description="Export an animation for preview")
+    export_atlas: BoolProperty(
+        name="Export Atlas", 
+        default=True
+    )
 
-    export_progress:                    bpy.props.FloatProperty(name="Export Progress", 
-                                                                default=-1,
-                                                                subtype='PERCENTAGE',
-                                                                precision=1,
-                                                                min=-1,
-                                                                soft_min=0,
-                                                                soft_max=100,
-                                                                max=101,
-                                                                update=update_export_progress)
+    export_glb: BoolProperty(
+        name="Export GLB", 
+        default=True
+    )
+
+    export_animation: BoolProperty(
+        name="Export Animation",
+        default=False
+    )
+
+    export_animation_source: EnumProperty(
+        items=tuple(EXPORT_ANIMATION_SOURCE), 
+        name="Export Source", 
+        default=0
+    )
+
+    export_animation_actions: CollectionProperty(
+        type=AnimationProperty
+    )
+
+    export_animation_json_paths: CollectionProperty(
+        name="JSON Paths", 
+        type=ExportAnimationJSONPathProperty
+    )
+
+    export_animation_preview: BoolProperty(
+        name="Export Animation Preview", 
+        default=False, 
+        description="Export an animation for preview"
+    )
+
+    export_progress: FloatProperty(
+        name="Export Progress", 
+        default=-1,
+        subtype='PERCENTAGE',
+        precision=1,
+        min=-1,
+        soft_min=0,
+        soft_max=100,
+        max=101,
+        update=update_export_progress
+    )
 
     ### Baking options
-    baking_target_uvmap:                bpy.props.StringProperty(name="Bake UV map", default=TARGET_UV_MAP)
-    baking_options:                     bpy.props.EnumProperty(items=tuple(BAKING_MODE), name="Bake Mode", default=1)
+    baking_target_uvmap: StringProperty(
+        name="Bake UV map", 
+        default=TARGET_UV_MAP
+    )
+
+    baking_options: EnumProperty(
+        items=tuple(BAKING_MODE), 
+        name="Bake Mode", 
+        default=1
+    )
 
     ### Helpers Copy UV
-    target_object_uv:                   bpy.props.PointerProperty(name="Target", 
-                                                                  type=bpy.types.Object, 
-                                                                  description="Object to copy UV layers to")
-    source_object_uv:                   bpy.props.PointerProperty(name="Source", 
-                                                                  type=bpy.types.Object, 
-                                                                  description="Object to copy UV layers from")
+    target_object_uv: PointerProperty(
+        name="Target", 
+        type=Object, 
+        description="Object to copy UV layers to"
+    )
+
+    source_object_uv: PointerProperty(
+        name="Source", 
+        type=Object, 
+        description="Object to copy UV layers from"
+    )
 
     ### Debug bone animation
-    debug_animation_show:               bpy.props.BoolProperty(name="Show Debug Vis", default=False)
-    debug_animation_actions:            bpy.props.CollectionProperty(type=AnimationProperty)
-    debug_animation_avatar_basis:       bpy.props.PointerProperty(name="Avatar Basis", type=bpy.types.Object, 
-                                                                  update=update_debug_basis, 
-                                                                  description="Avatar basis object with animation metadata")
+    debug_animation_show: BoolProperty(
+        name="Show Debug Vis", 
+        default=False
+    )
+
+    debug_animation_actions: CollectionProperty(
+        type=AnimationProperty
+    )
+
+    debug_animation_avatar_basis: PointerProperty(
+        name="Avatar Basis", type=Object, 
+        update=update_debug_basis, 
+        description="Avatar basis object with animation metadata"
+    )
 
     ### Mirror Vertices Options
-    mirror_distance:                    bpy.props.FloatProperty(name="Mirror Distance", default=0.001, precision=4, 
-                                                                description="Maximum distance to search for mirror a vertex")
-    mirror_verts_source:                bpy.props.PointerProperty(name="Mirror Source", type=bpy.types.Object, 
-                                                                  description="Object to copy vertex positions from.")
-    mirror_verts_target:                bpy.props.PointerProperty(name="Mirror Target", type=bpy.types.Object, 
-                                                                  description="Object to copy vertex positions to.")
+    mirror_distance: FloatProperty(
+        name="Mirror Distance", 
+        default=0.001, 
+        precision=4, 
+        description="Maximum distance to search for mirror a vertex"
+    )
+
+    mirror_verts_source: PointerProperty(
+        name="Mirror Source", 
+        type=Object, 
+        description="Object to copy vertex positions from"
+    )
+
+    mirror_verts_target: PointerProperty(
+        name="Mirror Target", 
+        type=Object, 
+        description="Object to copy vertex positions to"
+    )
 
     def get_selected_effect(self) -> EffectProperty:
         if self.selected_effect:
