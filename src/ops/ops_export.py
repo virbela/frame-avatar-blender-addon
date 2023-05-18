@@ -423,7 +423,7 @@ def get_verts_or_vgroup(obj: Object, color_effect: ColorEffect) -> list[tuple[in
 
 
 def obj_from_shapekey(obj: Object, keyname: str):
-    scene = require_work_scene(bpy.context)
+    scene = require_work_scene()
     view_layer = scene.view_layers[0]
 
     pending_object = obj.copy()

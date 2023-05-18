@@ -110,7 +110,7 @@ class BoneAnimationExporter:
 
     def set_transforms(self):
         log.info("\tGetting bone transforms...")
-        bakescene = require_bake_scene(self.context)
+        bakescene = require_bake_scene()
         # blender z-up to babylon y-up
         R1 = Matrix.Rotation(math.radians(180), 4, "Y")
         R2 = Matrix.Rotation(math.radians(-90), 4, "X")

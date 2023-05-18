@@ -12,8 +12,8 @@ class TestUtilsHelpers(unittest.TestCase):
             not_implemented_func()
 
     def test_require_scenes(self):
-        b_sc = helpers.require_bake_scene(bpy.context)
-        m_sc = helpers.require_work_scene(bpy.context)
+        b_sc = helpers.require_bake_scene()
+        m_sc = helpers.require_work_scene()
         self.assertIsNotNone(b_sc)
         self.assertEqual(b_sc.name, "Baking")
         self.assertIsNotNone(m_sc)
