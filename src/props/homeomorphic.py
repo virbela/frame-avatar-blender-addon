@@ -287,6 +287,8 @@ class HomeomorphicProperties(PropertyGroup):
         description="Object to copy vertex groups to"
     )
 
+    anim_export: StringProperty()
+
 
     def get_selected_effect(self) -> EffectProperty:
         if self.selected_effect:

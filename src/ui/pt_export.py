@@ -33,9 +33,16 @@ class FABA_PT_export(bpy.types.Panel):
                         sp = self.layout.split(factor=0.05)
                         _ = sp.column()
                         col = sp.column()
-                        col.prop(HT, "export_animation_preview", toggle=True, text="Preview Only")
-                        for ea in sorted(HT.export_animation_actions, key=lambda a: a.name):
-                            col.prop(ea, "checked", text=ea.name)
+                        col.prop_search(HT, "anim_export", bpy.data, "actions", text="idle")
+                        col.prop_search(HT, "anim_export", bpy.data, "actions", text="walk")
+                        col.prop_search(HT, "anim_export", bpy.data, "actions", text="sit")
+                        col.prop_search(HT, "anim_export", bpy.data, "actions", text="sitclap")
+                        col.prop_search(HT, "anim_export", bpy.data, "actions", text="standclap")
+                        col.prop_search(HT, "anim_export", bpy.data, "actions", text="strafe-left")
+                        col.prop_search(HT, "anim_export", bpy.data, "actions", text="strafe-right")
+                        # col.prop(HT, "export_animation_preview", toggle=True, text="Preview Only")
+                        # for ea in sorted(HT.export_animation_actions, key=lambda a: a.name):
+                        #     col.prop(ea, "checked", text=ea.name)
 
 
                 if HT.should_export_animation_json():
