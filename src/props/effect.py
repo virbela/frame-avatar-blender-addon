@@ -11,12 +11,11 @@ from ..utils.helpers import EnumDescriptor
 
 
 EFFECT_TYPE = EnumDescriptor(
-    ("POSITION",       "Position Effect",            "Effect to transform shape positions",
-        "",            0),
+    ("POSITION", "Position Effect", "Effect to transform shape positions",
+     "",         0),
 
-    ("COLOR",          "Color Effect",               "Effect to override shape color",
-        "",            1),
-
+    ("COLOR",    "Color Effect",    "Effect to override shape color",
+     "",         1),
 )
 
 class PositionEffect(PropertyGroup):

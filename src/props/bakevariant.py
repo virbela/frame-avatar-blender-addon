@@ -5,20 +5,20 @@ from ..utils.helpers import EnumDescriptor
 
 
 UV_TARGET_CHANNEL = EnumDescriptor(
-    ("UV_TARGET_NIL",        "Unassigned",           "UV island has not yet been assigned an atlas channel",
-        "DOT",               0),
+    ("UV_TARGET_NIL",   "Unassigned",    "UV island has not yet been assigned an atlas channel",
+     "DOT",             0),
 
-    ("UV_TARGET_COLOR",      "Color channel",        "UV island will be placed in the color channel",
-        "COLOR",             1),
+    ("UV_TARGET_COLOR", "Color channel", "UV island will be placed in the color channel",
+     "COLOR",           1),
 
-    ("UV_TARGET_R",          "Red channel",          "UV island will be placed in the red channel",
-        "EVENT_R",           2),
+    ("UV_TARGET_R",     "Red channel",   "UV island will be placed in the red channel",
+     "EVENT_R",         2),
 
-    ("UV_TARGET_G",          "Green channel",        "UV island will be placed in the green channel",
-        "EVENT_G",           3),
+    ("UV_TARGET_G",     "Green channel", "UV island will be placed in the green channel",
+     "EVENT_G",         3),
 
-    ("UV_TARGET_B",          "Blue channel",         "UV island will be placed in the blue channel",
-        "EVENT_B",           4),
+    ("UV_TARGET_B",     "Blue channel",  "UV island will be placed in the blue channel",
+     "EVENT_B",         4),
 )
 
 

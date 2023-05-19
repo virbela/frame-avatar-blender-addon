@@ -20,29 +20,29 @@ from ..utils.constants import TARGET_UV_MAP
 from ..utils.helpers import EnumDescriptor
 
 BAKING_MODE = EnumDescriptor(
-    ("COMBINED",       "Combined",          "Full bake",
-        "",            0),
+    ("COMBINED", "Combined", "Full bake",
+     "",         0),
 
-    ("DIFFUSE",        "Color",             "Color only bake",
-        "",            1),
+    ("DIFFUSE",  "Color",    "Color only bake",
+     "",         1),
 )
 
 
 AVATAR_TYPE = EnumDescriptor(
-    ("FLOATER",        "Floater",              "Export floater avatar",
-        "",            0),
+    ("FLOATER",  "Floater",   "Export floater avatar",
+     "",         0),
 
-    ("FULLBODY",       "Full body",            "Export full body avatar",
-        "",            1),
+    ("FULLBODY", "Full body", "Export full body avatar",
+     "",         1),
 )
 
 
 EXPORT_ANIMATION_SOURCE = EnumDescriptor(
-    ("ACTION",         "Export from Action",               "Export animation from blender actions",
-        "",            0),
+    ("ACTION", "Export from Action", "Export animation from blender actions",
+     "",       0),
 
-    ("JSON",           "Export from JSON",                 "Export animation from external JSON files",
-        "",            1),
+    ("JSON",   "Export from JSON",   "Export animation from external JSON files",
+     "",       1),
 )
 
 

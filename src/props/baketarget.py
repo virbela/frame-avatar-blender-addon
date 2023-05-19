@@ -23,26 +23,26 @@ if TYPE_CHECKING:
 
 
 UV_ISLAND_MODES = EnumDescriptor(
-    ("UV_IM_MONOCHROME",    "Grayscale",        "This UV island will be channel packed to a grayscale segment of the atlas",
-        "IMAGE_ZDEPTH",     0),
+    ("UV_IM_MONOCHROME", "Grayscale",     "This UV island will be channel packed to a grayscale segment of the atlas",
+     "IMAGE_ZDEPTH",     0),
 
-    ("UV_IM_COLOR",         "Color",            "This UV island will end up on the color segment of the atlas",
-        "COLOR",            1),
+    ("UV_IM_COLOR",      "Color",         "This UV island will end up on the color segment of the atlas",
+     "COLOR",            1),
 
-    ("UV_IM_NIL",           "Nil UV island",    "This UV island will have zero area (unshaded)",
-        "DOT",              2),
+    ("UV_IM_NIL",        "Nil UV island", "This UV island will have zero area (unshaded)",
+     "DOT",              2),
 
-    ("UV_IM_FROZEN",        "Frozen",           "This UV island will not be modified by the packer",
-        "FREEZE",           3),
+    ("UV_IM_FROZEN",     "Frozen",        "This UV island will not be modified by the packer",
+     "FREEZE",           3),
 )
 
 
 UV_BAKE_MODE = EnumDescriptor(
-    ("UV_BM_REGULAR",        "Regular",            "This is a regular, non mirrored, bake target",
-        "OBJECT_DATA",       0),
+    ("UV_BM_REGULAR",  "Regular",  "This is a regular, non mirrored, bake target",
+     "OBJECT_DATA",    0),
 
-    ("UV_BM_MIRRORED",       "Mirrored",           "This bake target will be mirrored upon another target along the U axis",
-        "MOD_MIRROR",        1),
+    ("UV_BM_MIRRORED", "Mirrored", "This bake target will be mirrored upon another target along the U axis",
+     "MOD_MIRROR",     1),
 )
 
 
