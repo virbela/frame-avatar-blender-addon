@@ -142,6 +142,8 @@ class BoneAnimationExporter:
             # XXX Export Matrix in column major format
             return [round(mat[j][i], 4) for i in range(4) for j in range(4)]
 
+        last_frame = bakescene.frame_current
+        last_action = self.armature.animation_data.action
         for action in bpy.data.actions:
             self.ht.export_progress_step(1.0)
             if action.name not in [ea.name for ea in self.ht.export_animation_actions]:
@@ -160,6 +162,11 @@ class BoneAnimationExporter:
                 self.context.view_layer.update()
                 mats = [get_bone_mat(self.armature.pose.bones[bname]) for bname in self.bones]
                 self.transforms[action.name].append(sum(mats, []))
+
+        # -- restore last action and frame
+        self.armature.animation_data.action = last_action
+        bakescene.frame_set(last_frame)
+        self.context.view_layer.update()
 
     def export_transforms_json(self):
         filepath = bpy.data.filepath
