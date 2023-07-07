@@ -34,6 +34,10 @@ class ValidationError:
 
 def validate_bake_target_setup(ht: HomeomorphicProperties) -> bool:
     for bake_target in ht.bake_target_collection:
+        if not bake_target.shape_key_name:
+            popup_message(f"Missing shapekey in {bake_target.name}", "Workmesh Error")
+            return False
+
         if bake_target.bake_mode == "UV_BM_MIRRORED":
             # XXX What to do here
             continue

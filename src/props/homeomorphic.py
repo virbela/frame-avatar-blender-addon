@@ -80,12 +80,12 @@ def update_export_progress(self, context):
 
 class HomeomorphicProperties(PropertyGroup):
     avatar_rig: PointerProperty(
-        name="Avatar Rig", 
+        name="Avatar Rig",
         type=Object
     )
 
     avatar_mesh: PointerProperty(
-        name="Avatar Mesh", 
+        name="Avatar Mesh",
         type=Object
     )
 
@@ -96,7 +96,7 @@ class HomeomorphicProperties(PropertyGroup):
     )
 
     selected_effect: IntProperty(
-        name="Selected effect", 
+        name="Selected effect",
         default=-1
     )
 
@@ -105,7 +105,7 @@ class HomeomorphicProperties(PropertyGroup):
     )
 
     selected_bake_target: IntProperty(
-        name="Selected bake target", 
+        name="Selected bake target",
         default=-1
     )
 
@@ -114,7 +114,7 @@ class HomeomorphicProperties(PropertyGroup):
     )
 
     selected_bake_target_mirror: IntProperty(
-        name="Selected mirror entry", 
+        name="Selected mirror entry",
         default=-1
     )
 
@@ -123,7 +123,7 @@ class HomeomorphicProperties(PropertyGroup):
     )
 
     selected_bake_group: IntProperty(
-        name="Selected bake group", 
+        name="Selected bake group",
         default=-1
     )
 
@@ -133,45 +133,45 @@ class HomeomorphicProperties(PropertyGroup):
 
     ### Atlas,textures, paint assist ###
     atlas_size: IntProperty(
-        name="Atlas size", 
-        default=4096, 
+        name="Atlas size",
+        default=4096,
         update=update_atlas_size
     )
 
     color_percentage: FloatProperty(
-        name="Atlas color region percentage", 
+        name="Atlas color region percentage",
         default=25.0
     )
 
     painting_size: IntProperty(
-        name="Hand paint texture size", 
+        name="Hand paint texture size",
         default=1024
     )
 
     select_by_atlas_image: PointerProperty(
-        name="Match atlas", 
+        name="Match atlas",
         type=Image
     )
 
     ### Export options
     avatar_type: EnumProperty(
-        items=tuple(AVATAR_TYPE), 
-        name="Avatar Type", 
+        items=tuple(AVATAR_TYPE),
+        name="Avatar Type",
         default=1
     )
 
     denoise: BoolProperty(
-        name="Denoise Atlas", 
+        name="Denoise Atlas",
         default=False
     )
 
     export_atlas: BoolProperty(
-        name="Export Atlas", 
+        name="Export Atlas",
         default=True
     )
 
     export_glb: BoolProperty(
-        name="Export GLB", 
+        name="Export GLB",
         default=True
     )
 
@@ -181,8 +181,8 @@ class HomeomorphicProperties(PropertyGroup):
     )
 
     export_animation_source: EnumProperty(
-        items=tuple(EXPORT_ANIMATION_SOURCE), 
-        name="Export Source", 
+        items=tuple(EXPORT_ANIMATION_SOURCE),
+        name="Export Source",
         default=0
     )
 
@@ -191,18 +191,18 @@ class HomeomorphicProperties(PropertyGroup):
     )
 
     export_animation_json_paths: CollectionProperty(
-        name="JSON Paths", 
+        name="JSON Paths",
         type=ExportAnimationJSONPathProperty
     )
 
     export_animation_preview: BoolProperty(
-        name="Export Animation Preview", 
-        default=False, 
+        name="Export Animation Preview",
+        default=False,
         description="Export an animation for preview"
     )
 
     export_progress: FloatProperty(
-        name="Export Progress", 
+        name="Export Progress",
         default=-1,
         subtype="PERCENTAGE",
         precision=1,
@@ -215,32 +215,32 @@ class HomeomorphicProperties(PropertyGroup):
 
     ### Baking options
     baking_target_uvmap: StringProperty(
-        name="Bake UV map", 
+        name="Bake UV map",
         default=TARGET_UV_MAP
     )
 
     baking_options: EnumProperty(
-        items=tuple(BAKING_MODE), 
-        name="Bake Mode", 
+        items=tuple(BAKING_MODE),
+        name="Bake Mode",
         default=1
     )
 
     ### Helpers Copy UV
     target_object_uv: PointerProperty(
-        name="Target", 
-        type=Object, 
+        name="Target",
+        type=Object,
         description="Object to copy UV layers to"
     )
 
     source_object_uv: PointerProperty(
-        name="Source", 
-        type=Object, 
+        name="Source",
+        type=Object,
         description="Object to copy UV layers from"
     )
 
     ### Debug bone animation
     debug_animation_show: BoolProperty(
-        name="Show Debug Vis", 
+        name="Show Debug Vis",
         default=False
     )
 
@@ -249,41 +249,41 @@ class HomeomorphicProperties(PropertyGroup):
     )
 
     debug_animation_avatar_basis: PointerProperty(
-        name="Avatar Basis", type=Object, 
-        update=update_debug_basis, 
+        name="Avatar Basis", type=Object,
+        update=update_debug_basis,
         description="Avatar basis object with animation metadata"
     )
 
     ### Mirror Vertices Options
     mirror_distance: FloatProperty(
-        name="Mirror Distance", 
-        default=0.001, 
-        precision=4, 
+        name="Mirror Distance",
+        default=0.001,
+        precision=4,
         description="Maximum distance to search for mirror a vertex"
     )
 
     mirror_verts_source: PointerProperty(
-        name="Mirror Source", 
-        type=Object, 
+        name="Mirror Source",
+        type=Object,
         description="Object to copy vertex positions from"
     )
 
     mirror_verts_target: PointerProperty(
-        name="Mirror Target", 
-        type=Object, 
+        name="Mirror Target",
+        type=Object,
         description="Object to copy vertex positions to"
     )
 
     ### Transfer Skin Weights Options
     transfer_skin_source: PointerProperty(
-        name="Transfer Source", 
-        type=Object, 
+        name="Transfer Source",
+        type=Object,
         description="Object to copy vertex groups from"
     )
 
     transfer_skin_target: PointerProperty(
-        name="Transfer Target", 
-        type=Object, 
+        name="Transfer Target",
+        type=Object,
         description="Object to copy vertex groups to"
     )
 
@@ -332,11 +332,11 @@ class HomeomorphicProperties(PropertyGroup):
         self.export_progress += step
 
     def should_export_animation_action(self) -> bool:
-        return (self.avatar_type == "FULLBODY" and 
-                self.export_animation and 
+        return (self.avatar_type == "FULLBODY" and
+                self.export_animation and
                 self.export_animation_source == "ACTION")
 
     def should_export_animation_json(self) -> bool:
-        return (self.avatar_type == "FULLBODY" and 
-                self.export_animation and 
+        return (self.avatar_type == "FULLBODY" and
+                self.export_animation and
                 self.export_animation_source == "JSON")
