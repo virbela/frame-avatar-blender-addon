@@ -31,6 +31,8 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
 
     if not validate_export(context, HT):
         return
+
+    deselect_all()
     with selection(None, view_layer), active_object(None, view_layer):
         try:
             if HT.should_export_animation_action():
@@ -159,7 +161,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     with selection([obj], view_layer=view_layer), active_object(obj, view_layer=view_layer):
         with clear_custom_props(obj):
             obj["MorphSets_Avatar"] = morphsets_dict
-
+            log.info(f"Exporting avatar to {outputfile_glb}")
             bpy.ops.export_scene.gltf(
                 filepath=outputfile_glb,
                 export_format="GLB",
@@ -606,6 +608,12 @@ def get_effects_metadata(ht: HomeomorphicProperties, obj: Object) -> dict:
 
     return effects_medatata
 
+
+def deselect_all():
+    for sc in bpy.data.scenes:
+        vl = sc.view_layers[0]
+        for obj in sc.objects:
+            obj.select_set(False, view_layer=vl)
 
 class ExportAnimationJSONPaths:
 
