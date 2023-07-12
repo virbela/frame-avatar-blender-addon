@@ -13,6 +13,9 @@ class UVTransform:
     scale: float
     rotation: float
 
+    def isNil(self):
+        return self.scale == 1.0 and self.rotation == 0 and self.translation == Vector((0, 0))
+
 def get_uv_map_from_mesh(obj: Object) -> dict[int, Vector]:
     "If uv_layer is ACTIVE_LAYER, the active UV layer will be used, otherwise, uv_layer is considered to be the index of the wanted UV layer."
 
