@@ -3,6 +3,7 @@ from bpy.types import Panel
 from ..utils.logging import log
 from ..utils.helpers import get_homeomorphic_tool_state, require_bake_scene
 
+
 class FABA_PT_workflow(Panel):
     bl_label = "Workflow"
     bl_space_type = "VIEW_3D"

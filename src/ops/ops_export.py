@@ -615,6 +615,7 @@ def deselect_all():
         for obj in sc.objects:
             obj.select_set(False, view_layer=vl)
 
+
 class ExportAnimationJSONPaths:
 
     def add_json_path(operator: Operator, context: Context, ht: HomeomorphicProperties):

@@ -15,6 +15,7 @@ from ..utils.exceptions import BakeException
 from ..props import HomeomorphicProperties, BakeVariant
 from ..utils.helpers import require_bake_scene, set_scene, set_rendering, set_selection
 
+
 def bake_all_bake_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):
 
     last_active_scene = context.scene

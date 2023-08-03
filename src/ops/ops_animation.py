@@ -37,7 +37,6 @@ def transfer_skin_weights(operator: Operator, context: Context, ht: Homeomorphic
     bpy.ops.object.mode_set(mode=previous_mode)
     
 
-
 def poll_transfer_skin_weights(context: Context) -> bool:
     HT = get_homeomorphic_tool_state(context)
     return HT.transfer_skin_source and HT.transfer_skin_target

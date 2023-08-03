@@ -67,7 +67,6 @@ class FABA_PT_bake_targets(Panel):
                     raise InternalError(f"et.bake_mode set to unsupported value {et.bake_mode}")
 
 
-
 class FABA_UL_bake_variants(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if item.image:

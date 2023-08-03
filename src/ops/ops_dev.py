@@ -6,6 +6,7 @@ from ..utils.helpers import require_bake_scene
 from ..props import HomeomorphicProperties
 from ..utils.bone_animation_viewer import view_animation
 
+
 def clear_bake_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):
     ht.selected_bake_target = -1
     while len(ht.bake_target_collection):

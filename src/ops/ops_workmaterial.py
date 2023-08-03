@@ -14,6 +14,7 @@ from ..utils.helpers import (
     get_bake_target_variant_name
 )
 
+
 def update_all_materials(operator: Operator, context: Context, ht: HomeomorphicProperties):
     for bake_target in ht.bake_target_collection:
         for _, variant in bake_target.iter_variants():
