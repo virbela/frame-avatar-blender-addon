@@ -155,7 +155,6 @@ class BoneAnimationExporter:
             return [round(mat[j][i], 4) for i in range(4) for j in range(4)]
         
         def get_head_transform(head_bone: PoseBone) -> tuple:
-            # mat = calc_bone_matrix(head_bone)
             mat = R2 @ head_bone.matrix @ axis_basis_change
             loc, _, _ = mat.decompose()
             return list(loc.to_tuple(4))
