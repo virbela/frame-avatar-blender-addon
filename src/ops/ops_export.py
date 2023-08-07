@@ -480,6 +480,7 @@ def animation_metadata(ht: HomeomorphicProperties) -> dict:
     result["layers"] = sorted(o.name for o in animated_objects)
     result["weights"] = BoneAnimationExporter.weights
     result["bone_transforms"] = BoneAnimationExporter.transforms
+    result["head_transforms"] = BoneAnimationExporter.head_transforms
     return result
 
 

@@ -89,6 +89,10 @@ class HomeomorphicProperties(PropertyGroup):
         type=Object
     )
 
+    avatar_head_bone: StringProperty(
+        name="Head Bone",
+        description="The bone to use for head transform calculation."
+    )
 
     #Note that we use -1 to indicate that nothing is selected for integer selections
     effect_collection: CollectionProperty(

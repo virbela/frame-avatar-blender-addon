@@ -17,6 +17,8 @@ class FABA_PT_workflow(Panel):
 
         layout.prop(HT, "avatar_mesh")
         layout.prop(HT, "avatar_rig")
+        if HT.avatar_rig:
+            layout.prop_search(HT, "avatar_head_bone", HT.avatar_rig.pose, "bones")
 
 
 class FABA_PT_workflow_intro(Panel):
