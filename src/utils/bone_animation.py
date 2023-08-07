@@ -156,7 +156,7 @@ class BoneAnimationExporter:
         
         def get_head_transform(head_bone: PoseBone) -> tuple:
             # mat = calc_bone_matrix(head_bone)
-            mat = head_bone.matrix @ axis_basis_change
+            mat = R2 @ head_bone.matrix @ axis_basis_change
             loc, _, _ = mat.decompose()
             return list(loc.to_tuple(4))
 
