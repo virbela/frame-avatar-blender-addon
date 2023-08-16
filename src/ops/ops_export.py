@@ -98,6 +98,15 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
         if not validate_bake_target_setup(HT):
             return False
         
+    # -- check for invalid transform for the avatar_mesh
+
+    # -- check for missing mouth animation
+
+    # -- check for duplicate actions when we are exporting from actions
+    if HT.should_export_animation_action():
+        # --ensure actions are valid with no duplicates
+        pass
+        
     return True
 
 
