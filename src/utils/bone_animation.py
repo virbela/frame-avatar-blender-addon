@@ -162,8 +162,8 @@ class BoneAnimationExporter:
         last_frame = bakescene.frame_current
         last_action = self.armature.animation_data.action
         for action in bpy.data.actions:
-            if not action.use_fake_user:
-                continue
+            # if not action.use_fake_user:
+            #     continue
 
             self.ht.export_progress_step(1.0)
             if action.name not in [ea.name for ea in self.ht.export_animation_actions]:
