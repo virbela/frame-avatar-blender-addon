@@ -43,6 +43,11 @@ def start_debug_server(operator: Operator, context: Context, ht: HomeomorphicPro
     bpy.ops.debug.connect_debugger_vscode()
 
 
+def custom_op(operator: Operator, context: Context, ht: HomeomorphicProperties):
+    """ Use this to run some custom testing/debug stuff
+    """
+    pass
+
 class FABA_OT_clear_bake_scene(FabaOperator):
     bl_label =            "Remove everything from bake scene"
     bl_idname =           "faba.clear_bake_scene"
@@ -69,3 +74,9 @@ class FABA_OT_start_debug_server(FabaOperator):
     bl_idname =           "faba.start_debugger"
     bl_description =      "This is for internal development purposes and should not be seen in distribution"
     faba_operator =       start_debug_server
+
+class FABA_OT_custom_debug_operator(FabaOperator):
+    bl_label =            "Custom Operator"
+    bl_idname =           "faba.custom_operator"
+    bl_description =      "This is for internal development purposes and should not be seen in distribution"
+    faba_operator =       custom_op

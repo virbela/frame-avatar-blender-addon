@@ -232,3 +232,4 @@ class FABA_PT_workflow_debug(Panel):
 
         op_text = "Stop Animation" if HT.debug_animation_show else "Show Animation"
         layout.operator("faba.debug_bone_animation", text=op_text)
+        layout.operator("faba.custom_operator")

@@ -31,6 +31,7 @@ from .ops_dev import (
     FABA_OT_clear_bake_targets,
     FABA_OT_show_bone_debug,
     FABA_OT_start_debug_server,
+    FABA_OT_custom_debug_operator,
 )
 
 from .ops_effects import (
@@ -151,7 +152,8 @@ classes = (
     FABA_OT_clear_bake_targets,
     FABA_OT_show_bone_debug,
     FABA_OT_mirror_workmesh_verts,
-    FABA_OT_start_debug_server
+    FABA_OT_start_debug_server,
+    FABA_OT_custom_debug_operator
 )
 
 register_ops, unregister_ops = bpy.utils.register_classes_factory(classes)
