@@ -46,7 +46,10 @@ def start_debug_server(operator: Operator, context: Context, ht: HomeomorphicPro
 def custom_op(operator: Operator, context: Context, ht: HomeomorphicProperties):
     """ Use this to run some custom testing/debug stuff
     """
-    pass
+    # -- show mirrors
+    for bt in ht.bake_target_collection:
+        print(f"{bt.bake_mode} \t{bt.name}")
+
 
 class FABA_OT_clear_bake_scene(FabaOperator):
     bl_label =            "Remove everything from bake scene"

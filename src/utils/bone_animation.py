@@ -162,6 +162,9 @@ class BoneAnimationExporter:
         last_frame = bakescene.frame_current
         last_action = self.armature.animation_data.action
         for action in bpy.data.actions:
+            # TODO(ranjian0) 
+            # Need to reset stuff before moving to the next animation
+
             # if not action.use_fake_user:
             #     continue
 

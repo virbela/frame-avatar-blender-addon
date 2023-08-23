@@ -106,6 +106,10 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
     if HT.should_export_animation_action():
         # --ensure actions are valid with no duplicates
         pass
+
+    # -- check conforming weights if we are exporting from JSON files
+    if HT.should_export_animation_json():
+        pass
         
     return True
 
