@@ -41,7 +41,7 @@ class FABA_PT_workflow_bake_targets(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "Avatar"
-    bl_parent_id = "FABA_PT_workflow"
+    # bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
@@ -87,7 +87,7 @@ class FABA_PT_workflow_texture(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "Avatar"
-    bl_parent_id = "FABA_PT_workflow"
+    # bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
@@ -108,7 +108,7 @@ class FABA_PT_workflow_materials(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "Avatar"
-    bl_parent_id = "FABA_PT_workflow"
+    # bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
@@ -131,7 +131,7 @@ class FABA_PT_workflow_baking(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "Avatar"
-    bl_parent_id = "FABA_PT_workflow"
+    # bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
