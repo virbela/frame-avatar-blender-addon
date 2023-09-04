@@ -15,9 +15,9 @@ from .effect import EffectProperty
 from .baketarget import BakeTarget, BakeTargetMirrorEntry
 from .animation import AnimationProperty, ExportAnimationJSONPathProperty
 
-from ..utils.logging import log
-from ..utils.constants import TARGET_UV_MAP
-from ..utils.helpers import EnumDescriptor
+from ...utils.logging import log
+from ...utils.constants import TARGET_UV_MAP
+from ...utils.helpers import EnumDescriptor
 
 BAKING_MODE = EnumDescriptor(
     ("COMBINED", "Combined", "Full bake",

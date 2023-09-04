@@ -1,8 +1,8 @@
 from bpy.types import Panel, UIList
 
-from ..utils.exceptions import InternalError
-from ..props.baketarget import UV_ISLAND_MODES
-from ..utils.helpers import get_homeomorphic_tool_state, require_bake_scene
+from ...utils.exceptions import InternalError
+from ...props.deprecated.baketarget import UV_ISLAND_MODES
+from ...utils.helpers import get_homeomorphic_tool_state, require_bake_scene
 
 
 class FABA_PT_bake_targets(Panel):

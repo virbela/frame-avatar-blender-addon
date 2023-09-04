@@ -1,6 +1,6 @@
 from bpy.types import Panel, UIList
 
-from ..utils.helpers import get_homeomorphic_tool_state
+from ...utils.helpers import get_homeomorphic_tool_state
 
 
 class FABA_UL_effects(UIList):
@@ -12,7 +12,7 @@ class FABA_PT_effects(Panel):
     bl_label = "Effects"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Frame Avatar"
+    bl_category = "Avatar"
 
     def draw(self, context):
         if HT := get_homeomorphic_tool_state(context):

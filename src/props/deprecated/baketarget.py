@@ -13,9 +13,9 @@ from bpy.props import (
 )
 
 from .bakevariant import BakeVariant
-from ..utils.logging import log
-from ..utils.constants import MIRROR_TYPE, TARGET_UV_MAP
-from ..utils.helpers import popup_message, get_named_entry, require_named_entry, EnumDescriptor
+from ...utils.logging import log
+from ...utils.constants import MIRROR_TYPE, TARGET_UV_MAP
+from ...utils.helpers import popup_message, get_named_entry, require_named_entry, EnumDescriptor
 
 
 if TYPE_CHECKING:

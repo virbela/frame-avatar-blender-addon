@@ -1,7 +1,7 @@
 from bpy.types import Context, Object, Image, PropertyGroup
 from bpy.props import StringProperty, PointerProperty, EnumProperty
 
-from ..utils.helpers import EnumDescriptor
+from ...utils.helpers import EnumDescriptor
 
 
 UV_TARGET_CHANNEL = EnumDescriptor(

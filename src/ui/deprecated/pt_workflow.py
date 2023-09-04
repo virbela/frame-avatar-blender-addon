@@ -1,7 +1,7 @@
 import bpy
 from bpy.types import Panel
-from ..utils.logging import log
-from ..utils.helpers import get_homeomorphic_tool_state, require_bake_scene
+from ...utils.logging import log
+from ...utils.helpers import get_homeomorphic_tool_state, require_bake_scene
 
 
 class FABA_PT_workflow(Panel):
