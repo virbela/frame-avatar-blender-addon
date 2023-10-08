@@ -79,10 +79,7 @@ def make_everything_visible(
 
 def recalculate_normals(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
-    bake_scene = require_bake_scene()
-    view_layer = bake_scene.view_layers[0]  # TODO - make sure there is only one
-
+) -> None:
     for workmesh in context.selected_objects:
         clean_normals(context, workmesh)
 
@@ -93,7 +90,8 @@ def update_bake_scene(
     bake_scene = require_bake_scene()
 
     # DECISION - should we clear the bake scene each update?
-    # Clear bake scene from meshes (this will remove the objects that own the meshes as ell)
+    # Clear bake scene from meshes (this will remove the objects
+    # that own the meshes as ell)
     for obj in bake_scene.collection.objects:
         bpy.data.meshes.remove(obj.data, do_unlink=True)
 
@@ -107,8 +105,10 @@ def update_bake_scene(
 
         for variant in bake_target.iter_bake_scene_variant_names():
             if variant in bake_scene.objects:
-                # Object is already in bake scene - since we clear the bake scene this means two bake targets resolved to the same name
-                # TODO - we should validate the state before even starting this operation
+                # Object is already in bake scene - since we clear the bake scene this
+                # means two bake targets resolved to the same name
+                # TODO - we should validate the state before even
+                # starting this operation
                 raise Exception("FAIL")  # TODO - proper exception
 
             elif variant in bpy.data.objects:
@@ -116,8 +116,11 @@ def update_bake_scene(
                 raise Exception(
                     f"Object {variant} already existing"
                 )  # TODO - proper exception
-                # NOTE - this can happen if there is orphaned objects, like if the scene is deleted but not the objects
-                # TBD - how should we deal with this situation? Delete conflicting objects? warn user? Instruct user how to resolve situation?
+                # NOTE - this can happen if there is orphaned objects,
+                # like if the scene is deleted but not the objects
+                # TBD - how should we deal with this situation?
+                # Delete conflicting objects? warn user?
+                # Instruct user how to resolve situation?
 
             else:
                 # Object is not in bake scene, let's put it there
@@ -184,10 +187,13 @@ def copy_and_transform_uv(
     target_layer: str,
     scale_factor: float = 1.0,
 ):
-    # TODO - investigate if we can get uv layer index without actually changing it and getting mesh.loops.layers.uv.active
+    # TODO - investigate if we can get uv layer index without actually
+    # changing it and getting mesh.loops.layers.uv.active
     bpy.ops.object.mode_set(mode="OBJECT")
 
-    # TODO - would be great if we made a context manager for these commands so that we could reset all changes when exiting the context (this applies to a lot of things outside this function too)
+    # TODO - would be great if we made a context manager for these commands
+    # so that we could reset all changes when exiting the context
+    # (this applies to a lot of things outside this function too)
     set_uv_map(source_object, source_layer)
     set_uv_map(target_object, target_layer)
 
@@ -199,7 +205,8 @@ def copy_and_transform_uv(
     target_mesh.from_mesh(target_object.data)
     target_uv_layer_index = target_mesh.loops.layers.uv.active
 
-    # TODO - use a strict zip here so we can detect error and also handle any such errors using the .free() methods in the finalization handler
+    # TODO - use a strict zip here so we can detect error and also handle
+    # any such errors using the .free() methods in the finalization handler
     for source_face, target_face in zip(source_mesh.faces, target_mesh.faces):
         for source_loop, target_loop in zip(source_face.loops, target_face.loops):
             source_uv = source_loop[source_uv_layer_index].uv

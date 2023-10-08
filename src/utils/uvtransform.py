@@ -23,7 +23,8 @@ class UVTransform:
 
 
 def get_uv_map_from_mesh(obj: Object) -> dict[int, Vector]:
-    "If uv_layer is ACTIVE_LAYER, the active UV layer will be used, otherwise, uv_layer is considered to be the index of the wanted UV layer."
+    """If uv_layer is ACTIVE_LAYER, the active UV layer will be used, otherwise,
+    uv_layer is considered to be the index of the wanted UV layer."""
 
     if obj.mode == "EDIT":
         mesh = bmesh.from_edit_mesh(obj.data)
@@ -46,12 +47,12 @@ def get_uv_map_from_mesh(obj: Object) -> dict[int, Vector]:
 class UVTransformationCalculator:
     def __init__(self, reference_uv_map: dict[int, Vector]) -> None:
         # Find two furthest points in UV map
-        max_len = None
+        max_len = float("-inf")
         for ref_index1, ref1 in reference_uv_map.items():
             for ref_index2, ref2 in reference_uv_map.items():
-                l = (ref1 - ref2).length
-                if max_len is None or l > max_len:
-                    max_len = l
+                length = (ref1 - ref2).length
+                if max_len is None or length > max_len:
+                    max_len = length
                     endpoints = ref_index1, ref_index2
 
         self.ep1, self.ep2 = endpoints
@@ -83,7 +84,7 @@ class UVTransformationCalculator:
         # Calculate rotation
         reference_vector = (R2 - R1).normalized()
         target_vector = (T2 - T1).normalized()
-        rotation = reference_vector.angle_signed(target_vector)
+        rotation = reference_vector.angle_signed(target_vector, 0.0)
 
         # Calculate translation
         reference_centroid = self.get_centroid(self.reference_uv_map)

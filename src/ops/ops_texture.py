@@ -34,10 +34,14 @@ def UVPM_INSTALLED() -> bool:
 def auto_assign_atlas(
     operator: Operator, context: Context, ht: HomeomorphicProperties
 ) -> None:
-    "Goes through all bake targets and assigns them to the correct intermediate atlas and UV set based on the uv_mode"
+    """Goes through all bake targets and assigns them to the correct
+    intermediate atlas and UV set based on the uv_mode"""
 
-    # TODO - currently we don't take into account that variants may end up on different bins which is fine but we need to store the intermediate target with the variant and not the bake target
-    # TODO - currently we will just hardcode the intermediate atlases but later we need to check which to use and create them if needed
+    # TODO - currently we don't take into account that variants may end up on
+    # different bins which is fine but we need to store the intermediate target
+    # with the variant and not the bake target
+    # TODO - currently we will just hardcode the intermediate atlases but later we
+    # need to check which to use and create them if needed
     a_width = ht.atlas_size
     a_height = ht.atlas_size
 
@@ -82,8 +86,10 @@ def auto_assign_atlas(
             at.scale(a_width, a_height)
             at.update()
 
-    # TODO - here we need to put things in bins like how the UV packing does below but before we can do this we should look at the variants
-    # TBD - should we do it all from beginning? for now yes - maybe later we can have selection
+    # TODO - here we need to put things in bins like how the UV packing does below
+    # but before we can do this we should look at the variants
+    # TBD - should we do it all from beginning? for now yes -
+    # maybe later we can have selection
 
     # TO-DOC - document what happens here properly
 
@@ -272,7 +278,8 @@ def pack_intermediate_atlas(
         bpy.ops.uvpackmaster2.split_overlapping_islands()
         bake_scene.uvp2_props.rot_step = 45
 
-        # note - we use guarded operators for setting the state of the packing box since setting it to the same state it already is will fail
+        # note - we use guarded operators for setting the state of the packing box
+        # since setting it to the same state it already is will fail
         disable_packing_box()
 
         if box:
@@ -285,8 +292,11 @@ def pack_intermediate_atlas(
 
             enable_packing_box()
 
-        # NOTE - if we later do downsampling when doing final bake - we must consider the final pixel margin and not the intermediate one!
-        bake_scene.uvp2_props.pixel_margin = 5  # TODO - not hardcode! We could just not set this and set it in UVP UI but I think it is better this is a setting in FABA so that we don't forget about it
+        # NOTE - if we later do downsampling when doing final bake - we must consider
+        # the final pixel margin and not the intermediate one!
+        bake_scene.uvp2_props.pixel_margin = 5  # TODO - not hardcode! We could just not
+        # set this and set it in UVP UI but I think it is better this is a setting
+        # in FABA so that we don't forget about it
 
         bpy.ops.uvpackmaster2.uv_pack()
         disable_packing_box()
@@ -326,15 +336,17 @@ def copy_and_transform_uv(
     target_layer: str,
     scale_factor: float = 1.0,
 ):
-    # TODO - investigate if we can get uv layer index without actually changing it and getting mesh.loops.layers.uv.active
+    # TODO - investigate if we can get uv layer index without actually changing it and
+    # getting mesh.loops.layers.uv.active
     try:
         bpy.ops.object.mode_set(mode="OBJECT")
-    except:
+    except Exception:
         # No need, context already set
         pass
 
     # TODO - would be great if we made a context manager for these commands so that we
-    # could reset all changes when exiting the context (this applies to a lot of things outside this function too)
+    # could reset all changes when exiting the context (this applies to a lot of
+    # things outside this function too)
     set_uv_map(source_object, source_layer)
     set_uv_map(target_object, target_layer)
 
@@ -346,7 +358,8 @@ def copy_and_transform_uv(
     target_mesh.from_mesh(target_object.data)
     target_uv_layer_index = target_mesh.loops.layers.uv.active
 
-    # TODO - use a strict zip here so we can detect error and also handle any such errors using the .free() methods in the finalization handler
+    # TODO - use a strict zip here so we can detect error and also handle any such
+    # errors using the .free() methods in the finalization handler
     for source_face, target_face in zip(source_mesh.faces, target_mesh.faces):
         for source_loop, target_loop in zip(source_face.loops, target_face.loops):
             source_uv = source_loop[source_uv_layer_index].uv

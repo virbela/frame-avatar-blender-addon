@@ -32,7 +32,7 @@ class Effects:
     ) -> None:
         if ht.selected_effect != -1:
             et = ht.effect_collection[ht.selected_effect]
-            pos = et.positions.add()
+            et.positions.add()
 
     @staticmethod
     def remove_position_effect(
@@ -48,7 +48,7 @@ class Effects:
     ) -> None:
         if ht.selected_effect != -1:
             et = ht.effect_collection[ht.selected_effect]
-            pos = et.colors.add()
+            et.colors.add()
 
     @staticmethod
     def remove_color_effect(
@@ -79,7 +79,7 @@ class FABA_OT_remove_position_effect(FabaOperator):
     bl_idname = "faba.remove_position_effect"
     faba_operator = Effects.remove_position_effect
 
-    index: bpy.props.IntProperty()
+    index: bpy.props.IntProperty()  # type: ignore
 
 
 class FABA_OT_add_position_effect(FabaOperator):
@@ -95,7 +95,7 @@ class FABA_OT_remove_color_effect(FabaOperator):
     bl_idname = "faba.remove_color_effect"
     faba_operator = Effects.remove_color_effect
 
-    index: bpy.props.IntProperty()
+    index: bpy.props.IntProperty()  # type: ignore
 
 
 class FABA_OT_add_color_effect(FabaOperator):

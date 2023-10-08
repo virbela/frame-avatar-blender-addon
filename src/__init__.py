@@ -1,3 +1,12 @@
+import bpy
+from bpy.app.handlers import persistent
+from bpy.types import Context, AddonPreferences
+
+from .ui import register_ui, unregister_ui
+from .ops import register_ops, unregister_ops
+from .props import register_props, unregister_props
+from .utils.helpers import get_homeomorphic_tool_state
+
 bl_info = {
     "name": "Frame Avatar Blender Addon (FABA)",
     "description": "Provides a set of tools for the creation of homeomorphic avatars.",
@@ -17,38 +26,24 @@ bl_info = {
 # 	This should be optional
 # 	labels: dependency
 
-import bpy
-from bpy.app.handlers import persistent
-from bpy.types import Context, AddonPreferences
-
-from .ui import register_ui, unregister_ui
-from .ops import register_ops, unregister_ops
-from .props import register_props, unregister_props
-from .utils.helpers import get_homeomorphic_tool_state
-
 
 class FrameAvatarAddonPreferences(AddonPreferences):
     bl_idname = __package__
 
-    log_target: bpy.props.StringProperty(
+    log_target: bpy.props.StringProperty(  # type: ignore
         name="Log File Name", subtype="FILE_NAME", default="fabalog"
     )
-    glb_export_dir: bpy.props.StringProperty(
+    glb_export_dir: bpy.props.StringProperty(  # type: ignore
         name="GLB Export Dir",
         subtype="DIR_PATH",
-        description="Folder to use for glb export (default is current blendfile folder).",
+        description="Folder to use for glb export (default blendfile path).",
     )
-    atlas_export_dir: bpy.props.StringProperty(
+    atlas_export_dir: bpy.props.StringProperty(  # type: ignore
         name="Atlas Export Dir",
         subtype="DIR_PATH",
-        description="Folder to use for atlas export (default is current blendfile folder).",
+        description="Folder to use for atlas export (default blendfile path).",
     )
-    npy_export_dir: bpy.props.StringProperty(
-        name="Npy Export Dir",
-        subtype="DIR_PATH",
-        description="Folder to use for animation (.npy) export (default is current blendfile folder).",
-    )
-    custom_frame_validation: bpy.props.BoolProperty(
+    custom_frame_validation: bpy.props.BoolProperty(  # type: ignore
         default=False,
         name="Frame Validation",
         description="Enable validation for the frame avatars. (Frame artists only!)",
@@ -120,7 +115,7 @@ if __name__ == "__main__":
         unregister()
     except RuntimeError:
         pass  # some class probably not registered
-    except:
+    except Exception:
         # show any other exception
         import traceback
 

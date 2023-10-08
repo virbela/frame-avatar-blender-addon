@@ -79,7 +79,7 @@ class BoneAnimationExporter:
         max_weights_per_vert = 10
         export_indices = get_gltf_export_indices(self.ht.avatar_mesh)
 
-        def el(val, count) -> None:
+        def el(val: int | float, count: int) -> list[int | float]:
             # create empty list filled with `val` `count`` times
             return [val] * count
 
@@ -89,7 +89,8 @@ class BoneAnimationExporter:
 
             tmp_map = dict()
             for v in obj.data.vertices:
-                # XXX Important to only use the groups for deformation bones, any other vertex groups
+                # XXX Important to only use the groups for deformation bones,
+                # any other vertex groups
                 #     should be ignored (preserves user created groups too)
                 vgroups = [
                     g for g in v.groups if obj.vertex_groups[g.group].name in self.bones
@@ -158,12 +159,12 @@ class BoneAnimationExporter:
             mat = R2 @ bone_matrix @ inverse_bind_pose @ axis_basis_change
             return mat
 
-        def get_bone_mat(pose_bone: PoseBone) -> list:
+        def get_bone_mat(pose_bone: PoseBone) -> list[float]:
             mat = calc_bone_matrix(pose_bone)
             # XXX Export Matrix in column major format
             return [round(mat[j][i], 4) for i in range(4) for j in range(4)]
 
-        def get_head_transform(head_bone: PoseBone) -> tuple:
+        def get_head_transform(head_bone: PoseBone) -> list[float]:
             mat = R2 @ head_bone.matrix @ axis_basis_change
             loc, _, _ = mat.decompose()
             return list(loc.to_tuple(4))
@@ -248,7 +249,7 @@ class BoneAnimationExporter:
         img.update()
         filepath = bpy.data.filepath
         directory = os.path.dirname(filepath)
-        img.filepath = os.path.join(directory, f"bone_weights.png")
+        img.filepath = os.path.join(directory, "bone_weights.png")
         img.save()
 
     def save_transforms_to_png(self) -> None:

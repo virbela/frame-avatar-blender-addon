@@ -22,7 +22,7 @@ from .helpers import (
 
 def generate_animation_blob(
     context: Context, avatar: Object, animated_objects: list[Object]
-):
+) -> None:
     HT = get_homeomorphic_tool_state(context)
     export_full_blob = all([ea.checked for ea in HT.export_animation_actions])
 
@@ -100,7 +100,7 @@ def export_action_animation(
     animated_objects: list[Object],
     num_verts: int,
     export_indices: list[int],
-):
+) -> None:
     HT = get_homeomorphic_tool_state(context)
     if action.name not in [ea.name for ea in HT.export_animation_actions]:
         # Possibly not a valid export action eg tpose
@@ -147,7 +147,7 @@ def validate_animation_export_verts(avatar: Object) -> bool:
             f"Invalid GLB vert count. \nExpected {GLB_VERT_COUNT} got {len(export_indices)}. Ensure base avatar mesh has no materials and only 2 uv layers"
         )
         popup_message(
-            f"Invalid GLB vert count. See console for more details", "Export Error"
+            "Invalid GLB vert count. See console for more details", "Export Error"
         )
         return False
     return True

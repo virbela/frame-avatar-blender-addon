@@ -47,7 +47,7 @@ class LoadModule:
     https://github.com/wisaac407/blender-script-watcher
     """
 
-    def __init__(self, filepath) -> None:
+    def __init__(self, filepath: str) -> None:
         self.filepath = filepath
         self.remove_cached_mods()
         try:
@@ -77,7 +77,7 @@ class LoadModule:
         else:
             f.close()
 
-    def get_paths(self) -> None:
+    def get_paths(self) -> tuple[list[str], list[str]]:
         """Find all the python paths surrounding the given filepath."""
 
         dirname = os.path.dirname(self.filepath)
@@ -96,7 +96,7 @@ class LoadModule:
         # If we just have one (non __init__) file then return just that file.
         return paths, filepaths or [self.filepath]
 
-    def get_mod_name(self) -> None:
+    def get_mod_name(self) -> tuple[str, str]:
         """Return the module name and the root path of the given python file path."""
         dir, mod = os.path.split(self.filepath)
 
@@ -116,7 +116,10 @@ class LoadModule:
         paths, files = self.get_paths()
         for mod_name, mod in list(sys.modules.items()):
             try:
-                if hasattr(mod, "__file__") and os.path.dirname(mod.__file__) in paths:
+                if (
+                    hasattr(mod, "__file__")
+                    and os.path.dirname(str(mod.__file__)) in paths
+                ):
                     del sys.modules[mod_name]
             except TypeError:
                 pass

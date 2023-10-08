@@ -224,7 +224,7 @@ class AttrSet(AttributeReference):
 
 
 def get_nice_name(
-    collection: list,
+    collection: typing.Iterable,
     prefix: str,
     max_prefix_length: int,
     random_hash_length: int = 8,

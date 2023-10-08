@@ -96,7 +96,7 @@ class ShaderDrawer:
 
             ibo = gpu.types.GPUIndexBuf(type="TRIS", seq=indices)
 
-            batch = gpu.types.GPUBatch(type="TRIS", buf=vbo, elem=ibo)
+            gpu.types.GPUBatch(type="TRIS", buf=vbo, elem=ibo)
             batch_verts = gpu.types.GPUBatch(type="POINTS", buf=vbo_vert, elem=ibo)
             batches.extend([batch_verts])
         return batches

@@ -1,4 +1,5 @@
 import bpy
+import typing
 from contextlib import contextmanager
 from bpy.types import Object, ViewLayer
 
@@ -20,7 +21,9 @@ def active_scene(name: str) -> None:
 
 
 @contextmanager
-def selection(objects: list[Object] = None, view_layer: ViewLayer = None) -> None:
+def selection(
+    objects: list[Object] | None = None, view_layer: ViewLayer | None = None
+) -> typing.Generator[None, None, None]:
     selected = [o for o in bpy.data.objects if o.select_get()]
 
     # -- clear old selection state
@@ -47,7 +50,11 @@ def selection(objects: list[Object] = None, view_layer: ViewLayer = None) -> Non
 
 
 @contextmanager
-def active_object(object: Object = None, view_layer: ViewLayer = None) -> None:
+def active_object(
+    object: Object | None = None, view_layer: ViewLayer | None = None
+) -> typing.Generator[None, None, None]:
+    if not view_layer:
+        return
     active = view_layer.objects.active
 
     # -- set current active

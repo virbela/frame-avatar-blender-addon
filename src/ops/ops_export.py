@@ -89,12 +89,6 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
         )
         return False
 
-    # XXX Allow export from the bake scene
-    # active_scene = context.scene
-    # if active_scene != work_scene:
-    #     popup_message("Export validation failed! Must be in main scene!", "Validation Error")
-    #     return False
-
     if HT.avatar_mesh is None:
         popup_message(
             "Export validation failed! Avatar Object not selected in workflow panel!",
@@ -394,7 +388,8 @@ def clear_custom_props(item: Object | Scene) -> None:
 def calculate_effect_delta(
     obj: Object, effect: PositionEffect
 ) -> list[tuple[int, tuple[float]]]:
-    """Return ids and final positions of all transformed verts of target shapekey relative to base shapekey"""
+    """Return ids and final positions of all transformed verts of
+    target shapekey relative to base shapekey"""
 
     base = obj.data.shape_keys.key_blocks.get(effect.parent_shapekey)
     if not base:
@@ -576,7 +571,9 @@ def get_uvtransform_metadata(
             }
         return uv_transform
 
-    def get_variant_channel(bk: BakeTarget, variant: BakeVariant) -> tuple[int]:
+    def get_variant_channel(
+        bk: BakeTarget, variant: BakeVariant
+    ) -> tuple[int, int, int, int]:
         if variant.uv_target_channel == "UV_TARGET_COLOR":
             return (0, 0, 0, 1)
         elif variant.uv_target_channel == "UV_TARGET_R":
@@ -585,7 +582,8 @@ def get_uvtransform_metadata(
             return (0, 1, 0, 0)
         elif variant.uv_target_channel == "UV_TARGET_B":
             return (0, 0, 1, 0)
-        # XXX Get here only for variants with NIL uv islands i.e items with `__None` suffix
+        # XXX Get here only for variants with NIL uv islands
+        # i.e items with `__None` suffix
         if bk.uv_mode != "UV_IM_NIL":
             log.fatal(f"Invalid UV channel for {bk.name}")
         log.info(f"NIL UV Channel for {bk.name}")
@@ -722,7 +720,7 @@ class FABA_OT_remove_export_json_path(FabaOperator):
     bl_idname = "faba.remove_json_path"
     faba_operator = ExportAnimationJSONPaths.remove_json_path
 
-    index: bpy.props.IntProperty()
+    index: bpy.props.IntProperty()  # type: ignore
 
 
 class FABA_OT_add_export_json_path(FabaOperator):
