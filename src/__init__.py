@@ -1,4 +1,5 @@
 import bpy
+import typing
 from bpy.app.handlers import persistent
 from bpy.types import Context, AddonPreferences
 
@@ -58,7 +59,7 @@ class FrameAvatarAddonPreferences(AddonPreferences):
         layout.prop(self, "custom_frame_validation")
 
 
-def timer_update_export_actions() -> None:
+def timer_update_export_actions() -> int:
     """Create a list of actions that can be exported."""
     HT = get_homeomorphic_tool_state(bpy.context)
 
@@ -78,7 +79,7 @@ def timer_update_export_actions() -> None:
 
 
 @persistent
-def refresh_timer_on_file_open(dummy) -> None:
+def refresh_timer_on_file_open(dummy: typing.Any) -> None:
     if not bpy.app.timers.is_registered(timer_update_export_actions):
         bpy.app.timers.register(timer_update_export_actions, first_interval=1)
 

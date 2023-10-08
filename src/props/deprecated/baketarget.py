@@ -185,7 +185,7 @@ class BakeTarget(PropertyGroup):
 
     def get_mirror_type(
         self, ht: "HomeomorphicProperties"
-    ) -> tuple[BakeTargetMirrorEntry, MIRROR_TYPE]:
+    ) -> tuple[BakeTargetMirrorEntry | None, MIRROR_TYPE | None]:
         find_id = ht.get_bake_target_index(self)
         for mirror in ht.bake_target_mirror_collection:
             if find_id == mirror.primary:

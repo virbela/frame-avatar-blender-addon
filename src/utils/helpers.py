@@ -42,7 +42,7 @@ PREFS_LOG = True
 
 
 @contextmanager
-def profile() -> None:
+def profile() -> typing.Generator[None, None, None]:
     s = io.StringIO()
     pr = cProfile.Profile()
 

@@ -37,7 +37,7 @@ EXPORT_ANIMATION_SOURCE = EnumDescriptor(
 )
 
 
-def update_atlas_size(self, context: Context) -> None:
+def update_atlas_size(self: "HomeomorphicProperties", context: Context) -> None:
     atlas_images = [im for im in bpy.data.images if "atlas_intermediate" in im.name]
     if atlas_images:
         ats = self.atlas_size
@@ -62,7 +62,7 @@ def update_debug_basis(HT: "HomeomorphicProperties", context: Context) -> None:
                 action.checked = False
 
 
-def update_export_progress(self, context) -> None:
+def update_export_progress(self: 'HomeomorphicProperties', context: Context) -> None:
     # XXX Dirty Hack
     # bpy.ops.wm.redraw_timer(type="DRAW_WIN_SWAP", iterations=1)
     pass
@@ -203,17 +203,20 @@ class HomeomorphicProperties(PropertyGroup):
         description="Object to copy vertex groups to",
     )
 
-    def get_selected_effect(self) -> EffectProperty:
+    def get_selected_effect(self) -> EffectProperty | None:
         if self.selected_effect:
             return self.effect_collection[self.selected_effect]
+        return None
 
-    def get_selected_bake_target(self) -> BakeTarget:
+    def get_selected_bake_target(self) -> BakeTarget | None:
         if self.selected_bake_target != -1:
             return self.bake_target_collection[self.selected_bake_target]
+        return None
 
-    def get_selected_bake_group(self) -> BakeGroup:
+    def get_selected_bake_group(self) -> BakeGroup | None:
         if self.selected_bake_group != -1:
             return self.bake_group_collection[self.selected_bake_group]
+        return None
 
     def require_selected_bake_target(self) -> BakeTarget:
         if candidate := self.get_selected_bake_target():
@@ -221,9 +224,10 @@ class HomeomorphicProperties(PropertyGroup):
         else:
             raise Exception()  # TODO - proper exception
 
-    def get_selected_mirror(self) -> BakeTargetMirrorEntry:
+    def get_selected_mirror(self) -> BakeTargetMirrorEntry | None:
         if self.selected_bake_target_mirror != -1:
             return self.bake_target_mirror_collection[self.selected_bake_target_mirror]
+        return None
 
     def require_selected_mirror(self) -> BakeTargetMirrorEntry:
         if candidate := self.get_selected_mirror():
@@ -235,7 +239,8 @@ class HomeomorphicProperties(PropertyGroup):
         for index, bt in enumerate(self.bake_target_collection):
             if (
                 bt == target
-            ):  # note: We can't use identity comparison due to internal deferring in blender
+            ):  # note: We can't use identity comparison due to internal deferring 
+                # in blender
                 return index
         return -1
 
@@ -250,14 +255,14 @@ class HomeomorphicProperties(PropertyGroup):
 
     def should_export_animation_action(self) -> bool:
         return (
-            self.avatar_type == "FULLBODY"
+            str(self.avatar_type) == "FULLBODY"
             and self.export_animation
-            and self.export_animation_source == "ACTION"
+            and str(self.export_animation_source) == "ACTION"
         )
 
     def should_export_animation_json(self) -> bool:
         return (
-            self.avatar_type == "FULLBODY"
+            str(self.avatar_type) == "FULLBODY"
             and self.export_animation
-            and self.export_animation_source == "JSON"
+            and str(self.export_animation_source) == "JSON"
         )

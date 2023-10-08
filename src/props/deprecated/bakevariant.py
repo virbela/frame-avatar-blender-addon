@@ -58,7 +58,7 @@ def update_atlas(self: "BakeVariant", context: Context) -> None:
             self.uv_target_channel = "UV_TARGET_NIL"
 
 
-def get_bakevariant_name(self: "BakeVariant") -> None:
+def get_bakevariant_name(self: "BakeVariant") -> str:
     return self.get("name", "Untitled variant")
 
 

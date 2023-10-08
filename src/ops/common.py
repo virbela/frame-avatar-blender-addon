@@ -9,7 +9,7 @@ class GuardedOperator:
     def __init__(self, operator: Operator) -> None:
         self.operator = operator
 
-    def __repr__(self) -> None:
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} of {self.operator}>"
 
     def __call__(self, *args, **kwargs) -> None:

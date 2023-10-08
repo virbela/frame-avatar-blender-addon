@@ -236,7 +236,7 @@ def pack_intermediate_atlas(
     all_uv_object_list: list[Intermediate.Packing.BakeTarget],
     atlas: Image,
     uv_map: str,
-    box: tuple[float] = None,
+    box: tuple[float, float, float, float]
 ) -> None:
     view_layer = bake_scene.view_layers[0]
 
