@@ -36,12 +36,12 @@ from ..utils.helpers import (
 )
 
 
-def export(operator: Operator, context: Context, HT: HomeomorphicProperties):
+def export(operator: Operator, context: Context, HT: HomeomorphicProperties) -> None:
     HT.export_progress_start()
     context.window.cursor_set("WAIT")
     view_layer = require_work_scene().view_layers[0]
 
-    def on_exit():
+    def on_exit() -> None:
         HT.export_progress_end()
         context.window.cursor_set("DEFAULT")
 
@@ -254,7 +254,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     return True
 
 
-def export_atlas(context: Context, denoise: bool = True):
+def export_atlas(context: Context, denoise: bool = True) -> None:
     work_scene = require_work_scene()
 
     work_scene.use_nodes = True
@@ -376,7 +376,7 @@ def export_atlas(context: Context, denoise: bool = True):
 
 
 @contextmanager
-def clear_custom_props(item: Object | Scene):
+def clear_custom_props(item: Object | Scene) -> None:
     prop_keys = list(item.keys())
 
     # remove all custom props
@@ -455,7 +455,7 @@ def get_verts_or_vgroup(
         # no vert weights, return all verts
         return data
 
-    def filter_by_vgroup(data):
+    def filter_by_vgroup(data) -> None:
         index, _ = data
         group = obj.vertex_groups.get(color_effect.vert_group)
         try:
@@ -470,7 +470,7 @@ def get_verts_or_vgroup(
     return list(data_only_in_group)
 
 
-def obj_from_shapekey(obj: Object, keyname: str):
+def obj_from_shapekey(obj: Object, keyname: str) -> None:
     scene = require_work_scene()
     view_layer = scene.view_layers[0]
 
@@ -690,7 +690,7 @@ def get_effects_metadata(ht: HomeomorphicProperties, obj: Object) -> dict:
     return effects_medatata
 
 
-def deselect_all():
+def deselect_all() -> None:
     for sc in bpy.data.scenes:
         vl = sc.view_layers[0]
         for obj in sc.objects:
@@ -698,7 +698,7 @@ def deselect_all():
 
 
 class ExportAnimationJSONPaths:
-    def add_json_path(operator: Operator, context: Context, ht: HomeomorphicProperties):
+    def add_json_path(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
         ht.export_animation_json_paths.add()
 
     def remove_json_path(

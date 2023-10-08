@@ -6,7 +6,7 @@ from .helpers import is_reference_valid
 
 
 @contextmanager
-def active_scene(name: str):
+def active_scene(name: str) -> None:
     active_scene = bpy.context.scene
 
     # -- set new active scene
@@ -20,7 +20,7 @@ def active_scene(name: str):
 
 
 @contextmanager
-def selection(objects: list[Object] = None, view_layer: ViewLayer = None):
+def selection(objects: list[Object] = None, view_layer: ViewLayer = None) -> None:
     selected = [o for o in bpy.data.objects if o.select_get()]
 
     # -- clear old selection state
@@ -47,7 +47,7 @@ def selection(objects: list[Object] = None, view_layer: ViewLayer = None):
 
 
 @contextmanager
-def active_object(object: Object = None, view_layer: ViewLayer = None):
+def active_object(object: Object = None, view_layer: ViewLayer = None) -> None:
     active = view_layer.objects.active
 
     # -- set current active

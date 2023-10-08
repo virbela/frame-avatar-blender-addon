@@ -41,7 +41,7 @@ def transfer_skin_weights(
 
 def poll_transfer_skin_weights(context: Context) -> bool:
     HT = get_homeomorphic_tool_state(context)
-    return HT.transfer_skin_source and HT.transfer_skin_target
+    return HT.transfer_skin_source is not None and HT.transfer_skin_target is not None
 
 
 class FABA_OT_transfer_skin_weights(FabaOperator):

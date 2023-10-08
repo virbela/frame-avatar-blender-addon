@@ -8,44 +8,50 @@ from ..props import HomeomorphicProperties
 
 
 class Effects:
-    def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
+    @staticmethod
+    def add(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
         GenericList.add(
             ht.effect_collection,
             AttrGet(ht, "selected_effect"),
             AttrSet(ht, "selected_effect"),
         )
 
-    def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
+    @staticmethod
+    def remove(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
         GenericList.remove(
             ht.effect_collection,
             AttrGet(ht, "selected_effect"),
             AttrSet(ht, "selected_effect"),
         )
 
+    @staticmethod
     def add_position_effect(
         operator: Operator, context: Context, ht: HomeomorphicProperties
-    ):
+    ) -> None:
         if ht.selected_effect != -1:
             et = ht.effect_collection[ht.selected_effect]
             pos = et.positions.add()
 
+    @staticmethod
     def remove_position_effect(
         operator: Operator, context: Context, ht: HomeomorphicProperties
-    ):
+    ) -> None:
         if ht.selected_effect != -1:
             et = ht.effect_collection[ht.selected_effect]
             et.positions.remove(operator.index)
 
+    @staticmethod
     def add_color_effect(
         operator: Operator, context: Context, ht: HomeomorphicProperties
-    ):
+    ) -> None:
         if ht.selected_effect != -1:
             et = ht.effect_collection[ht.selected_effect]
             pos = et.colors.add()
 
+    @staticmethod
     def remove_color_effect(
         operator: Operator, context: Context, ht: HomeomorphicProperties
-    ):
+    ) -> None:
         if ht.selected_effect != -1:
             et = ht.effect_collection[ht.selected_effect]
             et.colors.remove(operator.index)

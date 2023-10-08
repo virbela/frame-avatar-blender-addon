@@ -11,7 +11,7 @@ class FABA_PT_workflow(Panel):
     bl_category = "Avatar"
     bl_idname = "FABA_PT_workflow"
 
-    def draw(self, context):
+    def draw(self, context) -> None:
         layout = self.layout
         HT = get_homeomorphic_tool_state(context)
 
@@ -29,7 +29,7 @@ class FABA_PT_workflow_intro(Panel):
     bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
-    def draw(self, context):
+    def draw(self, context) -> None:
         layout = self.layout
         get_help = layout.operator("wm.url_open", text="Help")
         get_help.url = "http://example.org/"
@@ -44,7 +44,7 @@ class FABA_PT_workflow_bake_targets(Panel):
     bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
-    def draw(self, context):
+    def draw(self, context) -> None:
         layout = self.layout
         layout.operator("faba.create_targets_from_avatar_object")
         layout.operator("faba.clear_bake_targets")
@@ -58,7 +58,7 @@ class FABA_PT_workflow_workmeshes(Panel):
     bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
-    def draw(self, context):
+    def draw(self, context) -> None:
         HT = get_homeomorphic_tool_state(context)
         layout = self.layout
         col = layout.column(align=True)
@@ -90,7 +90,7 @@ class FABA_PT_workflow_texture(Panel):
     bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
-    def draw(self, context):
+    def draw(self, context) -> None:
         layout = self.layout
         HT = get_homeomorphic_tool_state(context)
 
@@ -111,7 +111,7 @@ class FABA_PT_workflow_materials(Panel):
     bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
-    def draw(self, context):
+    def draw(self, context) -> None:
         layout = self.layout
         HT = get_homeomorphic_tool_state(context)
 
@@ -134,7 +134,7 @@ class FABA_PT_workflow_baking(Panel):
     bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
-    def draw(self, context):
+    def draw(self, context) -> None:
         layout = self.layout
         HT = get_homeomorphic_tool_state(context)
 
@@ -174,7 +174,7 @@ class FABA_PT_workflow_helpers(Panel):
     bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
-    def draw(self, context):
+    def draw(self, context) -> None:
         layout = self.layout
         HT = get_homeomorphic_tool_state(context)
 
@@ -195,7 +195,7 @@ class FABA_PT_workflow_animation(Panel):
     bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
-    def draw(self, context):
+    def draw(self, context) -> None:
         layout = self.layout
         HT = get_homeomorphic_tool_state(context)
 
@@ -215,7 +215,7 @@ class FABA_PT_workflow_debug(Panel):
     bl_parent_id = "FABA_PT_workflow"
     bl_options = {"DEFAULT_CLOSED"}
 
-    def draw(self, context):
+    def draw(self, context) -> None:
         layout = self.layout
         HT = get_homeomorphic_tool_state(context)
 

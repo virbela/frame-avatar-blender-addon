@@ -37,7 +37,7 @@ EXPORT_ANIMATION_SOURCE = EnumDescriptor(
 )
 
 
-def update_atlas_size(self, context: Context):
+def update_atlas_size(self, context: Context) -> None:
     atlas_images = [im for im in bpy.data.images if "atlas_intermediate" in im.name]
     if atlas_images:
         ats = self.atlas_size
@@ -50,7 +50,7 @@ def update_atlas_size(self, context: Context):
                     at.update()
 
 
-def update_debug_basis(HT: "HomeomorphicProperties", context: Context):
+def update_debug_basis(HT: "HomeomorphicProperties", context: Context) -> None:
     HT.debug_animation_actions.clear()
     if basis := HT.debug_animation_avatar_basis:
         if metadata := basis.get("MorphSets_Avatar"):
@@ -62,7 +62,7 @@ def update_debug_basis(HT: "HomeomorphicProperties", context: Context):
                 action.checked = False
 
 
-def update_export_progress(self, context):
+def update_export_progress(self, context) -> None:
     # XXX Dirty Hack
     # bpy.ops.wm.redraw_timer(type="DRAW_WIN_SWAP", iterations=1)
     pass
@@ -239,13 +239,13 @@ class HomeomorphicProperties(PropertyGroup):
                 return index
         return -1
 
-    def export_progress_start(self):
+    def export_progress_start(self) -> None:
         self.export_progress = 0
 
-    def export_progress_end(self):
+    def export_progress_end(self) -> None:
         self.export_progress = -1
 
-    def export_progress_step(self, step: float):
+    def export_progress_step(self, step: float) -> None:
         self.export_progress += step
 
     def should_export_animation_action(self) -> bool:

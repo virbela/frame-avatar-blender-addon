@@ -19,12 +19,12 @@ class PendingLogEntry:
 
 
 class LogLevelDescriptor:
-    def __init__(self, log_instance: "LogBase", log_level: LogLevel, description: str):
+    def __init__(self, log_instance: "LogBase", log_level: LogLevel, description: str) -> None:
         self.__doc__ = description
         self.log_instance = log_instance
         self.log_level = log_level
 
-    def __call__(self, message, print_console=True):
+    def __call__(self, message, print_console=True) -> None:
         self.log_instance.process_message(
             PendingLogEntry(time.localtime(), self.log_level, message), print_console
         )
@@ -33,7 +33,7 @@ class LogLevelDescriptor:
 class LogBase:
     MAX_HISTORY = 1000
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.history = list()
 
         self.debug = LogLevelDescriptor(
@@ -58,7 +58,7 @@ class LogBase:
             "Fatal errors are errors that we can't recover from and we don't know how to tell the user to recover from them",
         )
 
-    def exception(self, message: str):
+    def exception(self, message: str) -> None:
         tab = "\t"
         self.fatal(
             f"{message}\n{textwrap.indent(traceback.format_exc().strip(), tab)}\n"
@@ -68,7 +68,7 @@ class LogBase:
 class LogInstance(LogBase):
     "Log instance"
 
-    def process_message(self, message: PendingLogEntry, print_console: bool):
+    def process_message(self, message: PendingLogEntry, print_console: bool) -> None:
         try:
             preferences = bpy.context.preferences.addons[__package__].preferences
         except KeyError:
@@ -97,7 +97,7 @@ class LogInstance(LogBase):
 class DummyLogInstance(LogBase):
     "Dummy log"
 
-    def process_message(self, message: PendingLogEntry):
+    def process_message(self, message: PendingLogEntry) -> None:
         pass
 
 

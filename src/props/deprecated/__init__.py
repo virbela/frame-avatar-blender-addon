@@ -25,7 +25,7 @@ classes = (
 register, unregister = bpy.utils.register_classes_factory(classes)
 
 
-def register_props():
+def register_props() -> None:
     register()
 
     # XXX Kept for backward compatibility
@@ -34,7 +34,7 @@ def register_props():
     )
 
 
-def unregister_props():
+def unregister_props() -> None:
     del bpy.types.Scene.homeomorphictools
 
     unregister()

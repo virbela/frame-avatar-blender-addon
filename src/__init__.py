@@ -54,7 +54,7 @@ class FrameAvatarAddonPreferences(AddonPreferences):
         description="Enable validation for the frame avatars. (Frame artists only!)",
     )
 
-    def draw(self, context: Context):
+    def draw(self, context: Context) -> None:
         layout = self.layout
         layout.prop(self, "log_target")
         layout.prop(self, "glb_export_dir")
@@ -63,7 +63,7 @@ class FrameAvatarAddonPreferences(AddonPreferences):
         layout.prop(self, "custom_frame_validation")
 
 
-def timer_update_export_actions():
+def timer_update_export_actions() -> None:
     """Create a list of actions that can be exported."""
     HT = get_homeomorphic_tool_state(bpy.context)
 
@@ -83,13 +83,13 @@ def timer_update_export_actions():
 
 
 @persistent
-def refresh_timer_on_file_open(dummy):
+def refresh_timer_on_file_open(dummy) -> None:
     if not bpy.app.timers.is_registered(timer_update_export_actions):
         bpy.app.timers.register(timer_update_export_actions, first_interval=1)
 
 
 # Addon registration
-def register():
+def register() -> None:
     # XXX Order Matters
     bpy.utils.register_class(FrameAvatarAddonPreferences)
     register_props()
@@ -100,7 +100,7 @@ def register():
     bpy.app.handlers.load_post.append(refresh_timer_on_file_open)
 
 
-def unregister():
+def unregister() -> None:
     unregister_ui()
     unregister_ops()
     unregister_props()

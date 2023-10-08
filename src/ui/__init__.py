@@ -18,11 +18,11 @@ classes = (
 register, unregister = bpy.utils.register_classes_factory(classes)
 
 
-def register_ui():
+def register_ui() -> None:
     deprecated_ui_register()
     register()
 
 
-def unregister_ui():
+def unregister_ui() -> None:
     deprecated_ui_unregister()
     unregister()

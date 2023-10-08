@@ -43,7 +43,7 @@ UV_TARGET_CHANNEL = EnumDescriptor(
 )
 
 
-def update_atlas(self: "BakeVariant", context: Context):
+def update_atlas(self: "BakeVariant", context: Context) -> None:
     # when atlas is set, also set the uv_channel
     if self.intermediate_atlas:
         if "red" in self.intermediate_atlas.name:
@@ -58,11 +58,11 @@ def update_atlas(self: "BakeVariant", context: Context):
             self.uv_target_channel = "UV_TARGET_NIL"
 
 
-def get_bakevariant_name(self: "BakeVariant"):
+def get_bakevariant_name(self: "BakeVariant") -> None:
     return self.get("name", "Untitled variant")
 
 
-def set_bakevariant_name(self: "BakeVariant", value: str):
+def set_bakevariant_name(self: "BakeVariant", value: str) -> None:
     if not self.workmesh:
         self["name"] = value
         return

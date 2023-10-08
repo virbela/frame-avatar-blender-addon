@@ -7,7 +7,7 @@ For structures that SHOULD be saved in blender specific contexts are defined in 
 from dataclasses import dataclass
 
 
-def iter_dc(d):
+def iter_dc(d) -> None:
     # note: dataclasses.asdict performs a deep copy which will be problematic when referencing blender objects so we will iter it ourselves
     return ((key, getattr(d, key)) for key in d.__dataclass_fields__)
 

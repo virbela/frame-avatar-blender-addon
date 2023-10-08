@@ -6,13 +6,13 @@ from ..utils.constants import WORK_SCENE, BAKE_SCENE
 
 
 class GuardedOperator:
-    def __init__(self, operator: Operator):
+    def __init__(self, operator: Operator) -> None:
         self.operator = operator
 
-    def __repr__(self):
+    def __repr__(self) -> None:
         return f"<{self.__class__.__name__} of {self.operator}>"
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> None:
         if self.operator.poll():
             return self.operator(*args, **kwargs)
 

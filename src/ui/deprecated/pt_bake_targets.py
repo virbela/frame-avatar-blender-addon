@@ -11,7 +11,7 @@ class FABA_PT_bake_targets(Panel):
     bl_region_type = "UI"
     bl_category = "Avatar"
 
-    def draw(self, context):
+    def draw(self, context) -> None:
         if HT := get_homeomorphic_tool_state(context):
             row = self.layout.row()
             rows = 3
@@ -171,7 +171,7 @@ class FABA_UL_bake_target_mirrors(UIList):
         if ht := get_homeomorphic_tool_state(context):
             row = layout.row()
 
-            def na(txt):
+            def na(txt) -> None:
                 """This is a helper function that will say (Not assigned) if the string is empty
                 but otherwise indicate the contents but also convey it is a broken link
                 """

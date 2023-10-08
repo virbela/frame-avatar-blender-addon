@@ -19,7 +19,7 @@ def clear_bake_targets(
         ht.bake_target_mirror_collection.remove(0)
 
 
-def clear_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def clear_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
     scene = require_bake_scene()
     for item in scene.objects:
         if item.type == "MESH":
@@ -51,7 +51,7 @@ def start_debug_server(
     bpy.ops.debug.connect_debugger_vscode()
 
 
-def custom_op(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def custom_op(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
     """Use this to run some custom testing/debug stuff"""
     # -- show mirrors
     for bt in ht.bake_target_collection:

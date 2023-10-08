@@ -278,7 +278,7 @@ def create_workmeshes_for_specific_target(
         update_workmesh_materials(bake_target, variant)
 
 
-def update_workmesh_materials(bake_target, variant):
+def update_workmesh_materials(bake_target, variant) -> None:
     load_material_templates()
 
     # TBD - should we disconnect the material if we fail to create one?
@@ -303,7 +303,7 @@ def update_workmesh_materials(bake_target, variant):
     variant.workmesh.active_material = bake_material
 
 
-def load_material_templates():
+def load_material_templates() -> None:
     asset_mat_names = (
         Assets.Materials.BakeAO.name,
         Assets.Materials.BakeDiffuse.name,

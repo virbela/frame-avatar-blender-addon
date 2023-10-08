@@ -8,7 +8,7 @@ class FABA_PT_export(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "Avatar"
 
-    def draw(self, context):
+    def draw(self, context) -> None:
         if HT := get_homeomorphic_tool_state(context):
             self.layout.prop(HT, "avatar_type", expand=True)
             self.layout.prop(HT, "export_glb")

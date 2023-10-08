@@ -24,7 +24,7 @@ class BoneAnimationExporter:
     transforms = dict()
     head_transforms = dict()
 
-    def __init__(self, context: Context, ht: HomeomorphicProperties):
+    def __init__(self, context: Context, ht: HomeomorphicProperties) -> None:
         log.info("Bone animation export started ...")
         self.ht = ht
         self.context = context
@@ -47,7 +47,7 @@ class BoneAnimationExporter:
         self.save_animation_json()
 
     @classmethod
-    def load_from_json(cls, context: Context, ht: HomeomorphicProperties):
+    def load_from_json(cls, context: Context, ht: HomeomorphicProperties) -> None:
         transforms = dict()
         head_transforms = dict()
         weights_compare = list()
@@ -74,12 +74,12 @@ class BoneAnimationExporter:
         cls.transforms = copy.deepcopy(transforms)
         cls.head_transforms = copy.deepcopy(head_transforms)
 
-    def set_weights(self):
+    def set_weights(self) -> None:
         log.info("\tCalculating vertex weights...")
         max_weights_per_vert = 10
         export_indices = get_gltf_export_indices(self.ht.avatar_mesh)
 
-        def el(val, count):
+        def el(val, count) -> None:
             # create empty list filled with `val` `count`` times
             return [val] * count
 
@@ -122,13 +122,13 @@ class BoneAnimationExporter:
             for i, index in enumerate(export_indices):
                 self.weights[obj.name][str(i)] = tmp_map[index]
 
-    def export_weights_json(self):
+    def export_weights_json(self) -> None:
         filepath = bpy.data.filepath
         directory = os.path.dirname(filepath)
         with open(os.path.join(directory, "weights.json"), "w") as file:
             json.dump(self.weights, file, indent=4)
 
-    def set_transforms(self):
+    def set_transforms(self) -> None:
         log.info("\tGetting bone transforms...")
         bakescene = require_bake_scene()
         # blender z-up to babylon y-up
@@ -212,13 +212,13 @@ class BoneAnimationExporter:
         bakescene.frame_set(last_frame)
         self.context.view_layer.update()
 
-    def export_transforms_json(self):
+    def export_transforms_json(self) -> None:
         filepath = bpy.data.filepath
         directory = os.path.dirname(filepath)
         with open(os.path.join(directory, "bone_transforms.json"), "w") as file:
             json.dump(self.transforms, file, indent=4)
 
-    def save_weights_to_png(self):
+    def save_weights_to_png(self) -> None:
         num_bones = len(self.weights[self.animated_objects[0].name].keys())
         num_objects = len(self.animated_objects)
         num_weights = len(self.weights[self.animated_objects[0].name][self.bones[0]])
@@ -251,7 +251,7 @@ class BoneAnimationExporter:
         img.filepath = os.path.join(directory, f"bone_weights.png")
         img.save()
 
-    def save_transforms_to_png(self):
+    def save_transforms_to_png(self) -> None:
         filepath = bpy.data.filepath
         directory = os.path.dirname(filepath)
 
@@ -277,7 +277,7 @@ class BoneAnimationExporter:
             img.filepath = os.path.join(directory, f"{tname}.png")
             img.save()
 
-    def save_animation_json(self):
+    def save_animation_json(self) -> None:
         filepath = bpy.data.filepath
         filename = Path(filepath).stem
         directory = os.path.dirname(filepath)

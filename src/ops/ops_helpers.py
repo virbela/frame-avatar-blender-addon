@@ -38,7 +38,7 @@ def select_objects_by_uv(
         mesh.from_mesh(obj.data)
         uv_layer_index = mesh.loops.layers.uv.active
 
-        def check_candidate_object():
+        def check_candidate_object() -> None:
             for face in mesh.faces:
                 for loop in face.loops:
                     uv = loop[uv_layer_index]
@@ -87,7 +87,7 @@ def recalculate_normals(
         clean_normals(context, workmesh)
 
 
-def update_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def update_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
     bake_scene = require_bake_scene()
 
     # DECISION - should we clear the bake scene each update?
@@ -164,7 +164,7 @@ def reset_uv_transforms(
     reset_uv_transformations(to_reset)
 
 
-def reset_uv_transformations(bake_targets: list[BakeTarget]):
+def reset_uv_transformations(bake_targets: list[BakeTarget]) -> None:
     for bake_target in bake_targets:
         for _, variant in bake_target.iter_variants():
             copy_and_transform_uv(
@@ -208,7 +208,7 @@ def copy_and_transform_uv(
     target_mesh.free()
 
 
-def clean_normals(context: Context, object_: Object):
+def clean_normals(context: Context, object_: Object) -> None:
     context.view_layer.objects.active = object_
     bpy.ops.object.mode_set(mode="EDIT", toggle=False)
     bpy.ops.mesh.select_all(action="SELECT")
@@ -219,7 +219,7 @@ def clean_normals(context: Context, object_: Object):
     bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 
 
-def copy_uv_layers(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def copy_uv_layers(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
     last_edit_mode = bpy.context.mode
     if last_edit_mode == "EDIT_MESH":
         # -- switch to object mode

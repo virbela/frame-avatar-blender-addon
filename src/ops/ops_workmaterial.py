@@ -54,7 +54,7 @@ def switch_to_preview_material(
     generic_switch_to_material(context, ht, "preview")
 
 
-def select_by_atlas(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def select_by_atlas(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
     selection = list()
     for bake_target in ht.bake_target_collection:
         for _, variant in bake_target.iter_variants():

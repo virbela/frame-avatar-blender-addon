@@ -60,7 +60,7 @@ def bake_selected_workmeshes(
     view_layer = bake_scene.view_layers[0]  # TODO - make sure there is only one
 
     # NOTE - see technical detail 5 for further info on this temporary solution
-    def get_bake_target_and_variant_from_workmesh(workmesh):
+    def get_bake_target_and_variant_from_workmesh(workmesh) -> None:
         for bake_target in ht.bake_target_collection:
             for variant in bake_target.variant_collection:
                 if variant.workmesh == workmesh:
@@ -110,7 +110,7 @@ def bake_specific_variant(
     uv_layers.active = uv_layers[ht.baking_target_uvmap]
 
 
-def run_bake(ht: HomeomorphicProperties, invoke: bool = True):
+def run_bake(ht: HomeomorphicProperties, invoke: bool = True) -> None:
     bpy.context.scene.cycles.device = "GPU"
     bpy.context.scene.render.engine = "CYCLES"
     bpy.context.scene.render.bake.use_clear = False
@@ -137,7 +137,7 @@ def run_bake(ht: HomeomorphicProperties, invoke: bool = True):
     bpy.context.scene.render.bake.use_selected_to_active = last_op
 
 
-def ensure_color_output_node_ready(variant: BakeVariant, tree: NodeTree):
+def ensure_color_output_node_ready(variant: BakeVariant, tree: NodeTree) -> None:
     material_nodes = tree.nodes
     material_links = tree.links
 

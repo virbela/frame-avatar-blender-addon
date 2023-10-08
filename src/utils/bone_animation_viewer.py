@@ -10,7 +10,7 @@ from .helpers import get_asset_file, get_homeomorphic_tool_state, is_dev
 context = bpy.context
 
 
-def view_animation(animation: str, show: bool):
+def view_animation(animation: str, show: bool) -> None:
     ht = get_homeomorphic_tool_state(bpy.context)
 
     dns = bpy.app.driver_namespace
@@ -24,14 +24,14 @@ def view_animation(animation: str, show: bool):
     Update3DViewPorts()
 
 
-def Update3DViewPorts():
+def Update3DViewPorts() -> None:
     for area in bpy.context.window.screen.areas:
         if area.type == "VIEW_3D":
             area.tag_redraw()
 
 
 class ShaderDrawer:
-    def __init__(self, ht: HomeomorphicProperties, action: str):
+    def __init__(self, ht: HomeomorphicProperties, action: str) -> None:
         self.ht = ht
         self.handle = None
         self.action = action
@@ -101,7 +101,7 @@ class ShaderDrawer:
             batches.extend([batch_verts])
         return batches
 
-    def update(self):
+    def update(self) -> None:
         # -- shader sources
         vertex_source = get_asset_file("bone_animation.vert.glsl", "r")
         fragment_source = get_asset_file("bone_animation.frag.glsl", "r")
@@ -114,7 +114,7 @@ class ShaderDrawer:
         bone_transforms = self.animationdata["bone_transforms"][self.action]
         num_frames = len(bone_transforms)
 
-        def draw():
+        def draw() -> None:
             gpu.state.depth_test_set("LESS_EQUAL")
             gpu.state.depth_mask_set(True)
             shader.bind()
@@ -135,7 +135,7 @@ class ShaderDrawer:
             draw, (), "WINDOW", "POST_VIEW"
         )
 
-    def remove(self):
+    def remove(self) -> None:
         if self.handle:
             try:
                 bpy.types.SpaceView3D.draw_handler_remove(self.handle, "WINDOW")

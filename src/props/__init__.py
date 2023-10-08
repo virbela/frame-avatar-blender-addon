@@ -10,9 +10,9 @@ from .deprecated import (
 )
 
 
-def register_props():
+def register_props() -> None:
     deprecated_props_register()
 
 
-def unregister_props():
+def unregister_props() -> None:
     deprecated_props_unregister()

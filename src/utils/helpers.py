@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from ..props import HomeomorphicProperties, BakeTarget, BakeVariant
 
 
-def IMPLEMENTATION_PENDING(*p, **n):
+def IMPLEMENTATION_PENDING(*p, **n) -> None:
     raise InternalError(f"This feature is not implemented! (arguments: {p} {n})")
 
 
@@ -42,7 +42,7 @@ PREFS_LOG = True
 
 
 @contextmanager
-def profile():
+def profile() -> None:
     s = io.StringIO()
     pr = cProfile.Profile()
 
@@ -79,11 +79,11 @@ class EnumEntry:
 
 
 class EnumDescriptor:
-    def __init__(self, *entries):
+    def __init__(self, *entries) -> None:
         self.members = {ee.identifier: ee for ee in (EnumEntry(*e) for e in entries)}
         self.by_value = {ee.number: ee for ee in self.members.values()}
 
-    def __iter__(self):
+    def __iter__(self) -> None:
         for member in self.members.values():
             yield (
                 member.identifier,
@@ -117,7 +117,7 @@ def get_named_entry(collection: bpy_prop_collection, name: str) -> typing.Any:
     return collection.get(name)
 
 
-def require_named_entry(collection: bpy_prop_collection, name: str):
+def require_named_entry(collection: bpy_prop_collection, name: str) -> None:
     if not name:
         raise FrameException.NoNameGivenForCollectionLookup(collection)
 
@@ -147,7 +147,7 @@ def create_named_entry(
     return collection.new(name, *positional)
 
 
-def set_scene(context: Context, scene: Scene):
+def set_scene(context: Context, scene: Scene) -> None:
     context.window.scene = scene
 
 
@@ -175,15 +175,15 @@ def set_selection(
         collection.active = selected[0]
 
 
-def clear_selection(collection: list):
+def clear_selection(collection: list) -> None:
     set_selection(collection)
 
 
-def set_active(collection: bpy_prop_collection, item: Object):
+def set_active(collection: bpy_prop_collection, item: Object) -> None:
     collection.active = item
 
 
-def clear_active(collection: bpy_prop_collection):
+def clear_active(collection: bpy_prop_collection) -> None:
     collection.active = None
 
 
@@ -208,18 +208,18 @@ def set_rendering(
 
 
 class AttributeReference:
-    def __init__(self, target, attribute):
+    def __init__(self, target, attribute) -> None:
         self.target = target
         self.attribute = attribute
 
 
 class AttrGet(AttributeReference):
-    def __call__(self):
+    def __call__(self) -> None:
         return getattr(self.target, self.attribute)
 
 
 class AttrSet(AttributeReference):
-    def __call__(self, value):
+    def __call__(self, value) -> None:
         return setattr(self.target, self.attribute, value)
 
 
@@ -248,12 +248,12 @@ def is_reference_valid(target: typing.Any) -> bool:
 
 
 class UUIDManager:
-    def __init__(self, key):
+    def __init__(self, key) -> None:
         self.key = key
         self.uuid_map = dict()
         self.lock = threading.Lock()
 
-    def validate(self):
+    def validate(self) -> None:
         to_discard = [
             key for key, value in self.uuid_map.items() if not is_reference_valid(value)
         ]
@@ -264,7 +264,7 @@ class UUIDManager:
             if self.uuid_map.get(key) is not value:
                 log.warning("UUID connection was broken")
 
-    def register(self, obj, auto_fix=True):
+    def register(self, obj, auto_fix=True) -> None:
         with self.lock:
             if existing_uuid := obj.get(self.key, ""):
                 if self.uuid_map.get(existing_uuid) is not obj:
@@ -283,13 +283,13 @@ class UUIDManager:
                         return candidate
 
 
-def get_bake_target_variant_name(bake_target: "BakeTarget", variant: "BakeVariant"):
+def get_bake_target_variant_name(bake_target: "BakeTarget", variant: "BakeVariant") -> None:
     if bake_target.multi_variants:
         return f"{bake_target.shortname}.{variant.name}"
     return f"{bake_target.shortname}"
 
 
-def purge_object(obj: Object):
+def purge_object(obj: Object) -> None:
     bpy.data.objects.remove(obj)
     for block in bpy.data.meshes:
         if block.users == 0:
@@ -346,8 +346,8 @@ def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
     return preferences
 
 
-def popup_message(message: str, title: str = "Error", icon: str = "ERROR"):
-    def oops(self, context: Context):
+def popup_message(message: str, title: str = "Error", icon: str = "ERROR") -> None:
+    def oops(self, context: Context) -> None:
         self.layout.label(text=message)
 
     if bpy.app.background:
@@ -357,7 +357,7 @@ def popup_message(message: str, title: str = "Error", icon: str = "ERROR"):
     bpy.context.window_manager.popup_menu(oops, title=title, icon=icon)
 
 
-def ensure_applied_rotation(object: Object):
+def ensure_applied_rotation(object: Object) -> None:
     "Ensure obj has rotation applied"
     rot = object.rotation_euler
     if (rot.x, rot.y, rot.z) == (0, 0, 0):
@@ -374,7 +374,7 @@ def ensure_applied_rotation(object: Object):
 
 
 def get_gltf_export_indices(obj: Object) -> list[int]:
-    def __get_uvs(blender_mesh, uv_i):
+    def __get_uvs(blender_mesh, uv_i) -> None:
         layer = blender_mesh.uv_layers[uv_i]
         uvs = np.empty(len(blender_mesh.loops) * 2, dtype=np.float32)
         layer.data.foreach_get("uv", uvs)

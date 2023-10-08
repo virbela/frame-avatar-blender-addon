@@ -83,11 +83,11 @@ class BakeTargetMirrorEntry(PropertyGroup):
     secondary: IntProperty(name="Secondary bake target identifier", default=-1)
 
 
-def get_baketarget_name(self: "BakeTarget"):
+def get_baketarget_name(self: "BakeTarget") -> None:
     return self.get("name", "Untitled bake target")
 
 
-def set_baketarget_name(self: "BakeTarget", value: str):
+def set_baketarget_name(self: "BakeTarget", value: str) -> None:
     if not self.source_object:
         # Initial name set from the create bake targets operator
         self["name"] = value

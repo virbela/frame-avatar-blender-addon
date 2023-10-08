@@ -14,7 +14,7 @@ class UVTransform:
     scale: float
     rotation: float
 
-    def isNil(self):
+    def isNil(self) -> None:
         return (
             self.scale == 1.0
             and self.rotation == 0
@@ -44,7 +44,7 @@ def get_uv_map_from_mesh(obj: Object) -> dict[int, Vector]:
 
 
 class UVTransformationCalculator:
-    def __init__(self, reference_uv_map: dict[int, Vector]):
+    def __init__(self, reference_uv_map: dict[int, Vector]) -> None:
         # Find two furthest points in UV map
         max_len = None
         for ref_index1, ref1 in reference_uv_map.items():

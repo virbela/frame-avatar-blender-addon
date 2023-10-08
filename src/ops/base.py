@@ -7,14 +7,14 @@ from ..utils.exceptions import BakeException
 from ..utils.helpers import get_homeomorphic_tool_state
 
 PollFunction = typing.Callable[[Context], bool]
-OperatorFunction = typing.Callable[[Context, HomeomorphicProperties], None]
+OperatorFunction = typing.Callable[[Operator, Context, HomeomorphicProperties], None]
 
 
 def empty_poll(context: Context) -> bool:
     return True
 
 
-def empty_op(context: Context, ht: HomeomorphicProperties) -> None:
+def empty_op(op: Operator, context: Context, ht: HomeomorphicProperties) -> None:
     pass
 
 
@@ -31,7 +31,7 @@ class FabaOperator(Operator):
     ) -> typing.Union[typing.Set[str], typing.Set[int]]:
         if HT := get_homeomorphic_tool_state(context):
             try:
-                self.faba_operator(context, HT)
+                FabaOperator.faba_operator(self, context, HT)
 
             except BakeException.base as e:
                 log.exception(f"Exception when calling operator for {self}: {e}")

@@ -21,7 +21,7 @@ except Exception:
     sys.exit()
 
 
-def main():
+def main() -> None:
     # Load the addon module
     LoadModule(os.path.join(addon_dir, "src", "__init__.py"))
     print("-" * 70, end="\n\n")
@@ -47,7 +47,7 @@ class LoadModule:
     https://github.com/wisaac407/blender-script-watcher
     """
 
-    def __init__(self, filepath):
+    def __init__(self, filepath) -> None:
         self.filepath = filepath
         self.remove_cached_mods()
         try:
@@ -77,7 +77,7 @@ class LoadModule:
         else:
             f.close()
 
-    def get_paths(self):
+    def get_paths(self) -> None:
         """Find all the python paths surrounding the given filepath."""
 
         dirname = os.path.dirname(self.filepath)
@@ -96,7 +96,7 @@ class LoadModule:
         # If we just have one (non __init__) file then return just that file.
         return paths, filepaths or [self.filepath]
 
-    def get_mod_name(self):
+    def get_mod_name(self) -> None:
         """Return the module name and the root path of the given python file path."""
         dir, mod = os.path.split(self.filepath)
 
@@ -111,7 +111,7 @@ class LoadModule:
 
         return mod, dir
 
-    def remove_cached_mods(self):
+    def remove_cached_mods(self) -> None:
         """Remove all the script modules from the system cache."""
         paths, files = self.get_paths()
         for mod_name, mod in list(sys.modules.items()):
