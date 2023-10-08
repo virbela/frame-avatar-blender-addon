@@ -1,4 +1,4 @@
-from bpy.types import Panel, UIList
+from bpy.types import Panel, UIList, Context
 
 from ...utils.helpers import get_homeomorphic_tool_state
 
@@ -23,7 +23,7 @@ class FABA_PT_effects(Panel):
     bl_region_type = "UI"
     bl_category = "Avatar"
 
-    def draw(self, context) -> None:
+    def draw(self, context: Context) -> None:
         if HT := get_homeomorphic_tool_state(context):
             ob = HT.avatar_mesh
             self.layout.template_list(

@@ -9,7 +9,7 @@ from ..utils.bone_animation_viewer import view_animation
 
 def clear_bake_targets(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     ht.selected_bake_target = -1
     while len(ht.bake_target_collection):
         ht.bake_target_collection.remove(0)
@@ -32,7 +32,7 @@ def clear_bake_scene(
 
 def debug_bone_animation(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     if ht.debug_animation_avatar_basis:
         ht.debug_animation_show = not ht.debug_animation_show
 
@@ -49,7 +49,7 @@ def debug_bone_animation(
 
 def start_debug_server(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     bpy.ops.debug.connect_debugger_vscode()
 
 
@@ -63,7 +63,7 @@ def custom_op(operator: Operator, context: Context, ht: HomeomorphicProperties) 
 class FABA_OT_clear_bake_scene(FabaOperator):
     bl_label = "Remove everything from bake scene"
     bl_idname = "faba.clear_bake_scene"
-    bl_description = "This is for internal development purposes and should not be seen in distribution"
+    bl_description = "This is for internal development purposes"
     faba_operator = clear_bake_scene
 
 
@@ -77,19 +77,19 @@ class FABA_OT_clear_bake_targets(FabaOperator):
 class FABA_OT_show_bone_debug(FabaOperator):
     bl_label = "Show bone animation debug"
     bl_idname = "faba.debug_bone_animation"
-    bl_description = "This is for internal development purposes and should not be seen in distribution"
+    bl_description = "This is for internal development purposes"
     faba_operator = debug_bone_animation
 
 
 class FABA_OT_start_debug_server(FabaOperator):
     bl_label = "Start Debugger"
     bl_idname = "faba.start_debugger"
-    bl_description = "This is for internal development purposes and should not be seen in distribution"
+    bl_description = "This is for internal development purposes"
     faba_operator = start_debug_server
 
 
 class FABA_OT_custom_debug_operator(FabaOperator):
     bl_label = "Custom Operator"
     bl_idname = "faba.custom_operator"
-    bl_description = "This is for internal development purposes and should not be seen in distribution"
+    bl_description = "This is for internal development purposes"
     faba_operator = custom_op

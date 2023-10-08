@@ -1,4 +1,4 @@
-from bpy.types import Panel, UIList
+from bpy.types import Panel, UIList, Context
 
 from ...utils.exceptions import InternalError
 from ...props.deprecated.baketarget import UV_ISLAND_MODES
@@ -11,7 +11,7 @@ class FABA_PT_bake_targets(Panel):
     bl_region_type = "UI"
     bl_category = "Avatar"
 
-    def draw(self, context) -> None:
+    def draw(self, context: Context) -> None:
         if HT := get_homeomorphic_tool_state(context):
             row = self.layout.row()
             rows = 3
@@ -76,7 +76,7 @@ class FABA_PT_bake_targets(Panel):
                         self.layout.prop(variant, "intermediate_atlas")
                         if variant.intermediate_atlas is None:
                             self.layout.label(
-                                text=f"Intermediate atlas: (not assigned)",
+                                text="Intermediate atlas: (not assigned)",
                                 icon="UNLINKED",
                             )
 
@@ -113,7 +113,8 @@ class FABA_UL_bake_targets(UIList):
     ):
         if item.bake_mode == "UV_BM_MIRRORED":
             if target_item := data.bake_target_collection[item.mirror_source]:
-                # TODO - we should have a function that automatically fixes index out of range issues in case we lose the reference.
+                # TODO - we should have a function that automatically fixes index out
+                # of range issues in case we lose the reference.
                 layout.prop(
                     item,
                     "name",
@@ -171,9 +172,10 @@ class FABA_UL_bake_target_mirrors(UIList):
         if ht := get_homeomorphic_tool_state(context):
             row = layout.row()
 
-            def na(txt) -> None:
-                """This is a helper function that will say (Not assigned) if the string is empty
-                but otherwise indicate the contents but also convey it is a broken link
+            def na(txt) -> str:
+                """This is a helper function that will say (Not assigned) if the string
+                is empty but otherwise indicate the contents but also convey it is a
+                broken link
                 """
                 if txt:
                     return f"`{txt}` N/A"

@@ -236,7 +236,7 @@ def pack_intermediate_atlas(
     all_uv_object_list: list[Intermediate.Packing.BakeTarget],
     atlas: Image,
     uv_map: str,
-    box: tuple[float, float, float, float]
+    box: tuple[float, float, float, float],
 ) -> None:
     view_layer = bake_scene.view_layers[0]
 
@@ -335,7 +335,7 @@ def copy_and_transform_uv(
     target_object: Object,
     target_layer: str,
     scale_factor: float = 1.0,
-):
+) -> None:
     # TODO - investigate if we can get uv layer index without actually changing it and
     # getting mesh.loops.layers.uv.active
     try:

@@ -30,7 +30,7 @@ update_selected_workmesh_active_shapekey = IMPLEMENTATION_PENDING
 
 def create_workmeshes_for_all_targets(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     bake_scene = require_bake_scene()
     for bake_target in ht.bake_target_collection:
         create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
@@ -38,7 +38,7 @@ def create_workmeshes_for_all_targets(
 
 def create_workmeshes_for_selected_target(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     if bake_target := ht.get_selected_bake_target():
         bake_scene = require_bake_scene()
         create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
@@ -46,7 +46,7 @@ def create_workmeshes_for_selected_target(
 
 def update_all_workmeshes(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     bake_scene = require_bake_scene()
     for bake_target in ht.bake_target_collection:
         for variant in bake_target.variant_collection:
@@ -62,7 +62,7 @@ def update_all_workmeshes(
 
 def workmesh_to_shapekey(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     work_scene = require_work_scene()
     avatar_object = work_scene.objects.get("Avatar")
     if not avatar_object:
@@ -89,7 +89,7 @@ def workmesh_to_shapekey(
 
 def all_workmeshes_to_shapekey(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     bake_scene = require_bake_scene()
     work_scene = require_work_scene()
     avatar_object = work_scene.objects.get("Avatar")
@@ -120,7 +120,7 @@ def all_workmeshes_to_shapekey(
 
 def shapekey_to_workmesh(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     work_scene = require_work_scene()
     avatar_object = work_scene.objects.get("Avatar")
     if not avatar_object:
@@ -153,7 +153,7 @@ def shapekey_to_workmesh(
 
 def all_shapekeys_to_workmeshes(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     bake_scene = require_bake_scene()
     work_scene = require_work_scene()
     avatar_object = work_scene.objects.get("Avatar")
@@ -193,7 +193,7 @@ def all_shapekeys_to_workmeshes(
 
 def workmesh_symmetrize(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     for obj in context.selected_objects:
         mesh = obj.data
         right_verts = [v for v in mesh.vertices if v.co.x > 0.0]
@@ -227,7 +227,7 @@ def create_workmeshes_for_specific_target(
     ht: HomeomorphicProperties,
     bake_scene: Scene,
     bake_target: BakeTarget,
-):
+) -> None:
     for variant in bake_target.variant_collection:
         pending_name = get_bake_target_variant_name(bake_target, variant)
 
@@ -235,7 +235,7 @@ def create_workmeshes_for_specific_target(
         if pending_name in bake_scene.objects:
             # NOTE(ranjian0) since artists may have performed actions on the workmeshs,
             # we choose to skip regeneration.
-            log.warning(f"Skipping existing workmesh ...")
+            log.warning("Skipping existing workmesh ...")
             pending_object = bake_scene.objects.get(pending_name)
             bake_uv = pending_object.data.uv_layers[TARGET_UV_MAP]
             local_uv = pending_object.data.uv_layers[PAINTING_UV_MAP]
@@ -282,7 +282,8 @@ def update_workmesh_materials(bake_target, variant) -> None:
     load_material_templates()
 
     # TBD - should we disconnect the material if we fail to create one?
-    # This might be good in order to prevent accidentally getting unintended materials activated
+    # This might be good in order to prevent accidentally getting
+    # unintended materials activated
     # TODO(ranjian0) Should mirrored baketarget workmeshes have a material
     if not variant.uv_map:
         variant.workmesh.active_material = None
@@ -292,7 +293,8 @@ def update_workmesh_materials(bake_target, variant) -> None:
     bake_material_name = f"bake-{get_bake_target_variant_name(bake_target, variant)}"
     bake_material = create_named_entry(bpy.data.materials, bake_material_name)
     bake_material.use_nodes = True  # contribution note 9
-    # TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?
+    # TBD should we use source_uv_map here or should we consider the workmesh to
+    # have an intermediate UV map?
     setup_bake_material(
         bake_material,
         variant.intermediate_atlas,
@@ -328,7 +330,7 @@ def load_material_templates() -> None:
 
 def mirror_workmesh_verts(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     source_obj = ht.mirror_verts_source
     target_obj = ht.mirror_verts_target
 
@@ -369,7 +371,7 @@ def mirror_workmesh_verts(
 
 def transfer_skin_weights(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     pass
 
 

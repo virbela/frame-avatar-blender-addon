@@ -7,7 +7,7 @@ from .helpers import is_reference_valid
 
 
 @contextmanager
-def active_scene(name: str) -> None:
+def active_scene(name: str) -> typing.Generator[None, None, None]:
     active_scene = bpy.context.scene
 
     # -- set new active scene

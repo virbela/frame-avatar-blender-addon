@@ -1,5 +1,5 @@
 from typing import Callable, Any, Sequence
-from bpy.types import CollectionProperty, Object, Context, Operator
+from bpy.types import Object, Context, Operator, bpy_prop_collection
 
 from ..props import BakeVariant
 from ..utils.constants import WORK_SCENE, BAKE_SCENE
@@ -18,11 +18,13 @@ class GuardedOperator:
 
 
 class GenericList:
-    "This is an abstract handler for list operations. The operations needs a collection and callables to get and set the current selection"
+    """This is an abstract handler for list operations.
+    The operations needs a collection and callables to
+    get and set the current selection"""
 
     @staticmethod
     def add(
-        collection: CollectionProperty, get_selected: Any, set_selected: Any
+        collection: bpy_prop_collection[Any], get_selected: Any, set_selected: Any
     ) -> Any:
         new = collection.add()
         last_id = len(collection) - 1
@@ -31,7 +33,7 @@ class GenericList:
 
     @staticmethod
     def remove(
-        collection: CollectionProperty, get_selected: Any, set_selected: Any
+        collection: bpy_prop_collection[Any], get_selected: Any, set_selected: Any
     ) -> Any:
         collection.remove(get_selected())
         last_id = len(collection) - 1
@@ -53,8 +55,8 @@ def copy_object(source_obj: Object, name: str) -> Object:
 
 
 def copy_collection(
-    source: CollectionProperty,
-    dest: CollectionProperty,
+    source: bpy_prop_collection[Any],
+    dest: bpy_prop_collection[Any],
     transfer: Callable[[Any, Any], None],
 ) -> None:
     while len(dest):

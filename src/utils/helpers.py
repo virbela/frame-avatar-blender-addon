@@ -18,23 +18,26 @@ from typing import TYPE_CHECKING, Tuple
 from bpy.types import (
     Context,
     Scene,
+    Menu,
     bpy_prop_collection,
     Object,
-    Preferences,
+    AddonPreferences,
     Mesh,
     Action,
+    ObjectBase
 )
 
 from .logging import log
 from .constants import BAKE_SCENE, WORK_SCENE
 from .exceptions import InternalError, FrameException
 
+T = typing.TypeVar('T')
 
 if TYPE_CHECKING:
     from ..props import HomeomorphicProperties, BakeTarget, BakeVariant
 
 
-def IMPLEMENTATION_PENDING(*p, **n) -> None:
+def IMPLEMENTATION_PENDING(*p: typing.Any, **n: typing.Any) -> None:
     raise InternalError(f"This feature is not implemented! (arguments: {p} {n})")
 
 
@@ -79,11 +82,11 @@ class EnumEntry:
 
 
 class EnumDescriptor:
-    def __init__(self, *entries) -> None:
+    def __init__(self, *entries: typing.Tuple[str, str, str, str, int]) -> None:
         self.members = {ee.identifier: ee for ee in (EnumEntry(*e) for e in entries)}
         self.by_value = {ee.number: ee for ee in self.members.values()}
 
-    def __iter__(self) -> None:
+    def __iter__(self) -> typing.Generator[typing.Tuple[str, str, str, str, int], None, None]:
         for member in self.members.values():
             yield (
                 member.identifier,
@@ -113,11 +116,11 @@ def get_homeomorphic_tool_state(context: Context) -> "HomeomorphicProperties":
     return scene.homeomorphictools
 
 
-def get_named_entry(collection: bpy_prop_collection, name: str) -> typing.Any:
+def get_named_entry(collection: bpy_prop_collection[T], name: str) -> T:
     return collection.get(name)
 
 
-def require_named_entry(collection: bpy_prop_collection, name: str) -> None:
+def require_named_entry(collection: bpy_prop_collection[T], name: str) -> T:
     if not name:
         raise FrameException.NoNameGivenForCollectionLookup(collection)
 
@@ -128,9 +131,9 @@ def require_named_entry(collection: bpy_prop_collection, name: str) -> None:
 
 
 def create_named_entry(
-    collection: bpy_prop_collection,
+    collection: bpy_prop_collection[T],
     name: str,
-    *positional,
+    *positional: typing.Any,
     action: NamedEntryAction = NamedEntryAction.GET_EXISTING,
 ) -> typing.Any:
     if name in collection:
@@ -152,21 +155,23 @@ def set_scene(context: Context, scene: Scene) -> None:
 
 
 def set_selection(
-    collection: list,
-    *selected,
+    collection: list[ObjectBase],
+    *selected: list[T],
     synchronize_active: bool = False,
     make_sure_active: bool = False,
-):
+) -> None:
     new_selection = set(selected)
 
     for item in collection:
-        # NOTE There are two APIs to select things, we will favor the setter since that seems the be most recent
+        # NOTE There are two APIs to select things, we will favor the setter
+        # since that seems the be most recent
         if setter := getattr(item, "select_set", None):
             setter(item in new_selection)
         else:
             item.select = item in new_selection
 
-    # if there is an active element in this collection and it is not selected, we deactivate it if synchronize_active is set
+    # if there is an active element in this collection and it is not selected,
+    # we deactivate it if synchronize_active is set
     if synchronize_active and collection.active not in new_selection:
         collection.active = None
 
@@ -188,17 +193,18 @@ def clear_active(collection: bpy_prop_collection) -> None:
 
 
 def set_rendering(
-    collection: bpy_prop_collection,
-    *selected,
+    collection: bpy_prop_collection[T],
+    *selected: bpy_prop_collection[T],
     synchronize_active: bool = False,
     make_sure_active: bool = False,
-):
+) -> None:
     new_selection = set(selected)
 
     for item in collection:
         item.hide_render = item not in new_selection
 
-    # if there is an active element in this collection and it is not selected, we deactivate it if synchronize_active is set
+    # if there is an active element in this collection and it is not selected,
+    # we deactivate it if synchronize_active is set
     if synchronize_active and collection.active not in new_selection:
         collection.active = None
 
@@ -208,28 +214,28 @@ def set_rendering(
 
 
 class AttributeReference:
-    def __init__(self, target, attribute) -> None:
+    def __init__(self, target: T, attribute: str) -> None:
         self.target = target
         self.attribute = attribute
 
 
 class AttrGet(AttributeReference):
-    def __call__(self) -> None:
+    def __call__(self) -> typing.Any:
         return getattr(self.target, self.attribute)
 
 
 class AttrSet(AttributeReference):
-    def __call__(self, value) -> None:
+    def __call__(self, value: typing.Any) -> None:
         return setattr(self.target, self.attribute, value)
 
 
 def get_nice_name(
-    collection: typing.Iterable,
+    collection: typing.Iterable[T],
     prefix: str,
     max_prefix_length: int,
     random_hash_length: int = 8,
     max_tries: int = 1000,
-):
+) -> str:
     for v in range(max_tries):
         tail = f"-{v:03}" if v else ""
         candidate = f"{prefix[:max_prefix_length]}{tail}"
@@ -248,9 +254,9 @@ def is_reference_valid(target: typing.Any) -> bool:
 
 
 class UUIDManager:
-    def __init__(self, key) -> None:
+    def __init__(self, key: str) -> None:
         self.key = key
-        self.uuid_map = dict()
+        self.uuid_map: typing.Dict[str, Object] = dict()
         self.lock = threading.Lock()
 
     def validate(self) -> None:
@@ -264,7 +270,7 @@ class UUIDManager:
             if self.uuid_map.get(key) is not value:
                 log.warning("UUID connection was broken")
 
-    def register(self, obj, auto_fix=True) -> None:
+    def register(self, obj: Object, auto_fix=True) -> str:
         with self.lock:
             if existing_uuid := obj.get(self.key, ""):
                 if self.uuid_map.get(existing_uuid) is not obj:
@@ -285,7 +291,7 @@ class UUIDManager:
 
 def get_bake_target_variant_name(
     bake_target: "BakeTarget", variant: "BakeVariant"
-) -> None:
+) -> str:
     if bake_target.multi_variants:
         return f"{bake_target.shortname}.{variant.name}"
     return f"{bake_target.shortname}"
@@ -293,13 +299,13 @@ def get_bake_target_variant_name(
 
 def purge_object(obj: Object) -> None:
     bpy.data.objects.remove(obj)
-    for block in bpy.data.meshes:
-        if block.users == 0:
-            bpy.data.meshes.remove(block)
+    for me in bpy.data.meshes:
+        if me.users == 0:
+            bpy.data.meshes.remove(me)
 
-    for block in bpy.data.materials:
-        if block.users == 0:
-            bpy.data.materials.remove(block)
+    for mat in bpy.data.materials:
+        if mat.users == 0:
+            bpy.data.materials.remove(mat)
 
 
 def is_dev() -> bool:
@@ -310,9 +316,9 @@ def is_dev() -> bool:
     return True
 
 
-def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
+def get_prefs() -> typing.Union[AddonPreferences, types.SimpleNamespace]:
     global PREFS_LOG
-
+    preferences: typing.Union[AddonPreferences, types.SimpleNamespace]
     try:
         preferences = bpy.context.preferences.addons[__package__].preferences
     except KeyError:
@@ -350,7 +356,7 @@ def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
 
 
 def popup_message(message: str, title: str = "Error", icon: str = "ERROR") -> None:
-    def oops(self, context: Context) -> None:
+    def oops(self: Menu, context: Context) -> None:
         self.layout.label(text=message)
 
     if bpy.app.background:
@@ -377,7 +383,7 @@ def ensure_applied_rotation(object: Object) -> None:
 
 
 def get_gltf_export_indices(obj: Object) -> list[int]:
-    def __get_uvs(blender_mesh, uv_i) -> None:
+    def __get_uvs(blender_mesh: Mesh, uv_i: int) -> np.ndarray[typing.Any, np.float32]:
         layer = blender_mesh.uv_layers[uv_i]
         uvs = np.empty(len(blender_mesh.loops) * 2, dtype=np.float32)
         layer.data.foreach_get("uv", uvs)
@@ -391,7 +397,7 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
         return uvs
 
     # Get the active mesh
-    me: Mesh = obj.data
+    me = obj.data
     tex_coord_max = len(me.uv_layers)
 
     dot_fields = [("vertex_index", np.uint32)]
@@ -445,7 +451,8 @@ def get_animation_objects(ht: "HomeomorphicProperties") -> list[Object]:
             avatar_obj = bake_target.source_object
 
         if bake_target.multi_variants:
-            # TODO(ranjian0) Figure out if baketargets with multiple variants can be animated
+            # TODO(ranjian0) Figure out if baketargets with
+            # multiple variants can be animated
             log.info(f"Skipping multivariant {bake_target.name}", print_console=False)
             continue
 

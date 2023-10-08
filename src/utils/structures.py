@@ -1,14 +1,20 @@
 """
-This module is used to define common structures that are only used internally in certain operations.
-These must not be saved in any blender specific context and must be discarded after use
-For structures that SHOULD be saved in blender specific contexts are defined in the properties.py module.
-"""
+This module is used to define common structures that are only used internally in certain
+operations. These must not be saved in any blender specific context and must be 
+discarded after use 
 
+For structures that SHOULD be saved in blender specific contexts are defined in the 
+properties.py module.
+"""
+import typing
 from dataclasses import dataclass
 
 
-def iter_dc(d) -> None:
-    # note: dataclasses.asdict performs a deep copy which will be problematic when referencing blender objects so we will iter it ourselves
+def iter_dc(
+    d: "Intermediate.Pending.BakeTarget"
+) -> typing.Generator[typing.Any, None, None]:
+    # note: dataclasses.asdict performs a deep copy which will be
+    # problematic when referencing blender objects so we will iter it ourselves
     return ((key, getattr(d, key)) for key in d.__dataclass_fields__)
 
 
@@ -34,7 +40,7 @@ class Intermediate:
             bake_target: object
             variant: object
             area: float = 0.0
-            variant_name: str = None
+            variant_name: str = ""
             bin: object = None
 
         @dataclass

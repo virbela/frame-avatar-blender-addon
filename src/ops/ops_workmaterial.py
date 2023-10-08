@@ -17,7 +17,7 @@ from ..utils.helpers import (
 
 def update_all_materials(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     for bake_target in ht.bake_target_collection:
         for _, variant in bake_target.iter_variants():
             update_workmesh_materials(context, ht, bake_target, variant)
@@ -25,7 +25,7 @@ def update_all_materials(
 
 def update_selected_material(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     if bake_target := ht.get_selected_bake_target():
         if variant := bake_target.variant_collection[bake_target.selected_variant]:
             update_workmesh_materials(context, ht, bake_target, variant)
@@ -33,7 +33,7 @@ def update_selected_material(
 
 def set_selected_objects_atlas(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     selected_objects = context.selected_objects
     for bake_target in ht.bake_target_collection:
         for _, variant in bake_target.iter_variants():
@@ -44,13 +44,13 @@ def set_selected_objects_atlas(
 
 def switch_to_bake_material(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     generic_switch_to_material(context, ht, "bake")
 
 
 def switch_to_preview_material(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     generic_switch_to_material(context, ht, "preview")
 
 
@@ -76,9 +76,11 @@ def update_workmesh_materials(
     ht: HomeomorphicProperties,
     bake_target: BakeTarget,
     variant: BakeVariant,
-):
+) -> None:
     # TODO Handle mirror bake targets properly i.e this fails when no uv map is found
-    # TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
+    # TBD - should we disconnect the material if we fail to create one? 
+    # This might be good in order to prevent accidentally getting 
+    # unintended materials activated
     if not variant.uv_map:
         variant.workmesh.active_material = None
         log.error(f"Missing UV map for {variant}")
@@ -91,7 +93,8 @@ def update_workmesh_materials(
 
     bake_material = bpy.data.materials.new(bake_material_name)
     bake_material.use_nodes = True  # contribution note 9
-    # TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?
+    # TBD should we use source_uv_map here or should we consider the workmesh
+    # to have an intermediate UV map?
     setup_bake_material(
         bake_material,
         variant.intermediate_atlas,
@@ -104,7 +107,7 @@ def update_workmesh_materials(
 
 def generic_switch_to_material(
     context: Context, ht: HomeomorphicProperties, material_type: str
-):
+) -> None:
     bake_scene = require_bake_scene()
     # todo note 1
     for bt in ht.bake_target_collection:

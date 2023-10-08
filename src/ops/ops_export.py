@@ -2,6 +2,7 @@ import os
 import bpy
 import json
 import uuid
+import typing
 import tempfile
 from pathlib import Path
 from collections import defaultdict
@@ -370,7 +371,7 @@ def export_atlas(context: Context, denoise: bool = True) -> None:
 
 
 @contextmanager
-def clear_custom_props(item: Object | Scene) -> None:
+def clear_custom_props(item: Object | Scene) -> typing.Generator[None, None, None]:
     prop_keys = list(item.keys())
 
     # remove all custom props
@@ -465,7 +466,7 @@ def get_verts_or_vgroup(
     return list(data_only_in_group)
 
 
-def obj_from_shapekey(obj: Object, keyname: str) -> None:
+def obj_from_shapekey(obj: Object, keyname: str) -> Object:
     scene = require_work_scene()
     view_layer = scene.view_layers[0]
 
@@ -517,7 +518,7 @@ def obj_from_shapekey(obj: Object, keyname: str) -> None:
     return pending_object
 
 
-def animation_metadata(ht: HomeomorphicProperties) -> dict:
+def animation_metadata(ht: HomeomorphicProperties) -> dict[str, list[typing.Any]]:
     result = dict()
     animated_objects = get_animation_objects(ht)
     result["layers"] = sorted(o.name for o in animated_objects)
@@ -696,14 +697,16 @@ def deselect_all() -> None:
 
 
 class ExportAnimationJSONPaths:
+    @staticmethod
     def add_json_path(
         operator: Operator, context: Context, ht: HomeomorphicProperties
     ) -> None:
         ht.export_animation_json_paths.add()
 
+    @staticmethod
     def remove_json_path(
         operator: Operator, context: Context, ht: HomeomorphicProperties
-    ):
+    ) -> None:
         ht.export_animation_json_paths.remove(operator.index)
 
 

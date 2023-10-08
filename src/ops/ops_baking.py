@@ -1,4 +1,5 @@
 import bpy
+import typing
 from bpy.types import (
     Operator,
     Context,
@@ -12,13 +13,13 @@ from bpy.types import (
 from .base import FabaOperator
 from ..utils.logging import log
 from ..utils.exceptions import BakeException
-from ..props import HomeomorphicProperties, BakeVariant
+from ..props import HomeomorphicProperties, BakeVariant, BakeTarget
 from ..utils.helpers import require_bake_scene, set_scene, set_rendering, set_selection
 
 
 def bake_all_bake_targets(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     last_active_scene = context.scene
     bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]  # TODO - make sure there is only one
@@ -39,7 +40,7 @@ def bake_all_bake_targets(
 
 def bake_selected_bake_target(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     last_active_scene = context.scene
     bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]  # TODO - make sure there is only one
@@ -55,12 +56,12 @@ def bake_selected_bake_target(
 
 def bake_selected_workmeshes(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]  # TODO - make sure there is only one
 
     # NOTE - see technical detail 5 for further info on this temporary solution
-    def get_bake_target_and_variant_from_workmesh(workmesh) -> None:
+    def get_bake_target_and_variant_from_workmesh(workmesh) -> typing.Tuple[BakeTarget, BakeVariant]:
         for bake_target in ht.bake_target_collection:
             for variant in bake_target.variant_collection:
                 if variant.workmesh == workmesh:
@@ -91,7 +92,7 @@ def bake_selected_workmeshes(
 
 def bake_specific_variant(
     ht: HomeomorphicProperties, view_layer: ViewLayer, variant: BakeVariant
-):
+) -> None:
     workmesh = variant.workmesh
 
     ensure_color_output_node_ready(variant, workmesh.active_material.node_tree)

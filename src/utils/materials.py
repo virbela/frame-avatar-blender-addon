@@ -1,5 +1,5 @@
 import bpy
-from bpy.types import Scene, Image, Material, ShaderNodeTree
+from bpy.types import Scene, Image, Material, NodeTree
 
 from .constants import Assets
 from ..props import BakeTarget
@@ -16,8 +16,10 @@ def get_material_variants(
     bt: BakeTarget, bake_scene: Scene, atlas: Image, uv_map: str, recreate: bool = False
 ) -> dict[str, Intermediate.Pending.Materials]:
     # ISSUE-7: Material creation needs improvement
-    # 	*	We should handle the case when multiple variants are not used (we should use a generic naming function that is discussed elsewere).
-    # 	*	Move out the cache `result` to a module and also document why we need it (do we?)
+    # 	*	We should handle the case when multiple variants are not used
+    # (we should use a generic naming function that is discussed elsewere).
+    # 	*	Move out the cache `result` to a module and also document why we need it
+    # (do we?)
     # 	labels: needs-improvement
 
     result = dict()
@@ -74,8 +76,8 @@ def setup_bake_material(
     material: Material,
     atlas: Image,
     uv_map: str = "UVMap",
-    diffuse_image: Image = None,
-    diffuse_uv_map: Image = None,
+    diffuse_image: Image | None = None,
+    diffuse_uv_map: Image | None = None,
 ) -> None:
     template = bpy.data.materials[Assets.Materials.BakeAO.name]
     if diffuse_image and diffuse_uv_map:
@@ -102,7 +104,7 @@ def setup_bake_preview_material(
     nodes["uvm_target"].uv_map = uv_map
 
 
-def copy_nodetree(tree_from: ShaderNodeTree, tree_to: ShaderNodeTree) -> None:
+def copy_nodetree(tree_from: NodeTree, tree_to: NodeTree) -> None:
     tree_to.nodes.clear()
     tree_to.links.clear()
 

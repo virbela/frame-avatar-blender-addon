@@ -11,21 +11,21 @@ class FABA_PT_export(bpy.types.Panel):
 
     def draw(self, context: Context) -> None:
         if HT := get_homeomorphic_tool_state(context):
-            self.layout.prop(HT.as_any(), "avatar_type", expand=True)
-            self.layout.prop(HT.as_any(), "export_glb")
-            self.layout.prop(HT.as_any(), "export_atlas")
+            self.layout.prop(HT, "avatar_type", expand=True)
+            self.layout.prop(HT, "export_glb")
+            self.layout.prop(HT, "export_atlas")
             if HT.export_atlas:
                 sp = self.layout.split(factor=0.05)
                 _ = sp.column()
                 col = sp.column()
-                col.prop(HT.as_any(), "denoise")
+                col.prop(HT, "denoise")
 
             anim = self.layout.row(align=True)
             anim.enabled = HT.avatar_type == "FULLBODY"
-            anim.prop(HT.as_any(), "export_animation")
+            anim.prop(HT, "export_animation")
 
             if HT.export_animation:
-                self.layout.prop(HT.as_any(), "export_animation_source", expand=True)
+                self.layout.prop(HT, "export_animation_source", expand=True)
 
                 if HT.should_export_animation_action():
                     if not HT.export_animation_actions:
@@ -35,7 +35,7 @@ class FABA_PT_export(bpy.types.Panel):
                         _ = sp.column()
                         col = sp.column()
                         col.prop(
-                            HT.as_any(),
+                            HT,
                             "export_animation_preview",
                             toggle=True,
                             text="Preview Only",
@@ -64,6 +64,6 @@ class FABA_PT_export(bpy.types.Panel):
             row.scale_y = 1.5
             row.operator("faba.export", text="Export")
             # if HT.export_progress > -1:
-            #     self.layout.prop(HT.as_any(), "export_progress", slider=True)
+            #     self.layout.prop(HT, "export_progress", slider=True)
             # else:
             #     self.layout.operator("faba.export", text="Export")

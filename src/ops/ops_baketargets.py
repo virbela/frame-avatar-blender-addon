@@ -20,7 +20,7 @@ from ..utils.helpers import (
 
 def create_targets_from_avatar_object(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     source_object = ht.avatar_mesh
     source_uv = source_object.data.uv_layers[0]  # Assume first UV map is the source one
     source_uv.name = TARGET_UV_MAP
@@ -38,7 +38,7 @@ def create_targets_from_avatar_object(
 
 def create_baketarget_from_key_blocks(
     ht: HomeomorphicProperties, source_object: Object, key_blocks: list[ShapeKey]
-):
+) -> None:
     # Create all intermediate targets
     targets = dict()
     mirror_list = list()

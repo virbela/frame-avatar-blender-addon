@@ -11,7 +11,7 @@ from .common import set_uv_map, copy_object, copy_collection, transfer_variant
 
 def synchronize_uv_to_vertices(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     mesh = bmesh.from_edit_mesh(context.active_object.data)
     uv_layer = mesh.loops.layers.uv.active
 
@@ -30,7 +30,7 @@ def synchronize_uv_to_vertices(
 
 def select_objects_by_uv(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     bake_scene = require_bake_scene()
     to_select = list()
     for obj in bake_scene.objects:
@@ -38,7 +38,7 @@ def select_objects_by_uv(
         mesh.from_mesh(obj.data)
         uv_layer_index = mesh.loops.layers.uv.active
 
-        def check_candidate_object() -> None:
+        def check_candidate_object() -> bool:
             for face in mesh.faces:
                 for loop in face.loops:
                     uv = loop[uv_layer_index]
@@ -59,7 +59,7 @@ def select_objects_by_uv(
 
 def synchronize_visibility_to_render(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]  # TODO - make sure there is only one
 
@@ -69,7 +69,7 @@ def synchronize_visibility_to_render(
 
 def make_everything_visible(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]  # TODO - make sure there is only one
 
@@ -136,7 +136,7 @@ def update_bake_scene(
 
 def synchronize_mirrors(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     for mirror in ht.bake_target_mirror_collection:
         primary = ht.bake_target_collection[mirror.primary]
         secondary = ht.bake_target_collection[mirror.secondary]
@@ -156,7 +156,7 @@ def synchronize_mirrors(
 
 def reset_uv_transforms(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     bake_scene = require_bake_scene()
     view_layer = bake_scene.view_layers[0]  # TODO - make sure there is only one
 
@@ -186,7 +186,7 @@ def copy_and_transform_uv(
     target_object: Object,
     target_layer: str,
     scale_factor: float = 1.0,
-):
+) -> None:
     # TODO - investigate if we can get uv layer index without actually
     # changing it and getting mesh.loops.layers.uv.active
     bpy.ops.object.mode_set(mode="OBJECT")

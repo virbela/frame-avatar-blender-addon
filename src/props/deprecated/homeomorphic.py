@@ -62,7 +62,7 @@ def update_debug_basis(HT: "HomeomorphicProperties", context: Context) -> None:
                 action.checked = False
 
 
-def update_export_progress(self: 'HomeomorphicProperties', context: Context) -> None:
+def update_export_progress(self: "HomeomorphicProperties", context: Context) -> None:
     # XXX Dirty Hack
     # bpy.ops.wm.redraw_timer(type="DRAW_WIN_SWAP", iterations=1)
     pass
@@ -239,7 +239,7 @@ class HomeomorphicProperties(PropertyGroup):
         for index, bt in enumerate(self.bake_target_collection):
             if (
                 bt == target
-            ):  # note: We can't use identity comparison due to internal deferring 
+            ):  # note: We can't use identity comparison due to internal deferring
                 # in blender
                 return index
         return -1
