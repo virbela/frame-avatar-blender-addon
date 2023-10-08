@@ -1,10 +1,11 @@
+import sys
 import bpy
+import argparse
 import bpy.utils
-import sys, argparse
 from pathlib import Path
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
     try:
         argument_delimiter = sys.argv.index("--")
         pre_args = sys.argv[:argument_delimiter]
@@ -16,7 +17,6 @@ def get_args():
     parser = argparse.ArgumentParser(prog=f"{' '.join(pre_args)} --")
     parser.add_argument("output", type=Path, help="File to write script dir to")
     return parser.parse_args(args)
-
 
 args = get_args()
 with args.output.open("w") as outfile:

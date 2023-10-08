@@ -9,7 +9,7 @@ from ..utils.helpers import get_homeomorphic_tool_state
 
 def transfer_skin_weights(
     operator: Operator, context: Context, ht: HomeomorphicProperties
-):
+) -> None:
     previous_mode = context.mode
     if previous_mode != "OBJECT":
         bpy.ops.object.mode_set(mode="OBJECT")

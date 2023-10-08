@@ -22,12 +22,12 @@ import subprocess
 REPO_FILES = ("src/",)
 
 
-def git(*args):
+def git(*args: str | bytes) -> bytes:
     # convenience routine for simplifying git command calls.
     return subprocess.check_output(("git",) + args)
 
 
-def main():
+def main() -> None:
     _, args = getopt.getopt(sys.argv[1:], "", [])
     if len(args) != 1:
         raise getopt.GetoptError(
