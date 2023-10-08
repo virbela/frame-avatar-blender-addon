@@ -69,70 +69,70 @@ def update_export_progress(self, context) -> None:
 
 
 class HomeomorphicProperties(PropertyGroup):
-    avatar_rig: PointerProperty(name="Avatar Rig", type=Object)
+    avatar_rig: PointerProperty(name="Avatar Rig", type=Object)  # type: ignore
 
-    avatar_mesh: PointerProperty(name="Avatar Mesh", type=Object)
+    avatar_mesh: PointerProperty(name="Avatar Mesh", type=Object)  # type: ignore
 
-    avatar_head_bone: StringProperty(
+    avatar_head_bone: StringProperty(  # type: ignore
         name="Head Bone", description="The bone to use for head transform calculation."
     )
 
     # Note that we use -1 to indicate that nothing is selected for integer selections
-    effect_collection: CollectionProperty(type=EffectProperty)
+    effect_collection: CollectionProperty(type=EffectProperty)  # type: ignore
 
-    selected_effect: IntProperty(name="Selected effect", default=-1)
+    selected_effect: IntProperty(name="Selected effect", default=-1)  # type: ignore
 
-    bake_target_collection: CollectionProperty(type=BakeTarget)
+    bake_target_collection: CollectionProperty(type=BakeTarget)  # type: ignore
 
-    selected_bake_target: IntProperty(name="Selected bake target", default=-1)
+    selected_bake_target: IntProperty(name="Selected bake target", default=-1)  # type: ignore
 
-    bake_target_mirror_collection: CollectionProperty(type=BakeTargetMirrorEntry)
+    bake_target_mirror_collection: CollectionProperty(type=BakeTargetMirrorEntry)  # type: ignore
 
-    selected_bake_target_mirror: IntProperty(name="Selected mirror entry", default=-1)
+    selected_bake_target_mirror: IntProperty(name="Selected mirror entry", default=-1)  # type: ignore
 
-    bake_group_collection: CollectionProperty(type=BakeGroup)
+    bake_group_collection: CollectionProperty(type=BakeGroup)  # type: ignore
 
-    selected_bake_group: IntProperty(name="Selected bake group", default=-1)
+    selected_bake_group: IntProperty(name="Selected bake group", default=-1)  # type: ignore
 
-    source_object: StringProperty(name="Object name")
+    source_object: StringProperty(name="Object name")  # type: ignore
 
     ### Atlas,textures, paint assist ###
-    atlas_size: IntProperty(name="Atlas size", default=4096, update=update_atlas_size)
+    atlas_size: IntProperty(name="Atlas size", default=4096, update=update_atlas_size)  # type: ignore
 
-    color_percentage: FloatProperty(name="Atlas color region percentage", default=25.0)
+    color_percentage: FloatProperty(name="Atlas color region percentage", default=25.0)  # type: ignore
 
-    painting_size: IntProperty(name="Hand paint texture size", default=1024)
+    painting_size: IntProperty(name="Hand paint texture size", default=1024)  # type: ignore
 
-    select_by_atlas_image: PointerProperty(name="Match atlas", type=Image)
+    select_by_atlas_image: PointerProperty(name="Match atlas", type=Image)  # type: ignore
 
     ### Export options
-    avatar_type: EnumProperty(items=tuple(AVATAR_TYPE), name="Avatar Type", default=1)
+    avatar_type: EnumProperty(items=tuple(AVATAR_TYPE), name="Avatar Type", default=1)  # type: ignore
 
-    denoise: BoolProperty(name="Denoise Atlas", default=False)
+    denoise: BoolProperty(name="Denoise Atlas", default=False)  # type: ignore
 
-    export_atlas: BoolProperty(name="Export Atlas", default=True)
+    export_atlas: BoolProperty(name="Export Atlas", default=True)  # type: ignore
 
-    export_glb: BoolProperty(name="Export GLB", default=True)
+    export_glb: BoolProperty(name="Export GLB", default=True)  # type: ignore
 
-    export_animation: BoolProperty(name="Export Animation", default=False)
+    export_animation: BoolProperty(name="Export Animation", default=False)  # type: ignore
 
-    export_animation_source: EnumProperty(
+    export_animation_source: EnumProperty(  # type: ignore
         items=tuple(EXPORT_ANIMATION_SOURCE), name="Export Source", default=0
     )
 
-    export_animation_actions: CollectionProperty(type=AnimationProperty)
+    export_animation_actions: CollectionProperty(type=AnimationProperty)  # type: ignore
 
-    export_animation_json_paths: CollectionProperty(
+    export_animation_json_paths: CollectionProperty(  # type: ignore
         name="JSON Paths", type=ExportAnimationJSONPathProperty
     )
 
-    export_animation_preview: BoolProperty(
+    export_animation_preview: BoolProperty(  # type: ignore
         name="Export Animation Preview",
         default=False,
         description="Export an animation for preview",
     )
 
-    export_progress: FloatProperty(
+    export_progress: FloatProperty(  # type: ignore
         name="Export Progress",
         default=-1,
         subtype="PERCENTAGE",
@@ -145,25 +145,25 @@ class HomeomorphicProperties(PropertyGroup):
     )
 
     ### Baking options
-    baking_target_uvmap: StringProperty(name="Bake UV map", default=TARGET_UV_MAP)
+    baking_target_uvmap: StringProperty(name="Bake UV map", default=TARGET_UV_MAP)  # type: ignore
 
-    baking_options: EnumProperty(items=tuple(BAKING_MODE), name="Bake Mode", default=1)
+    baking_options: EnumProperty(items=tuple(BAKING_MODE), name="Bake Mode", default=1)  # type: ignore
 
     ### Helpers Copy UV
-    target_object_uv: PointerProperty(
+    target_object_uv: PointerProperty(  # type: ignore
         name="Target", type=Object, description="Object to copy UV layers to"
     )
 
-    source_object_uv: PointerProperty(
+    source_object_uv: PointerProperty(  # type: ignore
         name="Source", type=Object, description="Object to copy UV layers from"
     )
 
     ### Debug bone animation
-    debug_animation_show: BoolProperty(name="Show Debug Vis", default=False)
+    debug_animation_show: BoolProperty(name="Show Debug Vis", default=False)  # type: ignore
 
-    debug_animation_actions: CollectionProperty(type=AnimationProperty)
+    debug_animation_actions: CollectionProperty(type=AnimationProperty)  # type: ignore
 
-    debug_animation_avatar_basis: PointerProperty(
+    debug_animation_avatar_basis: PointerProperty(  # type: ignore
         name="Avatar Basis",
         type=Object,
         update=update_debug_basis,
@@ -171,33 +171,33 @@ class HomeomorphicProperties(PropertyGroup):
     )
 
     ### Mirror Vertices Options
-    mirror_distance: FloatProperty(
+    mirror_distance: FloatProperty(  # type: ignore
         name="Mirror Distance",
         default=0.001,
         precision=4,
         description="Maximum distance to search for mirror a vertex",
     )
 
-    mirror_verts_source: PointerProperty(
+    mirror_verts_source: PointerProperty(  # type: ignore
         name="Mirror Source",
         type=Object,
         description="Object to copy vertex positions from",
     )
 
-    mirror_verts_target: PointerProperty(
+    mirror_verts_target: PointerProperty(  # type: ignore
         name="Mirror Target",
         type=Object,
         description="Object to copy vertex positions to",
     )
 
     ### Transfer Skin Weights Options
-    transfer_skin_source: PointerProperty(
+    transfer_skin_source: PointerProperty(  # type: ignore
         name="Transfer Source",
         type=Object,
         description="Object to copy vertex groups from",
     )
 
-    transfer_skin_target: PointerProperty(
+    transfer_skin_target: PointerProperty(  # type: ignore
         name="Transfer Target",
         type=Object,
         description="Object to copy vertex groups to",

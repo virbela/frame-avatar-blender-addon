@@ -78,9 +78,9 @@ UV_BAKE_MODE = EnumDescriptor(
 
 
 class BakeTargetMirrorEntry(PropertyGroup):
-    primary: IntProperty(name="Primary bake target identifier", default=-1)
+    primary: IntProperty(name="Primary bake target identifier", default=-1)  # type: ignore
 
-    secondary: IntProperty(name="Secondary bake target identifier", default=-1)
+    secondary: IntProperty(name="Secondary bake target identifier", default=-1)  # type: ignore
 
 
 def get_baketarget_name(self: "BakeTarget") -> None:
@@ -120,47 +120,47 @@ def set_baketarget_name(self: "BakeTarget", value: str) -> None:
 
 
 class BakeTarget(PropertyGroup):
-    name: StringProperty(
+    name: StringProperty(  # type: ignore
         name="Bake target name",
         default="Untitled bake target",
         get=get_baketarget_name,
         set=set_baketarget_name,
     )
 
-    object_name: StringProperty(
+    object_name: StringProperty(  # type: ignore
         name="Object name",
         description="The object that is used for this bake target.\n"
         "Once selected it is possible to select a specific shape key",
     )
 
-    source_object: PointerProperty(name="Source object", type=Object)
+    source_object: PointerProperty(name="Source object", type=Object)  # type: ignore
 
-    shape_key_name: StringProperty(name="Shape key")
+    shape_key_name: StringProperty(name="Shape key")  # type: ignore
 
-    uv_area_weight: FloatProperty(
+    uv_area_weight: FloatProperty(  # type: ignore
         name="UV island area weight", default=1.0, min=0.0, max=1.0
     )
 
-    bake_mode: EnumProperty(items=tuple(UV_BAKE_MODE), name="UV bake mode", default=0)
+    bake_mode: EnumProperty(items=tuple(UV_BAKE_MODE), name="UV bake mode", default=0)  # type: ignore
 
-    mirror_source: IntProperty(name="Bake target used for mirror")
+    mirror_source: IntProperty(name="Bake target used for mirror")  # type: ignore
 
-    uv_mode: EnumProperty(
+    uv_mode: EnumProperty(  # type: ignore
         items=tuple(UV_ISLAND_MODES), name="UV island mode", default=0
     )
 
-    atlas: PointerProperty(name="Atlas image", type=Image)
+    atlas: PointerProperty(name="Atlas image", type=Image)  # type: ignore
 
-    source_uv_map: StringProperty(name="UV map", default=TARGET_UV_MAP)
+    source_uv_map: StringProperty(name="UV map", default=TARGET_UV_MAP)  # type: ignore
 
-    multi_variants: BoolProperty(name="Multiple variants", default=False)
+    multi_variants: BoolProperty(name="Multiple variants", default=False)  # type: ignore
 
-    variant_collection: CollectionProperty(type=BakeVariant)
+    variant_collection: CollectionProperty(type=BakeVariant)  # type: ignore
 
-    selected_variant: IntProperty(name="Selected bake variant", default=-1)
+    selected_variant: IntProperty(name="Selected bake variant", default=-1)  # type: ignore
 
     # Flag export
-    export: BoolProperty(name="Export Bake Target", default=True)
+    export: BoolProperty(name="Export Bake Target", default=True)  # type: ignore
 
     def get_object(self) -> Object:
         return get_named_entry(bpy.data.objects, self.object_name)

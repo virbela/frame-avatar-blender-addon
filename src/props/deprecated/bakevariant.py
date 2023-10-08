@@ -78,23 +78,23 @@ def set_bakevariant_name(self: "BakeVariant", value: str) -> None:
 
 
 class BakeVariant(PropertyGroup):
-    name: StringProperty(
+    name: StringProperty(  # type: ignore
         name="Variant name",
         default="Untitled variant",
         get=get_bakevariant_name,
         set=set_bakevariant_name,
     )
 
-    image: PointerProperty(name="Image texture", type=Image)
+    image: PointerProperty(name="Image texture", type=Image)  # type: ignore
 
-    uv_map: StringProperty(name="UV Map")
+    uv_map: StringProperty(name="UV Map")  # type: ignore
 
-    workmesh: PointerProperty(name="Work mesh", type=Object)
+    workmesh: PointerProperty(name="Work mesh", type=Object)  # type: ignore
 
-    uv_target_channel: EnumProperty(
+    uv_target_channel: EnumProperty(  # type: ignore
         items=tuple(UV_TARGET_CHANNEL), name="UV target channel", default=0
     )
 
-    intermediate_atlas: PointerProperty(
+    intermediate_atlas: PointerProperty(  # type: ignore
         name="Intermediate atlas", type=Image, update=update_atlas
     )

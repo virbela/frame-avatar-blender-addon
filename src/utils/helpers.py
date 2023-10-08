@@ -317,12 +317,13 @@ def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
         preferences = bpy.context.preferences.addons[__package__].preferences
     except KeyError:
         # XXX DEV(simulate preferences)
-        preferences = types.SimpleNamespace()
-        preferences.log_target = "devlog"
-        preferences.npy_export_dir = ""
-        preferences.glb_export_dir = ""
-        preferences.atlas_export_dir = ""
-        preferences.custom_frame_validation = True
+        preferences = types.SimpleNamespace(
+            log_target="", 
+            npy_export_dir="", 
+            glb_export_dir="", 
+            atlas_export_dir="",
+            custom_frame_validation = True
+        )
         # -- check for .env.json to load dev frame dirs
         env_file = Path(__file__).parent.parent.parent.joinpath(".env.json").absolute()
         if env_file.exists():
