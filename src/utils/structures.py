@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 
 def iter_dc(
-    d: "Intermediate.Pending.BakeTarget"
+    d: "Intermediate.Pending.BakeTarget",
 ) -> typing.Generator[typing.Any, None, None]:
     # note: dataclasses.asdict performs a deep copy which will be
     # problematic when referencing blender objects so we will iter it ourselves

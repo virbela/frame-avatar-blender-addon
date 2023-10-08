@@ -78,8 +78,8 @@ def update_workmesh_materials(
     variant: BakeVariant,
 ) -> None:
     # TODO Handle mirror bake targets properly i.e this fails when no uv map is found
-    # TBD - should we disconnect the material if we fail to create one? 
-    # This might be good in order to prevent accidentally getting 
+    # TBD - should we disconnect the material if we fail to create one?
+    # This might be good in order to prevent accidentally getting
     # unintended materials activated
     if not variant.uv_map:
         variant.workmesh.active_material = None

@@ -1,4 +1,4 @@
-from typing import Callable, Any, Sequence
+import typing
 from bpy.types import Object, Context, Operator, bpy_prop_collection
 
 from ..props import BakeVariant
@@ -24,8 +24,10 @@ class GenericList:
 
     @staticmethod
     def add(
-        collection: bpy_prop_collection[Any], get_selected: Any, set_selected: Any
-    ) -> Any:
+        collection: bpy_prop_collection[typing.Any],
+        get_selected: typing.Any,
+        set_selected: typing.Any,
+    ) -> typing.Any:
         new = collection.add()
         last_id = len(collection) - 1
         set_selected(last_id)
@@ -33,8 +35,10 @@ class GenericList:
 
     @staticmethod
     def remove(
-        collection: bpy_prop_collection[Any], get_selected: Any, set_selected: Any
-    ) -> Any:
+        collection: bpy_prop_collection[typing.Any],
+        get_selected: typing.Any,
+        set_selected: typing.Any,
+    ) -> typing.Any:
         collection.remove(get_selected())
         last_id = len(collection) - 1
         if last_id == -1:
@@ -55,9 +59,9 @@ def copy_object(source_obj: Object, name: str) -> Object:
 
 
 def copy_collection(
-    source: bpy_prop_collection[Any],
-    dest: bpy_prop_collection[Any],
-    transfer: Callable[[Any, Any], None],
+    source: bpy_prop_collection[typing.Any],
+    dest: bpy_prop_collection[typing.Any],
+    transfer: typing.Callable[[typing.Any, typing.Any], None],
 ) -> None:
     while len(dest):
         dest.remove(0)
@@ -80,7 +84,7 @@ def poll_work_scene(context: Context) -> bool:
     return context.scene.name == WORK_SCENE
 
 
-def poll_selected_objects(context: Context) -> Sequence[Object]:
+def poll_selected_objects(context: Context) -> typing.Sequence[Object]:
     return context.selected_objects
 
 

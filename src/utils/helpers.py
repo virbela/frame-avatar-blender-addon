@@ -24,14 +24,14 @@ from bpy.types import (
     AddonPreferences,
     Mesh,
     Action,
-    ObjectBase
+    ObjectBase,
 )
 
 from .logging import log
 from .constants import BAKE_SCENE, WORK_SCENE
 from .exceptions import InternalError, FrameException
 
-T = typing.TypeVar('T')
+T = typing.TypeVar("T")
 
 if TYPE_CHECKING:
     from ..props import HomeomorphicProperties, BakeTarget, BakeVariant
@@ -86,7 +86,9 @@ class EnumDescriptor:
         self.members = {ee.identifier: ee for ee in (EnumEntry(*e) for e in entries)}
         self.by_value = {ee.number: ee for ee in self.members.values()}
 
-    def __iter__(self) -> typing.Generator[typing.Tuple[str, str, str, str, int], None, None]:
+    def __iter__(
+        self,
+    ) -> typing.Generator[typing.Tuple[str, str, str, str, int], None, None]:
         for member in self.members.values():
             yield (
                 member.identifier,

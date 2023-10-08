@@ -61,7 +61,9 @@ def bake_selected_workmeshes(
     view_layer = bake_scene.view_layers[0]  # TODO - make sure there is only one
 
     # NOTE - see technical detail 5 for further info on this temporary solution
-    def get_bake_target_and_variant_from_workmesh(workmesh) -> typing.Tuple[BakeTarget, BakeVariant]:
+    def get_bake_target_and_variant_from_workmesh(
+        workmesh,
+    ) -> typing.Tuple[BakeTarget, BakeVariant]:
         for bake_target in ht.bake_target_collection:
             for variant in bake_target.variant_collection:
                 if variant.workmesh == workmesh:

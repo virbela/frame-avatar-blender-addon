@@ -1,12 +1,13 @@
-import typing 
+import typing
 
 def register_classes_factory(
-    classes: typing.Iterable[typing.Any]
-    ) -> typing.Tuple[typing.Callable[[], None], typing.Callable[[], None]]: ...
-
+    classes: typing.Iterable[typing.Any],
+) -> typing.Tuple[typing.Callable[[], None], typing.Callable[[], None]]: ...
 def register_class(cls: typing.Optional[typing.Any]) -> None: ...
 def unregister_class(cls: typing.Optional[typing.Any]) -> None: ...
-def user_resource(resource_type,
-                  *,
-                  path: typing.Optional[str] = '',
-                  create: typing.Optional[bool] = False) -> str: ...
+def user_resource(
+    resource_type: str,
+    *,
+    path: typing.Optional[str] = "",
+    create: typing.Optional[bool] = False
+) -> str: ...

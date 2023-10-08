@@ -11,8 +11,8 @@ from bpy import app
 from bpy import props
 
 GenericType = typing.TypeVar("GenericType")
-context: 'bpy.types.Context' = None
+context: "bpy.types.Context"
 
-data: 'bpy.types.BlendData' = None
-''' Access to Blender's internal data
-'''
+data: "bpy.types.BlendData"
+""" Access to Blender's internal data
+"""
