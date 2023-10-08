@@ -17,7 +17,9 @@ class Effects:
         )
 
     @staticmethod
-    def remove(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+    def remove(
+        operator: Operator, context: Context, ht: HomeomorphicProperties
+    ) -> None:
         GenericList.remove(
             ht.effect_collection,
             AttrGet(ht, "selected_effect"),

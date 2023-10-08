@@ -283,7 +283,9 @@ class UUIDManager:
                         return candidate
 
 
-def get_bake_target_variant_name(bake_target: "BakeTarget", variant: "BakeVariant") -> None:
+def get_bake_target_variant_name(
+    bake_target: "BakeTarget", variant: "BakeVariant"
+) -> None:
     if bake_target.multi_variants:
         return f"{bake_target.shortname}.{variant.name}"
     return f"{bake_target.shortname}"

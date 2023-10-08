@@ -105,13 +105,17 @@ def create_baketarget_from_key_blocks(
 
 class BakeMirrors:
     @staticmethod
-    def set_primary(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+    def set_primary(
+        operator: Operator, context: Context, ht: HomeomorphicProperties
+    ) -> None:
         if mirror := ht.get_selected_mirror():
             if bake_target := ht.get_selected_bake_target():
                 mirror.primary = ht.get_bake_target_index(bake_target)
 
     @staticmethod
-    def set_secondary(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+    def set_secondary(
+        operator: Operator, context: Context, ht: HomeomorphicProperties
+    ) -> None:
         if mirror := ht.get_selected_mirror():
             if bake_target := ht.get_selected_bake_target():
                 mirror.secondary = ht.get_bake_target_index(bake_target)
@@ -125,7 +129,9 @@ class BakeMirrors:
         )
 
     @staticmethod
-    def remove(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+    def remove(
+        operator: Operator, context: Context, ht: HomeomorphicProperties
+    ) -> None:
         GenericList.remove(
             ht.bake_target_mirror_collection,
             AttrGet(ht, "selected_bake_target_mirror"),
@@ -143,7 +149,9 @@ class BakeTargets:
         )
 
     @staticmethod
-    def remove(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+    def remove(
+        operator: Operator, context: Context, ht: HomeomorphicProperties
+    ) -> None:
         GenericList.remove(
             ht.bake_target_collection,
             AttrGet(ht, "selected_bake_target"),
@@ -151,7 +159,9 @@ class BakeTargets:
         )
 
     @staticmethod
-    def edit_selected(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+    def edit_selected(
+        operator: Operator, context: Context, ht: HomeomorphicProperties
+    ) -> None:
         bake_target = ht.get_selected_bake_target()
         if not bake_target:
             return
@@ -182,7 +192,9 @@ class BakeGroups:
         )
 
     @staticmethod
-    def remove(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+    def remove(
+        operator: Operator, context: Context, ht: HomeomorphicProperties
+    ) -> None:
         GenericList.remove(
             ht.bake_group_collection,
             AttrGet(ht, "selected_bake_group"),
@@ -191,7 +203,9 @@ class BakeGroups:
 
     class Members:
         @staticmethod
-        def add(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+        def add(
+            operator: Operator, context: Context, ht: HomeomorphicProperties
+        ) -> None:
             if bake_group := ht.get_selected_bake_group():
                 if bake_target := ht.get_selected_bake_target():
                     new = GenericList.add(
@@ -202,7 +216,9 @@ class BakeGroups:
                     new.target = ht.get_bake_target_index(bake_target)
 
         @staticmethod
-        def remove(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+        def remove(
+            operator: Operator, context: Context, ht: HomeomorphicProperties
+        ) -> None:
             if bake_group := ht.get_selected_bake_group():
                 GenericList.remove(
                     bake_group.members,
@@ -222,7 +238,9 @@ class BakeVariants:
             )
 
     @staticmethod
-    def remove(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+    def remove(
+        operator: Operator, context: Context, ht: HomeomorphicProperties
+    ) -> None:
         if bake_target := ht.get_selected_bake_target():
             GenericList.remove(
                 bake_target.variant_collection,

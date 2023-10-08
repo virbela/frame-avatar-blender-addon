@@ -19,7 +19,9 @@ class PendingLogEntry:
 
 
 class LogLevelDescriptor:
-    def __init__(self, log_instance: "LogBase", log_level: LogLevel, description: str) -> None:
+    def __init__(
+        self, log_instance: "LogBase", log_level: LogLevel, description: str
+    ) -> None:
         self.__doc__ = description
         self.log_instance = log_instance
         self.log_level = log_level

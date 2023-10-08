@@ -5,7 +5,9 @@ from ..utils.helpers import require_bake_scene
 from ..props import HomeomorphicProperties
 
 
-def setup_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+def setup_bake_scene(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+) -> None:
     require_bake_scene()
 
 

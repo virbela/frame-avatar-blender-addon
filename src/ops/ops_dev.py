@@ -19,7 +19,9 @@ def clear_bake_targets(
         ht.bake_target_mirror_collection.remove(0)
 
 
-def clear_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+def clear_bake_scene(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+) -> None:
     scene = require_bake_scene()
     for item in scene.objects:
         if item.type == "MESH":

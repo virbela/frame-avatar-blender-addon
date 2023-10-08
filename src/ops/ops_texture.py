@@ -18,15 +18,22 @@ from ..utils.helpers import (
     require_bake_scene,
 )
 
+
 def UVPM2_INSTALLED() -> bool:
     return "uvpackmaster2" in dir(bpy.ops)
+
+
 def UVPM3_INSTALLED() -> bool:
     return "uvpackmaster3" in dir(bpy.ops)
+
+
 def UVPM_INSTALLED() -> bool:
     return UVPM2_INSTALLED() or UVPM3_INSTALLED()
 
 
-def auto_assign_atlas(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+def auto_assign_atlas(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+) -> None:
     "Goes through all bake targets and assigns them to the correct intermediate atlas and UV set based on the uv_mode"
 
     # TODO - currently we don't take into account that variants may end up on different bins which is fine but we need to store the intermediate target with the variant and not the bake target
@@ -147,7 +154,9 @@ def auto_assign_atlas(operator: Operator, context: Context, ht: HomeomorphicProp
             target_bin.allocated += uv_island.area
 
 
-def pack_uv_islands(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+def pack_uv_islands(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+) -> None:
     last_active_scene = context.scene
 
     bake_scene = require_bake_scene()

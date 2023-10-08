@@ -698,7 +698,9 @@ def deselect_all() -> None:
 
 
 class ExportAnimationJSONPaths:
-    def add_json_path(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+    def add_json_path(
+        operator: Operator, context: Context, ht: HomeomorphicProperties
+    ) -> None:
         ht.export_animation_json_paths.add()
 
     def remove_json_path(

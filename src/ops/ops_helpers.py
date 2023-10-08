@@ -87,7 +87,9 @@ def recalculate_normals(
         clean_normals(context, workmesh)
 
 
-def update_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+def update_bake_scene(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+) -> None:
     bake_scene = require_bake_scene()
 
     # DECISION - should we clear the bake scene each update?
@@ -219,7 +221,9 @@ def clean_normals(context: Context, object_: Object) -> None:
     bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 
 
-def copy_uv_layers(operator: Operator, context: Context, ht: HomeomorphicProperties) -> None:
+def copy_uv_layers(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+) -> None:
     last_edit_mode = bpy.context.mode
     if last_edit_mode == "EDIT_MESH":
         # -- switch to object mode
