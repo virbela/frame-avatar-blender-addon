@@ -318,11 +318,11 @@ def get_prefs() -> typing.Union[Preferences, types.SimpleNamespace]:
     except KeyError:
         # XXX DEV(simulate preferences)
         preferences = types.SimpleNamespace(
-            log_target="", 
-            npy_export_dir="", 
-            glb_export_dir="", 
+            log_target="",
+            npy_export_dir="",
+            glb_export_dir="",
             atlas_export_dir="",
-            custom_frame_validation = True
+            custom_frame_validation=True,
         )
         # -- check for .env.json to load dev frame dirs
         env_file = Path(__file__).parent.parent.parent.joinpath(".env.json").absolute()
