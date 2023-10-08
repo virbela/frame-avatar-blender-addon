@@ -4,6 +4,7 @@ import unittest
 from src.utils import helpers
 from src.utils import exceptions
 
+
 class TestUtilsHelpers(unittest.TestCase):
     def test_implementation_pending(self):
         not_implemented_func = helpers.IMPLEMENTATION_PENDING
@@ -54,4 +55,3 @@ class TestUtilsHelpers(unittest.TestCase):
 
         helpers.ensure_applied_rotation(obj)
         self.assertEqual(tuple(obj.rotation_euler), (0, 0, 0))
-

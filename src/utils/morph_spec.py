@@ -6,19 +6,16 @@ from .logging import log
 
 EXPECTED_SHAPEKEYS_COMMON = [
     "Basis",
-
     # -- mouth animation effects
     "FacialHairs_open_effect",
     "FacialHairs_Long_open_effect",
     "Face_Human_Mouth_Open_effect",
     "FacialHairs_Goatee_open_effect",
     "Face_Human_female_Mouth_Open_effect",
-
     # -- android
     "Eyes_Android",
     "Face_Android_Complete",
     "Body_Android",
-
     # -- face
     "Face_Human",
     "Face_Human_female",
@@ -54,7 +51,6 @@ EXPECTED_SHAPEKEYS_COMMON = [
     "Hairs_CombOver__Hairs_Short",
     "Hairs_Dreads_Short_1",
     "Hairs_Dreads_Short_2",
-
     # -- accessories Earings
     "Earring_Hoop_Big_Left__None",
     "Earring_Hoop_Big_Right__None",
@@ -64,7 +60,6 @@ EXPECTED_SHAPEKEYS_COMMON = [
     "Earring_Hoop_Top_Right__None",
     "Earring_Post_Left__None",
     "Earring_Post_Right__None",
-
     # -- accessories Glasses
     "Glasses_Ractangular__None",
     "Glasses_Squares__None",
@@ -72,7 +67,6 @@ EXPECTED_SHAPEKEYS_COMMON = [
     "Glasses_Sun_Rectangular__Glasses_Sun_Aviator",
     "Glasses_Sun_Round__Glasses_Sun_Aviator",
     "Glasses_Sun_Square__Glasses_Sun_Aviator",
-
     # -- accessories Hats
     "Hat_Baseball",
     "Hat_Cowboy",
@@ -96,10 +90,8 @@ EXPECTED_SHAPEKEYS_COMMON = [
     "Hat_Hairs_Cloche_LongStraight__Hairs_Long_Straight",
     "Hat_Hairs_Cloche_LongWavy__Hairs_Long_Wavy",
     "Hat_Hairs_Cloche_Short__Hairs_Short",
-
     # -- body
     "Body_Human",
-
     # -- UNUSED (DEPRECATE)
     "Hand",
     "Eye_L",
@@ -118,34 +110,27 @@ EXPECTED_SHAPEKEYS_FLOATER = [
     "Jacket_Poncho",
 ]
 
-EXPECTED_SHAPEKEYS_FLOATER.extend(
-    EXPECTED_SHAPEKEYS_COMMON
-)
+EXPECTED_SHAPEKEYS_FLOATER.extend(EXPECTED_SHAPEKEYS_COMMON)
 
 EXPECTED_SHAPEKEYS_FULLBODY = [
     "Arm_L",
     "Arm_R",
-
     "Leg_L",
     "Leg_R",
     "Formal_pants_L",
     "Formal_pants_R",
     "Boot_short_L",
     "Boot_short_R",
-
     "Sleeves_Short",
     "Formal_sleeve_L",
     "Formal_sleeve_R",
     "Informal_sleeve_R",
     "Informal_sleeve_L",
-
     "Formal_Jacket",
-    "Informal_Jacket"
+    "Informal_Jacket",
 ]
 
-EXPECTED_SHAPEKEYS_FULLBODY.extend(
-    EXPECTED_SHAPEKEYS_COMMON
-)
+EXPECTED_SHAPEKEYS_FULLBODY.extend(EXPECTED_SHAPEKEYS_COMMON)
 
 DEPRECATED_SHAPEKEYS = [
     "Hand",
@@ -155,6 +140,7 @@ DEPRECATED_SHAPEKEYS = [
     "Eye_Border_R",
 ]
 
+
 def validate_fullbody_morphs(avatar_obj: Object) -> bool:
     me: Mesh = avatar_obj.data
     keys_names = [k.name for k in me.shape_keys.key_blocks]
@@ -163,18 +149,21 @@ def validate_fullbody_morphs(avatar_obj: Object) -> bool:
     missing = list(names_diff_missing - set(DEPRECATED_SHAPEKEYS))
 
     if missing:
-        log.error("The following shapekeys are required in the fullbody, but were not found!")
+        log.error(
+            "The following shapekeys are required in the fullbody, but were not found!"
+        )
         log.error("--\n" + pformat(sorted(missing)))
 
         error_str = ", ".join(missing)
         popup_message(error_str, "Missing Shapekeys!")
-        return False 
+        return False
 
     # XXX Additional shapekeys can be remove during the export step
     # names_diff_additional = set(keys_names) - set(EXPECTED_SHAPEKEYS_FULLBODY)
     # log.info("The following shapekeys were found in the full body avatar, but are not required")
     # log.info(names_diff_additional)
     return True
+
 
 def validate_floater_morphs(avatar_obj: Object) -> bool:
     me: Mesh = avatar_obj.data
@@ -184,12 +173,14 @@ def validate_floater_morphs(avatar_obj: Object) -> bool:
     missing = list(names_diff_missing - set(DEPRECATED_SHAPEKEYS))
 
     if missing:
-        log.error("The following shapekeys are required in the floater, but were not found!")
+        log.error(
+            "The following shapekeys are required in the floater, but were not found!"
+        )
         log.error("--\n" + pformat(sorted(missing)))
 
         error_str = ", ".join(missing)
         popup_message(error_str, "Missing Shapekeys!")
-        return False 
+        return False
 
     # XXX Additional shapekeys can be remove during the export step
     # names_diff_additional = set(keys_names) - set(EXPECTED_SHAPEKEYS_FLOATER)

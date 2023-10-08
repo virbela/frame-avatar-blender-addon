@@ -4,6 +4,7 @@ from bpy.types import Object, ViewLayer
 
 from .helpers import is_reference_valid
 
+
 @contextmanager
 def active_scene(name: str):
     active_scene = bpy.context.scene
@@ -43,6 +44,7 @@ def selection(objects: list[Object] = None, view_layer: ViewLayer = None):
     for obj in selected:
         if is_reference_valid(obj):
             obj.select_set(True, view_layer=view_layer)
+
 
 @contextmanager
 def active_object(object: Object = None, view_layer: ViewLayer = None):

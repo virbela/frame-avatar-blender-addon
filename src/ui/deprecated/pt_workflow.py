@@ -138,7 +138,6 @@ class FABA_PT_workflow_baking(Panel):
         layout = self.layout
         HT = get_homeomorphic_tool_state(context)
 
-
         bake_scene = require_bake_scene()
         selection = [o for o in context.selected_objects]
         try:
@@ -147,11 +146,16 @@ class FABA_PT_workflow_baking(Panel):
             col.prop(bake_scene.render.bake, "margin", text="Bake Margin")
         except AttributeError as e:
             log.info(e)
-            layout.label(text="Please ensure Cycles Render Engine is enabled in the addons list!", icon="ERROR")
+            layout.label(
+                text="Please ensure Cycles Render Engine is enabled in the addons list!",
+                icon="ERROR",
+            )
 
         layout.row(align=True).prop(HT, "baking_options", expand=True)
         if selection and selection[0].type == "MESH":
-            layout.prop_search(HT, "baking_target_uvmap", selection[0].data, "uv_layers")
+            layout.prop_search(
+                HT, "baking_target_uvmap", selection[0].data, "uv_layers"
+            )
 
         col = layout.column(align=True)
         col.operator("faba.bake_all")

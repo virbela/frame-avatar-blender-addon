@@ -3,11 +3,12 @@ from dataclasses import dataclass
 from .helpers import popup_message
 from ..props import BakeVariant, HomeomorphicProperties
 
+
 class ValidationError:
     # Abstract errors
     @dataclass
     class InvalidBakeTargetConfiguration:
-        bake_target:	object
+        bake_target: object
 
     class InternalError:
         pass
@@ -28,8 +29,8 @@ class ValidationError:
     # Concrete errors - internal data inconsistencies
     @dataclass
     class InvalidEnum(InternalError):
-        bake_target:	object
-        member:			str
+        bake_target: object
+        member: str
 
 
 def validate_bake_target_setup(ht: HomeomorphicProperties) -> bool:
@@ -51,10 +52,12 @@ def validate_bake_target_setup(ht: HomeomorphicProperties) -> bool:
         default_variant: BakeVariant = bake_target.variant_collection[0]
         if not default_variant.workmesh:
             popup_message(f"Missing workmesh in {bake_target.name}", "Workmesh Error")
-            return False 
+            return False
 
         if not default_variant.intermediate_atlas:
-            popup_message(f"Missing intermediate atlas in {bake_target.name}", "Atlas Error")
+            popup_message(
+                f"Missing intermediate atlas in {bake_target.name}", "Atlas Error"
+            )
             return False
 
     return True

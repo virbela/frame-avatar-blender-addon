@@ -11,18 +11,14 @@ from .animation import AnimationProperty, ExportAnimationJSONPathProperty
 classes = (
     BakeTargetReference,
     BakeGroup,
-
     BakeTargetMirrorEntry,
     BakeVariant,
     BakeTarget,
-
     ColorEffect,
     PositionEffect,
     EffectProperty,
-
     AnimationProperty,
     ExportAnimationJSONPathProperty,
-
     HomeomorphicProperties,
 )
 
@@ -33,8 +29,9 @@ def register_props():
     register()
 
     # XXX Kept for backward compatibility
-    bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
-
+    bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(
+        type=HomeomorphicProperties
+    )
 
 
 def unregister_props():

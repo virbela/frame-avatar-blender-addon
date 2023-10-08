@@ -16,6 +16,7 @@ except Exception:
     # XXX Error importing test modules.
     # Print Traceback and close blender process
     import traceback
+
     traceback.print_exc()
     sys.exit()
 
@@ -70,7 +71,9 @@ class LoadModule:
         except IOError:
             print("Could not open script file.")
         except Exception:
-            sys.stderr.write("There was an error when running the script:\n" + traceback.format_exc())
+            sys.stderr.write(
+                "There was an error when running the script:\n" + traceback.format_exc()
+            )
         else:
             f.close()
 

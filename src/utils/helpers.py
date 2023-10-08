@@ -15,7 +15,15 @@ from pathlib import Path
 from dataclasses import dataclass
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Tuple
-from bpy.types import Context, Scene, bpy_prop_collection, Object, Preferences, Mesh, Action
+from bpy.types import (
+    Context,
+    Scene,
+    bpy_prop_collection,
+    Object,
+    Preferences,
+    Mesh,
+    Action,
+)
 
 from .logging import log
 from .constants import BAKE_SCENE, WORK_SCENE
@@ -29,7 +37,9 @@ if TYPE_CHECKING:
 def IMPLEMENTATION_PENDING(*p, **n):
     raise InternalError(f"This feature is not implemented! (arguments: {p} {n})")
 
+
 PREFS_LOG = True
+
 
 @contextmanager
 def profile():
@@ -58,6 +68,7 @@ class NamedEntryAction(enum.Enum):
     RECREATE = enum.auto()
     GET_EXISTING = enum.auto()
 
+
 @dataclass
 class EnumEntry:
     identifier: str
@@ -66,14 +77,21 @@ class EnumEntry:
     icon: str
     number: int
 
+
 class EnumDescriptor:
     def __init__(self, *entries):
-        self.members = {ee.identifier:ee for ee in (EnumEntry(*e) for e in entries)}
+        self.members = {ee.identifier: ee for ee in (EnumEntry(*e) for e in entries)}
         self.by_value = {ee.number: ee for ee in self.members.values()}
 
     def __iter__(self):
         for member in self.members.values():
-            yield (member.identifier, member.name, member.description, member.icon, member.number)
+            yield (
+                member.identifier,
+                member.name,
+                member.description,
+                member.icon,
+                member.number,
+            )
 
 
 def require_work_scene() -> Scene:
@@ -109,8 +127,12 @@ def require_named_entry(collection: bpy_prop_collection, name: str):
         raise FrameException.NamedEntryNotFound(collection, name)
 
 
-def create_named_entry(collection: bpy_prop_collection, name: str, *positional, action: NamedEntryAction = NamedEntryAction.GET_EXISTING) -> typing.Any:
-
+def create_named_entry(
+    collection: bpy_prop_collection,
+    name: str,
+    *positional,
+    action: NamedEntryAction = NamedEntryAction.GET_EXISTING,
+) -> typing.Any:
     if name in collection:
         if action == NamedEntryAction.RECREATE:
             collection.remove(collection.get(name))
@@ -129,11 +151,16 @@ def set_scene(context: Context, scene: Scene):
     context.window.scene = scene
 
 
-def set_selection(collection: list, *selected, synchronize_active: bool = False, make_sure_active: bool = False):
+def set_selection(
+    collection: list,
+    *selected,
+    synchronize_active: bool = False,
+    make_sure_active: bool = False,
+):
     new_selection = set(selected)
 
     for item in collection:
-        #NOTE There are two APIs to select things, we will favor the setter since that seems the be most recent
+        # NOTE There are two APIs to select things, we will favor the setter since that seems the be most recent
         if setter := getattr(item, "select_set", None):
             setter(item in new_selection)
         else:
@@ -160,7 +187,12 @@ def clear_active(collection: bpy_prop_collection):
     collection.active = None
 
 
-def set_rendering(collection: bpy_prop_collection, *selected, synchronize_active: bool = False, make_sure_active: bool = False):
+def set_rendering(
+    collection: bpy_prop_collection,
+    *selected,
+    synchronize_active: bool = False,
+    make_sure_active: bool = False,
+):
     new_selection = set(selected)
 
     for item in collection:
@@ -180,17 +212,24 @@ class AttributeReference:
         self.target = target
         self.attribute = attribute
 
+
 class AttrGet(AttributeReference):
     def __call__(self):
         return getattr(self.target, self.attribute)
+
 
 class AttrSet(AttributeReference):
     def __call__(self, value):
         return setattr(self.target, self.attribute, value)
 
 
-def get_nice_name(collection: list, prefix: str, max_prefix_length: int, random_hash_length: int = 8, max_tries: int = 1000):
-
+def get_nice_name(
+    collection: list,
+    prefix: str,
+    max_prefix_length: int,
+    random_hash_length: int = 8,
+    max_tries: int = 1000,
+):
     for v in range(max_tries):
         tail = f"-{v:03}" if v else ""
         candidate = f"{prefix[:max_prefix_length]}{tail}"
@@ -215,7 +254,9 @@ class UUIDManager:
         self.lock = threading.Lock()
 
     def validate(self):
-        to_discard = [key for key, value in self.uuid_map.items() if not is_reference_valid(value)]
+        to_discard = [
+            key for key, value in self.uuid_map.items() if not is_reference_valid(value)
+        ]
         for key in to_discard:
             del self.uuid_map[key]
 
@@ -354,7 +395,6 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
     for uv_i in range(tex_coord_max):
         dot_fields += [("uv%dx" % uv_i, np.float32), ("uv%dy" % uv_i, np.float32)]
 
-
     dots = np.empty(len(me.loops), dtype=np.dtype(dot_fields))
     vidxs = np.empty(len(me.loops))
     me.loops.foreach_get("vertex_index", vidxs)
@@ -366,7 +406,6 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
         dots["uv%dx" % uv_i] = uvs[:, 0]
         dots["uv%dy" % uv_i] = uvs[:, 1]
         del uvs
-
 
     # Calculate triangles and sort them into primitives.
 
@@ -380,13 +419,14 @@ def get_gltf_export_indices(obj: Object) -> list[int]:
 
     tri_material_idxs = np.empty(len(me.loop_triangles), dtype=np.uint32)
     me.loop_triangles.foreach_get("material_index", tri_material_idxs)
-    loop_material_idxs = np.repeat(tri_material_idxs, 3)  # material index for every loop
+    loop_material_idxs = np.repeat(
+        tri_material_idxs, 3
+    )  # material index for every loop
     unique_material_idxs = np.unique(tri_material_idxs)
     del tri_material_idxs
 
     for material_idx in unique_material_idxs:
         prim_indices[material_idx] = loop_indices[loop_material_idxs == material_idx]
-
 
     prim_dots = dots[prim_indices[0]]
     prim_dots, _ = np.unique(prim_dots, return_inverse=True)
@@ -410,13 +450,17 @@ def get_animation_objects(ht: "HomeomorphicProperties") -> list[Object]:
         if not obj:
             # TODO(ranjian0)
             # Possible variants not generated yet, or some other fail condition
-            log.info(f"Skipping missing workmesh {bake_target.name}", print_console=False)
+            log.info(
+                f"Skipping missing workmesh {bake_target.name}", print_console=False
+            )
             continue
 
         has_armature = any(mod.type == "ARMATURE" for mod in obj.modifiers)
         if not has_armature:
             # Object has no armature!
-            log.info(f"Skipping missing armature {bake_target.name}", print_console=False)
+            log.info(
+                f"Skipping missing armature {bake_target.name}", print_console=False
+            )
             continue
 
         animated_objects.append(obj)
@@ -435,7 +479,7 @@ def get_num_frames_all_actions() -> int:
     result = 0
     for action in bpy.data.actions:
         sx, sy = get_action_frame_range(action)
-        result += (sy - sx)
+        result += sy - sx
     return result
 
 

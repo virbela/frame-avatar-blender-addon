@@ -29,6 +29,7 @@ def Update3DViewPorts():
         if area.type == "VIEW_3D":
             area.tag_redraw()
 
+
 class ShaderDrawer:
     def __init__(self, ht: HomeomorphicProperties, action: str):
         self.ht = ht
@@ -39,7 +40,6 @@ class ShaderDrawer:
         self.avatar_basis = ht.debug_animation_avatar_basis
         if metadata := self.avatar_basis.get("MorphSets_Avatar"):
             self.animationdata = metadata["Animation"].to_dict()
-
 
     def make_mesh_batches(self) -> list[gpu.types.GPUBatch]:
         batches = []
@@ -54,18 +54,18 @@ class ShaderDrawer:
             bm.verts.ensure_lookup_table()
             for v in bm.verts:
                 vertices.append(v[shape].to_tuple(3))
-            
+
             indices = []
             bm.faces.ensure_lookup_table()
             for f in bm.faces:
                 indices.append([v.index for v in f.verts])
-            
+
             bone_weights = []
             bone_indices = []
             weights = self.animationdata["weights"][skname]
             for vert in bm.verts:
                 bone_map = list(enumerate(weights[str(vert.index)]))
-                top_four = sorted(bone_map, key=lambda v:v[1])[-4:]
+                top_four = sorted(bone_map, key=lambda v: v[1])[-4:]
                 bi = tuple(v[0] for v in top_four)
                 bw = tuple(v[1] for v in top_four)
                 bone_indices.append(bi)
@@ -101,15 +101,14 @@ class ShaderDrawer:
             batches.extend([batch_verts])
         return batches
 
-
-
     def update(self):
-
         # -- shader sources
         vertex_source = get_asset_file("bone_animation.vert.glsl", "r")
         fragment_source = get_asset_file("bone_animation.frag.glsl", "r")
 
-        shader = gpu.types.GPUShader(vertex_source, fragment_source, name="BoneAnimationShader")
+        shader = gpu.types.GPUShader(
+            vertex_source, fragment_source, name="BoneAnimationShader"
+        )
         batches = self.make_mesh_batches()
 
         bone_transforms = self.animationdata["bone_transforms"][self.action]
@@ -123,21 +122,18 @@ class ShaderDrawer:
             frame = int(time.time() % num_frames)
             transforms = bone_transforms[frame]
             shader.uniform_vector_float(
-                shader.uniform_from_name("bones"),
-                np.array(transforms), 16, 31
+                shader.uniform_from_name("bones"), np.array(transforms), 16, 31
             )
 
-            mvp = (
-                context.region_data.window_matrix @
-                context.region_data.view_matrix
-            )
+            mvp = context.region_data.window_matrix @ context.region_data.view_matrix
             shader.uniform_float("mvp", mvp)
             for batch in batches:
                 batch.draw(shader)
             gpu.state.depth_mask_set(False)
 
-
-        self.handle = bpy.types.SpaceView3D.draw_handler_add(draw, (), "WINDOW", "POST_VIEW")
+        self.handle = bpy.types.SpaceView3D.draw_handler_add(
+            draw, (), "WINDOW", "POST_VIEW"
+        )
 
     def remove(self):
         if self.handle:
@@ -146,13 +142,14 @@ class ShaderDrawer:
             except ValueError:
                 pass
 
+
 # Dev only
 # Destroy the shader drawer on scriptwatcher reload
 if is_dev() and 1:
     print("Resetting Bone Animation ShaderDrawer...")
     try:
         sd = bpy.app.driver_namespace["sd"]
-        sd.remove() 
+        sd.remove()
         del bpy.app.driver_namespace["sd"]
     except KeyError:
         pass

@@ -4,7 +4,7 @@ import mathutils
 from bpy.types import Context, Operator, Scene
 
 from .base import FabaOperator
-from .common import ( 
+from .common import (
     set_uv_map,
     poll_bake_scene,
     poll_work_scene,
@@ -28,19 +28,25 @@ update_selected_workmesh_all_shapekeys = IMPLEMENTATION_PENDING
 update_selected_workmesh_active_shapekey = IMPLEMENTATION_PENDING
 
 
-def create_workmeshes_for_all_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def create_workmeshes_for_all_targets(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     bake_scene = require_bake_scene()
     for bake_target in ht.bake_target_collection:
         create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
 
-def create_workmeshes_for_selected_target(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def create_workmeshes_for_selected_target(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     if bake_target := ht.get_selected_bake_target():
         bake_scene = require_bake_scene()
         create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
 
 
-def update_all_workmeshes(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def update_all_workmeshes(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     bake_scene = require_bake_scene()
     for bake_target in ht.bake_target_collection:
         for variant in bake_target.variant_collection:
@@ -54,13 +60,15 @@ def update_all_workmeshes(operator: Operator, context: Context, ht: Homeomorphic
                 update_workmesh_materials(bake_target, variant)
 
 
-def workmesh_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def workmesh_to_shapekey(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     work_scene = require_work_scene()
     avatar_object = work_scene.objects.get("Avatar")
     if not avatar_object:
         return
 
-    for object in  context.selected_objects:
+    for object in context.selected_objects:
         shape_name = object.name
         # Handle multiple variant names
         if "." in shape_name:
@@ -79,7 +87,9 @@ def workmesh_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicP
         bm.free()
 
 
-def all_workmeshes_to_shapekey(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def all_workmeshes_to_shapekey(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     bake_scene = require_bake_scene()
     work_scene = require_work_scene()
     avatar_object = work_scene.objects.get("Avatar")
@@ -87,7 +97,7 @@ def all_workmeshes_to_shapekey(operator: Operator, context: Context, ht: Homeomo
         return
 
     workmeshes = [m for m in bake_scene.objects if m.type == "MESH"]
-    for object in  workmeshes:
+    for object in workmeshes:
         shape_name = object.name
         # Handle multiple variant names
         if "." in shape_name and "offset" not in shape_name.lower():
@@ -108,7 +118,9 @@ def all_workmeshes_to_shapekey(operator: Operator, context: Context, ht: Homeomo
         bm.free()
 
 
-def shapekey_to_workmesh(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def shapekey_to_workmesh(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     work_scene = require_work_scene()
     avatar_object = work_scene.objects.get("Avatar")
     if not avatar_object:
@@ -116,7 +128,9 @@ def shapekey_to_workmesh(operator: Operator, context: Context, ht: HomeomorphicP
 
     # -- get mesh data for active shapekey
     shapekey_data = {}
-    active_shapekey = avatar_object.data.shape_keys.key_blocks[avatar_object.active_shape_key_index]
+    active_shapekey = avatar_object.data.shape_keys.key_blocks[
+        avatar_object.active_shape_key_index
+    ]
 
     bm = bmesh.new()
     bm.from_mesh(avatar_object.data)
@@ -137,7 +151,9 @@ def shapekey_to_workmesh(operator: Operator, context: Context, ht: HomeomorphicP
         vert.co = shapekey_data[vert.index]
 
 
-def all_shapekeys_to_workmeshes(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def all_shapekeys_to_workmeshes(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     bake_scene = require_bake_scene()
     work_scene = require_work_scene()
     avatar_object = work_scene.objects.get("Avatar")
@@ -175,7 +191,9 @@ def all_shapekeys_to_workmeshes(operator: Operator, context: Context, ht: Homeom
                 vert.co = shapekey_data[vert.index]
 
 
-def workmesh_symmetrize(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def workmesh_symmetrize(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     for obj in context.selected_objects:
         mesh = obj.data
         right_verts = [v for v in mesh.vertices if v.co.x > 0.0]
@@ -204,9 +222,13 @@ def workmesh_symmetrize(operator: Operator, context: Context, ht: HomeomorphicPr
         mesh.update()
 
 
-def create_workmeshes_for_specific_target(context: Context, ht: HomeomorphicProperties, bake_scene: Scene, bake_target: BakeTarget):
+def create_workmeshes_for_specific_target(
+    context: Context,
+    ht: HomeomorphicProperties,
+    bake_scene: Scene,
+    bake_target: BakeTarget,
+):
     for variant in bake_target.variant_collection:
-
         pending_name = get_bake_target_variant_name(bake_target, variant)
 
         # if the workmesh was previously created in the bake scene, skip
@@ -219,7 +241,6 @@ def create_workmeshes_for_specific_target(context: Context, ht: HomeomorphicProp
             local_uv = pending_object.data.uv_layers[PAINTING_UV_MAP]
 
         else:
-
             if source_object := bake_target.source_object:
                 ensure_applied_rotation(source_object)
 
@@ -229,19 +250,23 @@ def create_workmeshes_for_specific_target(context: Context, ht: HomeomorphicProp
                 pending_object.data.name = pending_name
 
                 # Create UV map for painting
-                bake_uv = pending_object.data.uv_layers[0]	# Assume first UV map is the bake one
+                bake_uv = pending_object.data.uv_layers[
+                    0
+                ]  # Assume first UV map is the bake one
                 bake_uv.name = TARGET_UV_MAP
                 local_uv = pending_object.data.uv_layers.new(name=PAINTING_UV_MAP)
                 set_uv_map(pending_object, local_uv.name)
 
                 # check if this target uses a shape key
-                if _ := pending_object.data.shape_keys.key_blocks.get(bake_target.shape_key_name):
-                    #Remove all shapekeys except the one this object represents
+                if _ := pending_object.data.shape_keys.key_blocks.get(
+                    bake_target.shape_key_name
+                ):
+                    # Remove all shapekeys except the one this object represents
                     for key in pending_object.data.shape_keys.key_blocks:
                         if key.name != bake_target.shape_key_name:
                             pending_object.shape_key_remove(key)
 
-                    #Remove remaining
+                    # Remove remaining
                     for key in pending_object.data.shape_keys.key_blocks:
                         pending_object.shape_key_remove(key)
 
@@ -256,7 +281,7 @@ def create_workmeshes_for_specific_target(context: Context, ht: HomeomorphicProp
 def update_workmesh_materials(bake_target, variant):
     load_material_templates()
 
-    #TBD - should we disconnect the material if we fail to create one? 
+    # TBD - should we disconnect the material if we fail to create one?
     # This might be good in order to prevent accidentally getting unintended materials activated
     # TODO(ranjian0) Should mirrored baketarget workmeshes have a material
     if not variant.uv_map:
@@ -264,37 +289,52 @@ def update_workmesh_materials(bake_target, variant):
         log.error(f"No uv found for variant {variant}")
         return
 
-    bake_material_name =f"bake-{get_bake_target_variant_name(bake_target, variant)}"
+    bake_material_name = f"bake-{get_bake_target_variant_name(bake_target, variant)}"
     bake_material = create_named_entry(bpy.data.materials, bake_material_name)
-    bake_material.use_nodes = True	#contribution note 9
-    #TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?
-    setup_bake_material(bake_material, variant.intermediate_atlas, bake_target.source_uv_map, variant.image, variant.uv_map)
+    bake_material.use_nodes = True  # contribution note 9
+    # TBD should we use source_uv_map here or should we consider the workmesh to have an intermediate UV map?
+    setup_bake_material(
+        bake_material,
+        variant.intermediate_atlas,
+        bake_target.source_uv_map,
+        variant.image,
+        variant.uv_map,
+    )
     variant.workmesh.active_material = bake_material
 
 
 def load_material_templates():
     asset_mat_names = (
-        Assets.Materials.BakeAO.name, 
-        Assets.Materials.BakeDiffuse.name, 
-        Assets.Materials.BakePreview.name
+        Assets.Materials.BakeAO.name,
+        Assets.Materials.BakeDiffuse.name,
+        Assets.Materials.BakePreview.name,
     )
-    
+
     # -- if we have not already loaded the template materials, load them
-    if not all(template_material in bpy.data.materials for template_material in asset_mat_names):
-        with bpy.data.libraries.load(str(Assets.Materials.url), link=False) as (data_from, data_to):
-            data_to.materials = [name for name in data_from.materials if name in asset_mat_names]
+    if not all(
+        template_material in bpy.data.materials for template_material in asset_mat_names
+    ):
+        with bpy.data.libraries.load(str(Assets.Materials.url), link=False) as (
+            data_from,
+            data_to,
+        ):
+            data_to.materials = [
+                name for name in data_from.materials if name in asset_mat_names
+            ]
         for mat in data_to.materials:
             if mat:
                 mat.use_fake_user = True
 
 
-def mirror_workmesh_verts(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def mirror_workmesh_verts(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     source_obj = ht.mirror_verts_source
     target_obj = ht.mirror_verts_target
 
     # TODO(ranjian0)
     # For now we assume the mirror axis is the x axis
-    
+
     source_verts = [v for v in source_obj.data.vertices]
     target_verts = [v for v in target_obj.data.vertices]
 
@@ -327,94 +367,100 @@ def mirror_workmesh_verts(operator: Operator, context: Context, ht: Homeomorphic
     target_obj.data.update()
 
 
-def transfer_skin_weights(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def transfer_skin_weights(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     pass
 
 
 class FABA_OT_create_workmeshes_for_all_targets(FabaOperator):
-    bl_label =            "New work meshes from all bake targets"
-    bl_idname =           "faba.create_workmeshes_for_all_targets"
-    bl_description =      "Create bake meshes for all bake targets"
-    faba_operator =       create_workmeshes_for_all_targets
-    faba_poll =           poll_baketargets
+    bl_label = "New work meshes from all bake targets"
+    bl_idname = "faba.create_workmeshes_for_all_targets"
+    bl_description = "Create bake meshes for all bake targets"
+    faba_operator = create_workmeshes_for_all_targets
+    faba_poll = poll_baketargets
 
 
 class FABA_OT_create_workmeshes_for_selected_target(FabaOperator):
-    bl_label =            "New work meshes from selected bake targets"
-    bl_idname =           "faba.create_workmeshes_for_selected_target"
-    bl_description =      "Create bake meshes for the selected bake targets"
-    faba_operator =       create_workmeshes_for_selected_target
+    bl_label = "New work meshes from selected bake targets"
+    bl_idname = "faba.create_workmeshes_for_selected_target"
+    bl_description = "Create bake meshes for the selected bake targets"
+    faba_operator = create_workmeshes_for_selected_target
 
 
 class FABA_OT_update_selected_workmesh_all_shapekeys(FabaOperator):
-    bl_label =            "Update selected"
-    bl_idname =           "faba.update_selected_workmesh_all_shapekeys"
-    bl_description =      "Update vertex position data for all workmeshes"
-    faba_operator =       update_selected_workmesh_all_shapekeys
+    bl_label = "Update selected"
+    bl_idname = "faba.update_selected_workmesh_all_shapekeys"
+    bl_description = "Update vertex position data for all workmeshes"
+    faba_operator = update_selected_workmesh_all_shapekeys
 
 
 class FABA_OT_update_selected_workmesh_active_shapekey(FabaOperator):
-    bl_label =            "Update active shapekey"
-    bl_idname =           "faba.update_selected_workmesh_active_shapekey"
-    bl_description =      "Update vertex position data for the active shape key mesh"
-    faba_operator =       update_selected_workmesh_active_shapekey
+    bl_label = "Update active shapekey"
+    bl_idname = "faba.update_selected_workmesh_active_shapekey"
+    bl_description = "Update vertex position data for the active shape key mesh"
+    faba_operator = update_selected_workmesh_active_shapekey
 
 
 class FABA_OT_update_selected_workmesh(FabaOperator):
-    bl_label =            "Update selected work mesh"
-    bl_idname =           "faba.update_selected_workmesh"
-    #TODO - bl_description
-    faba_operator =       update_selected_workmesh
+    bl_label = "Update selected work mesh"
+    bl_idname = "faba.update_selected_workmesh"
+    # TODO - bl_description
+    faba_operator = update_selected_workmesh
 
 
 class FABA_OT_update_all_workmeshes(FabaOperator):
-    bl_label =            "Update all work meshes"
-    bl_idname =           "faba.update_all_workmeshes"
-    bl_description =      "Reset all the bake target workmeshes(uv, materials)"
-    faba_operator =       update_all_workmeshes
+    bl_label = "Update all work meshes"
+    bl_idname = "faba.update_all_workmeshes"
+    bl_description = "Reset all the bake target workmeshes(uv, materials)"
+    faba_operator = update_all_workmeshes
 
 
 class FABA_OT_workmesh_to_shapekey(FabaOperator):
-    bl_label =            "Selected workmesh to shapekey"
-    bl_idname =           "faba.workmesh_to_shapekey"
-    bl_description =      "Transfer the selected workmesh(es) geometry to the corresponding shapekey(s)"
-    faba_operator =       workmesh_to_shapekey
-    faba_poll =           poll_bake_scene
+    bl_label = "Selected workmesh to shapekey"
+    bl_idname = "faba.workmesh_to_shapekey"
+    bl_description = (
+        "Transfer the selected workmesh(es) geometry to the corresponding shapekey(s)"
+    )
+    faba_operator = workmesh_to_shapekey
+    faba_poll = poll_bake_scene
 
 
 class FABA_OT_all_workmeshes_to_shapekeys(FabaOperator):
-    bl_label =            "All workmeshes to shapekeys"
-    bl_idname =           "faba.all_workmesh_to_shapekey"
-    bl_description =      "Transfer the all workmesh geometry to the corresponding shapekey"
-    faba_operator =       all_workmeshes_to_shapekey
-    faba_poll =           poll_bake_scene
+    bl_label = "All workmeshes to shapekeys"
+    bl_idname = "faba.all_workmesh_to_shapekey"
+    bl_description = "Transfer the all workmesh geometry to the corresponding shapekey"
+    faba_operator = all_workmeshes_to_shapekey
+    faba_poll = poll_bake_scene
 
 
 class FABA_OT_shapekey_to_workmesh(FabaOperator):
-    bl_label =            "Active shapekey to workmesh"
-    bl_idname =           "faba.shapekey_to_workmesh"
-    bl_description =      "Transfer the active shapekey geometry to the corresponding workmesh"
-    faba_operator =       shapekey_to_workmesh
-    faba_poll=            poll_work_scene
+    bl_label = "Active shapekey to workmesh"
+    bl_idname = "faba.shapekey_to_workmesh"
+    bl_description = (
+        "Transfer the active shapekey geometry to the corresponding workmesh"
+    )
+    faba_operator = shapekey_to_workmesh
+    faba_poll = poll_work_scene
 
 
 class FABA_OT_all_shapekey_to_workmesh(FabaOperator):
-    bl_label =            "All shapekeys to workmeshes"
-    bl_idname =           "faba.all_shapekey_to_workmesh"
-    bl_description =      "Transfer all shapekey geometry to the corresponding workmesh"
-    faba_operator =       all_shapekeys_to_workmeshes
-    faba_poll =           poll_work_scene
+    bl_label = "All shapekeys to workmeshes"
+    bl_idname = "faba.all_shapekey_to_workmesh"
+    bl_description = "Transfer all shapekey geometry to the corresponding workmesh"
+    faba_operator = all_shapekeys_to_workmeshes
+    faba_poll = poll_work_scene
 
 
 class FABA_OT_workmesh_symmetrize(FabaOperator):
-    bl_label =            "Symmetrize workmesh"
-    bl_idname =           "faba.workmesh_symmetrize"
-    bl_description =      "Make the workmesh symmetrical along X axis"
-    faba_operator =       workmesh_symmetrize
+    bl_label = "Symmetrize workmesh"
+    bl_idname = "faba.workmesh_symmetrize"
+    bl_description = "Make the workmesh symmetrical along X axis"
+    faba_operator = workmesh_symmetrize
 
 
 class FABA_OT_mirror_workmesh_verts(FabaOperator):
-    bl_label =            "Mirror Vertices"
-    bl_idname =           "faba.mirror_workmesh_verts"
-    bl_description =      "Mirror vertices from source object to target object"
-    faba_operator =       mirror_workmesh_verts
+    bl_label = "Mirror Vertices"
+    bl_idname = "faba.mirror_workmesh_verts"
+    bl_description = "Mirror vertices from source object to target object"
+    faba_operator = mirror_workmesh_verts

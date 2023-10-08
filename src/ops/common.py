@@ -4,6 +4,7 @@ from bpy.types import CollectionProperty, Object, Context, Operator
 from ..props import BakeVariant
 from ..utils.constants import WORK_SCENE, BAKE_SCENE
 
+
 class GuardedOperator:
     def __init__(self, operator: Operator):
         self.operator = operator
@@ -14,6 +15,7 @@ class GuardedOperator:
     def __call__(self, *args, **kwargs):
         if self.operator.poll():
             return self.operator(*args, **kwargs)
+
 
 class GenericList:
     "This is an abstract handler for list operations. The operations needs a collection and callables to get and set the current selection"
@@ -38,35 +40,45 @@ class GenericList:
 def set_uv_map(obj: Object, uv_map: str):
     obj.data.uv_layers[uv_map].active = True
 
+
 def copy_object(source_obj: Object, name: str) -> Object:
     new_object = source_obj.copy()
-    new_object.data = source_obj.data.copy()	#Copy data as well
+    new_object.data = source_obj.data.copy()  # Copy data as well
     new_object.name = name
     return new_object
 
-def copy_collection(source: CollectionProperty, dest: CollectionProperty, transfer: Callable):
+
+def copy_collection(
+    source: CollectionProperty, dest: CollectionProperty, transfer: Callable
+):
     while len(dest):
         dest.remove(0)
 
     for item in source:
         transfer(item, dest.add())
 
+
 def transfer_variant(source: BakeVariant, dest: BakeVariant):
     dest.name = source.name
     dest.image = source.image
     dest.uv_map = source.uv_map
 
+
 def poll_bake_scene(context: Context) -> bool:
     return context.scene.name == BAKE_SCENE
+
 
 def poll_work_scene(context: Context) -> bool:
     return context.scene.name == WORK_SCENE
 
+
 def poll_selected_objects(context: Context) -> bool:
     return context.selected_objects
 
+
 def poll_baketargets(context: Context) -> bool:
     return len(context.scene.homeomorphictools.bake_target_collection)
+
 
 def poll_avatar_mesh(context: Context) -> bool:
     return context.scene.homeomorphictools.avatar_mesh

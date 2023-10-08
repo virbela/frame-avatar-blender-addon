@@ -3,19 +3,19 @@ bl_info = {
     "description": "Provides a set of tools for the creation of homeomorphic avatars.",
     "author": "Martin Petersson, Mikael Lövqvist, Ian Karanja",
     "version": (0, 2, 4),
-    "blender": (2, 93, 0), # Previous Major LTS
+    "blender": (2, 93, 0),  # Previous Major LTS
     "location": "View3D",
     "warning": "",
     "wiki_url": "https://github.com/virbela/frame-avatar-blender-addon",
     "tracker_url": "https://github.com/virbela/frame-avatar-blender-addon/issues",
     "support": "COMMUNITY",
-    "category": "Avatar"
+    "category": "Avatar",
 }
-#dependencies: UVPackmaster 2.5.8
+# dependencies: UVPackmaster 2.5.8
 
-#ISSUE-6:	Solution depends on UVPackmaster 2/3
-#	This should be optional
-#	labels: dependency
+# ISSUE-6:	Solution depends on UVPackmaster 2/3
+# 	This should be optional
+# 	labels: dependency
 
 import bpy
 from bpy.app.handlers import persistent
@@ -30,27 +30,29 @@ from .utils.helpers import get_homeomorphic_tool_state
 class FrameAvatarAddonPreferences(AddonPreferences):
     bl_idname = __package__
 
-    log_target:                     bpy.props.StringProperty(name="Log File Name", subtype="FILE_NAME", default="fabalog")
-    glb_export_dir:                 bpy.props.StringProperty(
-                                        name="GLB Export Dir",
-                                        subtype="DIR_PATH",
-                                        description="Folder to use for glb export (default is current blendfile folder)."
-                                    )
-    atlas_export_dir:               bpy.props.StringProperty(
-                                        name="Atlas Export Dir",
-                                        subtype="DIR_PATH",
-                                        description="Folder to use for atlas export (default is current blendfile folder)."
-                                    )
-    npy_export_dir:                 bpy.props.StringProperty(
-                                        name="Npy Export Dir",
-                                        subtype="DIR_PATH",
-                                        description="Folder to use for animation (.npy) export (default is current blendfile folder)."
-                                    )
-    custom_frame_validation:        bpy.props.BoolProperty(
-                                        default=False,
-                                        name="Frame Validation",
-                                        description="Enable validation for the frame avatars. (Frame artists only!)"
-                                    )
+    log_target: bpy.props.StringProperty(
+        name="Log File Name", subtype="FILE_NAME", default="fabalog"
+    )
+    glb_export_dir: bpy.props.StringProperty(
+        name="GLB Export Dir",
+        subtype="DIR_PATH",
+        description="Folder to use for glb export (default is current blendfile folder).",
+    )
+    atlas_export_dir: bpy.props.StringProperty(
+        name="Atlas Export Dir",
+        subtype="DIR_PATH",
+        description="Folder to use for atlas export (default is current blendfile folder).",
+    )
+    npy_export_dir: bpy.props.StringProperty(
+        name="Npy Export Dir",
+        subtype="DIR_PATH",
+        description="Folder to use for animation (.npy) export (default is current blendfile folder).",
+    )
+    custom_frame_validation: bpy.props.BoolProperty(
+        default=False,
+        name="Frame Validation",
+        description="Enable validation for the frame avatars. (Frame artists only!)",
+    )
 
     def draw(self, context: Context):
         layout = self.layout
@@ -62,8 +64,7 @@ class FrameAvatarAddonPreferences(AddonPreferences):
 
 
 def timer_update_export_actions():
-    """ Create a list of actions that can be exported.
-    """
+    """Create a list of actions that can be exported."""
     HT = get_homeomorphic_tool_state(bpy.context)
 
     eactions = [ea.name for ea in HT.export_animation_actions]
@@ -78,7 +79,7 @@ def timer_update_export_actions():
     for idx, eaction in enumerate(HT.export_animation_actions):
         if eaction.name not in [a.name for a in bpy.data.actions]:
             HT.export_animation_actions.remove(idx)
-    return 2 # run every 2 seconds
+    return 2  # run every 2 seconds
 
 
 @persistent
@@ -111,14 +112,18 @@ def unregister():
 
 if __name__ == "__main__":
     # XXX ScriptWatcher hook for local development
-    import os; os.system("cls" if os.name == "nt" else "clear")
+    import os
+
+    os.system("cls" if os.name == "nt" else "clear")
 
     try:
         unregister()
     except RuntimeError:
-        pass # some class probably not registered
+        pass  # some class probably not registered
     except:
         # show any other exception
-        import traceback; traceback.print_exc()
+        import traceback
+
+        traceback.print_exc()
 
     register()

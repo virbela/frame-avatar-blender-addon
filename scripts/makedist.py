@@ -19,19 +19,20 @@ import pathlib
 import shutil
 import subprocess
 
-REPO_FILES = (
-    "src/",
-)
+REPO_FILES = ("src/",)
 
 
 def git(*args):
     # convenience routine for simplifying git command calls.
     return subprocess.check_output(("git",) + args)
 
+
 def main():
     _, args = getopt.getopt(sys.argv[1:], "", [])
     if len(args) != 1:
-        raise getopt.GetoptError("expecting exactly one arg, the tag to build a release for")
+        raise getopt.GetoptError(
+            "expecting exactly one arg, the tag to build a release for"
+        )
 
     upto = args[0]
     earliest = git("rev-list", "--reverse", upto).split(b"\n")[0].strip().decode()
@@ -43,7 +44,7 @@ def main():
         os.remove(outfilename)
 
     # -- create zip dir
-    zip_folder = (pathlib.Path() / basename)
+    zip_folder = pathlib.Path() / basename
     if zip_folder.exists():
         shutil.rmtree(str(zip_folder))
     zip_folder.mkdir()
@@ -59,10 +60,19 @@ def main():
                 )
             )
         else:
-            items = [item,]
+            items = [
+                item,
+            ]
 
         for filename in items:
-            info = git("log", "--format=%ct:%H", "-n1", "%s..%s" % (earliest, upto), "--", filename).strip()
+            info = git(
+                "log",
+                "--format=%ct:%H",
+                "-n1",
+                "%s..%s" % (earliest, upto),
+                "--",
+                filename,
+            ).strip()
             if info == b"":
                 continue
 
@@ -90,6 +100,7 @@ def main():
     else:
         shutil.rmtree(str(zip_folder))
         sys.stdout.write(f"Error: No files at tagged at {upto}")
+
 
 if __name__ == "__main__":
     main()

@@ -1,12 +1,12 @@
 import bpy
 from bpy.types import (
-    Operator, 
-    Context, 
-    ViewLayer, 
+    Operator,
+    Context,
+    ViewLayer,
     NodeTree,
     ShaderNodeTexImage,
     ShaderNodeOutputMaterial,
-    ShaderNodeBsdfPrincipled
+    ShaderNodeBsdfPrincipled,
 )
 
 from .base import FabaOperator
@@ -16,15 +16,18 @@ from ..props import HomeomorphicProperties, BakeVariant
 from ..utils.helpers import require_bake_scene, set_scene, set_rendering, set_selection
 
 
-def bake_all_bake_targets(operator: Operator, context: Context, ht: HomeomorphicProperties):
-
+def bake_all_bake_targets(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     last_active_scene = context.scene
     bake_scene = require_bake_scene()
-    view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+    view_layer = bake_scene.view_layers[0]  # TODO - make sure there is only one
     set_scene(context, bake_scene)
 
     for idx, bake_target in enumerate(ht.bake_target_collection, start=1):
-        operator.report({"INFO"}, f"Baking target {idx} / {len(ht.bake_target_collection)}.")
+        operator.report(
+            {"INFO"}, f"Baking target {idx} / {len(ht.bake_target_collection)}."
+        )
         log.info(f"Baking for {bake_target}")
         for variant in bake_target.variant_collection:
             bake_specific_variant(ht, view_layer, variant)
@@ -34,11 +37,12 @@ def bake_all_bake_targets(operator: Operator, context: Context, ht: Homeomorphic
     set_scene(context, last_active_scene)
 
 
-def bake_selected_bake_target(operator: Operator, context: Context, ht: HomeomorphicProperties):
-
+def bake_selected_bake_target(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     last_active_scene = context.scene
     bake_scene = require_bake_scene()
-    view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+    view_layer = bake_scene.view_layers[0]  # TODO - make sure there is only one
     set_scene(context, bake_scene)
 
     if bake_target := ht.get_selected_bake_target():
@@ -49,11 +53,13 @@ def bake_selected_bake_target(operator: Operator, context: Context, ht: Homeomor
     set_scene(context, last_active_scene)
 
 
-def bake_selected_workmeshes(operator: Operator, context: Context, ht: HomeomorphicProperties):
+def bake_selected_workmeshes(
+    operator: Operator, context: Context, ht: HomeomorphicProperties
+):
     bake_scene = require_bake_scene()
-    view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
+    view_layer = bake_scene.view_layers[0]  # TODO - make sure there is only one
 
-    #NOTE - see technical detail 5 for further info on this temporary solution
+    # NOTE - see technical detail 5 for further info on this temporary solution
     def get_bake_target_and_variant_from_workmesh(workmesh):
         for bake_target in ht.bake_target_collection:
             for variant in bake_target.variant_collection:
@@ -66,7 +72,6 @@ def bake_selected_workmeshes(operator: Operator, context: Context, ht: Homeomorp
     for workmesh in view_layer.objects:
         if workmesh.select_get(view_layer=view_layer):
             selection.append(get_bake_target_and_variant_from_workmesh(workmesh))
-
 
     for _, variant in selection:
         workmesh = variant.workmesh
@@ -84,13 +89,17 @@ def bake_selected_workmeshes(operator: Operator, context: Context, ht: Homeomorp
     run_bake(ht)
 
 
-def bake_specific_variant(ht: HomeomorphicProperties, view_layer: ViewLayer, variant: BakeVariant):
+def bake_specific_variant(
+    ht: HomeomorphicProperties, view_layer: ViewLayer, variant: BakeVariant
+):
     workmesh = variant.workmesh
 
     ensure_color_output_node_ready(variant, workmesh.active_material.node_tree)
 
     set_rendering(view_layer.objects, workmesh)
-    set_selection(view_layer.objects, workmesh, synchronize_active=True, make_sure_active=True)
+    set_selection(
+        view_layer.objects, workmesh, synchronize_active=True, make_sure_active=True
+    )
 
     # set active image in material
     material_nodes = workmesh.active_material.node_tree.nodes
@@ -143,8 +152,12 @@ def ensure_color_output_node_ready(variant: BakeVariant, tree: NodeTree):
     if not texnode:
         return
 
-    outputnode = [n for n in material_nodes if isinstance(n, ShaderNodeOutputMaterial)].pop()
-    diffusenode = [n for n in material_nodes if isinstance(n, ShaderNodeBsdfPrincipled)].pop()
+    outputnode = [
+        n for n in material_nodes if isinstance(n, ShaderNodeOutputMaterial)
+    ].pop()
+    diffusenode = [
+        n for n in material_nodes if isinstance(n, ShaderNodeBsdfPrincipled)
+    ].pop()
 
     # remove all links from the texnode or the diffuse node
     for link in material_links:
@@ -157,21 +170,21 @@ def ensure_color_output_node_ready(variant: BakeVariant, tree: NodeTree):
 
 
 class FABA_OT_bake_selected_bake_target(FabaOperator):
-    bl_label =            "Bake selected target"
-    bl_idname =           "faba.bake_selected_bake_target"
-    bl_description =      "Bake textures for the selected bake target"
-    faba_operator =       bake_selected_bake_target
+    bl_label = "Bake selected target"
+    bl_idname = "faba.bake_selected_bake_target"
+    bl_description = "Bake textures for the selected bake target"
+    faba_operator = bake_selected_bake_target
 
 
 class FABA_OT_bake_selected_workmeshes(FabaOperator):
-    bl_label =            "Bake selected work meshes"
-    bl_idname =           "faba.bake_selected_workmeshes"
-    bl_description =      "Bake textures for selected work meshes"
-    faba_operator =       bake_selected_workmeshes
+    bl_label = "Bake selected work meshes"
+    bl_idname = "faba.bake_selected_workmeshes"
+    bl_description = "Bake textures for selected work meshes"
+    faba_operator = bake_selected_workmeshes
 
 
 class FABA_OT_bake_all(FabaOperator):
-    bl_label =            "Bake all targets"
-    bl_idname =           "faba.bake_all"
-    bl_description =      "Bake textures for all targets and their variants"
-    faba_operator =       bake_all_bake_targets
+    bl_label = "Bake all targets"
+    bl_idname = "faba.bake_all"
+    bl_description = "Bake textures for all targets and their variants"
+    faba_operator = bake_all_bake_targets

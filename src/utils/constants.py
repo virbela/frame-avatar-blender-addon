@@ -3,13 +3,16 @@ from pathlib import Path
 
 ASSET_DIR = Path(__file__).parent.parent.joinpath("assets").absolute()
 
+
 class COLORS(enum.Enum):
     BLACK = (0.0, 0.0, 0.0, 1.0)
     WHITE = (1.0, 1.0, 1.0, 1.0)
 
+
 class MIRROR_TYPE(enum.Enum):
     PRIMARY = object()
     SECONDARY = object()
+
 
 IGNORED = type("IGNORED", (), {})
 
@@ -31,6 +34,7 @@ class Assets:
 
     class Materials:
         url = ASSET_DIR / "materials.blend"
+
         class BakeAO:
             name = "bake_material_ao"
 
@@ -39,4 +43,3 @@ class Assets:
 
         class BakePreview:
             name = "bake_material_preview"
-

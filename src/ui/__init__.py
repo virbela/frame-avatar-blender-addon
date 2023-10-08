@@ -1,7 +1,7 @@
 import bpy
 from .deprecated import (
-    register_ui as deprecated_ui_register, 
-    unregister_ui as deprecated_ui_unregister
+    register_ui as deprecated_ui_register,
+    unregister_ui as deprecated_ui_unregister,
 )
 
 from .pt_effects import (
@@ -11,7 +11,6 @@ from .pt_effects import (
 
 classes = (
     FABA_UL_effects,
-
     # XXX Order matters. This is the order in which the panels show up
     FABA_PT_effects,
 )
@@ -22,7 +21,8 @@ register, unregister = bpy.utils.register_classes_factory(classes)
 def register_ui():
     deprecated_ui_register()
     register()
-    
+
+
 def unregister_ui():
     deprecated_ui_unregister()
     unregister()

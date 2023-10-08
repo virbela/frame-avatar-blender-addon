@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from .logging import log
 from .constants import TARGET_UV_MAP
 
+
 @dataclass
 class UVTransform:
     centroid: Vector
@@ -14,7 +15,12 @@ class UVTransform:
     rotation: float
 
     def isNil(self):
-        return self.scale == 1.0 and self.rotation == 0 and self.translation == Vector((0, 0))
+        return (
+            self.scale == 1.0
+            and self.rotation == 0
+            and self.translation == Vector((0, 0))
+        )
+
 
 def get_uv_map_from_mesh(obj: Object) -> dict[int, Vector]:
     "If uv_layer is ACTIVE_LAYER, the active UV layer will be used, otherwise, uv_layer is considered to be the index of the wanted UV layer."
@@ -36,10 +42,10 @@ def get_uv_map_from_mesh(obj: Object) -> dict[int, Vector]:
 
     return uv_map
 
+
 class UVTransformationCalculator:
     def __init__(self, reference_uv_map: dict[int, Vector]):
-
-        #Find two furthest points in UV map
+        # Find two furthest points in UV map
         max_len = None
         for ref_index1, ref1 in reference_uv_map.items():
             for ref_index2, ref2 in reference_uv_map.items():
@@ -52,18 +58,21 @@ class UVTransformationCalculator:
         self.reference_distance = max_len
         self.reference_uv_map = reference_uv_map
 
-        log.info(f"UV endpoints {self.ep1}:{reference_uv_map[self.ep1]} - {self.ep2}:{reference_uv_map[self.ep2]}", print_console=False)
+        log.info(
+            f"UV endpoints {self.ep1}:{reference_uv_map[self.ep1]} - {self.ep2}:{reference_uv_map[self.ep2]}",
+            print_console=False,
+        )
 
     def get_centroid(self, uv_map: dict[int, Vector]) -> Vector:
         vecs = list(uv_map.values())
-        sorted_x = sorted(vecs, key = lambda v:v.x)
-        sorted_y = sorted(vecs, key = lambda v:v.y)
+        sorted_x = sorted(vecs, key=lambda v: v.x)
+        sorted_y = sorted(vecs, key=lambda v: v.y)
         min_x, max_x = sorted_x[0].x, sorted_x[-1].x
         min_y, max_y = sorted_y[0].y, sorted_y[-1].y
         return Vector(((min_x + max_x) / 2, (min_y + max_y) / 2))
 
     def calculate_transform(self, target_uv_map: dict[int, Vector]) -> UVTransform:
-        #Get reference and target endpoints as vectors
+        # Get reference and target endpoints as vectors
         R1, R2 = self.reference_uv_map[self.ep1], self.reference_uv_map[self.ep2]
         T1, T2 = target_uv_map[self.ep1], target_uv_map[self.ep2]
         distance = (T1 - T2).length
@@ -76,8 +85,7 @@ class UVTransformationCalculator:
         target_vector = (T2 - T1).normalized()
         rotation = reference_vector.angle_signed(target_vector)
 
-
-        #Calculate translation
+        # Calculate translation
         reference_centroid = self.get_centroid(self.reference_uv_map)
         target_centroid = self.get_centroid(target_uv_map)
         translation = target_centroid - reference_centroid
@@ -86,7 +94,7 @@ class UVTransformationCalculator:
             centroid=reference_centroid,
             translation=translation,
             scale=scale,
-            rotation=rotation
+            rotation=rotation,
         )
         log.info(f"UV Transform: {transform}", print_console=False)
         return transform
