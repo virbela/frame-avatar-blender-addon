@@ -18,6 +18,7 @@ def get_args() -> argparse.Namespace:
     parser.add_argument("output", type=Path, help="File to write script dir to")
     return parser.parse_args(args)
 
+
 args = get_args()
 with args.output.open("w") as outfile:
     print(Path(bpy.utils.user_resource("SCRIPTS")) / "addons", file=outfile)

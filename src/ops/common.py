@@ -21,14 +21,18 @@ class GenericList:
     "This is an abstract handler for list operations. The operations needs a collection and callables to get and set the current selection"
 
     @staticmethod
-    def add(collection: CollectionProperty, get_selected: Any, set_selected: Any) -> Any:
+    def add(
+        collection: CollectionProperty, get_selected: Any, set_selected: Any
+    ) -> Any:
         new = collection.add()
         last_id = len(collection) - 1
         set_selected(last_id)
         return new
 
     @staticmethod
-    def remove(collection: CollectionProperty, get_selected: Any, set_selected: Any) -> Any:
+    def remove(
+        collection: CollectionProperty, get_selected: Any, set_selected: Any
+    ) -> Any:
         collection.remove(get_selected())
         last_id = len(collection) - 1
         if last_id == -1:
@@ -49,7 +53,9 @@ def copy_object(source_obj: Object, name: str) -> Object:
 
 
 def copy_collection(
-    source: CollectionProperty, dest: CollectionProperty, transfer: Callable[[Any, Any], None]
+    source: CollectionProperty,
+    dest: CollectionProperty,
+    transfer: Callable[[Any, Any], None],
 ) -> None:
     while len(dest):
         dest.remove(0)

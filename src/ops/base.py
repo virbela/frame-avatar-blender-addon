@@ -9,11 +9,14 @@ from ..utils.helpers import get_homeomorphic_tool_state
 PollFunction = typing.Callable[[Context], bool]
 OperatorFunction = typing.Callable[[Context, HomeomorphicProperties], None]
 
+
 def empty_poll(context: Context) -> bool:
-    return True 
+    return True
+
 
 def empty_op(context: Context, ht: HomeomorphicProperties) -> None:
     pass
+
 
 class FabaOperator(Operator):
     faba_poll: PollFunction = empty_poll
