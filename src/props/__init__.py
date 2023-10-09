@@ -9,6 +9,14 @@ from .deprecated import (
     ColorEffect,
 )
 
+__all__ = [
+    "HomeomorphicProperties",
+    "BakeVariant",
+    "BakeTargetMirrorEntry",
+    "BakeTarget",
+    "PositionEffect",
+    "ColorEffect",
+]
 
 def register_props() -> None:
     deprecated_props_register()

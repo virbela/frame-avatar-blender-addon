@@ -7,6 +7,20 @@ from .baketarget import BakeTarget, BakeTargetMirrorEntry
 from .effect import ColorEffect, PositionEffect, EffectProperty
 from .animation import AnimationProperty, ExportAnimationJSONPathProperty
 
+__all__ = [
+    "BakeTargetReference",
+    "BakeGroup",
+    "BakeTargetMirrorEntry",
+    "BakeVariant",
+    "BakeTarget",
+    "ColorEffect",
+    "PositionEffect",
+    "EffectProperty",
+    "AnimationProperty",
+    "ExportAnimationJSONPathProperty",
+    "HomeomorphicProperties",
+]
+
 
 classes = (
     BakeTargetReference,
