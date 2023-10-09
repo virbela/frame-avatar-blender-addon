@@ -1,4 +1,5 @@
-from bpy.types import bpy_prop_collection, Object
+import typing
+from bpy.types import Object
 
 
 class InternalError(Exception):
@@ -7,19 +8,22 @@ class InternalError(Exception):
 
 class FrameException:
     class FailedToCreateNamedEntry(Exception):
-        def __init__(self, collection: bpy_prop_collection, name: str) -> None:
+        def __init__(self, collection: typing.Any, name: str) -> None:
             super().__init__(
-                f"Failed to create a named entry named `{name}` in collection {collection}."
+                (
+                    "Failed to create a named entry "
+                    f"named `{name}` in collection {collection}."
+                )
             )
 
     class NamedEntryNotFound(Exception):
-        def __init__(self, collection: bpy_prop_collection, name: str) -> None:
+        def __init__(self, collection: typing.Any, name: str) -> None:
             super().__init__(
                 f"No entry named `{name}` was found in collection {collection}."
             )
 
     class NoNameGivenForCollectionLookup(Exception):
-        def __init__(self, collection: bpy_prop_collection) -> None:
+        def __init__(self, collection: typing.Any) -> None:
             super().__init__(
                 f"No name was given for look up in collection {collection}."
             )
@@ -40,7 +44,10 @@ class BakeException:
         def __init__(self, name: str) -> None:
             self.name = name
             super().__init__(
-                f"The operation requries an object to be chosen and no such object `{name}` exists."
+                (
+                    "The operation requries an object to be"
+                    f"chosen and no such object `{name}` exists."
+                )
             )
 
     class NoSuchScene(base):

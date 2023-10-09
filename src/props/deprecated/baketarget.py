@@ -83,7 +83,7 @@ class BakeTargetMirrorEntry(PropertyGroup):
     secondary: IntProperty(name="Secondary bake target identifier", default=-1)  # type: ignore
 
 
-def get_baketarget_name(self: "BakeTarget") -> None:
+def get_baketarget_name(self: "BakeTarget") -> str:
     return self.get("name", "Untitled bake target")
 
 

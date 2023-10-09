@@ -172,7 +172,7 @@ class FABA_UL_bake_target_mirrors(UIList):
         if ht := get_homeomorphic_tool_state(context):
             row = layout.row()
 
-            def na(txt) -> str:
+            def na(txt: str) -> str:
                 """This is a helper function that will say (Not assigned) if the string
                 is empty but otherwise indicate the contents but also convey it is a
                 broken link

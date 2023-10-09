@@ -112,7 +112,12 @@ def auto_assign_atlas(
             raise Exception(uv.bake_target.uv_mode)  # TODO proper exception
 
     log.debug(
-        f"UV bins - monochrome: {len(monochrome_targets)}, color: {len(color_targets)}, nil: {len(nil_targets)}, frozen: {len(frozen_targets)}"
+        (
+            f"UV bins - monochrome: {len(monochrome_targets)}, "
+            f"color: {len(color_targets)}, "
+            f"nil: {len(nil_targets)}, "
+            f"frozen: {len(frozen_targets)}"
+        )
     )
 
     # NOTE - we support multiple color bins but it is not used yet

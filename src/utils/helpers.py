@@ -19,12 +19,10 @@ from bpy.types import (
     Context,
     Scene,
     Menu,
-    bpy_prop_collection,
     Object,
     AddonPreferences,
     Mesh,
     Action,
-    ObjectBase,
 )
 
 from .logging import log
@@ -99,11 +97,12 @@ class EnumDescriptor:
             )
 
 
-def require_work_scene() -> Scene:
+def require_work_scene() -> Scene | None:
     if scene := bpy.data.scenes.get(WORK_SCENE):
         return scene
 
     log.error(f"Work scene `{WORK_SCENE}` could not be found.")
+    return None
 
 
 def require_bake_scene() -> Scene:
@@ -118,11 +117,11 @@ def get_homeomorphic_tool_state(context: Context) -> "HomeomorphicProperties":
     return scene.homeomorphictools
 
 
-def get_named_entry(collection: bpy_prop_collection[T], name: str) -> T:
+def get_named_entry(collection: typing.Any, name: str) -> typing.Any:
     return collection.get(name)
 
 
-def require_named_entry(collection: bpy_prop_collection[T], name: str) -> T:
+def require_named_entry(collection: typing.Any, name: str) -> typing.Any:
     if not name:
         raise FrameException.NoNameGivenForCollectionLookup(collection)
 
@@ -133,7 +132,7 @@ def require_named_entry(collection: bpy_prop_collection[T], name: str) -> T:
 
 
 def create_named_entry(
-    collection: bpy_prop_collection[T],
+    collection: typing.Any,
     name: str,
     *positional: typing.Any,
     action: NamedEntryAction = NamedEntryAction.GET_EXISTING,
@@ -157,8 +156,8 @@ def set_scene(context: Context, scene: Scene) -> None:
 
 
 def set_selection(
-    collection: list[ObjectBase],
-    *selected: list[T],
+    collection: typing.Any,
+    *selected: typing.Any,
     synchronize_active: bool = False,
     make_sure_active: bool = False,
 ) -> None:
@@ -182,21 +181,21 @@ def set_selection(
         collection.active = selected[0]
 
 
-def clear_selection(collection: list) -> None:
+def clear_selection(collection: typing.Any) -> None:
     set_selection(collection)
 
 
-def set_active(collection: bpy_prop_collection, item: Object) -> None:
+def set_active(collection: typing.Any, item: Object) -> None:
     collection.active = item
 
 
-def clear_active(collection: bpy_prop_collection) -> None:
+def clear_active(collection: typing.Any) -> None:
     collection.active = None
 
 
 def set_rendering(
-    collection: bpy_prop_collection[T],
-    *selected: bpy_prop_collection[T],
+    collection: typing.Any,
+    *selected: typing.Any,
     synchronize_active: bool = False,
     make_sure_active: bool = False,
 ) -> None:
@@ -232,7 +231,7 @@ class AttrSet(AttributeReference):
 
 
 def get_nice_name(
-    collection: typing.Iterable[T],
+    collection: typing.Any,
     prefix: str,
     max_prefix_length: int,
     random_hash_length: int = 8,
@@ -272,7 +271,7 @@ class UUIDManager:
             if self.uuid_map.get(key) is not value:
                 log.warning("UUID connection was broken")
 
-    def register(self, obj: Object, auto_fix=True) -> str:
+    def register(self, obj: Object, auto_fix: bool = True) -> str:
         with self.lock:
             if existing_uuid := obj.get(self.key, ""):
                 if self.uuid_map.get(existing_uuid) is not obj:

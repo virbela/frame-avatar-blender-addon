@@ -51,5 +51,5 @@ class Intermediate:
 
     @dataclass
     class Mirror:
-        primary: object
-        secondary: object
+        primary: "Intermediate.Pending.BakeTarget"
+        secondary: "Intermediate.Pending.BakeTarget"

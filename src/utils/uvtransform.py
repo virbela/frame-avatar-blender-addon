@@ -14,7 +14,7 @@ class UVTransform:
     scale: float
     rotation: float
 
-    def isNil(self) -> None:
+    def isNil(self) -> bool:
         return (
             self.scale == 1.0
             and self.rotation == 0
@@ -60,7 +60,10 @@ class UVTransformationCalculator:
         self.reference_uv_map = reference_uv_map
 
         log.info(
-            f"UV endpoints {self.ep1}:{reference_uv_map[self.ep1]} - {self.ep2}:{reference_uv_map[self.ep2]}",
+            (
+                f"UV endpoints {self.ep1}:{reference_uv_map[self.ep1]} -"
+                f"{self.ep2}:{reference_uv_map[self.ep2]}"
+            ),
             print_console=False,
         )
 

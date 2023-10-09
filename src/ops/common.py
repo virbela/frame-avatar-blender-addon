@@ -1,18 +1,18 @@
 import typing
-from bpy.types import Object, Context, Operator, bpy_prop_collection
+from bpy.types import Object, Context
 
 from ..props import BakeVariant
 from ..utils.constants import WORK_SCENE, BAKE_SCENE
 
 
 class GuardedOperator:
-    def __init__(self, operator: Operator) -> None:
+    def __init__(self, operator: typing.Any) -> None:
         self.operator = operator
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} of {self.operator}>"
 
-    def __call__(self, *args, **kwargs) -> None:
+    def __call__(self, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
         if self.operator.poll():
             return self.operator(*args, **kwargs)
 
@@ -24,7 +24,7 @@ class GenericList:
 
     @staticmethod
     def add(
-        collection: bpy_prop_collection[typing.Any],
+        collection: typing.Any,
         get_selected: typing.Any,
         set_selected: typing.Any,
     ) -> typing.Any:
@@ -35,7 +35,7 @@ class GenericList:
 
     @staticmethod
     def remove(
-        collection: bpy_prop_collection[typing.Any],
+        collection: typing.Any,
         get_selected: typing.Any,
         set_selected: typing.Any,
     ) -> typing.Any:
@@ -59,8 +59,8 @@ def copy_object(source_obj: Object, name: str) -> Object:
 
 
 def copy_collection(
-    source: bpy_prop_collection[typing.Any],
-    dest: bpy_prop_collection[typing.Any],
+    source: typing.Any,
+    dest: typing.Any,
     transfer: typing.Callable[[typing.Any, typing.Any], None],
 ) -> None:
     while len(dest):

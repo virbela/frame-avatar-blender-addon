@@ -1,6 +1,7 @@
 import bpy
 import typing
 from bpy.types import (
+    Object,
     Operator,
     Context,
     ViewLayer,
@@ -62,14 +63,14 @@ def bake_selected_workmeshes(
 
     # NOTE - see technical detail 5 for further info on this temporary solution
     def get_bake_target_and_variant_from_workmesh(
-        workmesh,
+        workmesh: Object,
     ) -> typing.Tuple[BakeTarget, BakeVariant]:
         for bake_target in ht.bake_target_collection:
             for variant in bake_target.variant_collection:
                 if variant.workmesh == workmesh:
                     return bake_target, variant
 
-        raise BakeException.MissingBakeTargetVariant(workmesh)
+        raise BakeException.MissingBakeTargetVariant(workmesh.name)
 
     selection = list()
     for workmesh in view_layer.objects:

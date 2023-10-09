@@ -23,7 +23,6 @@ REPO_FILES = ("src/",)
 
 
 def git(*args: str | bytes) -> bytes:
-    # convenience routine for simplifying git command calls.
     return subprocess.check_output(("git",) + args)
 
 

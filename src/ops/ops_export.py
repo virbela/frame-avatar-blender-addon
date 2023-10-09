@@ -40,7 +40,11 @@ from ..utils.helpers import (
 def export(operator: Operator, context: Context, HT: HomeomorphicProperties) -> None:
     HT.export_progress_start()
     context.window.cursor_set("WAIT")
-    view_layer = require_work_scene().view_layers[0]
+    if not (work_scene := require_work_scene()):
+        popup_message("Invalid scene context!")
+        return
+
+    view_layer = work_scene.view_layers[0]
 
     def on_exit() -> None:
         HT.export_progress_end()
@@ -59,7 +63,7 @@ def export(operator: Operator, context: Context, HT: HomeomorphicProperties) -> 
                 BoneAnimationExporter.load_from_json(context, HT)
 
             if HT.export_glb:
-                with active_scene(require_work_scene().name):
+                with active_scene(work_scene.name):
                     success = export_glb(context, HT)
                     if not success:
                         # XXX exit early if mesh export failed
@@ -135,7 +139,11 @@ def validate_export(context: Context, HT: HomeomorphicProperties) -> bool:
 
 def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     obj = ht.avatar_mesh
-    view_layer = require_work_scene().view_layers[0]
+    if not (work_scene := require_work_scene()):
+        popup_message("Invalid scene context!")
+        return False
+
+    view_layer = work_scene.view_layers[0]
     ensure_applied_rotation(obj)
 
     if not obj.data.shape_keys:
@@ -250,7 +258,8 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
 
 
 def export_atlas(context: Context, denoise: bool = True) -> None:
-    work_scene = require_work_scene()
+    if not (work_scene := require_work_scene()):
+        return
 
     work_scene.use_nodes = True
     tree = work_scene.node_tree
@@ -441,7 +450,7 @@ def calculate_effect_delta(
 
 def get_verts_or_vgroup(
     obj: Object, color_effect: ColorEffect
-) -> list[tuple[int, list]]:
+) -> list[tuple[int, list[float]]]:
     data = sorted(
         [(v.index, list(color_effect.color)[:3]) for v in obj.data.vertices],
         key=lambda v: v[0],
@@ -451,7 +460,7 @@ def get_verts_or_vgroup(
         # no vert weights, return all verts
         return data
 
-    def filter_by_vgroup(data) -> None:
+    def filter_by_vgroup(data: tuple[int, list[float]]) -> bool:
         index, _ = data
         group = obj.vertex_groups.get(color_effect.vert_group)
         try:
@@ -530,7 +539,7 @@ def animation_metadata(ht: HomeomorphicProperties) -> dict[str, list[typing.Any]
 
 def get_uvtransform_metadata(
     context: Context, ht: HomeomorphicProperties, obj: Object
-) -> dict:
+) -> dict[str, typing.Any]:
     uv_transform_map = dict()
     uv_transform_extra_data = dict()
 
@@ -659,7 +668,7 @@ def get_uvtransform_metadata(
     return uv_transform_extra_data
 
 
-def get_effects_metadata(ht: HomeomorphicProperties, obj: Object) -> dict:
+def get_effects_metadata(ht: HomeomorphicProperties, obj: Object) -> typing.Any:
     log.info("Generating effects ...")
     effects_medatata = defaultdict(dict)
     for effect in ht.effect_collection:

@@ -22,7 +22,7 @@ def get_material_variants(
     # (do we?)
     # 	labels: needs-improvement
 
-    result = dict()
+    result: dict[str, Intermediate.Pending.Materials] = dict()
     for variant_name, variant in bt.iter_bake_scene_variants():
         _ = require_named_entry(bake_scene.objects, variant_name)
 

@@ -65,7 +65,10 @@ def create_baketarget_from_key_blocks(
                 mirror_list.append(Intermediate.Mirror(target, R))
             else:
                 log.error(
-                    f"Could not create mirror for {key} since there was no such object `{Rk}`"
+                    (
+                        f"Could not create mirror for {key} since there was "
+                        "no such object `{Rk}`"
+                    )
                 )
 
         elif key.endswith("_R"):

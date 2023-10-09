@@ -12,7 +12,7 @@ from .common import (
 )
 from ..utils.logging import log
 from ..utils.materials import setup_bake_material
-from ..props import HomeomorphicProperties, BakeTarget
+from ..props import HomeomorphicProperties, BakeTarget, BakeVariant
 from ..utils.constants import PAINTING_UV_MAP, TARGET_UV_MAP, Assets
 from ..utils.helpers import (
     create_named_entry,
@@ -63,7 +63,8 @@ def update_all_workmeshes(
 def workmesh_to_shapekey(
     operator: Operator, context: Context, ht: HomeomorphicProperties
 ) -> None:
-    work_scene = require_work_scene()
+    if not (work_scene := require_work_scene()):
+        return
     avatar_object = work_scene.objects.get("Avatar")
     if not avatar_object:
         return
@@ -278,7 +279,7 @@ def create_workmeshes_for_specific_target(
         update_workmesh_materials(bake_target, variant)
 
 
-def update_workmesh_materials(bake_target, variant) -> None:
+def update_workmesh_materials(bake_target: BakeTarget, variant: BakeVariant) -> None:
     load_material_templates()
 
     # TBD - should we disconnect the material if we fail to create one?
