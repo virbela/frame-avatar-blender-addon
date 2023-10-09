@@ -1,0 +1,11 @@
+black==23.9.1
+click==8.1.7
+colorama==0.4.6
+fake-bpy-module-latest==20230712
+mypy==1.5.1
+mypy-extensions==1.0.0
+numpy==1.25.1
+packaging==23.2
+pathspec==0.11.2
+platformdirs==3.11.0
+typing_extensions==4.8.0
