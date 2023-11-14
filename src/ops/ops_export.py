@@ -165,7 +165,7 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
     if os.path.exists(prefs.glb_export_dir):
         directory = str(Path(prefs.glb_export_dir).absolute())
 
-    fname = "faba_fullbody_avatar.glb"
+    fname = "faba_avatar.glb"
     if ht.avatar_type == "FLOATER":
         fname = "faba_floater_avatar.glb"
     outputfile_glb = os.path.join(directory , fname)
