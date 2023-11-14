@@ -9,7 +9,6 @@ class FABA_PT_export(bpy.types.Panel):
 
     def draw(self, context):
         if HT := get_homeomorphic_tool_state(context):
-            self.layout.prop(HT, "avatar_type", expand=True)
             self.layout.prop(HT, "export_glb")
             self.layout.prop(HT, "export_atlas")
             if HT.export_atlas:
@@ -20,7 +19,6 @@ class FABA_PT_export(bpy.types.Panel):
 
 
             anim = self.layout.row(align=True)
-            anim.enabled = HT.avatar_type == "FULLBODY"
             anim.prop(HT, "export_animation")
 
             if HT.export_animation:

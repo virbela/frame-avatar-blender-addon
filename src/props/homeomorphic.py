@@ -158,6 +158,7 @@ class HomeomorphicProperties(PropertyGroup):
     )
 
     ### Export options
+    # TODO(DEPRECATED) Remove this
     avatar_type: EnumProperty(
         items=tuple(AVATAR_TYPE),
         name="Avatar Type",
@@ -336,11 +337,9 @@ class HomeomorphicProperties(PropertyGroup):
         self.export_progress += step
 
     def should_export_animation_action(self) -> bool:
-        return (self.avatar_type == "FULLBODY" and
-                self.export_animation and
+        return (self.export_animation and
                 self.export_animation_source == "ACTION")
 
     def should_export_animation_json(self) -> bool:
-        return (self.avatar_type == "FULLBODY" and
-                self.export_animation and
+        return (self.export_animation and
                 self.export_animation_source == "JSON")

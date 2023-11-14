@@ -166,8 +166,6 @@ def export_glb(context: Context, ht: HomeomorphicProperties) -> bool:
         directory = str(Path(prefs.glb_export_dir).absolute())
 
     fname = "faba_avatar.glb"
-    if ht.avatar_type == "FLOATER":
-        fname = "faba_floater_avatar.glb"
     outputfile_glb = os.path.join(directory , fname)
 
     obj = ht.avatar_mesh
