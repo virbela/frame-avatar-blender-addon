@@ -1,6 +1,5 @@
 import bpy
 import typing 
-from typing import TYPE_CHECKING
 from bpy.types import PropertyGroup, Object, Image
 from bpy.props import (
     IntProperty,
@@ -14,12 +13,9 @@ from bpy.props import (
 
 from .bakevariant import BakeVariant
 from ..utils.logging import log
-from ..utils.constants import MIRROR_TYPE, TARGET_UV_MAP
+from ..utils.constants import TARGET_UV_MAP
 from ..utils.helpers import popup_message, get_named_entry, require_named_entry, EnumDescriptor
 
-
-if TYPE_CHECKING:
-    from .homeomorphic import HomeomorphicProperties
 
 
 UV_ISLAND_MODES = EnumDescriptor(
@@ -35,29 +31,6 @@ UV_ISLAND_MODES = EnumDescriptor(
     ("UV_IM_FROZEN",     "Frozen",        "This UV island will not be modified by the packer",
      "FREEZE",           3),
 )
-
-
-UV_BAKE_MODE = EnumDescriptor(
-    ("UV_BM_REGULAR",  "Regular",  "This is a regular, non mirrored, bake target",
-     "OBJECT_DATA",    0),
-
-    ("UV_BM_MIRRORED", "Mirrored", "This bake target will be mirrored upon another target along the U axis",
-     "MOD_MIRROR",     1),
-)
-
-
-class BakeTargetMirrorEntry(PropertyGroup):
-    primary: IntProperty(
-        name="Primary bake target identifier", 
-        default=-1
-    )
-
-    secondary: IntProperty(
-        name="Secondary bake target identifier", 
-        default=-1
-    )
-
-
 
 def get_baketarget_name(self: "BakeTarget"):
     return self.get("name", "Untitled bake target")
@@ -126,16 +99,6 @@ class BakeTarget(PropertyGroup):
         max=1.0
     )
 
-    bake_mode: EnumProperty(
-        items=tuple(UV_BAKE_MODE), 
-        name="UV bake mode", 
-        default=0
-    )
-
-    mirror_source: IntProperty(
-        name="Bake target used for mirror"
-    )
-
     uv_mode: EnumProperty(
         items=tuple(UV_ISLAND_MODES), 
         name="UV island mode", 
@@ -189,16 +152,6 @@ class BakeTarget(PropertyGroup):
             else:
                 return self.object_name
         return "untitled"
-
-    def get_mirror_type(self, ht: "HomeomorphicProperties") -> tuple[BakeTargetMirrorEntry, MIRROR_TYPE]:
-        find_id = ht.get_bake_target_index(self)
-        for mirror in ht.bake_target_mirror_collection:
-            if find_id == mirror.primary:
-                return mirror, MIRROR_TYPE.PRIMARY
-            elif find_id == mirror.secondary:
-                return mirror, MIRROR_TYPE.SECONDARY
-
-        return None, None
 
     def iter_bake_scene_variants(self) -> typing.Generator[tuple[str, BakeVariant], None, None]:
         prefix = self.name

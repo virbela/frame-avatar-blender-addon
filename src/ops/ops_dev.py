@@ -12,11 +12,6 @@ def clear_bake_targets(operator: Operator, context: Context, ht: HomeomorphicPro
     while len(ht.bake_target_collection):
         ht.bake_target_collection.remove(0)
 
-    ht.selected_bake_target_mirror = -1
-    while len(ht.bake_target_mirror_collection):
-        ht.bake_target_mirror_collection.remove(0)
-
-
 def clear_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProperties):
     scene = require_bake_scene()
     for item in scene.objects:

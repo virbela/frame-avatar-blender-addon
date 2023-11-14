@@ -3,10 +3,9 @@ import bmesh
 from bpy.types import Operator, Context, Object
 
 from .base import FabaOperator
-from ..utils.constants import MIRROR_TYPE
 from ..utils.helpers import require_bake_scene, set_selection
 from ..props import BakeTarget, HomeomorphicProperties
-from .common import set_uv_map, copy_object, copy_collection, transfer_variant
+from .common import set_uv_map, copy_object
 
 
 def synchronize_uv_to_vertices(operator: Operator, context: Context, ht: HomeomorphicProperties):
@@ -85,10 +84,6 @@ def update_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProp
 
     #todo note 1
     for bake_target in ht.bake_target_collection:
-        _, mt = bake_target.get_mirror_type(ht)
-        if mt is MIRROR_TYPE.SECONDARY:
-            continue
-
         source_obj = bake_target.require_object()
 
         for variant in bake_target.iter_bake_scene_variant_names():
@@ -114,21 +109,6 @@ def update_bake_scene(operator: Operator, context: Context, ht: HomeomorphicProp
                 for skey in new_object.data.shape_keys.key_blocks:
                     if skey.name != bake_target.shape_key_name:
                         new_object.shape_key_remove(skey)
-
-
-def synchronize_mirrors(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    for mirror in ht.bake_target_mirror_collection:
-        primary = ht.bake_target_collection[mirror.primary]
-        secondary = ht.bake_target_collection[mirror.secondary]
-        if primary and secondary:
-            secondary.uv_area_weight = primary.uv_area_weight
-            secondary.uv_mode = primary.uv_mode
-            secondary.atlas = primary.atlas
-            secondary.uv_map = primary.uv_map
-            secondary.multi_variants = primary.multi_variants
-            copy_collection(primary.variant_collection, secondary.variant_collection, transfer_variant)
-            secondary.selected_variant = primary.selected_variant
-
 
 def reset_uv_transforms(operator: Operator, context: Context, ht: HomeomorphicProperties):
     bake_scene = require_bake_scene()
@@ -281,13 +261,6 @@ class FABA_OT_update_baking_scene(FabaOperator):
     bl_idname =           "faba.update_baking_scene"
     bl_description =      "Regenerate bake scene objects from bake targets"
     faba_operator =       update_bake_scene
-
-
-class FABA_OT_synchronize_mirrors(FabaOperator):
-    bl_label =            "Synchronize mirrors"
-    bl_description =      "Copy settings from all primary targets to secondary targets in the mirror list"
-    bl_idname =           "faba.synchronize_mirrors"
-    faba_operator =       synchronize_mirrors
 
 
 class FABA_OT_copy_uv_layers(FabaOperator):

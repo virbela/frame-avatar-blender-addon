@@ -577,30 +577,6 @@ def get_uvtransform_metadata(context: Context, ht: HomeomorphicProperties, obj: 
             result["UVChannel"] = get_variant_channel(bake_target, variant)
 
         uv_transform_extra_data[bake_target.shortname] = result
-
-    for bake_target in ht.bake_target_collection:
-        if bake_target.bake_mode == "UV_BM_MIRRORED":
-            # -- set the uv transform to opposite mirror
-            if bake_target.name.lower().endswith("_left"):
-                base = bake_target.name[:-5]
-                Rk = f"{base}_Right" # assumes title case
-            elif bake_target.name.lower().endswith("_right"):
-                base = bake_target.name[:-6]
-                Rk = f"{base}_Left" # assumes title case
-            elif bake_target.name.lower().endswith("_l") or bake_target.name.lower().endswith("_r"):
-                base = bake_target.name[:-2]
-                Rk = f"{base}_L" if bake_target.name.lower().endswith("_r") else f"{base}_R"
-            else:
-                log.info(f"Could not find determine mirror target {bake_target.shortname}")
-                continue 
-
-            R = ht.bake_target_collection.get(Rk)
-            if not R:
-                log.info(f"Missing mirror source for {bake_target.shortname}")
-                continue
-            uv_transform_extra_data[bake_target.shortname] = uv_transform_extra_data[R.shortname]
-            uv_transform_extra_data[bake_target.shortname]["is_mirror"] = True
-
     return uv_transform_extra_data
 
 

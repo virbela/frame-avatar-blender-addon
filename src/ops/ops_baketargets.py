@@ -4,10 +4,10 @@ from bpy.types import Operator, Context, ShapeKey, Object
 from .base import FabaOperator
 from .common import GenericList, poll_avatar_mesh
 
-from ..utils.constants import TARGET_UV_MAP
 from ..utils.logging import log
+from ..utils.constants import TARGET_UV_MAP
+from ..props import HomeomorphicProperties
 from ..utils.structures import Intermediate, iter_dc
-from ..props import HomeomorphicProperties, BakeTargetMirrorEntry
 from ..utils.helpers import AttrGet, AttrSet, popup_message, require_work_scene, set_scene, set_selection
 
 
@@ -22,15 +22,10 @@ def create_targets_from_avatar_object(operator: Operator, context: Context, ht: 
         popup_message("Avatar mesh has no shape keys!", "Mesh Error")
         return
 
-    for mirror in ht.bake_target_mirror_collection:
-        bk = ht.bake_target_collection[mirror.secondary]
-        bk.bake_mode = "UV_BM_MIRRORED"
-
 
 def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object: Object, key_blocks: list[ShapeKey]):
     #Create all intermediate targets
     targets = dict()
-    mirror_list = list()
 
     for sk in key_blocks:
         key = sk.name
@@ -43,22 +38,9 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
             uv_mode = "UV_IM_MONOCHROME",
         )
 
-    #Configure targets and mirrors
+    #Configure UV modes
     for key, target in targets.items():
-        if key.endswith("_L"):
-            base = key[:-2]
-            Rk = f"{base}_R"
-            R = targets.get(Rk)
-
-            if R:
-                mirror_list.append(Intermediate.Mirror(target, R))
-            else:
-                log.error(f"Could not create mirror for {key} since there was no such object `{Rk}`")
-
-        elif key.endswith("_R"):
-            pass
-
-        elif key.endswith("__None"):
+        if key.endswith("__None"):
             target.uv_mode = "UV_IM_NIL"
 
     #Create bake targets
@@ -77,33 +59,6 @@ def create_baketarget_from_key_blocks(ht: HomeomorphicProperties, source_object:
             setattr(new, key, value)
 
         target.bake_target = new
-
-    def create_mirror(primary: int, secondary: int) -> BakeTargetMirrorEntry:
-        new = ht.bake_target_mirror_collection.add()
-        new.primary = primary
-        new.secondary = secondary
-        return new
-
-    for mirror in mirror_list:
-        create_mirror(ht.get_bake_target_index(mirror.primary.bake_target), ht.get_bake_target_index(mirror.secondary.bake_target))
-
-
-class BakeMirrors:
-    def set_primary(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        if mirror := ht.get_selected_mirror():
-            if bake_target := ht.get_selected_bake_target():
-                mirror.primary = ht.get_bake_target_index(bake_target)
-
-    def set_secondary(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        if mirror := ht.get_selected_mirror():
-            if bake_target := ht.get_selected_bake_target():
-                mirror.secondary = ht.get_bake_target_index(bake_target)
-
-    def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        GenericList.add(ht.bake_target_mirror_collection, AttrGet(ht, "selected_bake_target_mirror"), AttrSet(ht, "selected_bake_target_mirror"))
-
-    def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        GenericList.remove(ht.bake_target_mirror_collection, AttrGet(ht, "selected_bake_target_mirror"), AttrSet(ht, "selected_bake_target_mirror"))
 
 
 class BakeTargets:
@@ -206,37 +161,9 @@ class FABA_OT_add_bake_target_variant(FabaOperator):
 
 class FABA_OT_remove_bake_target_variant(FabaOperator):
     bl_label =            "-"
-    bl_description =      "Remove mirror entry"
+    bl_description =      "Remove variant entry"
     bl_idname =           "faba.remove_bake_target_variant"
     faba_operator =       BakeVariants.remove
-
-
-class FABA_OT_set_bake_mirror_primary(FabaOperator):
-    bl_label =            "Set primary"
-    bl_description =      "Set primary bake target of selected mirror entry"
-    bl_idname =           "faba.set_bake_mirror_primary"
-    faba_operator =       BakeMirrors.set_primary
-
-
-class FABA_OT_set_bake_mirror_secondary(FabaOperator):
-    bl_label =            "Set secondary"
-    bl_description =      "Set secondary bake target of selected mirror entry"
-    bl_idname =           "faba.set_bake_mirror_secondary"
-    faba_operator =       BakeMirrors.set_secondary
-
-
-class FABA_OT_add_bake_target_mirror(FabaOperator):
-    bl_label =            "+"
-    bl_description =      "Create new mirror entry"
-    bl_idname =           "faba.add_bake_target_mirror"
-    faba_operator =       BakeMirrors.add
-
-
-class FABA_OT_remove_bake_target_mirror(FabaOperator):
-    bl_label =            "-"
-    bl_description =      "Remove mirror entry"
-    bl_idname =           "faba.remove_bake_target_mirror"
-    faba_operator =       BakeMirrors.remove
 
 
 class FABA_OT_add_bake_group(FabaOperator):

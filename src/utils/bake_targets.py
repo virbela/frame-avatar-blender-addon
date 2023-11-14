@@ -38,10 +38,6 @@ def validate_bake_target_setup(ht: HomeomorphicProperties) -> bool:
             popup_message(f"Missing shapekey in {bake_target.name}", "Workmesh Error")
             return False
 
-        if bake_target.bake_mode == "UV_BM_MIRRORED":
-            # XXX What to do here
-            continue
-
         if bake_target.uv_mode == "UV_IM_NIL":
             # XXX Nil UV has not setup, skip
             continue

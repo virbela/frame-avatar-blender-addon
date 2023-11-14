@@ -41,11 +41,3 @@ class Intermediate:
             name:				str
             allocated:			float		= 0.0
             atlas:				object		= None
-
-    @dataclass
-    class Mirror:
-        primary: 				object
-        secondary: 				object
-
-
-

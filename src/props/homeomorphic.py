@@ -12,7 +12,7 @@ from bpy.props import (
 
 from .bakegroup import BakeGroup
 from .effect import EffectProperty
-from .baketarget import BakeTarget, BakeTargetMirrorEntry
+from .baketarget import BakeTarget
 from .animation import AnimationProperty, ExportAnimationJSONPathProperty
 
 from ..utils.logging import log
@@ -110,15 +110,6 @@ class HomeomorphicProperties(PropertyGroup):
 
     selected_bake_target: IntProperty(
         name="Selected bake target",
-        default=-1
-    )
-
-    bake_target_mirror_collection: CollectionProperty(
-        type=BakeTargetMirrorEntry
-    )
-
-    selected_bake_target_mirror: IntProperty(
-        name="Selected mirror entry",
         default=-1
     )
 
@@ -307,16 +298,6 @@ class HomeomorphicProperties(PropertyGroup):
 
     def require_selected_bake_target(self) -> BakeTarget:
         if candidate := self.get_selected_bake_target():
-            return candidate
-        else:
-            raise Exception()    #TODO - proper exception
-
-    def get_selected_mirror(self) -> BakeTargetMirrorEntry:
-        if self.selected_bake_target_mirror != -1:
-            return self.bake_target_mirror_collection[self.selected_bake_target_mirror]
-
-    def require_selected_mirror(self) -> BakeTargetMirrorEntry:
-        if candidate := self.get_selected_mirror():
             return candidate
         else:
             raise Exception()    #TODO - proper exception

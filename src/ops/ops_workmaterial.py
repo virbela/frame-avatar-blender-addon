@@ -2,7 +2,6 @@ import bpy
 from bpy.types import Context, Operator
 
 from .base import FabaOperator
-from ..utils.constants import MIRROR_TYPE
 from ..utils.logging import log
 from ..utils.materials import setup_bake_material, get_material_variants
 from ..props import HomeomorphicProperties, BakeTarget, BakeVariant
@@ -59,7 +58,6 @@ def select_by_atlas(operator: Operator, context: Context, ht: HomeomorphicProper
 
 
 def update_workmesh_materials(context: Context, ht: HomeomorphicProperties,  bake_target: BakeTarget, variant: BakeVariant):
-    #TODO Handle mirror bake targets properly i.e this fails when no uv map is found
     #TBD - should we disconnect the material if we fail to create one? This might be good in order to prevent accidentally getting unintended materials activated
     if not variant.uv_map:
         variant.workmesh.active_material = None
@@ -82,10 +80,6 @@ def generic_switch_to_material(context: Context, ht: HomeomorphicProperties, mat
     bake_scene = require_bake_scene()
     #todo note 1
     for bt in ht.bake_target_collection:
-        _, mt = bt.get_mirror_type(ht)
-        if mt is MIRROR_TYPE.SECONDARY:
-            continue
-
         atlas = bt.atlas
         uv_map = bt.source_uv_map
 

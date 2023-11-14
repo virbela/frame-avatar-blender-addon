@@ -1,9 +1,9 @@
 import bpy
 
+from .baketarget import BakeTarget
 from .bakevariant import BakeVariant
 from .homeomorphic import HomeomorphicProperties
 from .bakegroup import BakeGroup, BakeTargetReference
-from .baketarget import BakeTarget, BakeTargetMirrorEntry
 from .effect import ColorEffect, PositionEffect, EffectProperty
 from .animation import AnimationProperty, ExportAnimationJSONPathProperty
 
@@ -12,7 +12,6 @@ classes = (
     BakeTargetReference,
     BakeGroup,
 
-    BakeTargetMirrorEntry,
     BakeVariant,
     BakeTarget,
 
