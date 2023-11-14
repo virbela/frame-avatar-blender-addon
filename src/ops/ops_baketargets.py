@@ -88,27 +88,6 @@ class BakeTargets:
         bpy.ops.object.mode_set(mode="EDIT")
 
 
-class BakeGroups:
-
-    def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        GenericList.add(ht.bake_group_collection, AttrGet(ht, "selected_bake_group"), AttrSet(ht, "selected_bake_group"))
-
-    def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
-        GenericList.remove(ht.bake_group_collection, AttrGet(ht, "selected_bake_group"), AttrSet(ht, "selected_bake_group"))
-
-
-    class Members:
-        def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
-            if bake_group := ht.get_selected_bake_group():
-                if bake_target := ht.get_selected_bake_target():
-                    new = GenericList.add(bake_group.members, AttrGet(bake_group, "selected_member"), AttrSet(bake_group, "selected_member"))
-                    new.target = ht.get_bake_target_index(bake_target)
-
-        def remove(operator: Operator, context: Context, ht: HomeomorphicProperties):
-            if bake_group := ht.get_selected_bake_group():
-                GenericList.remove(bake_group.members, AttrGet(bake_group, "selected_member"), AttrSet(bake_group, "selected_member"))
-
-
 class BakeVariants:
 
     def add(operator: Operator, context: Context, ht: HomeomorphicProperties):
@@ -164,32 +143,3 @@ class FABA_OT_remove_bake_target_variant(FabaOperator):
     bl_description =      "Remove variant entry"
     bl_idname =           "faba.remove_bake_target_variant"
     faba_operator =       BakeVariants.remove
-
-
-class FABA_OT_add_bake_group(FabaOperator):
-    bl_label =            "+"
-    bl_description =      "Create new bake group"
-    bl_idname =           "faba.add_bake_group"
-    faba_operator =       BakeGroups.add
-
-
-class FABA_OT_remove_bake_group(FabaOperator):
-    bl_label =            "-"
-    bl_description =      "Remove selected bake group"
-    bl_idname =           "faba.remove_bake_group"
-    faba_operator =       BakeGroups.remove
-
-
-class FABA_OT_add_bake_group_member(FabaOperator):
-    bl_label =            "+"
-    bl_description =      "Add selected bake target to bake group"
-    bl_idname =           "faba.add_bake_group_member"
-    faba_operator =       BakeGroups.Members.add
-
-
-class FABA_OT_remove_bake_group_member(FabaOperator):
-    bl_label =            "-"
-    bl_description =      "Remove selected member from bake group"
-    bl_idname =           "faba.remove_bake_group_member"
-    faba_operator =       BakeGroups.Members.remove
-

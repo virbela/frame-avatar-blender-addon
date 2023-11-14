@@ -67,9 +67,6 @@ def make_everything_visible(operator: Operator, context: Context, ht: Homeomorph
 
 
 def recalculate_normals(operator: Operator, context: Context, ht: HomeomorphicProperties):
-    bake_scene = require_bake_scene()
-    view_layer = bake_scene.view_layers[0]	#TODO - make sure there is only one
-
     for workmesh in context.selected_objects:
         clean_normals(context, workmesh)
 

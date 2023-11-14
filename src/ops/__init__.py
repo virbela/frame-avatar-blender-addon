@@ -4,13 +4,9 @@ from .ops_intro import FABA_OT_setup_bake_scene
 from .ops_animation import FABA_OT_transfer_skin_weights
 
 from .ops_baketargets import (
-    FABA_OT_add_bake_group_member,
-    FABA_OT_add_bake_group,
     FABA_OT_add_bake_target_variant,
     FABA_OT_add_bake_target,
     FABA_OT_create_targets_from_avatar,
-    FABA_OT_remove_bake_group_member,
-    FABA_OT_remove_bake_group,
     FABA_OT_remove_bake_target_variant,
     FABA_OT_remove_bake_target,
     FABA_OT_show_selected_bt,
@@ -128,10 +124,6 @@ classes = (
     FABA_OT_remove_bake_target,
     FABA_OT_add_bake_target_variant,
     FABA_OT_remove_bake_target_variant,
-    FABA_OT_add_bake_group,
-    FABA_OT_remove_bake_group,
-    FABA_OT_add_bake_group_member,
-    FABA_OT_remove_bake_group_member,
     FABA_OT_remove_effect,
     FABA_OT_add_effect,
     FABA_OT_remove_position_effect,

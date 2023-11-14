@@ -71,20 +71,3 @@ class FABA_UL_bake_variants(UIList):
 class FABA_UL_bake_targets(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layout.prop(item, "name", icon=UV_ISLAND_MODES.members[item.uv_mode].icon, text="", emboss=False, translate=False)
-
-
-class FABA_UL_bake_groups(UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        layout.prop(item, "name", icon="UNLINKED", text="", emboss=False, translate=False)
-
-
-class FABA_UL_bake_group_members(UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        if ht := get_homeomorphic_tool_state(context):
-            if item.target < len(ht.bake_target_collection):
-                if target := ht.bake_target_collection[item.target]:
-                    layout.prop(target, "name", icon=UV_ISLAND_MODES.members[target.uv_mode].icon, text="", emboss=False, translate=False)
-                else:
-                    layout.label(icon="UNLINKED", text=item.target)
-            else:
-                layout.label(icon="UNLINKED", text="No target")

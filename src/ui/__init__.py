@@ -16,10 +16,8 @@ from .pt_workflow import (
 
 from .pt_bake_targets import (
     FABA_PT_bake_targets,
-    FABA_UL_bake_groups,
     FABA_UL_bake_variants,
     FABA_UL_bake_targets,
-    FABA_UL_bake_group_members,
 )
 
 from .pt_effects import (
@@ -33,10 +31,8 @@ from .pt_export import (
 
 classes = (
     FABA_UL_effects,
-    FABA_UL_bake_groups,
     FABA_UL_bake_variants,
     FABA_UL_bake_targets,
-    FABA_UL_bake_group_members,
 
     # XXX Order matters. This is the order in which the panels show up
     FABA_PT_workflow,

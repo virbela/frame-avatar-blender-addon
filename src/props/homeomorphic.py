@@ -10,7 +10,6 @@ from bpy.props import (
     CollectionProperty,
 )
 
-from .bakegroup import BakeGroup
 from .effect import EffectProperty
 from .baketarget import BakeTarget
 from .animation import AnimationProperty, ExportAnimationJSONPathProperty
@@ -110,15 +109,6 @@ class HomeomorphicProperties(PropertyGroup):
 
     selected_bake_target: IntProperty(
         name="Selected bake target",
-        default=-1
-    )
-
-    bake_group_collection: CollectionProperty(
-        type=BakeGroup
-    )
-
-    selected_bake_group: IntProperty(
-        name="Selected bake group",
         default=-1
     )
 
@@ -291,10 +281,6 @@ class HomeomorphicProperties(PropertyGroup):
     def get_selected_bake_target(self) -> BakeTarget:
         if self.selected_bake_target != -1:
             return self.bake_target_collection[self.selected_bake_target]
-
-    def get_selected_bake_group(self) -> BakeGroup:
-        if self.selected_bake_group != -1:
-            return self.bake_group_collection[self.selected_bake_group]
 
     def require_selected_bake_target(self) -> BakeTarget:
         if candidate := self.get_selected_bake_target():
