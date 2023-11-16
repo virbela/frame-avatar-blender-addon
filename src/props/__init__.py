@@ -27,11 +27,15 @@ register, unregister = bpy.utils.register_classes_factory(classes)
 def register_props():
     register()
 
+    # DEPRECATED
     bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
+    
+    bpy.types.WindowManager.faba = bpy.props.PointerProperty(type=HomeomorphicProperties)
 
 
 
 def unregister_props():
     del bpy.types.Scene.homeomorphictools
+    del bpy.types.WindowManager.faba
 
     unregister()
