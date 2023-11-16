@@ -10,7 +10,7 @@ from .utils.helpers import get_homeomorphic_tool_state
 bl_info = {
     "name": "Frame Avatar Blender Addon (FABA)",
     "description": "Provides a set of tools for the creation of homeomorphic avatars.",
-    "author": "Martin Petersson, Mikael Lövqvist, Ian Karanja",
+    "author": "VirBela Labs <hello@framevr.io>",
     "version": (0, 2, 4),
     "blender": (3, 3, 0),
     "location": "View3D",
