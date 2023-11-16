@@ -1,22 +1,3 @@
-bl_info = {
-    "name": "Frame Avatar Blender Addon (FABA)",
-    "description": "Provides a set of tools for the creation of homeomorphic avatars.",
-    "author": "Martin Petersson, Mikael Lövqvist, Ian Karanja",
-    "version": (0, 2, 4),
-    "blender": (2, 93, 0), # Previous Major LTS
-    "location": "View3D",
-    "warning": "",
-    "wiki_url": "https://github.com/virbela/frame-avatar-blender-addon",
-    "tracker_url": "https://github.com/virbela/frame-avatar-blender-addon/issues",
-    "support": "COMMUNITY",
-    "category": "Avatar"
-}
-#dependencies: UVPackmaster 2.5.8
-
-#ISSUE-6:	Solution depends on UVPackmaster 2/3
-#	This should be optional
-#	labels: dependency
-
 import bpy
 from bpy.app.handlers import persistent
 from bpy.types import Context, AddonPreferences
@@ -26,6 +7,19 @@ from .ops import register_ops, unregister_ops
 from .props import register_props, unregister_props
 from .utils.helpers import get_homeomorphic_tool_state
 
+bl_info = {
+    "name": "Frame Avatar Blender Addon (FABA)",
+    "description": "Provides a set of tools for the creation of homeomorphic avatars.",
+    "author": "Martin Petersson, Mikael Lövqvist, Ian Karanja",
+    "version": (0, 2, 4),
+    "blender": (3, 3, 0),
+    "location": "View3D",
+    "warning": "",
+    "wiki_url": "https://github.com/virbela/frame-avatar-blender-addon",
+    "tracker_url": "https://github.com/virbela/frame-avatar-blender-addon/issues",
+    "support": "COMMUNITY",
+    "category": "Avatar"
+}
 
 class FrameAvatarAddonPreferences(AddonPreferences):
     bl_idname = __package__
@@ -111,14 +105,16 @@ def unregister():
 
 if __name__ == "__main__":
     # XXX ScriptWatcher hook for local development
-    import os; os.system("cls" if os.name == "nt" else "clear")
+    import os 
+    os.system("cls" if os.name == "nt" else "clear")
 
     try:
         unregister()
     except RuntimeError:
         pass # some class probably not registered
-    except:
+    except Exception:
         # show any other exception
-        import traceback; traceback.print_exc()
+        import traceback
+        traceback.print_exc()
 
     register()
