@@ -3,15 +3,6 @@ import bpy
 from .ops_intro import FABA_OT_setup_bake_scene
 from .ops_animation import FABA_OT_transfer_skin_weights
 
-from .ops_baketargets import (
-    FABA_OT_add_bake_target_variant,
-    FABA_OT_add_bake_target,
-    FABA_OT_create_targets_from_avatar,
-    FABA_OT_remove_bake_target_variant,
-    FABA_OT_remove_bake_target,
-    FABA_OT_show_selected_bt,
-)
-
 from .ops_baking import (
     FABA_OT_bake_all,
     FABA_OT_bake_selected_bake_target,
@@ -88,7 +79,6 @@ classes = (
     FABA_OT_transfer_skin_weights,
     FABA_OT_add_export_json_path,
     FABA_OT_remove_export_json_path,
-    FABA_OT_create_targets_from_avatar,
     FABA_OT_create_workmeshes_for_all_targets,
     FABA_OT_create_workmeshes_for_selected_target,
     FABA_OT_update_selected_workmesh_all_shapekeys,
@@ -119,11 +109,6 @@ classes = (
     FABA_OT_recalculate_normals,
     FABA_OT_update_baking_scene,
     FABA_OT_copy_uv_layers,
-    FABA_OT_add_bake_target,
-    FABA_OT_show_selected_bt,
-    FABA_OT_remove_bake_target,
-    FABA_OT_add_bake_target_variant,
-    FABA_OT_remove_bake_target_variant,
     FABA_OT_remove_effect,
     FABA_OT_add_effect,
     FABA_OT_remove_position_effect,
