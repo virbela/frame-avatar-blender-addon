@@ -17,6 +17,9 @@ class FABA_PT_effects(Panel):
     def draw(self, context):
         if HT := get_homeomorphic_tool_state(context):
             ob = HT.avatar_mesh
+            if not ob:
+                self.layout.label(text="Please assign an avatar mesh in the Workflow panel.", icon="ERROR")
+                return
             self.layout.template_list("FABA_UL_effects", "", HT, "effect_collection", HT, "selected_effect")
             effect_actions = self.layout.row(align=True)
             effect_actions.operator("faba.add_effect")

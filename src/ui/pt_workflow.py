@@ -21,35 +21,6 @@ class FABA_PT_workflow(Panel):
             layout.prop_search(HT, "avatar_head_bone", HT.avatar_rig.pose, "bones")
 
 
-class FABA_PT_workflow_intro(Panel):
-    bl_label = "Introduction"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "Avatar"
-    bl_parent_id = "FABA_PT_workflow"
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
-        layout = self.layout
-        get_help = layout.operator("wm.url_open", text="Help")
-        get_help.url = "http://example.org/"
-        layout.operator("faba.setup_bake_scene")
-
-
-class FABA_PT_workflow_bake_targets(Panel):
-    bl_label = "Bake Targets"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "Avatar"
-    bl_parent_id = "FABA_PT_workflow"
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
-        layout = self.layout
-        layout.operator("faba.create_targets_from_avatar_object")
-        layout.operator("faba.clear_bake_targets")
-
-
 class FABA_PT_workflow_workmeshes(Panel):
     bl_label = "Work Meshes"
     bl_space_type = "VIEW_3D"
