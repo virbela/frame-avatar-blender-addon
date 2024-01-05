@@ -228,7 +228,7 @@ class BoneAnimationExporter:
         img.update()
         filepath = bpy.data.filepath
         directory = os.path.dirname(filepath)
-        img.filepath = os.path.join(directory, f"bone_weights.png")
+        img.filepath = os.path.join(directory, "bone_weights.png")
         img.save()
 
     def save_transforms_to_png(self):
