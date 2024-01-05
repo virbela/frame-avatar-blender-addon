@@ -103,10 +103,12 @@ class HomeomorphicProperties(PropertyGroup):
         default=-1
     )
 
+    # TODO(DEPRECATED)
     bake_target_collection: CollectionProperty(
         type=BakeTarget
     )
 
+    # TODO(DEPRECATED)
     selected_bake_target: IntProperty(
         name="Selected bake target",
         default=-1
@@ -282,12 +284,14 @@ class HomeomorphicProperties(PropertyGroup):
         if self.selected_bake_target != -1:
             return self.bake_target_collection[self.selected_bake_target]
 
+    # DEPRECATED
     def require_selected_bake_target(self) -> BakeTarget:
         if candidate := self.get_selected_bake_target():
             return candidate
         else:
             raise Exception()    #TODO - proper exception
 
+    # DEPRECATED
     def get_bake_target_index(self, target: BakeTarget) -> int:
         for index, bt in enumerate(self.bake_target_collection):
             if bt == target:    # note: We can't use identity comparison due to internal deferring in blender
