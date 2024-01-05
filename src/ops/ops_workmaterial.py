@@ -134,3 +134,13 @@ class FABA_OT_set_selected_workmesh_atlas(FabaOperator):
     bl_idname =           "faba.set_selected_workmesh_atlas"
     bl_description =      "Set the intermediate atlas for all selected workmeshes to `Match atlas`"
     faba_operator =       set_selected_objects_atlas
+
+
+classes = (
+    FABA_OT_update_selected_material,
+    FABA_OT_update_all_materials,
+    FABA_OT_switch_to_bake_material,
+    FABA_OT_switch_to_preview_material,
+    FABA_OT_select_by_atlas,
+    FABA_OT_set_selected_workmesh_atlas,
+)

@@ -5,8 +5,8 @@ from ..utils.exceptions import BakeException, InternalError
 from ..utils.helpers import get_homeomorphic_tool_state
 
 class FabaOperator(Operator):
-  faba_poll = lambda context : True
-  faba_operator = lambda context, HT: None
+  faba_poll = lambda context : True  # noqa: E731
+  faba_operator = lambda context, HT: None  # noqa: E731
 
   @classmethod
   def poll(cls, context: Context) -> bool:

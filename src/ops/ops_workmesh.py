@@ -8,6 +8,7 @@ from .common import (
     set_uv_map,
     poll_bake_scene,
     poll_work_scene,
+    poll_shapekeys,
     poll_baketargets,
 )
 from ..utils.logging import log
@@ -32,6 +33,39 @@ def create_workmeshes_for_all_targets(operator: Operator, context: Context, ht: 
     bake_scene = require_bake_scene()
     for bake_target in ht.bake_target_collection:
         create_workmeshes_for_specific_target(context, ht, bake_scene, bake_target)
+        
+def create_workmeshes_for_all_shapekeys(operator: Operator, context: Context, ht: HomeomorphicProperties):
+    bake_scene = require_bake_scene()
+    shapekeys = ht.avatar_mesh.data.shape_keys.key_blocks
+    for shapekey in shapekeys:
+        source_object = ht.avatar_mesh
+        ensure_applied_rotation(source_object)
+
+        pending_object = source_object.copy()
+        pending_object.name = shapekey.name
+        pending_object.data = source_object.data.copy()
+        pending_object.data.name = shapekey.name
+
+        # Create UV map for painting
+        bake_uv = pending_object.data.uv_layers[0]	# Assume first UV map is the bake one
+        bake_uv.name = TARGET_UV_MAP
+        local_uv = pending_object.data.uv_layers.new(name=PAINTING_UV_MAP)
+        set_uv_map(pending_object, local_uv.name)
+
+        # check if this target uses a shape key
+        if _ := pending_object.data.shape_keys.key_blocks.get(shapekey.name):
+            #Remove all shapekeys except the one this object represents
+            for key in pending_object.data.shape_keys.key_blocks:
+                if key.name != shapekey.name:
+                    pending_object.shape_key_remove(key)
+
+            #Remove remaining
+            for key in pending_object.data.shape_keys.key_blocks:
+                pending_object.shape_key_remove(key)
+
+        bake_scene.collection.objects.link(pending_object)
+        
+        
 
 
 def create_workmeshes_for_selected_target(operator: Operator, context: Context, ht: HomeomorphicProperties):
@@ -213,7 +247,7 @@ def create_workmeshes_for_specific_target(context: Context, ht: HomeomorphicProp
         if pending_name in bake_scene.objects:
             # NOTE(ranjian0) since artists may have performed actions on the workmeshs,
             # we choose to skip regeneration.
-            log.warning(f"Skipping existing workmesh ...")
+            log.warning("Skipping existing workmesh ...")
             pending_object = bake_scene.objects.get(pending_name)
             bake_uv = pending_object.data.uv_layers[TARGET_UV_MAP]
             local_uv = pending_object.data.uv_layers[PAINTING_UV_MAP]
@@ -340,9 +374,9 @@ class FABA_OT_create_workmeshes_for_all_targets(FabaOperator):
 
 
 class FABA_OT_create_workmeshes_for_selected_target(FabaOperator):
-    bl_label =            "New work meshes from selected bake targets"
+    bl_label =            "New work meshes from selected shape keys"
     bl_idname =           "faba.create_workmeshes_for_selected_target"
-    bl_description =      "Create bake meshes for the selected bake targets"
+    bl_description =      "Create bake meshes for the selected shape keys"
     faba_operator =       create_workmeshes_for_selected_target
 
 
@@ -418,3 +452,27 @@ class FABA_OT_mirror_workmesh_verts(FabaOperator):
     bl_idname =           "faba.mirror_workmesh_verts"
     bl_description =      "Mirror vertices from source object to target object"
     faba_operator =       mirror_workmesh_verts
+
+
+class FABA_OT_create_workmeshes_for_all_shapekeys(FabaOperator):
+    bl_label =            "New work meshes from all shape keys"
+    bl_idname =           "faba.create_workmeshes_for_all_shapekeys"
+    bl_description =      "Create bake meshes for all shape keys"
+    faba_operator =       create_workmeshes_for_all_shapekeys
+    faba_poll =           poll_shapekeys
+    
+classes = (
+    FABA_OT_create_workmeshes_for_all_targets,
+    FABA_OT_create_workmeshes_for_selected_target,
+    FABA_OT_update_selected_workmesh_all_shapekeys,
+    FABA_OT_update_selected_workmesh_active_shapekey,
+    FABA_OT_update_selected_workmesh,
+    FABA_OT_update_all_workmeshes,
+    FABA_OT_workmesh_to_shapekey,
+    FABA_OT_all_workmeshes_to_shapekeys,
+    FABA_OT_shapekey_to_workmesh,
+    FABA_OT_all_shapekey_to_workmesh,
+    FABA_OT_workmesh_symmetrize,
+    FABA_OT_mirror_workmesh_verts,
+    FABA_OT_create_workmeshes_for_all_shapekeys,
+)

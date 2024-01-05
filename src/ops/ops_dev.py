@@ -78,3 +78,11 @@ class FABA_OT_custom_debug_operator(FabaOperator):
     bl_idname =           "faba.custom_operator"
     bl_description =      "This is for internal development purposes and should not be seen in distribution"
     faba_operator =       custom_op
+
+classes = (
+    FABA_OT_clear_bake_scene,
+    FABA_OT_clear_bake_targets,
+    FABA_OT_show_bone_debug,
+    FABA_OT_start_debug_server,
+    FABA_OT_custom_debug_operator,
+)

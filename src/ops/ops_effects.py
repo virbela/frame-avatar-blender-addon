@@ -18,7 +18,7 @@ class Effects:
     def add_position_effect(operator: Operator, context: Context, ht: HomeomorphicProperties):
         if ht.selected_effect != -1:
             et = ht.effect_collection[ht.selected_effect]
-            pos = et.positions.add()
+            _ = et.positions.add()
 
     def remove_position_effect(operator: Operator, context: Context, ht: HomeomorphicProperties):
         if ht.selected_effect != -1:
@@ -28,7 +28,7 @@ class Effects:
     def add_color_effect(operator: Operator, context: Context, ht: HomeomorphicProperties):
         if ht.selected_effect != -1:
             et = ht.effect_collection[ht.selected_effect]
-            pos = et.colors.add()
+            _ = et.colors.add()
 
     def remove_color_effect(operator: Operator, context: Context, ht: HomeomorphicProperties):
         if ht.selected_effect != -1:
@@ -81,3 +81,11 @@ class FABA_OT_add_color_effect(FabaOperator):
     bl_idname =           "faba.add_color_effect"
     faba_operator =       Effects.add_color_effect
 
+classes = (
+    FABA_OT_remove_effect,
+    FABA_OT_add_effect,
+    FABA_OT_remove_position_effect,
+    FABA_OT_add_position_effect,
+    FABA_OT_remove_color_effect,
+    FABA_OT_add_color_effect,
+)

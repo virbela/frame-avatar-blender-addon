@@ -48,3 +48,8 @@ class FABA_OT_transfer_skin_weights(FabaOperator):
     bl_description =      "Transfer vertex groups from source object to target object"
     faba_operator =       transfer_skin_weights
     faba_poll =           poll_transfer_skin_weights
+
+
+classes = (
+    FABA_OT_transfer_skin_weights,
+)

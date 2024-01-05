@@ -70,3 +70,6 @@ def poll_baketargets(context: Context) -> bool:
 
 def poll_avatar_mesh(context: Context) -> bool:
     return context.scene.homeomorphictools.avatar_mesh
+
+def poll_shapekeys(context: Context) -> bool:
+    return context.scene.homeomorphictools.avatar_mesh and context.scene.homeomorphictools.avatar_mesh.data.shape_keys

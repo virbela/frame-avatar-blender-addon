@@ -265,3 +265,15 @@ class FABA_OT_copy_uv_layers(FabaOperator):
     bl_description =      "Transfer UV layers from one object to another"
     bl_idname =           "faba.copy_uv_layers"
     faba_operator =       copy_uv_layers
+
+
+classes = (
+    FABA_OT_synchronize_uv_to_vertices,
+    FABA_OT_select_objects_by_uv,
+    FABA_OT_synchronize_visibility_to_render,
+    FABA_OT_make_everything_visible,
+    FABA_OT_reset_uv_transforms,
+    FABA_OT_recalculate_normals,
+    FABA_OT_update_baking_scene,
+    FABA_OT_copy_uv_layers,
+)

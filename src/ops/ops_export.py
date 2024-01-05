@@ -645,3 +645,10 @@ class FABA_OT_add_export_json_path(FabaOperator):
     bl_description =      "Add JSON path"
     bl_idname =           "faba.add_json_path"
     faba_operator =       ExportAnimationJSONPaths.add_json_path
+
+
+classes = (
+    FABA_OT_export,
+    FABA_OT_add_export_json_path,
+    FABA_OT_remove_export_json_path,
+)

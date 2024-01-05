@@ -175,3 +175,10 @@ class FABA_OT_bake_all(FabaOperator):
     bl_idname =           "faba.bake_all"
     bl_description =      "Bake textures for all targets and their variants"
     faba_operator =       bake_all_bake_targets
+
+
+classes = (
+    FABA_OT_bake_selected_bake_target,
+    FABA_OT_bake_selected_workmeshes,
+    FABA_OT_bake_all,
+)

@@ -33,7 +33,7 @@ class FABA_PT_workflow_workmeshes(Panel):
         HT = get_homeomorphic_tool_state(context)
         layout = self.layout
         col = layout.column(align=True)
-        col.operator("faba.create_workmeshes_for_all_targets")
+        col.operator("faba.create_workmeshes_for_all_shapekeys")
         col.operator("faba.create_workmeshes_for_selected_target")
         col = layout.column(align=True)
         col.operator("faba.workmesh_to_shapekey")

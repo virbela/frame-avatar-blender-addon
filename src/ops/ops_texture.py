@@ -18,9 +18,12 @@ from ..utils.helpers import (
     require_bake_scene
 )
 
-UVPM2_INSTALLED = lambda: "uvpackmaster2" in dir(bpy.ops)
-UVPM3_INSTALLED = lambda: "uvpackmaster3" in dir(bpy.ops)
-UVPM_INSTALLED = lambda: UVPM2_INSTALLED() or UVPM3_INSTALLED()
+def UVPM2_INSTALLED():
+    return "uvpackmaster2" in dir(bpy.ops)
+def UVPM3_INSTALLED():
+    return "uvpackmaster3" in dir(bpy.ops)
+def UVPM_INSTALLED():
+    return UVPM2_INSTALLED() or UVPM3_INSTALLED()
 
 
 def auto_assign_atlas(operator: Operator, context: Context, ht: HomeomorphicProperties):
@@ -239,7 +242,7 @@ def copy_and_transform_uv(
     #TODO - investigate if we can get uv layer index without actually changing it and getting mesh.loops.layers.uv.active
     try:
         bpy.ops.object.mode_set(mode="OBJECT")
-    except:
+    except Exception:
         # No need, context already set
         pass
 
@@ -279,3 +282,9 @@ class FABA_OT_pack_uv_islands(FabaOperator):
     bl_idname =           "faba.pack_uv_islands"
     bl_description =      "Go through the bake targets and pack workmesh uvs into intermediate atlases"
     faba_operator =       pack_uv_islands
+
+
+classes = (
+    FABA_OT_auto_assign_atlas,
+    FABA_OT_pack_uv_islands,
+)
