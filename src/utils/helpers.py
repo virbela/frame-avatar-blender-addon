@@ -91,8 +91,8 @@ def require_bake_scene() -> Scene:
 
 
 def get_homeomorphic_tool_state(context: Context) -> "HomeomorphicProperties":
-    scene = require_work_scene()
-    return scene.homeomorphictools
+    wm = context.window_manager
+    return wm.faba
 
 
 def get_named_entry(collection: bpy_prop_collection, name: str) -> typing.Any:

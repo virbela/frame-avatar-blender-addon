@@ -69,17 +69,20 @@ def poll_baketargets(context: Context) -> bool:
     return len(context.scene.homeomorphictools.bake_target_collection)
 
 def poll_avatar_mesh(context: Context) -> bool:
-    return context.scene.homeomorphictools.avatar_mesh
+    wm = context.window_manager
+    return wm.faba.avatar_mesh
 
 def poll_shapekeys(context: Context) -> bool:
+    wm = context.window_manager
     return (
-        context.scene.homeomorphictools.avatar_mesh and 
-        context.scene.homeomorphictools.avatar_mesh.data.shape_keys
+        wm.faba.avatar_mesh and 
+        wm.faba.avatar_mesh.data.shape_keys
     )
 
 def poll_active_shapekey(context: Context) -> bool:
+    wm = context.window_manager
     return (
-        context.scene.homeomorphictools.avatar_mesh and 
-        context.scene.homeomorphictools.avatar_mesh.data.shape_keys and 
-        context.scene.homeomorphictools.avatar_mesh.active_shape_key_index > 0 # 0 is the basis
+        wm.faba.avatar_mesh and 
+        wm.faba.avatar_mesh.data.shape_keys and 
+        wm.faba.avatar_mesh.active_shape_key_index > 0 # 0 is the basis
     )
