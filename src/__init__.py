@@ -79,6 +79,90 @@ def timer_update_export_actions():
 def refresh_timer_on_file_open(dummy):
     if not bpy.app.timers.is_registered(timer_update_export_actions):
         bpy.app.timers.register(timer_update_export_actions, first_interval=1)
+        
+@persistent
+def migrate_props(dummy):
+    """Migrate properties from scene.homeomorphic to window_manager.faba"""
+    
+    # -- first move the single value props
+    scene = bpy.context.scene
+    wm = bpy.context.window_manager
+    props = [
+        "avatar_rig",
+        "avatar_mesh",
+        "avatar_head_bone",
+        "selected_effect",
+        "source_object",
+        "atlas_size",
+        "color_percentage",
+        "painting_size",
+        "select_by_atlas_image",
+        "avatar_type",
+        "denoise",
+        "export_atlas",
+        "export_glb",
+        "export_animation",
+        "export_animation_source",
+        "export_animation_preview",
+        "export_progress",
+        "baking_target_uvmap",
+        "baking_options",
+        "target_object_uv",
+        "source_object_uv",
+        "debug_animation_show",
+        "debug_animation_avatar_basis",
+        "mirror_distance",
+        "mirror_verts_source",
+        "mirror_verts_target",
+        "transfer_skin_source",
+        "transfer_skin_target",
+    ]
+    
+    for prop in props:
+        setattr(wm.faba, prop, getattr(scene.homeomorphic, prop))
+        
+    # -- now move the collections
+    # effect_collection
+    wm.faba.effect_collection.clear()
+    for effect in scene.homeomorphic.effect_collection:
+        item = wm.faba.effect_collection.add()
+        item.name = effect.name
+        item.type = effect.type
+        item.target = effect.target
+        
+        # -- position effect
+        if effect.type == "POSITION":
+            for pos_effect in effect.positions:
+                item2 = item.positions.add()
+                item2.parent_shapekey = pos_effect.parent_shapekey
+                item2.effect_shapekey = pos_effect.effect_shapekey
+        elif effect.type == "COLOR":
+            for color_effect in effect.colors:
+                item2 = item.colors.add()
+                item2.shape = color_effect.shape
+                item2.color = color_effect.color
+                item2.vert_group = color_effect.vert_group
+
+    # bake_target_collection
+    
+    # export_animation_actions    
+    # -- these are dynamically created, so we don't need to do anything here
+    
+    # export_animation_json_paths
+    wm.faba.export_animation_json_paths.clear()
+    for path in scene.homeomorphic.export_animation_json_paths:
+        item = wm.faba.export_animation_json_paths.add()
+        item.file = path.file
+        item.export = path.export
+        
+
+    # debug_animation_actions
+    wm.faba.debug_animation_actions.clear()
+    for action in scene.homeomorphic.debug_animation_actions:
+        item = wm.faba.debug_animation_actions.add()
+        item.name = action.name
+        item.checked = action.checked
+    
 
 
 # Addon registration
