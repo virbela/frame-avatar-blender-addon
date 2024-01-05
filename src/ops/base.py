@@ -32,3 +32,7 @@ class FabaOperator(Operator):
 
     return {"CANCELLED"}
 
+
+def DeprecatedFabaOperator(cls):
+  log.warning(f"{cls} is deprecated and will be removed in a future version of Faba")
+  return cls

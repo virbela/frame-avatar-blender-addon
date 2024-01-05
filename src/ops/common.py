@@ -72,4 +72,14 @@ def poll_avatar_mesh(context: Context) -> bool:
     return context.scene.homeomorphictools.avatar_mesh
 
 def poll_shapekeys(context: Context) -> bool:
-    return context.scene.homeomorphictools.avatar_mesh and context.scene.homeomorphictools.avatar_mesh.data.shape_keys
+    return (
+        context.scene.homeomorphictools.avatar_mesh and 
+        context.scene.homeomorphictools.avatar_mesh.data.shape_keys
+    )
+
+def poll_active_shapekey(context: Context) -> bool:
+    return (
+        context.scene.homeomorphictools.avatar_mesh and 
+        context.scene.homeomorphictools.avatar_mesh.data.shape_keys and 
+        context.scene.homeomorphictools.avatar_mesh.active_shape_key_index > 0 # 0 is the basis
+    )

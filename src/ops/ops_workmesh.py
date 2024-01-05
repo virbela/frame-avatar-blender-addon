@@ -3,13 +3,14 @@ import bmesh
 import mathutils
 from bpy.types import Context, Operator, Scene
 
-from .base import FabaOperator
+from .base import FabaOperator, DeprecatedFabaOperator
 from .common import ( 
     set_uv_map,
     poll_bake_scene,
     poll_work_scene,
     poll_shapekeys,
     poll_baketargets,
+    poll_active_shapekey,
 )
 from ..utils.logging import log
 from ..utils.materials import setup_bake_material
@@ -40,6 +41,11 @@ def create_workmeshes_for_all_shapekeys(operator: Operator, context: Context, ht
     for shapekey in shapekeys:
         source_object = ht.avatar_mesh
         ensure_applied_rotation(source_object)
+        
+        # -- check if already exists in bake scene
+        if bake_scene.objects.get(shapekey.name):
+            log.warning(f"Skipping existing workmesh: {shapekey.name}")
+            continue
 
         pending_object = source_object.copy()
         pending_object.name = shapekey.name
@@ -65,7 +71,41 @@ def create_workmeshes_for_all_shapekeys(operator: Operator, context: Context, ht
 
         bake_scene.collection.objects.link(pending_object)
         
-        
+def create_workmesh_for_active_shapekey(operator: Operator, context: Context, ht: HomeomorphicProperties):
+    bake_scene = require_bake_scene()
+    # -- index is validated in poll
+    shapekey = ht.avatar_mesh.data.shape_keys.key_blocks[ht.avatar_mesh.active_shape_key_index]
+    # -- check if object already exists in bake scene
+    if bake_scene.objects.get(shapekey.name):
+        log.warning(f"Skipping existing workmesh: {shapekey.name}")
+        return
+    
+    source_object = ht.avatar_mesh
+    ensure_applied_rotation(source_object)
+
+    pending_object = source_object.copy()
+    pending_object.name = shapekey.name
+    pending_object.data = source_object.data.copy()
+    pending_object.data.name = shapekey.name
+
+    # Create UV map for painting
+    bake_uv = pending_object.data.uv_layers[0]	# Assume first UV map is the bake one
+    bake_uv.name = TARGET_UV_MAP
+    local_uv = pending_object.data.uv_layers.new(name=PAINTING_UV_MAP)
+    set_uv_map(pending_object, local_uv.name)
+
+    # check if this target uses a shape key
+    if _ := pending_object.data.shape_keys.key_blocks.get(shapekey.name):
+        #Remove all shapekeys except the one this object represents
+        for key in pending_object.data.shape_keys.key_blocks:
+            if key.name != shapekey.name:
+                pending_object.shape_key_remove(key)
+
+        #Remove remaining
+        for key in pending_object.data.shape_keys.key_blocks:
+            pending_object.shape_key_remove(key)
+
+    bake_scene.collection.objects.link(pending_object)        
 
 
 def create_workmeshes_for_selected_target(operator: Operator, context: Context, ht: HomeomorphicProperties):
@@ -364,7 +404,7 @@ def mirror_workmesh_verts(operator: Operator, context: Context, ht: Homeomorphic
 def transfer_skin_weights(operator: Operator, context: Context, ht: HomeomorphicProperties):
     pass
 
-
+@DeprecatedFabaOperator
 class FABA_OT_create_workmeshes_for_all_targets(FabaOperator):
     bl_label =            "New work meshes from all bake targets"
     bl_idname =           "faba.create_workmeshes_for_all_targets"
@@ -373,10 +413,11 @@ class FABA_OT_create_workmeshes_for_all_targets(FabaOperator):
     faba_poll =           poll_baketargets
 
 
+@DeprecatedFabaOperator
 class FABA_OT_create_workmeshes_for_selected_target(FabaOperator):
-    bl_label =            "New work meshes from selected shape keys"
+    bl_label =            "New work meshes from selected targets"
     bl_idname =           "faba.create_workmeshes_for_selected_target"
-    bl_description =      "Create bake meshes for the selected shape keys"
+    bl_description =      "Create bake meshes for the selected targets"
     faba_operator =       create_workmeshes_for_selected_target
 
 
@@ -457,10 +498,19 @@ class FABA_OT_mirror_workmesh_verts(FabaOperator):
 class FABA_OT_create_workmeshes_for_all_shapekeys(FabaOperator):
     bl_label =            "New work meshes from all shape keys"
     bl_idname =           "faba.create_workmeshes_for_all_shapekeys"
-    bl_description =      "Create bake meshes for all shape keys"
+    bl_description =      "Create work meshes for all shape keys"
     faba_operator =       create_workmeshes_for_all_shapekeys
     faba_poll =           poll_shapekeys
     
+
+class FABA_OT_create_workmesh_for_active_shapekey(FabaOperator):
+    bl_label =            "New work mesh from active shape key"
+    bl_idname =           "faba.create_workmesh_for_active_shapekey"
+    bl_description =      "Create a work mesh for the active shape key (basis excluded)"
+    faba_operator =       create_workmesh_for_active_shapekey
+    faba_poll =           poll_active_shapekey
+
+
 classes = (
     FABA_OT_create_workmeshes_for_all_targets,
     FABA_OT_create_workmeshes_for_selected_target,
@@ -475,4 +525,5 @@ classes = (
     FABA_OT_workmesh_symmetrize,
     FABA_OT_mirror_workmesh_verts,
     FABA_OT_create_workmeshes_for_all_shapekeys,
+    FABA_OT_create_workmesh_for_active_shapekey,
 )

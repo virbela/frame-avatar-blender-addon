@@ -34,7 +34,7 @@ class FABA_PT_workflow_workmeshes(Panel):
         layout = self.layout
         col = layout.column(align=True)
         col.operator("faba.create_workmeshes_for_all_shapekeys")
-        col.operator("faba.create_workmeshes_for_selected_target")
+        col.operator("faba.create_workmesh_for_active_shapekey")
         col = layout.column(align=True)
         col.operator("faba.workmesh_to_shapekey")
         col.operator("faba.all_workmesh_to_shapekey")
