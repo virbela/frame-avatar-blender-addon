@@ -1,7 +1,6 @@
 import bpy
 from bpy.types import Panel
-from ..utils.logging import log
-from ..utils.helpers import get_homeomorphic_tool_state, require_bake_scene
+from ..utils.helpers import get_homeomorphic_tool_state
 
 
 class FABA_PT_workflow(Panel):
@@ -97,40 +96,40 @@ class FABA_PT_workflow_materials(Panel):
         layout.prop(HT, "select_by_atlas_image")
 
 
-class FABA_PT_workflow_baking(Panel):
-    bl_label = "Baking"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "Avatar"
-    bl_parent_id = "FABA_PT_workflow"
-    bl_options = {"DEFAULT_CLOSED"}
+# class FABA_PT_workflow_baking(Panel):
+#     bl_label = "Baking"
+#     bl_space_type = "VIEW_3D"
+#     bl_region_type = "UI"
+#     bl_category = "Avatar"
+#     bl_parent_id = "FABA_PT_workflow"
+#     bl_options = {"DEFAULT_CLOSED"}
 
-    def draw(self, context):
-        layout = self.layout
-        HT = get_homeomorphic_tool_state(context)
+#     def draw(self, context):
+#         layout = self.layout
+#         HT = get_homeomorphic_tool_state(context)
 
 
-        bake_scene = require_bake_scene()
-        selection = [o for o in context.selected_objects]
-        try:
-            col = layout.column(align=True)
-            col.prop(bake_scene.cycles, "samples", text="Bake Samples")
-            col.prop(bake_scene.render.bake, "margin", text="Bake Margin")
-        except AttributeError as e:
-            log.info(e)
-            layout.label(text="Please ensure Cycles Render Engine is enabled in the addons list!", icon="ERROR")
+#         bake_scene = require_bake_scene()
+#         selection = [o for o in context.selected_objects]
+#         try:
+#             col = layout.column(align=True)
+#             col.prop(bake_scene.cycles, "samples", text="Bake Samples")
+#             col.prop(bake_scene.render.bake, "margin", text="Bake Margin")
+#         except AttributeError as e:
+#             log.info(e)
+#             layout.label(text="Please ensure Cycles Render Engine is enabled in the addons list!", icon="ERROR")
 
-        layout.row(align=True).prop(HT, "baking_options", expand=True)
-        if selection and selection[0].type == "MESH":
-            layout.prop_search(HT, "baking_target_uvmap", selection[0].data, "uv_layers")
+#         layout.row(align=True).prop(HT, "baking_options", expand=True)
+#         if selection and selection[0].type == "MESH":
+#             layout.prop_search(HT, "baking_target_uvmap", selection[0].data, "uv_layers")
 
-        col = layout.column(align=True)
-        col.operator("faba.bake_all")
-        col.operator("faba.bake_selected_bake_target")
-        if selection:
-            col.operator("faba.bake_selected_workmeshes")
-        else:
-            layout.label(text="Please select a workmesh to bake from one!", icon="INFO")
+#         col = layout.column(align=True)
+#         col.operator("faba.bake_all")
+#         col.operator("faba.bake_selected_bake_target")
+#         if selection:
+#             col.operator("faba.bake_selected_workmeshes")
+#         else:
+#             layout.label(text="Please select a workmesh to bake from one!", icon="INFO")
 
 
 class FABA_PT_workflow_helpers(Panel):
