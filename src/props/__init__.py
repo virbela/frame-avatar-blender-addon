@@ -2,6 +2,7 @@ import bpy
 
 from .baketarget import BakeTarget
 from .bakevariant import BakeVariant
+from .workmesh import WorkmeshProperty
 from .homeomorphic import HomeomorphicProperties
 from .effect import ColorEffect, PositionEffect, EffectProperty
 from .animation import AnimationProperty, ExportAnimationJSONPathProperty
@@ -17,6 +18,8 @@ classes = (
 
     AnimationProperty,
     ExportAnimationJSONPathProperty,
+    
+    WorkmeshProperty,
 
     HomeomorphicProperties,
 )
@@ -30,6 +33,7 @@ def register_props():
     # DEPRECATED (kept for backwards compatibility)
     bpy.types.Scene.homeomorphictools = bpy.props.PointerProperty(type=HomeomorphicProperties)
     
+    bpy.types.Mesh.faba_workmesh = bpy.props.PointerProperty(type=WorkmeshProperty)
     bpy.types.WindowManager.faba = bpy.props.PointerProperty(type=HomeomorphicProperties)
 
 
@@ -37,5 +41,6 @@ def register_props():
 def unregister_props():
     del bpy.types.Scene.homeomorphictools
     del bpy.types.WindowManager.faba
+    del bpy.types.Mesh.faba_workmesh
 
     unregister()

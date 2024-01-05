@@ -21,6 +21,10 @@ from .pt_export import (
     FABA_PT_export
 )
 
+from .pt_workmesh import (
+    FABA_PT_workmesh
+)
+
 classes = (
     FABA_UL_effects,
 
@@ -36,6 +40,8 @@ classes = (
     # FABA_PT_workflow_baking,
     FABA_PT_workflow_helpers,
     FABA_PT_workflow_animation,
+    
+    FABA_PT_workmesh,
 )
 
 if is_dev():
